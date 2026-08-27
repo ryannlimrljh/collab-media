@@ -47,9 +47,9 @@
         </button>
         <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
       </div>
+      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
       <div class="c-sidebar-section">Workspace</div>
-      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
-      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
+      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
       <div class="c-sidebar-section">System</div>
       <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
@@ -237,7 +237,7 @@
       var what = query ? '\u201c' + query + '\u201d' : 'this filter';
       emptyEl.innerHTML = '<div class="c-empty"><i class="ph-fill ph-tray"></i>' +
         '<h4>Nothing here yet</h4>' +
-        '<p>No plans match ' + what + '. Clear the filter, or start a new plan from the media planner.</p>' +
+        '<p>No plans match ' + what + '. Clear the filter, or start a new plan from Home.</p>' +
         '<a class="c-btn c-btn-primary c-btn-md" href="campaigns.html" style="text-decoration:none"><i class="ph ph-arrow-left"></i> Back to media planner</a></div>';
     }
     countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
