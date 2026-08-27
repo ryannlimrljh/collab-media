@@ -625,7 +625,7 @@
       if (!deleting) {
         ci++;
         target.textContent = msg.slice(0, ci);
-        if (ci === msg.length) { deleting = true; setTimeout(tick, 2400); return; }
+        if (ci === msg.length) { deleting = true; setTimeout(tick, 4800); return; }
         setTimeout(tick, 45);
       } else {
         ci--;
@@ -633,7 +633,7 @@
         if (ci === 0) {
           deleting = false;
           mi = (mi + 1) % msgs.length;
-          setTimeout(tick, 350);
+          setTimeout(tick, 800);
           return;
         }
         setTimeout(tick, 22);
