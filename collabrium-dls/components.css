@@ -494,7 +494,8 @@
    so the panel always matches the trigger's rendered width exactly in
    every Style variant; min-width is a floor for narrow fields only,
    never a reason for the panel to run narrower than the trigger. */
-.c-dropdown-panel{position:static; margin-top:var(--spacing-8); width:100%; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); overflow:hidden;}
+.c-dropdown-field{position:relative;}
+.c-dropdown-panel{position:absolute; left:0; z-index:20; margin-top:var(--spacing-8); width:100%; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); overflow:hidden;} /* absolute with no `top` keeps the panel at its static position — directly under the trigger's .input-wrap, whatever the label/helper around it — while floating it OVER the content below instead of pushing it down; z-index 20 is the same popover layer Filters' own .c-filter-panel uses (corrected v0.9.41 — position:static made this the one popover in the system that displaced the page) */
 .c-dropdown-list{max-height:320px; overflow-y:auto; padding:var(--spacing-8) 0;}
 
 /* Dropdown Option — the row sub-component inside Single select's panel */
@@ -859,7 +860,8 @@
 /* Panel — width:100% of the same .c-field parent the trigger fills, so
    it always matches the trigger's rendered width, same guarantee as
    Single select's own panel. */
-.c-dropdown-multi-panel{position:static; margin-top:var(--spacing-8); width:100%; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); overflow:hidden;}
+.c-dropdown-multi-field{position:relative;}
+.c-dropdown-multi-panel{position:absolute; left:0; z-index:20; margin-top:var(--spacing-8); width:100%; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); overflow:hidden;} /* same absolute-overlay correction as .c-dropdown-panel above (v0.9.41) */
 .c-dropdown-multi-list{max-height:320px; overflow-y:auto; padding:var(--spacing-8) 0;}
 .c-dropdown-multi-divider{height:1px; background:var(--color-neutral-3); margin:var(--spacing-8) 0;}
 .c-dropdown-multi-group{padding:var(--spacing-4) var(--spacing-12); font-family:var(--font-primary); font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
