@@ -21,8 +21,14 @@
   /* Stepper row — the stepper plus a quiet autosave caption. Steps are
      buttons (completed ones navigate back), so they need the button reset
      the DS's div-based stepper never needed. */
-  .p-stepper-row{display:flex; align-items:flex-start; gap:var(--spacing-24);
-    margin-bottom:var(--spacing-32);}
+  .p-stepper-row{display:flex; align-items:center; gap:var(--spacing-24);
+    margin-bottom:var(--spacing-24); background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-1); padding:var(--spacing-12) var(--spacing-16);}
+  .p-stripe-actions{display:flex; gap:var(--spacing-4); flex:none;
+    padding-left:var(--spacing-16); border-left:1px solid var(--color-neutral-3);}
+  .p-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
   .p-stepper-row .c-stepper{flex:1;}
   button.c-step{background:none; border:0; padding:0; cursor:pointer;
     font-family:inherit;}
@@ -142,9 +148,14 @@
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
     .p-rail{position:static;}
   }
+  /* In a tight stripe, only the active step keeps its label — the dots
+     carry the rest. Same trick the collapsed rail plays with its icons. */
+  @media (max-width:960px){
+    .c-stepper:not(.vertical) .c-step:not(.is-current) .c-step-text{display:none;}
+  }
   @media print{
     .c-sidebar-shell, .p-stepper-row, .p-crumb, .c-pageheader-actions,
-    .p-footer, .p-rail > .c-card:last-child, .c-toast-host{display:none !important;}
+    .p-footer, .c-shell-span-1, .c-toast-host{display:none !important;}
     .c-shell{height:auto; background:var(--color-neutral-1);}
     .c-shell-content{overflow:visible; padding:0;}
     .c-shell-grid{display:block;}
@@ -199,7 +210,7 @@
     <div class="c-shell-content">
 
       <a class="c-btn c-btn-ghost c-btn-sm p-crumb" href="campaigns.html">
-        <i class="ph ph-arrow-left"></i> All campaigns
+        <i class="ph ph-arrow-left"></i> Back
       </a>
 
       <header class="c-pageheader">
@@ -208,17 +219,12 @@
             <h1 id="pageTitle">Astro 30th Anniversary</h1>
             <p class="sub" id="pageSub">Astro · RM 150,000 · 26 Aug – 8 Sep 2026</p>
           </div>
-          <div class="c-pageheader-actions">
-            <button class="c-btn c-btn-secondary c-btn-md" type="button" id="saveDraft">
-              <i class="ph ph-floppy-disk"></i> Save draft
-            </button>
-          </div>
         </div>
       </header>
 
       <div class="p-stepper-row">
         <div class="c-stepper" id="stepper">
-          <button class="c-step" data-go="1" type="button">
+          <button class="c-step is-current" data-go="1" type="button">
             <span class="c-step-indicator active" data-ind="1">1</span>
             <span class="c-step-text"><span class="c-step-label active" data-lab="1">Brief</span></span>
           </button>
@@ -238,13 +244,20 @@
             <span class="c-step-text"><span class="c-step-label upcoming" data-lab="4">Summary</span></span>
           </button>
         </div>
+        <div class="p-stripe-actions">
+          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripePdf" type="button" aria-label="Plan as PDF" title="Plan as PDF"><i class="ph ph-file-pdf"></i></button>
+          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeXls" type="button" aria-label="Plan as Excel" title="Plan as Excel"><i class="ph ph-file-xls"></i></button>
+          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft" title="Save draft"><i class="ph ph-floppy-disk"></i></button>
+        </div>
         <span class="p-saved" id="savedNote"><i class="ph-fill ph-check-circle"></i> Saved · just now</span>
       </div>
 
+      <div class="c-shell-grid">
+        <div class="c-shell-span-3">
+
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
-        <div class="c-shell-grid">
-          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+        <div class="p-stack">
 
             <div class="c-card" id="askCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -309,7 +322,7 @@
             <div class="p-drawer">
               <button class="p-disclose" data-drawer="briefContext" aria-expanded="false" aria-controls="briefContext" type="button">
                 <div>
-                  <h4>Context for the AI</h4>
+                  <h4>Add context</h4>
                   <p class="sub">Benefits, challenges, key message, measure of success. All optional — it sharpens the draft plan.</p>
                 </div>
                 <i class="ph ph-caret-down"></i>
@@ -334,29 +347,6 @@
 
           </div>
 
-          <div class="c-shell-span-1">
-            <div class="p-rail">
-              <div class="c-card">
-                <span class="c-stat-label">Derived from the ask</span>
-                <div style="margin-top:var(--spacing-8);">
-                  <span class="c-stat-label">Flight</span>
-                  <div class="p-stat-value-sm" id="railFlight">14 days</div>
-                  <div class="p-stat-foot" id="railDaily">RM 10,714 per day</div>
-                </div>
-                <div class="p-stat-sep">
-                  <span class="c-stat-label">Budget</span>
-                  <div class="p-stat-value-sm" id="railBudget1">RM 150,000</div>
-                  <div class="p-stat-foot" id="railKpi">RM 30 per target attendee</div>
-                </div>
-              </div>
-              <div class="c-card" data-checkcard="1">
-                <h4>Before you continue</h4>
-                <div id="checks1"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="p-footer">
           <span></span>
           <button class="c-btn c-btn-primary c-btn-md" data-next="2" type="button">
@@ -367,8 +357,7 @@
 
       <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
       <section id="view2" hidden>
-        <div class="c-shell-grid">
-          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+        <div class="p-stack">
 
             <div class="c-card" id="whoCard">
               <h4>Who are you trying to reach?</h4>
@@ -493,28 +482,6 @@
 
           </div>
 
-          <div class="c-shell-span-1">
-            <div class="p-rail">
-              <div class="c-card">
-                <span class="c-stat-label">Live · updates as you pick</span>
-                <div style="margin-top:var(--spacing-8);">
-                  <span class="c-stat-label">Unique reach</span>
-                  <div class="c-stat-value" id="railReach">11.2M</div>
-                  <div class="p-stat-foot" id="railOverlap">14.2M raw · 21% overlap</div>
-                </div>
-                <div class="p-stat-sep">
-                  <span class="c-stat-label">Inventory pool</span>
-                  <div class="p-stat-value-sm">30.9M <span class="c-badge c-badge-success" style="vertical-align:4px;">High</span></div>
-                </div>
-              </div>
-              <div class="c-card" data-checkcard="2">
-                <h4>Before you continue</h4>
-                <div id="checks2"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="p-footer">
           <button class="c-btn c-btn-secondary c-btn-md" data-back="1" type="button"><i class="ph ph-arrow-left"></i> Back</button>
           <button class="c-btn c-btn-primary c-btn-md" data-next="3" type="button">Next: media mix <i class="ph ph-arrow-right"></i></button>
@@ -531,8 +498,7 @@
           </button>
         </div>
 
-        <div class="c-shell-grid">
-          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+        <div class="p-stack">
 
             <div class="c-card" id="channelCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -587,31 +553,6 @@
 
           </div>
 
-          <div class="c-shell-span-1">
-            <div class="p-rail">
-              <div class="c-card">
-                <span class="c-stat-label">Live · updates as you drag</span>
-                <div style="margin-top:var(--spacing-8);">
-                  <span class="c-stat-label">Unallocated</span>
-                  <div class="c-stat-value" id="railUnalloc">RM 0</div>
-                  <div class="c-progress-track size-default" style="margin-top:var(--spacing-8);">
-                    <div class="c-progress-fill tone-success" id="railAllocFill" style="width:100%;"></div>
-                  </div>
-                </div>
-                <div class="p-stat-sep">
-                  <span class="c-stat-label">Forecast</span>
-                  <div class="p-stat-value-sm" id="fcImps">8.5M imps</div>
-                  <div class="p-stat-foot" id="fcFoot">6.2M reach · 3.1 freq · RM 25 blended</div>
-                </div>
-              </div>
-              <div class="c-card" data-checkcard="3">
-                <h4>Against the brief</h4>
-                <div id="checks3"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="p-footer">
           <button class="c-btn c-btn-secondary c-btn-md" data-back="2" type="button"><i class="ph ph-arrow-left"></i> Back</button>
           <button class="c-btn c-btn-primary c-btn-md" data-next="4" type="button">Next: summary <i class="ph ph-arrow-right"></i></button>
@@ -625,8 +566,7 @@
           <div class="body"><p class="message" id="bookedText"></p></div>
         </div>
 
-        <div class="c-shell-grid">
-          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+        <div class="p-stack">
 
             <div class="c-card">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
@@ -660,38 +600,62 @@
 
           </div>
 
-          <div class="c-shell-span-1">
-            <div class="p-rail">
+        <div class="p-footer">
+          <button class="c-btn c-btn-secondary c-btn-md" data-back="3" type="button"><i class="ph ph-arrow-left"></i> Back</button>
+          <button class="c-btn c-btn-primary c-btn-md" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Book this plan</button>
+        </div>
+      </section>
+
+        </div>
+
+        <div class="c-shell-span-1">
+          <div class="p-rail">
+            <div class="c-tabs" id="railTabs">
+              <button class="c-tab active" data-railtab="summary" type="button">Summary</button>
+              <button class="c-tab" data-railtab="preview" type="button">Preview</button>
+            </div>
+            <div id="railSummary" class="p-rail-pane">
               <div class="c-card">
-                <span class="c-stat-label">Final forecast</span>
+                <span class="c-stat-label">The plan so far</span>
                 <div style="margin-top:var(--spacing-8);">
-                  <span class="c-stat-label">Net reach</span>
-                  <div class="c-stat-value" id="sumReach">—</div>
-                  <div class="p-stat-foot" id="sumReachFoot">—</div>
+                  <span class="c-stat-label">Flight</span>
+                  <div class="p-stat-value-sm" id="railFlight">—</div>
+                  <div class="p-stat-foot" id="railDaily">Set dates and budget</div>
                 </div>
                 <div class="p-stat-sep">
-                  <span class="c-stat-label">Impressions</span>
-                  <div class="p-stat-value-sm" id="sumImps">—</div>
-                  <div class="p-stat-foot" id="sumImpsFoot">—</div>
+                  <span class="c-stat-label">Budget</span>
+                  <div class="p-stat-value-sm" id="railBudget1">—</div>
+                  <div class="p-stat-foot" id="railKpi">Set a KPI target</div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Unique reach</span>
+                  <div class="p-stat-value-sm" id="railReach">—</div>
+                  <div class="p-stat-foot" id="railOverlap">Pick a persona to see reach</div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Unallocated</span>
+                  <div class="p-stat-value-sm" id="railUnalloc">RM 0</div>
+                  <div class="c-progress-track size-compact" style="margin-top:var(--spacing-8);">
+                    <div class="c-progress-fill tone-success" id="railAllocFill" style="width:100%;"></div>
+                  </div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Forecast</span>
+                  <div class="p-stat-value-sm" id="fcImps">—</div>
+                  <div class="p-stat-foot" id="fcFoot">—</div>
                 </div>
               </div>
-              <div class="c-card" data-checkcard="4">
-                <h4>Readiness</h4>
-                <div id="checks4"></div>
+              <div class="c-card" data-checkcard="all">
+                <h4 id="checksTitle">Before you continue</h4>
+                <div id="checksHost"></div>
               </div>
+            </div>
+            <div id="railPreview" class="p-rail-pane" hidden>
+              <div class="c-card" id="previewDoc"></div>
             </div>
           </div>
         </div>
-
-        <div class="p-footer">
-          <button class="c-btn c-btn-secondary c-btn-md" data-back="3" type="button"><i class="ph ph-arrow-left"></i> Back</button>
-          <div class="right">
-            <button class="c-btn c-btn-secondary c-btn-md" id="expPdf" type="button"><i class="ph ph-file-pdf"></i> Plan as PDF</button>
-            <button class="c-btn c-btn-secondary c-btn-md" id="expXls" type="button"><i class="ph ph-file-xls"></i> Plan as Excel</button>
-            <button class="c-btn c-btn-primary c-btn-md" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Book this plan</button>
-          </div>
-        </div>
-      </section>
+      </div>
 
     </div>
   </div>
@@ -957,10 +921,11 @@
     return out;
   }
 
-  function renderChecks(n){
-    var host = $('checks' + n);
+  function renderChecks(){
+    var host = $('checksHost');
     if (!host) return;
-    var list = checksFor(n);
+    $('checksTitle').textContent = step === 4 ? 'Readiness' : step === 3 ? 'Against the brief' : 'Before you continue';
+    var list = checksFor(step);
     host.innerHTML = list.map(function(c, i){
       var icon = c.level === 'ok' ? 'check-circle' : c.level === 'warn' ? 'warning-circle' : 'x-circle';
       return '<button class="p-check ' + c.level + '" data-target="' + (c.target || '') + '" type="button">' +
@@ -993,6 +958,7 @@
       var ind = document.querySelector('[data-ind="' + i + '"]');
       var lab = document.querySelector('[data-lab="' + i + '"]');
       var cls = i < n ? 'completed' : i === n ? 'active' : 'upcoming';
+      ind.closest('.c-step').classList.toggle('is-current', i === n);
       ind.className = 'c-step-indicator ' + cls;
       ind.innerHTML = i < n ? '<i class="ph ph-check"></i>' : String(i);
       lab.className = 'c-step-label ' + cls;
@@ -1008,8 +974,8 @@
     var current = n - 1;
     var blockers = checksFor(current).filter(function(c){ return c.level === 'block'; });
     if (blockers.length){
-      renderChecks(current);
-      var card = document.querySelector('[data-checkcard="' + current + '"]');
+      renderChecks();
+      var card = document.querySelector('[data-checkcard]');
       if (card){
         card.scrollIntoView({behavior:'smooth', block:'center'});
         card.classList.remove('p-flash');
@@ -1305,7 +1271,7 @@
     });
     renderAll();
   });
-  $('f-ex').addEventListener('input', function(){ renderChecks(2); });
+  $('f-ex').addEventListener('input', function(){ renderChecks(); });
 
   function renderAudienceRail(){
     var r = reach(), mult = filterMult();
@@ -1451,7 +1417,7 @@
         splitTouched = true;
         $('splitReset').hidden = false;
         $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
-        renderSplit(); renderMixRail(); renderChecks(3);
+        renderSplit(); renderMixRail(); renderChecks(); renderPreview();
       });
       sl.addEventListener('change', function(){ markSaved(); });
     });
@@ -1479,7 +1445,7 @@
     var diff = budget() - fc.alloc;
     var el = $('railUnalloc');
     el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
-    el.className = 'c-stat-value ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
+    el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
     var fill = $('railAllocFill');
     var pct = budget() ? Math.min(100, fc.alloc / budget() * 100) : 0;
     fill.style.width = pct + '%';
@@ -1531,10 +1497,6 @@
         s.name + ' · ' + s.ch + '</span>';
     }).join('') : '<span class="p-note">Nothing pinned — the optimiser buys freely across the pool.</span>';
 
-    $('sumReach').textContent = fmt(fc.reach);
-    $('sumReachFoot').textContent = 'of ' + fmt(audienceReach()) + ' addressable · ' + fc.freq + ' avg frequency';
-    $('sumImps').textContent = fmt(fc.imps);
-    $('sumImpsFoot').textContent = rm(fc.blended) + ' blended CPM · ' + rm(budget()) + ' total';
   }
 
   /* ═══ Booking ═══ */
@@ -1555,7 +1517,7 @@
     if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
     var blockers = checksFor(4).filter(function(c){ return c.level === 'block'; });
     if (blockers.length){
-      renderChecks(4);
+      renderChecks();
       toast('warning', 'Not ready to book', blockers[0].label + '.');
       return;
     }
@@ -1572,20 +1534,64 @@
     $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds — the plan is locked for editing until then.';
     $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
     $('bookBtn').disabled = true;
-    renderChecks(4);
+    renderChecks();
     markSaved();
     toast('success', 'Order raised', 'The sales team has been notified with a link to this plan.');
   });
 
-  /* ═══ Exports & draft ═══ */
-  $('expPdf').addEventListener('click', function(){ window.print(); });
-  $('expXls').addEventListener('click', function(){
-    toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.');
+  /* ═══ Functional stripe + Preview tab actions ═══ */
+  function actPdf(){ window.print(); }
+  function actXls(){ toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.'); }
+  function actSave(){ markSaved(); toast('success', null, 'Draft saved. Pick it up any time from Campaigns.'); }
+  $('stripePdf').addEventListener('click', actPdf);
+  $('stripeXls').addEventListener('click', actXls);
+  $('stripeSave').addEventListener('click', actSave);
+  $('previewDoc').addEventListener('click', function(e){
+    var b = e.target.closest('[data-act]');
+    if (!b) return;
+    ({save:actSave, pdf:actPdf, xls:actXls})[b.dataset.act]();
   });
-  $('saveDraft').addEventListener('click', function(){
-    markSaved();
-    toast('success', null, 'Draft saved. Pick it up any time from Campaigns.');
+
+  /* ═══ Rail tabs — Summary (live plan + checks) vs Preview (the plan as
+     the client will see it, with the functional actions alongside). ═══ */
+  $('railTabs').addEventListener('click', function(e){
+    var t = e.target.closest('.c-tab');
+    if (!t) return;
+    document.querySelectorAll('#railTabs .c-tab').forEach(function(x){ x.classList.toggle('active', x === t); });
+    $('railSummary').hidden = t.dataset.railtab !== 'summary';
+    $('railPreview').hidden = t.dataset.railtab !== 'preview';
   });
+
+  function renderPreview(){
+    var host = $('previewDoc');
+    if (!host) return;
+    var fc = forecast();
+    var fmts = onFormats();
+    var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
+    var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
+      : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') : '—';
+    host.innerHTML =
+      '<span class="c-stat-label">Plan preview</span>' +
+      '<div style="margin-top:var(--spacing-8); font-weight:800; font-size:var(--text-h5-size);">' +
+        (($('b-name').value || '').trim() || 'Untitled campaign') + '</div>' +
+      '<div class="p-stat-foot">' + (($('b-brand').value || '').trim() || '—') + ' · ' + $('sumFlightLabel').textContent + '</div>' +
+      '<div class="p-stat-sep" style="margin-top:var(--spacing-12);"></div>' +
+      '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
+      '<div class="p-kv"><span class="k">Objective</span><span class="v">' + ($('b-obj').value || '—') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Audience</span><span class="v">' + audTxt + '</span></div>' +
+      '<div class="p-kv"><span class="k">Net reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
+      '<div class="p-kv"><span class="k">Impressions</span><span class="v">' + fmt(fc.imps) + '</span></div>' +
+      fmts.map(function(f){
+        return '<div class="p-kv"><span class="k">' + f.name + '</span><span class="v">' + rm(split[f.id] || 0) + '</span></div>';
+      }).join('') +
+      '<div class="p-kv"><span class="k">Pinned sites</span><span class="v">' +
+        (pins.length ? pins.map(function(x){ return x.name; }).join(', ') : 'None') + '</span></div>' +
+      '<div style="display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:var(--spacing-16);">' +
+        '<button class="c-btn c-btn-secondary c-btn-sm" data-act="save" type="button"><i class="ph ph-floppy-disk"></i> Save draft</button>' +
+        '<button class="c-btn c-btn-secondary c-btn-sm" data-act="pdf" type="button"><i class="ph ph-file-pdf"></i> Plan as PDF</button>' +
+        '<button class="c-btn c-btn-secondary c-btn-sm" data-act="xls" type="button"><i class="ph ph-file-xls"></i> Plan as Excel</button>' +
+      '</div>';
+  }
 
   /* ═══ Drawers ═══ */
   document.querySelectorAll('.p-disclose').forEach(function(d){
@@ -1608,8 +1614,30 @@
     renderSplit();
     renderMixRail();
     if (step === 4) renderSummary();
-    [1,2,3,4].forEach(renderChecks);
+    renderChecks();
+    renderPreview();
   }
+
+  /* Simple insertion — a ?brief= one-liner from the campaigns page
+     prefills the ask. "BMW X3 launch, RM 200k, September" is enough. */
+  (function(){
+    var m = /[?&]brief=([^&]*)/.exec(window.location.search);
+    if (!m) return;
+    var text = decodeURIComponent(m[1].replace(/\+/g, ' ')).trim();
+    if (!text) return;
+    var bm = /rm\s*([\d][\d.,]*)\s*(k|m)?/i.exec(text);
+    if (bm){
+      var amt = parseFloat(bm[1].replace(/,/g, ''));
+      var suffix = (bm[2] || '').toLowerCase();
+      if (suffix === 'k') amt *= 1000;
+      if (suffix === 'm') amt *= 1000000;
+      if (amt > 0) $('b-budget').value = Math.round(amt);
+      text = text.replace(bm[0], '');
+    }
+    var name = text.replace(/^[\s,]+|[\s,]+$/g, '').replace(/\s{2,}/g, ' ').replace(/\s*,\s*,/g, ',');
+    if (name) $('b-name').value = name;
+    toast('neutral', 'Drafted from your one-liner', 'Check the ask, then walk the steps — everything is editable.');
+  })();
 
   renderLangs();
   renderChips();

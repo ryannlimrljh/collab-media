@@ -13,21 +13,31 @@
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41b" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.41b" />
 <style>
-  /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
-  .cl-controls{display:flex; flex-wrap:wrap; align-items:center;
-    gap:var(--spacing-8); margin-bottom:var(--spacing-24);}
-  .cl-controls .c-chip-group{flex:1;}
-  .cl-name{font-weight:700; color:var(--color-neutral-9);}
-  .cl-sub{display:block; font-size:var(--text-caption-size);
-    color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
-  .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
-  .cl-industry{white-space:nowrap;}
-  .c-datatable td.cl-action{text-align:right;}
-  .cl-pagination{margin-top:var(--spacing-16);}
-  /* The table's own rows carry a pointer because the whole row opens the
-     plan, same as the action button. */
-  @media (max-width:900px){
-    .cl-hide-narrow{display:none;}
+  /* Page-local layout only — every component is the DS's own. */
+  .ld-stats{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
+  .ld-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .ld-go{display:flex; gap:var(--spacing-8); align-items:flex-start;
+    margin-top:var(--spacing-8);}
+  .ld-go .c-field{flex:1;}
+  .ld-row{display:flex; align-items:center; gap:var(--spacing-12); width:100%;
+    padding:var(--spacing-12) var(--spacing-4); background:none; border:0;
+    border-bottom:1px solid var(--color-neutral-3); font-family:inherit;
+    text-align:left; cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .ld-row:hover{background:var(--color-neutral-2);}
+  .ld-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+  .ld-row:last-of-type{border-bottom:none;}
+  .ld-row .who{flex:1; min-width:0;}
+  .ld-row .who .n{display:block; font-size:var(--text-body2-size); font-weight:700;
+    color:var(--color-neutral-9); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap;}
+  .ld-row .who .b{display:block; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); margin-top:2px;}
+  .ld-row .amt{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .ld-all{margin-top:var(--spacing-8); align-self:flex-start;}
+  @media (max-width:1080px){
+    .c-shell-grid > .c-shell-span-2{grid-column:span 4;}
   }
 </style>
 </head>
@@ -81,56 +91,65 @@
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
             <h1>Campaigns</h1>
-            <p class="sub">Every plan you have open, and what stage it reached.</p>
-          </div>
-          <div class="c-pageheader-actions">
-            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none">
-              <i class="ph ph-plus"></i> New campaign
-            </a>
+            <p class="sub">Where things stand, and the fastest way into a new plan.</p>
           </div>
         </div>
       </header>
 
-      <div class="cl-controls">
-        <div class="c-filter-search">
-          <i class="ph ph-magnifying-glass icon-leading"></i>
-          <input type="text" id="clSearch" placeholder="Search campaigns or brands" aria-label="Search campaigns" />
-          <button class="c-filter-search-clear" id="clSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
-        </div>
-        <span class="c-filter-search-divider" aria-hidden="true"></span>
-        <div class="c-chip-group" id="clFilters" role="group" aria-label="Filter by status">
-          <button class="c-chip c-chip-filter is-active" type="button" data-f="all">All</button>
-          <button class="c-chip c-chip-filter" type="button" data-f="draft">Drafts</button>
-          <button class="c-chip c-chip-filter" type="button" data-f="booked">Booked</button>
-          <button class="c-chip c-chip-filter" type="button" data-f="completed">Completed</button>
-          <button class="c-chip c-chip-filter" type="button" data-f="ai">AI drafted</button>
-        </div>
-      </div>
+      <div class="c-shell-grid">
+        <div class="c-shell-span-2 ld-stack">
 
-      <div class="c-datatable" id="clTableWrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Campaign</th>
-              <th>Status</th>
-              <th class="cl-hide-narrow">Industry</th>
-              <th class="num">Budget</th>
-              <th class="cl-hide-narrow">Duration</th>
-              <th class="cl-hide-narrow">Updated</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="clRows"></tbody>
-        </table>
-        <div id="clEmpty" hidden></div>
-      </div>
+          <div class="ld-stats">
+            <div class="c-stat">
+              <span class="c-stat-label">Total campaigns</span>
+              <span class="c-stat-value">24</span>
+              <div class="c-stat-footer">2 booked · 22 in draft</div>
+            </div>
+            <div class="c-stat">
+              <span class="c-stat-label">Total budget</span>
+              <span class="c-stat-value">RM 2.2M</span>
+              <div class="c-stat-footer">across all campaigns</div>
+            </div>
+            <div class="c-stat">
+              <span class="c-stat-label">Average eCPM</span>
+              <span class="c-stat-value">RM 20.50</span>
+              <div class="c-stat-footer">booked inventory</div>
+            </div>
+            <div class="c-stat">
+              <span class="c-stat-label">Impressions booked</span>
+              <span class="c-stat-value">7.3M</span>
+              <div class="c-stat-footer">2 booked campaigns</div>
+            </div>
+          </div>
 
-      <div class="c-pagination cl-pagination">
-        <span class="count" id="clCount"></span>
-        <div class="c-page-controls">
-          <button class="c-page-btn" type="button" disabled aria-label="Previous page"><i class="ph ph-caret-left"></i></button>
-          <button class="c-page-btn current" type="button" aria-current="page">1</button>
-          <button class="c-page-btn" type="button" disabled aria-label="Next page"><i class="ph ph-caret-right"></i></button>
+          <div class="c-card">
+            <h4>Simple insertion</h4>
+            <p>One line is enough — brand, budget, when. The planner drafts the rest and you shape it from there.</p>
+            <div class="ld-go">
+              <div class="c-field">
+                <label for="quickBrief" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Campaign one-liner</label>
+                <input id="quickBrief" placeholder="e.g. BMW X3 launch, RM 200k, September" />
+              </div>
+              <button class="c-btn c-btn-primary c-btn-md" id="quickGo" type="button">
+                Go <i class="ph ph-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="c-shell-span-2">
+          <div class="c-card">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <h4>Latest campaigns</h4>
+              <span class="c-stat-label" id="latestCount"></span>
+            </div>
+            <p>Pick up where you left off.</p>
+            <div id="latestRows" style="margin-top:var(--spacing-4);"></div>
+            <a class="c-btn c-btn-ghost c-btn-sm ld-all" href="campaign-list.html" style="text-decoration:none;">
+              All campaigns <i class="ph ph-arrow-right"></i>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -169,135 +188,35 @@
 </div>
 
 <script src="../shared/shell.js"></script>
+<script src="../shared/campaigns-data.js"></script>
 <script>
 (function () {
   'use strict';
 
-  /* A cleaned sample of the live engine's campaign list — duplicates
-     collapsed, industries humanised, budgets in RM format. */
-  var CAMPAIGNS = [
-    {name:'BMW X3 launch', brand:'X3 Car', status:'booked', ai:false,
-     industry:'Automotive', budget:50000, duration:'2 weeks', updated:'27 Aug 2026'},
-    {name:'Astro 30 anniversary', brand:'Astro', status:'draft', ai:false,
-     industry:'Entertainment', budget:150000, duration:'1 week', updated:'27 Aug 2026'},
-    {name:'All new X3', brand:'BMW X3', status:'draft', ai:true,
-     industry:'Automotive', budget:200000, duration:'3 weeks', updated:'24 Aug 2026'},
-    {name:'Summer Peach perfume 2026', brand:'Perfume', status:'draft', ai:true,
-     industry:'Beauty', budget:60000, duration:'12 weeks', updated:'6 Aug 2026'},
-    {name:'Samsung S28 launch', brand:'Samsung S28', status:'draft', ai:true,
-     industry:'Tech & devices', budget:125000, duration:'8 weeks', updated:'4 Aug 2026'},
-    {name:'Switch new product launch', brand:'Apple products', status:'draft', ai:false,
-     industry:'Tech & devices', budget:90000, duration:'9 weeks', updated:'23 Jul 2026'},
-    {name:'New route launch — Malaysia to Hangzhou', brand:'AirAsia X', status:'draft', ai:false,
-     industry:'Tourism', budget:125000, duration:'4 weeks', updated:'29 Jun 2026'},
-    {name:'Mazda 6 facelift launch', brand:'Mazda 6', status:'draft', ai:true,
-     industry:'Automotive', budget:200000, duration:'8 weeks', updated:'24 Mar 2026'},
-    {name:'Lancôme perfume launch', brand:'L\'Oréal', status:'draft', ai:false,
-     industry:'Beauty', budget:100000, duration:'10 weeks', updated:'1 Mar 2026'},
-    {name:'Toyota Vios facelift 2026', brand:'Vios', status:'booked', ai:false,
-     industry:'Automotive', budget:100000, duration:'8 weeks', updated:'17 Dec 2025'}
-  ];
-
-  var filter = 'all', query = '';
-  var rowsEl = document.getElementById('clRows');
-  var emptyEl = document.getElementById('clEmpty');
-  var countEl = document.getElementById('clCount');
-
-  function rm(n){ return 'RM ' + n.toLocaleString('en-MY'); }
-
-  function badge(c){
-    if (c.status === 'booked')
-      return '<span class="c-badge c-badge-success"><i class="ph-fill ph-seal-check" style="font-size:12px"></i> Booked</span>';
-    if (c.status === 'completed')
-      return '<span class="c-badge c-badge-neutral">Completed</span>';
-    return '<span class="c-badge c-badge-neutral">Draft</span>';
-  }
-
-  function matches(c){
-    if (filter === 'draft' && c.status !== 'draft') return false;
-    if (filter === 'booked' && c.status !== 'booked') return false;
-    if (filter === 'completed' && c.status !== 'completed') return false;
-    if (filter === 'ai' && !c.ai) return false;
-    if (query){
-      var q = query.toLowerCase();
-      if (c.name.toLowerCase().indexOf(q) < 0 && c.brand.toLowerCase().indexOf(q) < 0) return false;
-    }
-    return true;
-  }
-
-  function counts(){
-    var t = {all:CAMPAIGNS.length, draft:0, booked:0, completed:0, ai:0};
-    CAMPAIGNS.forEach(function(c){
-      if (t[c.status] !== undefined) t[c.status]++;
-      if (c.ai) t.ai++;
-    });
-    return t;
-  }
-
-  function render(){
-    var hits = CAMPAIGNS.filter(matches);
-    rowsEl.innerHTML = hits.map(function(c){
-      var action = c.status === 'booked' ? 'View' : 'Continue';
-      return '<tr data-href="planner.html">' +
-        '<td><span class="cl-name">' + c.name + '</span>' +
-          '<span class="cl-sub">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></td>' +
-        '<td>' + badge(c) + '</td>' +
-        '<td class="cl-industry cl-hide-narrow">' + c.industry + '</td>' +
-        '<td class="num">' + rm(c.budget) + '</td>' +
-        '<td class="cl-hide-narrow">' + c.duration + '</td>' +
-        '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
-        '<td class="cl-action"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
-      '</tr>';
-    }).join('');
-
-    var none = !hits.length;
-    rowsEl.closest('table').style.display = none ? 'none' : '';
-    emptyEl.hidden = !none;
-    if (none){
-      var what = query ? '“' + query + '”' : 'this filter';
-      emptyEl.innerHTML = '<div class="c-empty"><i class="ph-fill ph-tray"></i>' +
-        '<h4>Nothing here yet</h4>' +
-        '<p>No campaigns match ' + what + '. Clear the filter, or start a new plan and it lands here.</p>' +
-        '<a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none"><i class="ph ph-plus"></i> New campaign</a></div>';
-    }
-
-    countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
-      : 'Showing 1–' + hits.length + ' of ' + hits.length;
-
-    var t = counts();
-    document.querySelectorAll('#clFilters .c-chip-filter').forEach(function(ch){
-      var f = ch.dataset.f;
-      var label = {all:'All', draft:'Drafts', booked:'Booked', completed:'Completed', ai:'AI drafted'}[f];
-      ch.textContent = label + ' (' + t[f] + ')';
-      ch.classList.toggle('is-active', f === filter);
-    });
-  }
-
-  document.getElementById('clFilters').addEventListener('click', function(e){
-    var ch = e.target.closest('.c-chip-filter');
-    if (!ch) return;
-    filter = ch.dataset.f;
-    render();
+  /* Latest campaigns — the six most recent; the whole row opens the plan. */
+  var latest = CAMPAIGNS.slice(0, 6);
+  document.getElementById('latestRows').innerHTML = latest.map(function (c) {
+    return '<button class="ld-row" type="button" data-href="planner.html">' +
+      '<span class="who"><span class="n">' + c.name + '</span>' +
+      '<span class="b">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></span>' +
+      campaignBadge(c) +
+      '<span class="amt">' + rmFmt(c.budget) + '</span></button>';
+  }).join('');
+  document.getElementById('latestCount').textContent = latest.length + ' of ' + CAMPAIGNS.length;
+  document.getElementById('latestRows').addEventListener('click', function (e) {
+    var row = e.target.closest('[data-href]');
+    if (row) window.location.href = row.dataset.href;
   });
 
-  var search = document.getElementById('clSearch');
-  var clear = document.getElementById('clSearchClear');
-  search.addEventListener('input', function(){
-    query = search.value.trim();
-    clear.hidden = !query;
-    render();
+  /* Simple insertion — one line in, the planner out, prefilled. */
+  function go() {
+    var v = document.getElementById('quickBrief').value.trim();
+    window.location.href = v ? 'planner.html?brief=' + encodeURIComponent(v) : 'planner.html';
+  }
+  document.getElementById('quickGo').addEventListener('click', go);
+  document.getElementById('quickBrief').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') go();
   });
-  clear.addEventListener('click', function(){
-    search.value = ''; query = ''; clear.hidden = true; render(); search.focus();
-  });
-
-  rowsEl.addEventListener('click', function(e){
-    if (e.target.closest('a')) return;
-    var tr = e.target.closest('tr[data-href]');
-    if (tr) window.location.href = tr.dataset.href;
-  });
-
-  render();
 })();
 </script>
 </body>

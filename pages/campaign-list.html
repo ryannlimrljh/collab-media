@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collab:Sales · All campaigns</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41b" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41b" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.41b" />
+<style>
+  /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
+  .cl-crumb{margin-bottom:var(--spacing-8); margin-left:calc(var(--spacing-12) * -1);
+    text-decoration:none;}
+  .cl-controls{display:flex; flex-wrap:wrap; align-items:center;
+    gap:var(--spacing-8); margin-bottom:var(--spacing-16);}
+  .c-filter-tray{margin-bottom:var(--spacing-16);}
+  .cl-name{font-weight:700; color:var(--color-neutral-9);}
+  .cl-sub{display:block; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
+  .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
+  .cl-industry{white-space:nowrap;}
+  .c-datatable td.cl-action{text-align:right;}
+  .cl-pagination{margin-top:var(--spacing-16);}
+  /* The table's own rows carry a pointer because the whole row opens the
+     plan, same as the action button. */
+  @media (max-width:900px){
+    .cl-hide-narrow{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department, Sales" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabSales.svg" alt="Sales" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
+      </div>
+      <div class="c-sidebar-section">Overview</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
+      <div class="c-sidebar-section">Plan</div>
+      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <div class="c-sidebar-section">System</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">ST</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Sarah Tan</span>
+            <span class="c-search-input-subtitle">Sales Planner</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+
+      <a class="c-btn c-btn-ghost c-btn-sm cl-crumb" href="campaigns.html">
+        <i class="ph ph-arrow-left"></i> Back
+      </a>
+
+      <header class="c-pageheader">
+        <div class="c-pageheader-row">
+          <div class="c-pageheader-text">
+            <h1>All campaigns</h1>
+            <p class="sub">Every plan you have open, and what stage it reached.</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="cl-controls">
+        <div class="c-filterbar" style="flex:1;">
+          <div class="c-filter-search">
+            <i class="ph ph-magnifying-glass icon-leading"></i>
+            <input type="text" id="clSearch" placeholder="Search campaigns or brands" aria-label="Search campaigns" />
+            <button class="c-filter-search-clear" id="clSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+          </div>
+          <span class="c-filter-search-divider" aria-hidden="true"></span>
+          <div style="position:relative;">
+            <button class="c-filter-trigger" id="clFilterTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+              <i class="ph ph-funnel leading"></i> Filter
+              <span class="count" id="clFilterCount" hidden></span>
+              <i class="ph ph-caret-down chev"></i>
+            </button>
+            <div class="c-filter-panel" id="clFilterPanel">
+              <p class="c-filter-panel-title">Status</p>
+              <div id="clFilterOptions"></div>
+              <div class="c-filter-footer">
+                <button class="c-btn c-btn-ghost c-btn-sm" id="clFilterClear" type="button">Clear</button>
+                <button class="c-btn c-btn-primary c-btn-sm" id="clFilterDone" type="button">Done</button>
+              </div>
+            </div>
+          </div>
+          <button class="c-btn c-btn-ghost c-btn-sm c-filter-clear-bar" id="clClearAll" type="button" hidden>Clear all</button>
+        </div>
+      </div>
+      <div class="c-filter-tray" id="clTray" hidden></div>
+
+      <div class="c-datatable" id="clTableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th class="cl-hide-narrow">Industry</th>
+              <th class="num">Budget</th>
+              <th class="cl-hide-narrow">Duration</th>
+              <th class="cl-hide-narrow">Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="clRows"></tbody>
+        </table>
+        <div id="clEmpty" hidden></div>
+      </div>
+
+      <div class="c-pagination cl-pagination">
+        <span class="count" id="clCount"></span>
+        <div class="c-page-controls">
+          <button class="c-page-btn" type="button" disabled aria-label="Previous page"><i class="ph ph-caret-left"></i></button>
+          <button class="c-page-btn current" type="button" aria-current="page">1</button>
+          <button class="c-page-btn" type="button" disabled aria-label="Next page"><i class="ph ph-caret-right"></i></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <a class="c-account-menu-item" href="campaigns.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<script src="../shared/shell.js"></script>
+<script src="../shared/campaigns-data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var FILTER_OPTS = [
+    {v:'draft', label:'Draft'},
+    {v:'booked', label:'Booked'},
+    {v:'completed', label:'Completed'},
+    {v:'ai', label:'AI drafted'}
+  ];
+  var applied = [];      /* committed filters — drive the table */
+  var pending = [];      /* checkbox state while the panel is open */
+  var query = '';
+
+  var rowsEl = document.getElementById('clRows');
+  var emptyEl = document.getElementById('clEmpty');
+  var countEl = document.getElementById('clCount');
+  var trigger = document.getElementById('clFilterTrigger');
+  var panel = document.getElementById('clFilterPanel');
+
+  function matches(c){
+    if (applied.length){
+      var ok = applied.some(function(f){
+        if (f === 'ai') return c.ai;
+        return c.status === f;
+      });
+      if (!ok) return false;
+    }
+    if (query){
+      var q = query.toLowerCase();
+      if (c.name.toLowerCase().indexOf(q) < 0 && c.brand.toLowerCase().indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+
+  function render(){
+    var hits = CAMPAIGNS.filter(matches);
+    rowsEl.innerHTML = hits.map(function(c){
+      var action = c.status === 'booked' ? 'View' : 'Continue';
+      return '<tr data-href="planner.html">' +
+        '<td><span class="cl-name">' + c.name + '</span>' +
+          '<span class="cl-sub">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></td>' +
+        '<td>' + campaignBadge(c) + '</td>' +
+        '<td class="cl-industry cl-hide-narrow">' + c.industry + '</td>' +
+        '<td class="num">' + rmFmt(c.budget) + '</td>' +
+        '<td class="cl-hide-narrow">' + c.duration + '</td>' +
+        '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
+        '<td class="cl-action"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
+      '</tr>';
+    }).join('');
+
+    var none = !hits.length;
+    rowsEl.closest('table').style.display = none ? 'none' : '';
+    emptyEl.hidden = !none;
+    if (none){
+      var what = query ? '\u201c' + query + '\u201d' : 'this filter';
+      emptyEl.innerHTML = '<div class="c-empty"><i class="ph-fill ph-tray"></i>' +
+        '<h4>Nothing here yet</h4>' +
+        '<p>No campaigns match ' + what + '. Clear the filter, or start a new plan from the campaigns page.</p>' +
+        '<a class="c-btn c-btn-primary c-btn-md" href="campaigns.html" style="text-decoration:none"><i class="ph ph-arrow-left"></i> Back to campaigns</a></div>';
+    }
+    countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
+      : 'Showing 1\u2013' + hits.length + ' of ' + hits.length;
+
+    /* Trigger count + applied pills + Clear all — never visually silent */
+    var countBadge = document.getElementById('clFilterCount');
+    countBadge.hidden = !applied.length;
+    countBadge.textContent = applied.length;
+    trigger.classList.toggle('active', !!applied.length);
+    var tray = document.getElementById('clTray');
+    tray.hidden = !applied.length;
+    tray.innerHTML = applied.map(function(f){
+      var label = FILTER_OPTS.filter(function(o){ return o.v === f; })[0].label;
+      return '<span class="c-chip c-chip-input">' + label +
+        '<button class="c-chip-remove" type="button" data-remove="' + f + '" aria-label="Remove ' + label + '"><i class="ph ph-x"></i></button></span>';
+    }).join('');
+    document.getElementById('clClearAll').hidden = !applied.length;
+  }
+
+  /* Panel — DS Compact filter: checkbox option rows, Clear/Done footer,
+     applied on Done (never destructively per keystroke). */
+  function renderOptions(){
+    document.getElementById('clFilterOptions').innerHTML = FILTER_OPTS.map(function(o){
+      var on = pending.indexOf(o.v) > -1;
+      return '<label class="c-filter-option" data-v="' + o.v + '">' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="label">' + o.label + '</span></label>';
+    }).join('');
+  }
+  function openPanel(){
+    pending = applied.slice();
+    renderOptions();
+    panel.classList.add('is-open');
+    trigger.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+  function closePanel(){
+    panel.classList.remove('is-open');
+    trigger.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+  trigger.addEventListener('click', function(e){
+    e.stopPropagation();
+    if (panel.classList.contains('is-open')) closePanel(); else openPanel();
+  });
+  panel.addEventListener('click', function(e){
+    e.stopPropagation();
+    var opt = e.target.closest('.c-filter-option');
+    if (!opt) return;
+    var v = opt.dataset.v;
+    var i = pending.indexOf(v);
+    if (i > -1) pending.splice(i, 1); else pending.push(v);
+    renderOptions();
+  });
+  document.getElementById('clFilterClear').addEventListener('click', function(e){
+    e.stopPropagation(); pending = []; renderOptions();
+  });
+  document.getElementById('clFilterDone').addEventListener('click', function(e){
+    e.stopPropagation(); applied = pending.slice(); closePanel(); render();
+  });
+  document.getElementById('clClearAll').addEventListener('click', function(){
+    applied = []; render();
+  });
+  document.getElementById('clTray').addEventListener('click', function(e){
+    var b = e.target.closest('[data-remove]');
+    if (!b) return;
+    applied = applied.filter(function(f){ return f !== b.dataset.remove; });
+    render();
+  });
+  document.addEventListener('click', function(e){
+    if (!panel.classList.contains('is-open')) return;
+    if (e.target.closest('#clFilterPanel') || e.target.closest('#clFilterTrigger')) return;
+    closePanel();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePanel(); });
+
+  var search = document.getElementById('clSearch');
+  var clear = document.getElementById('clSearchClear');
+  search.addEventListener('input', function(){
+    query = search.value.trim();
+    clear.hidden = !query;
+    render();
+  });
+  clear.addEventListener('click', function(){
+    search.value = ''; query = ''; clear.hidden = true; render(); search.focus();
+  });
+
+  rowsEl.addEventListener('click', function(e){
+    if (e.target.closest('a')) return;
+    var tr = e.target.closest('tr[data-href]');
+    if (tr) window.location.href = tr.dataset.href;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
