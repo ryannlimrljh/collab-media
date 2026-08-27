@@ -69,79 +69,18 @@
   .p-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     margin-top:var(--spacing-8);}
 
-  /* Select — Input Field's container with a caret, per the DLS Select
-     recipe (closed state styled, native option list left alone). */
-  .p-select-wrap{position:relative;}
-  .p-select{height:40px; width:100%; border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
-    padding:0 36px 0 var(--spacing-12); font-size:var(--text-body2-size);
-    font-family:inherit; font-weight:500; color:var(--color-neutral-9);
-    appearance:none; -webkit-appearance:none; cursor:pointer;}
-  .p-select:focus{outline:none; border:2px solid var(--color-obsidian);
-    padding:0 35px 0 11px;}
-  .p-select-caret{position:absolute; right:var(--spacing-12); top:12px;
-    font-size:var(--icon-sm); color:var(--color-neutral-5); pointer-events:none;}
-
-  /* Checkbox-option row (languages, channels) — Checkbox's own glyph in a
-     bordered option, Choice-tile selection convention. */
-  .p-checkrow{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
-  .p-checkopt{display:inline-flex; align-items:center; gap:var(--spacing-8);
-    height:40px; padding:0 var(--spacing-12); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
-    font-size:var(--text-body2-size); font-weight:500; font-family:inherit;
-    color:var(--color-neutral-9); cursor:pointer;
-    transition:border-color var(--duration-fast) var(--ease-standard);}
-  .p-checkopt:hover{border-color:var(--color-neutral-4);}
-  .p-checkopt.is-on{border:2px solid var(--color-obsidian); padding:0 11px;
-    font-weight:700;}
-  .p-checkopt:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-checkopt .c-checkbox-box{margin-top:0;}
-
-  /* Choice tiles (targeting basis) */
-  .p-choicerow{display:flex; gap:var(--spacing-8);}
-  .p-choice{flex:1; padding:var(--spacing-12); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
-    cursor:pointer; text-align:left; font-family:inherit;
-    transition:border-color var(--duration-fast) var(--ease-standard);}
-  .p-choice:hover{border-color:var(--color-neutral-4);}
-  .p-choice.is-selected{border:2px solid var(--color-obsidian); padding:11px;}
-  .p-choice:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-choice-t{font-size:var(--text-body2-size); font-weight:700;}
-  .p-choice-d{font-size:var(--text-caption-size); color:var(--color-neutral-5);
-    margin-top:2px;}
-
-  /* Persona picker — chip field + popover panel. */
-  .p-picker{position:relative;}
-  .p-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
-  .p-chip-add{display:inline-flex; align-items:center; gap:var(--spacing-4);
-    height:24px; padding:0 var(--spacing-8); border-radius:var(--radius-pill);
-    border:1px dashed var(--color-neutral-3); background:transparent;
-    color:var(--color-neutral-5); font-family:inherit;
-    font-size:var(--text-label2-size); font-weight:var(--text-label2-weight);
-    cursor:pointer;}
-  .p-chip-add:hover{color:var(--color-neutral-9); border-color:var(--color-neutral-4);}
-  .p-picker-panel{position:absolute; z-index:20; top:calc(100% + var(--spacing-8));
-    left:0; width:min(440px,100%); background:var(--color-neutral-1);
-    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
-    box-shadow:var(--shadow-3); padding:var(--spacing-12);}
-  .p-picker-panel[hidden]{display:none;}
-  .p-picker-panel .c-filter-search{width:100%;}
-  .p-picker-panel .c-filter-search input{width:100%;}
-  .p-picker-meta{display:flex; justify-content:space-between; align-items:center;
-    padding:var(--spacing-12) var(--spacing-4) var(--spacing-8);}
-  .p-picker-list{max-height:280px; overflow-y:auto; display:flex;
-    flex-direction:column; gap:2px;}
-  .p-picker-row{display:flex; align-items:center; gap:var(--spacing-12); width:100%;
-    padding:var(--spacing-8) var(--spacing-12); border-radius:var(--radius-sm);
-    border:none; background:none; cursor:pointer; text-align:left; font-family:inherit;
-    transition:background-color var(--duration-fast) var(--ease-standard);}
-  .p-picker-row:hover{background:var(--color-neutral-2);}
-  .p-picker-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
-  .p-picker-row[disabled]{cursor:not-allowed; opacity:.4;}
-  .p-picker-row[disabled]:hover{background:none;}
-  .p-picker-name{font-size:var(--text-body2-size); color:var(--color-neutral-9);}
-  .p-picker-row.is-on .p-picker-name{font-weight:700;}
+  /* Selection controls are the DS's own components — Dropdown Single and
+     Multiple select, Checkbox, Radio, Chip — all from components.css.
+     Only layout wrappers live here. */
+  .p-choices{display:flex; flex-wrap:wrap; gap:var(--spacing-12) var(--spacing-24);}
+  .p-choice-stack{display:flex; flex-direction:column; gap:var(--spacing-12);}
+  .c-dropdown-input, .c-dropdown-multi-input{width:100%;}
+  .p-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-4);
+    margin-top:var(--spacing-8);}
   .p-picker-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .c-dropdown-option .meta{margin-left:auto; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); font-variant-numeric:tabular-nums;
+    white-space:nowrap;}
 
   /* Drawer — a Card whose body discloses. */
   .p-drawer{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
@@ -164,23 +103,6 @@
   .p-drawer-section{padding-top:var(--spacing-16);}
   .p-drawer-section + .p-drawer-section{margin-top:var(--spacing-20);
     padding-top:var(--spacing-16); border-top:1px solid var(--color-neutral-3);}
-
-  /* Format rows */
-  .p-rowlist{display:flex; flex-direction:column; gap:var(--spacing-8);}
-  .p-row{display:flex; align-items:center; gap:var(--spacing-12);
-    padding:var(--spacing-12); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
-    font-size:var(--text-body2-size); cursor:pointer; font-family:inherit;
-    text-align:left; width:100%;
-    transition:border-color var(--duration-fast) var(--ease-standard);}
-  .p-row:hover{border-color:var(--color-neutral-4);}
-  .p-row.is-on{border:2px solid var(--color-obsidian); padding:11px;}
-  .p-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-row .c-checkbox-box{margin-top:0;}
-  .p-row .name{font-weight:700; flex:1;}
-  .p-row.is-off .name{font-weight:500; color:var(--color-neutral-5);}
-  .p-row .meta{font-variant-numeric:tabular-nums; color:var(--color-neutral-5);
-    white-space:nowrap;}
 
   /* Budget split rows */
   .p-split{display:flex; flex-direction:column; gap:var(--spacing-16);}
@@ -348,35 +270,38 @@
                   <input id="b-end" type="date" value="2026-09-08" /></div>
                 <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
                   <input id="b-budget" type="number" step="1000" value="150000" placeholder="0" /></div>
-                <div class="c-field"><label for="b-obj">Primary objective</label>
-                  <div class="p-select-wrap"><select class="p-select" id="b-obj">
-                    <option value="awareness" selected>Awareness</option>
-                    <option value="consideration">Consideration</option>
-                    <option value="conversion">Conversion</option>
-                    <option value="footfall">Footfall</option>
-                    <option value="leadgen">Lead generation</option>
-                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+                <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">Primary objective</label>
+                  <div class="input-wrap has-trailing-icon">
+                    <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
+                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                  </div>
+                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                </div>
               </div>
 
               <div class="p-grid3" style="margin-top:var(--spacing-12);">
-                <div class="c-field"><label for="b-kpi">Primary KPI</label>
-                  <div class="p-select-wrap"><select class="p-select" id="b-kpi">
-                    <option selected>Event attendees</option><option>Net reach</option>
-                    <option>Registrations</option><option>Video completions</option>
-                    <option>Store visits</option>
-                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+                <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">Primary KPI</label>
+                  <div class="input-wrap has-trailing-icon">
+                    <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Select KPI" readonly />
+                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                  </div>
+                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                </div>
                 <div class="c-field"><label for="b-target">Target</label>
                   <input id="b-target" type="number" value="5000" placeholder="0" /></div>
-                <div class="c-field"><label for="b-unit">Unit</label>
-                  <div class="p-select-wrap"><select class="p-select" id="b-unit">
-                    <option selected>people</option><option>sign-ups</option><option>views</option>
-                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+                <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Unit</label>
+                  <div class="input-wrap has-trailing-icon">
+                    <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
+                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                  </div>
+                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                </div>
               </div>
               <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
 
               <div class="c-field" style="margin-top:var(--spacing-16);">
                 <label>Campaign languages</label>
-                <div class="p-checkrow" id="langRow" style="margin-top:var(--spacing-4);"></div>
+                <div class="p-choices" id="langRow" style="margin-top:var(--spacing-4);"></div>
                 <span class="c-helper" style="margin-top:var(--spacing-4);">Creative must exist in every language you pick. We'll flag formats with no matching asset in the mix.</span>
               </div>
             </div>
@@ -449,15 +374,23 @@
               <h4>Who are you trying to reach?</h4>
               <p>Pick a targeting basis, then narrow it. One decision type on this screen — the evidence lives in the drawer below.</p>
 
-              <div class="p-choicerow" role="radiogroup" aria-label="Targeting basis" style="margin-top:var(--spacing-8);">
-                <button class="p-choice is-selected" data-mode="personas" role="radio" aria-checked="true" type="button">
-                  <div class="p-choice-t">Personas</div>
-                  <div class="p-choice-d" id="choiceSummary">2 selected · 11.2M unique</div>
-                </button>
-                <button class="p-choice" data-mode="mass" role="radio" aria-checked="false" type="button">
-                  <div class="p-choice-t">Mass targeting</div>
-                  <div class="p-choice-d">Entire Malaysia · 16.15M</div>
-                </button>
+              <div class="p-choices" role="radiogroup" aria-label="Targeting basis" style="margin-top:var(--spacing-8);">
+                <label class="c-choice" data-mode="personas">
+                  <input type="radio" name="basis" checked />
+                  <span class="c-radio-circle on"><span class="dot"></span></span>
+                  <span class="text">
+                    <span class="label">Personas</span>
+                    <span class="desc" id="choiceSummary">2 selected · 3M unique</span>
+                  </span>
+                </label>
+                <label class="c-choice" data-mode="mass">
+                  <input type="radio" name="basis" />
+                  <span class="c-radio-circle"><span class="dot" hidden></span></span>
+                  <span class="text">
+                    <span class="label">Mass targeting</span>
+                    <span class="desc">Entire Malaysia · 16.15M</span>
+                  </span>
+                </label>
               </div>
 
               <div id="massBody" hidden style="margin-top:var(--spacing-12);">
@@ -467,26 +400,28 @@
                 </div>
               </div>
 
-              <div class="p-picker" id="personaBody" style="margin-top:var(--spacing-12);">
-                <div class="p-chips" id="chipRow"></div>
-                <div class="p-picker-panel" id="pickerPanel" hidden>
-                  <div class="c-filter-search">
-                    <i class="ph ph-magnifying-glass icon-leading"></i>
-                    <input id="pickerSearch" type="text" placeholder="Search personas by name or category" aria-label="Search personas" autocomplete="off" />
-                    <button class="c-filter-search-clear" id="pickerClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+              <div id="personaBody" style="margin-top:var(--spacing-12);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--spacing-12);">
+                  <div class="c-field c-dropdown-multi-field" id="personaField" style="flex:1; max-width:440px;">
+                    <label for="personaTrigger">Personas — KULT audience playbook</label>
+                    <div class="input-wrap has-trailing-icon">
+                      <input type="text" class="c-dropdown-multi-input" id="personaTrigger" placeholder="Select personas" readonly />
+                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-multi-chevron"></i></span>
+                    </div>
+                    <div class="c-dropdown-multi-panel" id="personaPanel" hidden>
+                      <div class="c-dropdown-multi-list" id="personaList"></div>
+                      <div class="c-dropdown-multi-footer">
+                        <button class="clear" id="personaClear" type="button">Clear</button>
+                        <button class="done" id="personaDone" type="button">Done</button>
+                      </div>
+                    </div>
+                    <span class="c-helper" id="pickerCount">0 of 5 selected</span>
                   </div>
-                  <div class="p-picker-meta">
-                    <span class="p-picker-sub" id="pickerCount">0 of 5 selected</span>
-                    <button class="c-btn c-btn-ghost c-btn-sm" id="pickerSuggest" type="button">
-                      <i class="ph ph-sparkle"></i> Suggest from brief
-                    </button>
-                  </div>
-                  <div class="p-picker-list" id="pickerList"></div>
-                  <div class="c-filter-footer">
-                    <span class="p-picker-sub" id="pickerReach" style="align-self:center;">No personas selected</span>
-                    <button class="c-btn c-btn-secondary c-btn-sm" id="pickerDone" type="button">Done</button>
-                  </div>
+                  <button class="c-btn c-btn-ghost c-btn-sm" id="pickerSuggest" type="button" style="flex:none; margin-bottom:26px;">
+                    <i class="ph ph-sparkle"></i> Suggest from brief
+                  </button>
                 </div>
+                <div class="c-chip-group p-chips" id="chipRow"></div>
               </div>
             </div>
 
@@ -605,7 +540,7 @@
                 <span class="p-picker-sub" id="channelSummary">All channels</span>
               </div>
               <p>Leave everything off to consider every channel. Turning one on filters the formats and sites below.</p>
-              <div class="p-checkrow" id="channelRow" style="margin-top:var(--spacing-8);"></div>
+              <div class="p-choices" id="channelRow" style="margin-top:var(--spacing-8);"></div>
             </div>
 
             <div class="c-card" id="formatCard">
@@ -613,7 +548,7 @@
                 <h4>Formats</h4>
                 <span class="p-picker-sub">Each format carries its rate — nothing downstream is guesswork</span>
               </div>
-              <div class="p-rowlist" id="formatList" style="margin-top:var(--spacing-8);"></div>
+              <div class="p-choice-stack" id="formatList" style="margin-top:var(--spacing-8);"></div>
             </div>
 
             <div class="p-drawer" id="sitesDrawer">
@@ -1002,7 +937,7 @@
       add(Math.abs(diff) < 1, false, Math.abs(diff) < 1 ? 'Budget fully allocated, ' + rm(budget())
         : (diff > 0 ? rm(diff) + ' still unallocated' : rm(-diff) + ' over budget'), 'splitCard');
       var videoLed = onFormats().some(function(f){ return f.video; });
-      var awareness = $('b-obj').value === 'awareness';
+      var awareness = ddVal('b-obj') === 'awareness';
       add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective — video-led mix'
         : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
       var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
@@ -1103,24 +1038,95 @@
     });
   });
 
+  /* ═══ DS Dropdown — Single select (.c-dropdown-field, components.css).
+     The trigger is Input Field's own container with a readonly input;
+     rows are .c-dropdown-row with the trailing check glyph. One panel
+     open at a time; Escape and outside-click close. ═══ */
+  var DD_OPEN = null;
+  function closeDD(){
+    if (!DD_OPEN) return;
+    DD_OPEN.classList.remove('open');
+    DD_OPEN.querySelector('.c-dropdown-panel').hidden = true;
+    DD_OPEN = null;
+  }
+  function initSingleSelect(field, opts, initial, onPick){
+    var input = field.querySelector('.c-dropdown-input');
+    var panel = field.querySelector('.c-dropdown-panel');
+    var list = field.querySelector('.c-dropdown-list');
+    function renderRows(){
+      list.innerHTML = opts.map(function(o){
+        var sel = String(o.v) === String(input.dataset.value || '');
+        return '<div class="c-dropdown-row' + (sel ? ' selected' : '') + '" data-v="' + o.v + '">' +
+          '<span class="c-dropdown-row-label">' + o.label + '</span>' +
+          '<i class="ph ph-check c-dropdown-row-check"></i></div>';
+      }).join('');
+    }
+    function set(v, silent){
+      var o = null;
+      opts.forEach(function(x){ if (String(x.v) === String(v)) o = x; });
+      if (!o) return;
+      input.dataset.value = o.v;
+      /* An empty value ("Any …") reads as the Default state — placeholder
+         text, no Filled border — per the Dropdown States table. */
+      input.value = o.v === '' ? '' : o.label;
+      field.classList.toggle('has-value', o.v !== '');
+      if (!silent && onPick) onPick(o.v, o.label);
+    }
+    field._set = set;
+    input.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (field.classList.contains('read-only')) return;
+      if (DD_OPEN === field){ closeDD(); return; }
+      closeDD();
+      renderRows();
+      panel.hidden = false;
+      field.classList.add('open');
+      DD_OPEN = field;
+    });
+    list.addEventListener('click', function(e){
+      var row = e.target.closest('.c-dropdown-row');
+      if (!row || row.classList.contains('disabled')) return;
+      e.stopPropagation();
+      set(row.dataset.v);
+      closeDD();
+    });
+    if (initial !== undefined) set(initial, true);
+    return field;
+  }
+  document.addEventListener('click', closeDD);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDD(); });
+  function ddVal(id){ return $(id).dataset.value || ''; }
+
+  initSingleSelect(document.querySelector('[data-dd="b-obj"]'), [
+    {v:'awareness', label:'Awareness'}, {v:'consideration', label:'Consideration'},
+    {v:'conversion', label:'Conversion'}, {v:'footfall', label:'Footfall'},
+    {v:'leadgen', label:'Lead generation'}
+  ], 'awareness', function(){ renderAll(); markSaved(); });
+  initSingleSelect(document.querySelector('[data-dd="b-kpi"]'),
+    ['Event attendees','Net reach','Registrations','Video completions','Store visits']
+      .map(function(x){ return {v:x, label:x}; }),
+    'Event attendees', function(){ renderAll(); });
+  initSingleSelect(document.querySelector('[data-dd="b-unit"]'),
+    ['people','sign-ups','views'].map(function(x){ return {v:x, label:x}; }),
+    'people', function(){ renderAll(); });
+
   /* ═══ Step 1 — brief ═══ */
+  /* Languages — the DS Checkbox (.c-choice + .c-checkbox-box), inline. */
   function renderLangs(){
     var row = $('langRow'); row.innerHTML = '';
     LANGS.forEach(function(l){
       var on = langOn.indexOf(l) > -1;
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'p-checkopt' + (on ? ' is-on' : '');
-      b.setAttribute('role', 'checkbox');
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
-      b.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
-        (on ? '<i class="ph ph-check"></i>' : '') + '</span>' + l;
-      b.addEventListener('click', function(){
+      var lab = document.createElement('label');
+      lab.className = 'c-choice';
+      lab.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + l + '" />' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="text"><span class="label">' + l + '</span></span>';
+      lab.querySelector('input').addEventListener('change', function(){
         var i = langOn.indexOf(l);
         if (i > -1) langOn.splice(i, 1); else langOn.push(l);
         renderLangs(); renderAll();
       });
-      row.appendChild(b);
+      row.appendChild(lab);
     });
   }
 
@@ -1148,13 +1154,35 @@
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
     $(id).addEventListener('input', function(){ renderAll(); });
   });
-  ['b-obj','b-kpi','b-unit'].forEach(function(id){
-    $(id).addEventListener('change', function(){ renderAll(); });
-  });
   $('b-budget').addEventListener('change', function(){ resetSplit(); renderAll(); });
 
-  /* ═══ Step 2 — audience ═══ */
-  var panel = $('pickerPanel'), search = $('pickerSearch'), clearBtn = $('pickerClear');
+  /* ═══ Step 2 — audience. Persona picker is the DS Dropdown, Multiple
+     select (.c-dropdown-multi-field): count-based trigger, grouped
+     checkbox rows on the DS Checkbox glyph, Clear/Done footer. Applied
+     personas echo below as DS Input Chips. ═══ */
+  var personaField = $('personaField'), personaPanel = $('personaPanel');
+  var personaOpen = false;
+
+  function openPicker(){
+    personaOpen = true;
+    renderPersonaList();
+    personaPanel.hidden = false;
+    personaField.classList.add('open');
+  }
+  function closePicker(){
+    if (!personaOpen) return;
+    personaOpen = false;
+    personaPanel.hidden = true;
+    personaField.classList.remove('open');
+  }
+
+  function renderPersonaTrigger(){
+    $('personaTrigger').value = selected.length ? selected.length + ' selected' : '';
+    personaField.classList.toggle('filled', !!selected.length);
+    $('pickerCount').textContent = selected.length
+      ? selected.length + ' of ' + MAX + ' selected · ' + fmt(reach().uniq) + ' unique reach'
+      : '0 of ' + MAX + ' selected';
+  }
 
   function renderChips(){
     var row = $('chipRow'); row.innerHTML = '';
@@ -1169,29 +1197,12 @@
       });
       row.appendChild(chip);
     });
-    var add = document.createElement('button');
-    add.type = 'button';
-    add.className = 'p-chip-add';
-    add.innerHTML = '<i class="ph ph-plus"></i> ' + (selected.length ? 'Add persona' : 'Choose personas');
-    add.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
-    add.addEventListener('click', function(e){ e.stopPropagation(); openPicker(); });
-    row.appendChild(add);
   }
 
-  function renderList(){
-    var q = search.value.trim().toLowerCase();
-    var hits = PERSONAS.filter(function(p){
-      return !q || p.name.toLowerCase().indexOf(q) > -1 || p.cat.toLowerCase().indexOf(q) > -1;
-    });
-    var list = $('pickerList');
-    list.innerHTML = '';
-    if (!hits.length){
-      list.innerHTML = '<p class="p-note" style="text-align:center; padding:var(--spacing-16);">Nothing matched "' +
-        search.value + '". Try a category like Sports or Lifestyle.</p>';
-      return;
-    }
+  function renderPersonaList(){
+    var list = $('personaList'); list.innerHTML = '';
     var lastCat = null;
-    hits.forEach(function(p){
+    PERSONAS.forEach(function(p){
       if (p.cat !== lastCat){
         var g = document.createElement('div');
         g.className = 'c-dropdown-multi-group';
@@ -1201,18 +1212,15 @@
       }
       var on = selected.indexOf(p.id) > -1;
       var full = !on && selected.length >= MAX;
-      var row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'p-picker-row' + (on ? ' is-on' : '');
-      if (full){ row.disabled = true; row.title = 'Five personas maximum'; }
-      row.setAttribute('role', 'checkbox');
-      row.setAttribute('aria-checked', on ? 'true' : 'false');
-      row.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
-          (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-        '<span style="flex:1; min-width:0;"><span class="p-picker-name" style="display:block;">' + p.name + '</span>' +
-        '<span class="p-picker-sub">' + p.cat + '</span></span>' +
-        '<span class="p-picker-sub" style="font-variant-numeric:tabular-nums;">' + fmt(p.users) + '</span>';
-      row.addEventListener('click', function(e){ e.stopPropagation(); togglePersona(p.id); });
+      var row = document.createElement('label');
+      row.className = 'c-dropdown-option' + (full ? ' disabled' : '');
+      if (full) row.title = 'Five personas maximum';
+      row.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + (full ? ' disabled' : '') +
+          ' aria-label="' + p.name + '" />' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="c-dropdown-option-label">' + p.name + '</span>' +
+        '<span class="meta">' + fmt(p.users) + '</span>';
+      row.querySelector('input').addEventListener('change', function(){ togglePersona(p.id); });
       list.appendChild(row);
     });
   }
@@ -1221,37 +1229,41 @@
     var i = selected.indexOf(id);
     if (i > -1) selected.splice(i, 1);
     else if (selected.length < MAX) selected.push(id);
-    renderChips(); renderList(); renderAll();
+    if (personaOpen) renderPersonaList();
+    renderChips(); renderAll();
   }
-  function openPicker(){ panel.hidden = false; renderList(); renderChips(); search.focus(); }
-  function closePicker(){ if (!panel.hidden){ panel.hidden = true; renderChips(); } }
 
-  search.addEventListener('input', function(){
-    clearBtn.hidden = !search.value;
-    renderList();
+  $('personaTrigger').addEventListener('click', function(e){
+    e.stopPropagation();
+    if (personaOpen) closePicker(); else openPicker();
   });
-  clearBtn.addEventListener('click', function(){
-    search.value = ''; clearBtn.hidden = true; renderList(); search.focus();
+  personaPanel.addEventListener('click', function(e){ e.stopPropagation(); });
+  $('personaDone').addEventListener('click', function(e){ e.stopPropagation(); closePicker(); });
+  $('personaClear').addEventListener('click', function(e){
+    e.stopPropagation();
+    selected = [];
+    renderPersonaList(); renderChips(); renderAll();
   });
-  $('pickerDone').addEventListener('click', function(e){ e.stopPropagation(); closePicker(); });
   $('pickerSuggest').addEventListener('click', function(e){
     e.stopPropagation();
     selected = ['cl', 'al', 'kd'];   /* stand-in for the engine's own pick */
-    search.value = ''; clearBtn.hidden = true;
-    renderChips(); renderList(); renderAll();
+    if (personaOpen) renderPersonaList();
+    renderChips(); renderAll();
     toast('neutral', null, 'Suggested three personas from the brief. Swap any of them freely.');
   });
-  panel.addEventListener('click', function(e){ e.stopPropagation(); });
   document.addEventListener('click', function(){ closePicker(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePicker(); });
 
+  /* Targeting basis — the DS Radio with description. */
   document.querySelectorAll('[data-mode]').forEach(function(tile){
     tile.addEventListener('click', function(){
       mode = tile.dataset.mode;
       document.querySelectorAll('[data-mode]').forEach(function(t){
         var on = t.dataset.mode === mode;
-        t.classList.toggle('is-selected', on);
-        t.setAttribute('aria-checked', on ? 'true' : 'false');
+        t.querySelector('input').checked = on;
+        var circ = t.querySelector('.c-radio-circle');
+        circ.classList.toggle('on', on);
+        circ.querySelector('.dot').hidden = !on;
       });
       $('personaBody').hidden = mode !== 'personas';
       $('massBody').hidden = mode !== 'mass';
@@ -1260,21 +1272,23 @@
     });
   });
 
+  /* Refiners — four DS Single selects, generated onto the same
+     .c-dropdown-field recipe the brief uses. "Any …" is the Default
+     (placeholder) state, not a Filled value. */
   function renderFilters(){
     var g = $('filterGrid');
     if (!g.children.length){
       FILTERS.forEach(function(f){
         var d = document.createElement('div');
-        d.className = 'c-field';
+        d.className = 'c-field c-dropdown-field';
         d.innerHTML = '<label for="fs-' + f.id + '">' + f.label + '</label>' +
-          '<div class="p-select-wrap"><select class="p-select" id="fs-' + f.id + '">' +
-          f.opts.map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') +
-          '</select><i class="ph ph-caret-down p-select-caret"></i></div>';
+          '<div class="input-wrap has-trailing-icon">' +
+          '<input type="text" class="c-dropdown-input" id="fs-' + f.id + '" placeholder="' + f.opts[0][1] + '" readonly />' +
+          '<span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span></div>' +
+          '<div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>';
         g.appendChild(d);
-        d.querySelector('select').addEventListener('change', function(e){
-          filterState[f.id] = e.target.value;
-          renderAll();
-        });
+        initSingleSelect(d, f.opts.map(function(o){ return {v:o[0], label:o[1]}; }), undefined,
+          function(v){ filterState[f.id] = v; renderAll(); });
       });
     }
     var m = filterMult();
@@ -1285,7 +1299,10 @@
   }
   $('filterReset').addEventListener('click', function(){
     filterState = {};
-    FILTERS.forEach(function(f){ var el = $('fs-' + f.id); if (el) el.value = ''; });
+    FILTERS.forEach(function(f){
+      var el = $('fs-' + f.id);
+      if (el && el.closest('.c-dropdown-field')._set) el.closest('.c-dropdown-field')._set('', true);
+    });
     renderAll();
   });
   $('f-ex').addEventListener('input', function(){ renderChecks(2); });
@@ -1304,23 +1321,21 @@
     $('choiceSummary').textContent = selected.length
       ? selected.length + ' selected · ' + fmt(r.uniq) + ' unique'
       : 'None selected yet';
-    $('pickerCount').textContent = selected.length + ' of ' + MAX + ' selected';
-    $('pickerReach').textContent = selected.length ? fmt(r.uniq) + ' unique reach' : 'No personas selected';
+    renderPersonaTrigger();
   }
 
-  /* ═══ Step 3 — media mix ═══ */
+  /* ═══ Step 3 — media mix. Channels and formats are the DS Checkbox
+     (.c-choice), formats carrying channel and rate in the description. ═══ */
   function renderChannels(){
     var row = $('channelRow'); row.innerHTML = '';
     CHANNELS.forEach(function(c){
       var on = chanOn.indexOf(c) > -1;
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'p-checkopt' + (on ? ' is-on' : '');
-      b.setAttribute('role', 'checkbox');
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
-      b.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
-        (on ? '<i class="ph ph-check"></i>' : '') + '</span>' + c;
-      b.addEventListener('click', function(){
+      var lab = document.createElement('label');
+      lab.className = 'c-choice';
+      lab.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + c + '" />' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="text"><span class="label">' + c + '</span></span>';
+      lab.querySelector('input').addEventListener('change', function(){
         var i = chanOn.indexOf(c);
         if (i > -1) chanOn.splice(i, 1); else chanOn.push(c);
         FORMATS.forEach(function(f){ if (!chanAllows(f.ch)) f.on = false; });
@@ -1331,7 +1346,7 @@
         resetSplit();
         renderAll();
       });
-      row.appendChild(b);
+      row.appendChild(lab);
     });
     $('channelSummary').textContent = chanOn.length ? chanOn.join(', ') : 'All channels';
   }
@@ -1339,22 +1354,18 @@
   function renderFormats(){
     var list = $('formatList'); list.innerHTML = '';
     FORMATS.filter(function(f){ return chanAllows(f.ch); }).forEach(function(f){
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'p-row' + (f.on ? ' is-on' : ' is-off');
-      b.setAttribute('role', 'checkbox');
-      b.setAttribute('aria-checked', f.on ? 'true' : 'false');
-      b.innerHTML = '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' +
-          (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-        '<span class="name">' + f.name + '</span>' +
-        '<span class="c-tag"><span class="dot" style="background:var(--color-neutral-4);"></span>' + f.ch + '</span>' +
-        '<span class="meta">' + rm(f.cpm) + ' CPM</span>';
-      b.addEventListener('click', function(){
+      var lab = document.createElement('label');
+      lab.className = 'c-choice';
+      lab.innerHTML = '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
+        '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="text"><span class="label">' + f.name + '</span>' +
+        '<span class="desc">' + f.ch + ' · ' + rm(f.cpm) + ' CPM</span></span>';
+      lab.querySelector('input').addEventListener('change', function(){
         f.on = !f.on;
         resetSplit();
         renderAll();
       });
-      list.appendChild(b);
+      list.appendChild(lab);
     });
   }
 
@@ -1410,7 +1421,7 @@
   function renderSplit(){
     var host = $('budgetBars'); host.innerHTML = '';
     var b = budget();
-    $('splitBudgetLabel').textContent = rm(b) + ' · ' + ($('b-obj').value === 'awareness' ? 'awareness' : $('b-obj').value);
+    $('splitBudgetLabel').textContent = rm(b) + ' · ' + $('b-obj').value.toLowerCase();
     onFormats().forEach(function(f){
       var amt = split[f.id] || 0;
       var row = document.createElement('div');
@@ -1491,7 +1502,7 @@
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
     var rows = [
-      ['Objective', $('b-obj').options[$('b-obj').selectedIndex].text + ' — ' +
+      ['Objective', $('b-obj').value + ' — ' +
         ($('b-target').value || '?') + ' ' + $('b-unit').value + ' (' + $('b-kpi').value + ')', 'Brief'],
       ['Languages', langTxt, 'Brief'],
       ['Audience', audTxt, selected.join(',') === 'cl,al,kd' ? 'AI draft' : 'You'],
