@@ -43,16 +43,39 @@
   .icon-chip.el-earth{background:color-mix(in srgb, var(--color-green) 12%, transparent); color:var(--color-green);}
   .icon-chip.el-water{background:color-mix(in srgb, var(--color-navy) 12%, transparent); color:var(--color-navy);}
   .ld-stats .c-stat-footer{margin-top:auto;}
-  /* Entrance + hover, borrowed from the landing's card reveal: rise and
-     settle in a stagger, lift gently on hover. */
-  .ld-stats .c-stat{opacity:0; transform:translateY(16px);
+  /* Entrance, skeleton and hover, all borrowed from the landing's hero
+     cards: the tile reveals wearing a shimmer skeleton, holds a beat,
+     then the real content rises in a cascade; on hover the card tilts
+     toward the cursor at up to 12 degrees with a 1.05 scale (mouse
+     only) and settles back on the reveal's own curve. */
+  .ld-stats .c-stat{position:relative; opacity:0; transform:translateY(16px);
     transition:opacity 650ms cubic-bezier(.22,1,.36,1),
       transform 650ms cubic-bezier(.22,1,.36,1),
       box-shadow var(--duration-base) var(--ease-settle);}
   .ld-stats .c-stat.is-in{opacity:1; transform:none;}
-  .ld-stats .c-stat.is-in:hover{transform:translateY(-2px); box-shadow:var(--shadow-2);}
+  .ld-stats .c-stat.is-tilting{z-index:2; box-shadow:var(--shadow-3);
+    transition:box-shadow var(--duration-base) var(--ease-settle);}
+  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex;
+    flex-direction:column; gap:var(--spacing-16); padding:inherit;
+    border-radius:inherit; background:var(--color-neutral-1);
+    transition:opacity .45s cubic-bezier(.22,1,.36,1),
+      transform .45s cubic-bezier(.22,1,.36,1);}
+  .c-skeleton-bar{display:block; border-radius:var(--radius-pill);
+    background:linear-gradient(90deg, var(--color-neutral-2) 30%, var(--color-neutral-3) 50%, var(--color-neutral-2) 70%);
+    background-size:300% 100%; animation:c-skeleton-shimmer 1.6s linear infinite;}
+  .c-skeleton-bar--eyebrow{width:34%; height:10px;}
+  .c-skeleton-bar--title{width:72%; height:22px; margin-top:var(--spacing-8);}
+  .c-skeleton-bar--footer{width:46%; height:12px; margin-top:auto;}
+  @keyframes c-skeleton-shimmer{from{background-position:100% 0;} to{background-position:-200% 0;}}
+  .ld-stats .c-stat.is-loading > :not(.c-hcard-skeleton){opacity:0;
+    transform:translateY(8px);}
+  .ld-stats .c-stat.is-loaded > :not(.c-hcard-skeleton){opacity:1;
+    transform:none;
+    transition:opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1);
+    transition-delay:var(--content-delay, 0ms);}
   @media (prefers-reduced-motion:reduce){
     .ld-stats .c-stat{opacity:1; transform:none; transition:none;}
+    .c-skeleton-bar{animation:none;}
   }
   /* Where you left off — the section label sits outside the box; the
      whole card is interactive (Card, Interactive variant) and resumes
@@ -681,10 +704,64 @@
     });
   })();
 
-  /* Hero tiles — the landing's staggered rise-and-settle reveal. */
-  document.querySelectorAll('.ld-stats .c-stat').forEach(function (t, i) {
-    setTimeout(function () { t.classList.add('is-in'); }, 80 * i + 60);
-  });
+  /* Hero tiles — the landing's hero-card treatment: staggered reveal
+     wearing a shimmer skeleton (hold randomised, content cascades in),
+     and the pointer tilt once settled. */
+  (function () {
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var coarse = window.matchMedia('(pointer: coarse)').matches;
+    var MAX_TILT = 12;
+    document.querySelectorAll('.ld-stats .c-stat').forEach(function (t, i) {
+      setTimeout(function () { t.classList.add('is-in'); }, 80 * i + 60);
+
+      if (!reduced) {
+        var sk = document.createElement('div');
+        sk.className = 'c-hcard-skeleton';
+        sk.setAttribute('aria-hidden', 'true');
+        sk.innerHTML = '<span class="c-skeleton-bar c-skeleton-bar--eyebrow"></span>' +
+          '<span class="c-skeleton-bar c-skeleton-bar--title"></span>' +
+          '<span class="c-skeleton-bar c-skeleton-bar--footer"></span>';
+        Array.prototype.forEach.call(t.children, function (ch, ci) {
+          ch.style.setProperty('--content-delay', (120 + ci * 70) + 'ms');
+        });
+        t.appendChild(sk);
+        t.classList.add('is-loading');
+        var hold = 500 + Math.random() * 550 + 80 * i;
+        setTimeout(function () {
+          t.classList.add('is-loaded');
+          sk.style.opacity = '0';
+          sk.style.transform = 'translateY(-6px)';
+          setTimeout(function () { sk.remove(); }, 500);
+          setTimeout(function () {
+            t.classList.remove('is-loading', 'is-loaded');
+            Array.prototype.forEach.call(t.children, function (ch) {
+              ch.style.removeProperty('--content-delay');
+            });
+          }, 1400);
+        }, hold);
+      }
+
+      if (reduced || coarse) return;
+      t.addEventListener('pointerenter', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        t.classList.add('is-tilting');
+      });
+      t.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse' || !t.classList.contains('is-tilting')) return;
+        var r = t.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width;
+        var py = (e.clientY - r.top) / r.height;
+        var ry = (px - 0.5) * 2 * MAX_TILT;
+        var rx = -(py - 0.5) * 2 * MAX_TILT;
+        t.style.transform = 'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg) scale(1.05)';
+      });
+      t.addEventListener('pointerleave', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        t.classList.remove('is-tilting');
+        t.style.transform = '';
+      });
+    });
+  })();
 
   /* Where you left off — the whole card resumes the draft; each step
      dot deep-links into that step of the planner. */
