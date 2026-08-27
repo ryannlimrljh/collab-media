@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Collab:Sales · Campaigns</title>
+<title>Collab:Sales · Media planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,7 +14,37 @@
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.41b" />
 <style>
   /* Page-local layout only — every component is the DS's own. */
+  /* The divider sits tight under the page header, so pull the header's
+     shell margin in for this page. */
+  .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
+  .ld-divider{border:none; border-top:1px solid var(--color-neutral-3);
+    margin:0 0 var(--spacing-24);}
   .ld-stats{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
+  /* Hero boxes follow the mothership landing's card-fan recipe:
+     roomier 24px padding with a 12px rhythm, a quiet h3-sized label at
+     weight 500 (not the eyebrow), and the value at display size,
+     weight black. */
+  .ld-stats .c-stat{padding:var(--spacing-24); gap:var(--spacing-12);}
+  .ld-stats .c-stat-label{font-size:var(--text-h3-size); line-height:var(--text-h3-lh);
+    font-weight:var(--weight-medium); letter-spacing:0; text-transform:none;
+    color:var(--color-neutral-5);}
+  .ld-stats .c-stat-value{font-size:var(--text-display-size); line-height:1.1;
+    font-weight:var(--weight-black);}
+  .ld-create{display:flex; justify-content:flex-end;}
+  .ld-resume{flex-direction:row; align-items:center; gap:var(--spacing-24);}
+  .ld-resume .grow{flex:1; min-width:0; display:flex; flex-direction:column;
+    gap:var(--spacing-4);}
+  .ld-resume .name{font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
+  .ld-resume .meta{font-size:var(--text-body2-size); color:var(--color-neutral-5);}
+  .ld-resume .c-progress{max-width:320px; margin-top:var(--spacing-8);}
+  .ld-form{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);
+    margin-top:var(--spacing-8);}
+  .ld-form .span2{grid-column:span 2;}
+  .ld-form-foot{display:flex; justify-content:flex-end; margin-top:var(--spacing-12);}
+  .c-dropdown-input{width:100%;}
+  @media (max-width:760px){
+    .ld-resume{flex-direction:column; align-items:flex-start;}
+  }
   .ld-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
   .ld-go{display:flex; gap:var(--spacing-8); align-items:flex-start;
     margin-top:var(--spacing-8);}
@@ -55,14 +85,10 @@
         </button>
         <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
       </div>
-      <div class="c-sidebar-section">Overview</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
-      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
-      <div class="c-sidebar-section">Plan</div>
+      <div class="c-sidebar-section">Workspace</div>
+      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
       <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <div class="c-sidebar-section">System</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
         <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
@@ -90,11 +116,33 @@
       <header class="c-pageheader">
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
-            <h1>Campaigns</h1>
+            <h1>Media planner</h1>
             <p class="sub">Where things stand, and the fastest way into a new plan.</p>
           </div>
         </div>
       </header>
+
+      <hr class="ld-divider" />
+
+      <div class="c-card ld-resume" style="margin-bottom:var(--spacing-24);">
+        <div class="grow">
+          <span class="c-stat-label">Where you left off</span>
+          <span class="name">Astro 30 anniversary</span>
+          <span class="meta">Astro · RM 150,000 · stopped at Media mix · updated 27 Aug 2026</span>
+          <div class="c-progress">
+            <div class="c-progress-header">
+              <span class="c-progress-title">Plan progress</span>
+              <span class="c-progress-value">60%</span>
+            </div>
+            <div class="c-progress-track size-default">
+              <div class="c-progress-fill" style="width:60%;"></div>
+            </div>
+          </div>
+        </div>
+        <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none; flex:none;">
+          Continue building <i class="ph ph-arrow-right"></i>
+        </a>
+      </div>
 
       <div class="c-shell-grid">
         <div class="c-shell-span-2 ld-stack">
@@ -122,16 +170,48 @@
             </div>
           </div>
 
+          <div class="ld-create">
+            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none;">
+              <i class="ph ph-plus"></i> Create new media plan
+            </a>
+          </div>
+
           <div class="c-card">
-            <h4>Simple insertion</h4>
-            <p>One line is enough — brand, budget, when. The planner drafts the rest and you shape it from there.</p>
-            <div class="ld-go">
-              <div class="c-field">
-                <label for="quickBrief" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Campaign one-liner</label>
-                <input id="quickBrief" placeholder="e.g. BMW X3 launch, RM 200k, September" />
+            <h4>Build a new plan</h4>
+            <p>The essentials here, the fine-tuning in the planner — everything you enter carries straight into the flow.</p>
+            <div class="ld-form">
+              <div class="c-field span2">
+                <label for="qb-name">Campaign name</label>
+                <input id="qb-name" placeholder="e.g. BMW X3 launch" />
               </div>
+              <div class="c-field">
+                <label for="qb-brand">Advertiser brand</label>
+                <input id="qb-brand" placeholder="e.g. BMW, Astro" />
+              </div>
+              <div class="c-field">
+                <label for="qb-budget">Budget (RM)</label>
+                <input id="qb-budget" type="number" step="1000" placeholder="0" />
+              </div>
+              <div class="c-field">
+                <label for="qb-start">Flight start</label>
+                <input id="qb-start" type="date" />
+              </div>
+              <div class="c-field">
+                <label for="qb-end">Flight end</label>
+                <input id="qb-end" type="date" />
+              </div>
+              <div class="c-field c-dropdown-field span2" id="qbObjField">
+                <label for="qb-obj">Primary objective</label>
+                <div class="input-wrap has-trailing-icon">
+                  <input type="text" class="c-dropdown-input" id="qb-obj" placeholder="Select objective" readonly />
+                  <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="ld-form-foot">
               <button class="c-btn c-btn-primary c-btn-md" id="quickGo" type="button">
-                Go <i class="ph ph-arrow-right"></i>
+                Start planning <i class="ph ph-arrow-right"></i>
               </button>
             </div>
           </div>
@@ -141,13 +221,13 @@
         <div class="c-shell-span-2">
           <div class="c-card">
             <div style="display:flex; justify-content:space-between; align-items:baseline;">
-              <h4>Latest campaigns</h4>
+              <h4>My media plans</h4>
               <span class="c-stat-label" id="latestCount"></span>
             </div>
             <p>Pick up where you left off.</p>
             <div id="latestRows" style="margin-top:var(--spacing-4);"></div>
             <a class="c-btn c-btn-ghost c-btn-sm ld-all" href="campaign-list.html" style="text-decoration:none;">
-              All campaigns <i class="ph ph-arrow-right"></i>
+              All media plans <i class="ph ph-arrow-right"></i>
             </a>
           </div>
         </div>
@@ -208,14 +288,61 @@
     if (row) window.location.href = row.dataset.href;
   });
 
-  /* Simple insertion — one line in, the planner out, prefilled. */
+  /* Objective — the DS Dropdown (Single select), same engine as the
+     planner's own fields, scoped down to the one instance here. */
+  var OBJS = [
+    {v:'awareness', label:'Awareness'}, {v:'consideration', label:'Consideration'},
+    {v:'conversion', label:'Conversion'}, {v:'footfall', label:'Footfall'},
+    {v:'leadgen', label:'Lead generation'}
+  ];
+  (function () {
+    var field = document.getElementById('qbObjField');
+    var input = document.getElementById('qb-obj');
+    var panel = field.querySelector('.c-dropdown-panel');
+    var list = field.querySelector('.c-dropdown-list');
+    function close() { field.classList.remove('open'); panel.hidden = true; }
+    input.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (!panel.hidden) { close(); return; }
+      list.innerHTML = OBJS.map(function (o) {
+        var sel = o.v === (input.dataset.value || '');
+        return '<div class="c-dropdown-row' + (sel ? ' selected' : '') + '" data-v="' + o.v + '">' +
+          '<span class="c-dropdown-row-label">' + o.label + '</span>' +
+          '<i class="ph ph-check c-dropdown-row-check"></i></div>';
+      }).join('');
+      panel.hidden = false;
+      field.classList.add('open');
+    });
+    list.addEventListener('click', function (e) {
+      var row = e.target.closest('.c-dropdown-row');
+      if (!row) return;
+      e.stopPropagation();
+      input.dataset.value = row.dataset.v;
+      input.value = OBJS.filter(function (o) { return o.v === row.dataset.v; })[0].label;
+      field.classList.add('has-value');
+      close();
+    });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  })();
+
+  /* Build a new plan — every field carries straight into the planner. */
   function go() {
-    var v = document.getElementById('quickBrief').value.trim();
-    window.location.href = v ? 'planner.html?brief=' + encodeURIComponent(v) : 'planner.html';
+    var params = [];
+    function add(k, v) { if (v) params.push(k + '=' + encodeURIComponent(v)); }
+    add('name', document.getElementById('qb-name').value.trim());
+    add('brand', document.getElementById('qb-brand').value.trim());
+    add('budget', document.getElementById('qb-budget').value.trim());
+    add('start', document.getElementById('qb-start').value);
+    add('end', document.getElementById('qb-end').value);
+    add('obj', document.getElementById('qb-obj').dataset.value || '');
+    window.location.href = params.length ? 'planner.html?' + params.join('&') : 'planner.html';
   }
   document.getElementById('quickGo').addEventListener('click', go);
-  document.getElementById('quickBrief').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') go();
+  ['qb-name', 'qb-brand', 'qb-budget'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') go();
+    });
   });
 })();
 </script>

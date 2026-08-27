@@ -177,14 +177,10 @@
         </button>
         <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
       </div>
-      <div class="c-sidebar-section">Overview</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
-      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
-      <div class="c-sidebar-section">Plan</div>
+      <div class="c-sidebar-section">Workspace</div>
+      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-megaphone"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
       <a class="c-sidebar-item active" href="planner.html" aria-current="page"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <div class="c-sidebar-section">System</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
         <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
@@ -1618,9 +1614,27 @@
     renderPreview();
   }
 
-  /* Simple insertion — a ?brief= one-liner from the campaigns page
-     prefills the ask. "BMW X3 launch, RM 200k, September" is enough. */
+  /* Build a new plan — the campaigns page carries its fields in as
+     query params. A legacy ?brief= one-liner still parses too. */
   (function(){
+    function param(k){
+      var m = new RegExp('[?&]' + k + '=([^&]*)').exec(window.location.search);
+      return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')).trim() : '';
+    }
+    var got = false;
+    if (param('name')){ $('b-name').value = param('name'); got = true; }
+    if (param('brand')){ $('b-brand').value = param('brand'); got = true; }
+    if (param('budget')){ $('b-budget').value = parseInt(param('budget'), 10) || ''; got = true; }
+    if (param('start')){ $('b-start').value = param('start'); got = true; }
+    if (param('end')){ $('b-end').value = param('end'); got = true; }
+    if (param('obj')){
+      var f = document.querySelector('[data-dd="b-obj"]');
+      if (f && f._set){ f._set(param('obj'), true); got = true; }
+    }
+    if (got){
+      toast('neutral', 'Carried in from Build a new plan', 'Check the ask, then walk the steps — everything is editable.');
+      return;
+    }
     var m = /[?&]brief=([^&]*)/.exec(window.location.search);
     if (!m) return;
     var text = decodeURIComponent(m[1].replace(/\+/g, ' ')).trim();

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Collab:Sales · All campaigns</title>
+<title>Collab:Sales · All media plans</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,14 +47,10 @@
         </button>
         <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
       </div>
-      <div class="c-sidebar-section">Overview</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
-      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
-      <div class="c-sidebar-section">Plan</div>
+      <div class="c-sidebar-section">Workspace</div>
+      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
       <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <div class="c-sidebar-section">System</div>
-      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
       <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
         <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
@@ -86,7 +82,7 @@
       <header class="c-pageheader">
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
-            <h1>All campaigns</h1>
+            <h1>All media plans</h1>
             <p class="sub">Every plan you have open, and what stage it reached.</p>
           </div>
         </div>
@@ -96,7 +92,7 @@
         <div class="c-filterbar" style="flex:1;">
           <div class="c-filter-search">
             <i class="ph ph-magnifying-glass icon-leading"></i>
-            <input type="text" id="clSearch" placeholder="Search campaigns or brands" aria-label="Search campaigns" />
+            <input type="text" id="clSearch" placeholder="Search plans or brands" aria-label="Search media plans" />
             <button class="c-filter-search-clear" id="clSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
           </div>
           <span class="c-filter-search-divider" aria-hidden="true"></span>
@@ -241,8 +237,8 @@
       var what = query ? '\u201c' + query + '\u201d' : 'this filter';
       emptyEl.innerHTML = '<div class="c-empty"><i class="ph-fill ph-tray"></i>' +
         '<h4>Nothing here yet</h4>' +
-        '<p>No campaigns match ' + what + '. Clear the filter, or start a new plan from the campaigns page.</p>' +
-        '<a class="c-btn c-btn-primary c-btn-md" href="campaigns.html" style="text-decoration:none"><i class="ph ph-arrow-left"></i> Back to campaigns</a></div>';
+        '<p>No plans match ' + what + '. Clear the filter, or start a new plan from the media planner.</p>' +
+        '<a class="c-btn c-btn-primary c-btn-md" href="campaigns.html" style="text-decoration:none"><i class="ph ph-arrow-left"></i> Back to media planner</a></div>';
     }
     countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
       : 'Showing 1\u2013' + hits.length + ' of ' + hits.length;

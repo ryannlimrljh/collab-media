@@ -30,9 +30,13 @@ stylesheets plus this repo's `shared/shell.css`/`shell.js`.
 - `shared/` — the shell's page-local CSS and behaviour (collapse,
   account menu, department switcher, hover labels), ported from
   feedback-v1. One deliberate departure: no auto-minimise timer.
-- `pages/campaigns.html` — the landing (from Ryan's wireframe): four
-  KPI stat cards, a "Simple insertion" one-liner that opens the planner
-  prefilled, and the latest campaigns with "All →" into the full list.
+- `pages/campaigns.html` — the Media planner landing: a "Where you left
+  off" resume band, four hero stat boxes in the mothership landing's
+  card recipe, a right-aligned "Create new media plan" CTA, a "Build a
+  new plan" card whose fields (name, brand, budget, flight dates,
+  objective) carry straight into the planner via query params, and "My
+  media plans" with "All media plans →" into the full list. Nav is
+  trimmed to Media planner / Planner / Feedback.
 - `pages/campaign-list.html` — the full listing, one level down: back
   control, search, the DS Compact filter (funnel trigger, checkbox
   panel applied on Done, count badge, applied-pill tray, Clear all),
