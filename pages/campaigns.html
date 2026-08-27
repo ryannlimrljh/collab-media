@@ -106,6 +106,55 @@
      the column, the column passes the height to the card. */
   .ld-plans-col{display:flex; flex-direction:column;}
   .ld-plans-col > .c-card{flex:1;}
+  /* ── The Ask box, shrunk — the landing's assistant entry point in its
+     collapsed pill form: same glow layers, mark, and elevation, one row
+     instead of the two-row composer. Pinned bottom-centre of the main
+     column, exactly as the landing anchors it. ── */
+  .c-shell-main{position:relative;}
+  .c-shell-content{padding-bottom:110px;} /* the pill's height + offset, so the last card scrolls clear */
+  @keyframes ask-glow-slide{ from{ background-position:0% 0%; } to{ background-position:200% 0%; } }
+  .ld-ask{position:absolute; left:50%; bottom:var(--spacing-24); z-index:20;
+    width:min(440px, calc(100% - var(--spacing-32)));
+    opacity:0; transform:translate(-50%, 16px);
+    transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+  .ld-ask.is-in{opacity:1; transform:translate(-50%, 0);}
+  .ld-ask .floating-ask-glow-outer{position:absolute; inset:-4px; z-index:0;
+    border-radius:var(--radius-pill);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(16px); opacity:.7;
+    mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite;
+    pointer-events:none;}
+  .ld-ask .floating-ask-glow-inner{position:absolute; inset:-1px; z-index:0;
+    border-radius:var(--radius-pill);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(1px);
+    mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite;
+    pointer-events:none;}
+  .ld-ask .floating-ask{position:relative; z-index:10; display:flex;
+    align-items:center; gap:var(--spacing-8);
+    padding:var(--spacing-8) var(--spacing-8) var(--spacing-8) 48px;
+    background:var(--color-neutral-1); border-radius:var(--radius-pill);
+    box-shadow:var(--shadow-4);}
+  .ld-ask .floating-ask-mark{position:absolute; left:var(--spacing-16); top:50%;
+    transform:translateY(-50%); width:24px; height:24px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-pill); background:var(--color-obsidian);
+    color:var(--color-neutral-1); font-size:14px; line-height:1;
+    pointer-events:none;}
+  .ld-ask input{flex:1; min-width:0; border:0; outline:none; background:transparent;
+    font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);}
+  .ld-ask input::placeholder{color:var(--color-neutral-5);}
+  .ld-ask .ask-send{width:36px; height:36px; flex:none;
+    border-radius:var(--radius-pill); background:var(--color-obsidian);
+    color:var(--color-neutral-1); border:0; display:flex; align-items:center;
+    justify-content:center; cursor:pointer; font-size:var(--icon-sm);}
+  .ld-ask .ask-send:hover{background:var(--color-neutral-8);}
+  .ld-ask .ask-send:active{background:var(--color-neutral-7);}
+  .ld-ask .ask-send:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){
+    .ld-ask{transition:none; opacity:1; transform:translate(-50%, 0);}
+    .ld-ask .floating-ask-glow-outer, .ld-ask .floating-ask-glow-inner{animation:none;}
+  }
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-2{grid-column:span 4;}
   }
@@ -261,6 +310,17 @@
       </div>
 
     </div>
+
+    <div class="ld-ask" id="askBox">
+      <div class="floating-ask-glow-outer" aria-hidden="true"></div>
+      <div class="floating-ask-glow-inner" aria-hidden="true"></div>
+      <div class="floating-ask">
+        <span class="floating-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+        <input type="text" id="askInput" aria-label="Ask anything about your plans"
+               placeholder="Ask anything — or describe a plan and I'll draft it" />
+        <button class="ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -314,6 +374,21 @@
     var row = e.target.closest('[data-href]');
     if (row) window.location.href = row.dataset.href;
   });
+
+  /* Ask box — arrives after the tiles settle; a typed line drafts a plan
+     (the planner's one-liner brief parse), same carry-in as before. */
+  (function () {
+    var box = document.getElementById('askBox');
+    var input = document.getElementById('askInput');
+    setTimeout(function () { box.classList.add('is-in'); }, 600);
+    function send() {
+      var v = input.value.trim();
+      if (!v) { input.focus(); return; }
+      window.location.href = 'planner.html?brief=' + encodeURIComponent(v);
+    }
+    document.getElementById('askSend').addEventListener('click', send);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+  })();
 
   /* Hero tiles — the landing's staggered rise-and-settle reveal. */
   document.querySelectorAll('.ld-stats .c-stat').forEach(function (t, i) {
