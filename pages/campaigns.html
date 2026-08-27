@@ -141,9 +141,29 @@
     border-radius:var(--radius-pill); background:var(--color-obsidian);
     color:var(--color-neutral-1); font-size:14px; line-height:1;
     pointer-events:none;}
-  .ld-ask input{flex:1; min-width:0; border:0; outline:none; background:transparent;
-    font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);}
-  .ld-ask input::placeholder{color:var(--color-neutral-5);}
+  .ld-ask .floating-ask-field{position:relative; flex:1; display:flex;
+    align-items:center; min-width:0; height:36px;}
+  .ld-ask input{width:100%; border:0; outline:none; background:transparent;
+    font-family:inherit; font-size:var(--text-body1-size);
+    color:var(--color-neutral-9); cursor:pointer; caret-color:transparent;}
+  /* The running line — the landing's ghost marquee: its own element so it
+     can be masked and travelled; both ends fade, the travel distance is
+     measured and the speed derived from it in JS. */
+  .ld-ask .floating-ask-ghost{position:absolute; inset:0; display:flex;
+    align-items:center; overflow:hidden; pointer-events:none;
+    white-space:nowrap; font-size:var(--text-body1-size);
+    color:var(--color-neutral-5);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+            mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);}
+  .ld-ask .floating-ask-ghost-t{display:inline-block; white-space:nowrap;}
+  .ld-ask .floating-ask-ghost.is-running .floating-ask-ghost-t{
+    animation:ask-marquee var(--ask-marquee-dur, 9s) var(--ease-standard) infinite;}
+  @keyframes ask-marquee{
+    0%,18%  { transform:translateX(0); }
+    50%,68% { transform:translateX(var(--ask-marquee-dx, 0px)); }
+    100%    { transform:translateX(0); }
+  }
+  .ld-ask .floating-ask-ghost-p{display:none;}
   .ld-ask .ask-send{width:36px; height:36px; flex:none;
     border-radius:var(--radius-pill); background:var(--color-obsidian);
     color:var(--color-neutral-1); border:0; display:flex; align-items:center;
@@ -154,6 +174,10 @@
   @media (prefers-reduced-motion:reduce){
     .ld-ask{transition:none; opacity:1; transform:translate(-50%, 0);}
     .ld-ask .floating-ask-glow-outer, .ld-ask .floating-ask-glow-inner{animation:none;}
+    .ld-ask .floating-ask-ghost{display:none;}
+    .ld-ask .floating-ask-ghost-p{position:absolute; inset:0; display:flex;
+      align-items:center; pointer-events:none; white-space:nowrap;
+      font-size:var(--text-body1-size); color:var(--color-neutral-5);}
   }
   /* ── Assistant overlay — the landing's chat modal: veil, folding
      shell, warm thread rail, and the composer that is the ask box
@@ -434,8 +458,11 @@
       <div class="floating-ask-glow-inner" aria-hidden="true"></div>
       <div class="floating-ask">
         <span class="floating-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
-        <input type="text" id="askInput" aria-label="Ask anything about your plans"
-               placeholder="Ask anything — or describe a plan and I'll draft it" />
+        <div class="floating-ask-field">
+          <input type="text" id="askInput" readonly aria-label="Open the AI campaign wizard" />
+          <span class="floating-ask-ghost" id="askGhost" aria-hidden="true"><span class="floating-ask-ghost-t" id="askGhostT">AI campaign wizard — let me help you build your media plan.</span></span>
+          <span class="floating-ask-ghost-p" aria-hidden="true">AI campaign wizard</span>
+        </div>
         <button class="ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
       </div>
     </div>
@@ -617,21 +644,30 @@
       }, 600);
     }
 
-    document.getElementById('askSend').addEventListener('click', function () {
-      var v = input.value.trim();
-      input.value = '';
-      openChat(v || null);
-    });
+    /* The pill is a launcher: a click anywhere on it — field included —
+       opens the wizard. */
+    box.addEventListener('click', function () { openChat(null); });
     input.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter') return;
-      var v = input.value.trim();
-      input.value = '';
-      openChat(v || null);
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openChat(null); }
     });
-    box.addEventListener('click', function (e) {
-      if (e.target.closest('#askSend')) return;
-      if (document.activeElement !== input || !input.value.trim()) input.focus();
-    });
+
+    /* The rolling line — measure the overflow, derive the duration from
+       the distance so the speed stays constant whatever the sentence. */
+    var ghost = document.getElementById('askGhost');
+    var ghostT = document.getElementById('askGhostT');
+    function runMarquee() {
+      if (reduced || !ghost) return;
+      var dx = ghost.clientWidth - ghostT.scrollWidth;
+      if (dx < -4) {
+        ghost.style.setProperty('--ask-marquee-dx', dx + 'px');
+        ghost.style.setProperty('--ask-marquee-dur', (6 + Math.abs(dx) / 25).toFixed(1) + 's');
+        ghost.classList.add('is-running');
+      } else {
+        ghost.classList.remove('is-running');
+      }
+    }
+    setTimeout(runMarquee, 700);
+    window.addEventListener('resize', runMarquee);
 
     var chatInput = document.getElementById('chatInput');
     function chatSend() {
