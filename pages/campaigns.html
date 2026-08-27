@@ -19,6 +19,18 @@
   .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
   .ld-divider{border:none; border-top:1px solid var(--color-neutral-3);
     margin:0 0 var(--spacing-24);}
+  /* Typewriter header: the caret blinks in steps; the h1 holds at least
+     one line so short messages don't collapse the header row. */
+  #pageGreeting{min-height:var(--text-h1-lh);}
+  .ld-caret{display:inline-block; width:3px; height:.82em; margin-left:6px;
+    background:var(--color-neutral-9); vertical-align:baseline;
+    animation:ld-caret-blink 1.1s steps(2, start) infinite;}
+  @keyframes ld-caret-blink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+  .ld-sr{position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap;}
+  @media (prefers-reduced-motion:reduce){
+    .ld-caret{animation:none; opacity:0;}
+  }
   /* Section heads follow the landing's "Where we stand" band: a bold
      h4-size heading on the baseline with a caption note beside it — no
      rule underneath, the type and the space carry the break. */
@@ -381,7 +393,7 @@
       <header class="c-pageheader">
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
-            <h1 id="pageGreeting">Home</h1>
+            <h1 id="pageGreeting"><span class="ld-type" id="typeTarget" aria-hidden="true"></span><span class="ld-caret" aria-hidden="true"></span><span class="ld-sr" id="greetSr">Home</span></h1>
             <p class="sub">Where things stand, and the fastest way into a new plan.</p>
           </div>
           <div class="c-pageheader-actions">
@@ -585,14 +597,49 @@
 (function () {
   'use strict';
 
-  /* The greeting follows the clock; the name follows whoever the account
-     row says is signed in, so one source feeds both. */
+  /* Typewriter header. The greeting follows the clock, the name follows
+     the account row, the draft count follows the data, and the loop
+     types, holds, deletes, and moves on. Reduced motion gets the static
+     greeting. */
   (function () {
     var h = new Date().getHours();
     var g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
     var who = document.querySelector('.c-sidebar-account .c-search-input-title');
     var first = who ? who.textContent.trim().split(/\s+/)[0] : '';
-    document.getElementById('pageGreeting').textContent = first ? g + ', ' + first : g;
+    var drafts = CAMPAIGNS.filter(function (c) { return c.status === 'draft'; }).length;
+    var msgs = [
+      first ? g + ', ' + first : g,
+      'Ready to build your next plan?',
+      drafts + ' drafts are waiting on you.',
+      'Astro 30 is one step from done.'
+    ];
+    var target = document.getElementById('typeTarget');
+    document.getElementById('greetSr').textContent = msgs[0];
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      target.textContent = msgs[0];
+      return;
+    }
+    var mi = 0, ci = 0, deleting = false;
+    function tick() {
+      var msg = msgs[mi];
+      if (!deleting) {
+        ci++;
+        target.textContent = msg.slice(0, ci);
+        if (ci === msg.length) { deleting = true; setTimeout(tick, 2400); return; }
+        setTimeout(tick, 45);
+      } else {
+        ci--;
+        target.textContent = msg.slice(0, ci);
+        if (ci === 0) {
+          deleting = false;
+          mi = (mi + 1) % msgs.length;
+          setTimeout(tick, 350);
+          return;
+        }
+        setTimeout(tick, 22);
+      }
+    }
+    setTimeout(tick, 300);
   })();
 
   /* Latest campaigns — the six most recent; the whole row opens the plan. */
