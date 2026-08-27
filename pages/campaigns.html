@@ -366,23 +366,23 @@
           <div>
             <div class="ld-sechead"><h2>Where you left off</h2></div>
             <div class="c-card c-card-interactive ld-resume" id="resumeCard" role="link" tabindex="0"
-                 aria-label="Continue building Astro 30 anniversary — stopped at Media mix, 60% complete">
+                 aria-label="Continue building Astro 30 anniversary, stopped at Media mix, 60% complete">
               <span class="name">Astro 30 anniversary</span>
               <span class="meta">Astro · RM 150,000 · updated 27 Aug 2026</span>
               <div class="c-stepper ld-resume-steps" aria-label="Plan progress by step">
-                <button class="c-step" type="button" data-step="1" title="Brief — done">
+                <button class="c-step" type="button" data-step="1" title="Brief: done">
                   <span class="c-step-indicator completed"><i class="ph ph-check"></i></span>
                 </button>
                 <div class="c-step-connector"></div>
-                <button class="c-step" type="button" data-step="2" title="Audience — done">
+                <button class="c-step" type="button" data-step="2" title="Audience: done">
                   <span class="c-step-indicator completed"><i class="ph ph-check"></i></span>
                 </button>
                 <div class="c-step-connector"></div>
-                <button class="c-step" type="button" data-step="3" title="Media mix — where you stopped">
+                <button class="c-step" type="button" data-step="3" title="Media mix: where you stopped">
                   <span class="c-step-indicator active">3</span>
                 </button>
                 <div class="c-step-connector"></div>
-                <button class="c-step" type="button" data-step="4" title="Summary — not started">
+                <button class="c-step" type="button" data-step="4" title="Summary: not started">
                   <span class="c-step-indicator upcoming">4</span>
                 </button>
               </div>
@@ -460,7 +460,7 @@
         <span class="floating-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
         <div class="floating-ask-field">
           <input type="text" id="askInput" readonly aria-label="Open the AI campaign wizard" />
-          <span class="floating-ask-ghost" id="askGhost" aria-hidden="true"><span class="floating-ask-ghost-t" id="askGhostT">AI campaign wizard — let me help you build your media plan.</span></span>
+          <span class="floating-ask-ghost" id="askGhost" aria-hidden="true"><span class="floating-ask-ghost-t" id="askGhostT">AI campaign wizard: let me help you build your media plan.</span></span>
           <span class="floating-ask-ghost-p" aria-hidden="true">AI campaign wizard</span>
         </div>
         <button class="ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
@@ -476,7 +476,7 @@
       <button class="c-chat-new" type="button" id="chatNew"><i class="ph ph-plus"></i> New conversation</button>
       <div class="c-chat-threads">
         <div class="c-chat-threads-h">Recent</div>
-        <button class="c-chat-thread is-active" type="button">Astro 30 — where it stands</button>
+        <button class="c-chat-thread is-active" type="button">Astro 30: where it stands</button>
         <button class="c-chat-thread" type="button">Q4 inventory pressure</button>
         <button class="c-chat-thread" type="button">BMW X3 wrap-up notes</button>
       </div>
@@ -484,15 +484,15 @@
     <div class="c-chat-main">
       <div class="c-chat-hd">
         <div>
-          <h2>Astro 30 — where it stands</h2>
-          <p>A placeholder thread — the shape is real, the wiring comes later.</p>
+          <h2>Astro 30: where it stands</h2>
+          <p>A placeholder thread. The shape is real, the wiring comes later.</p>
         </div>
       </div>
       <div class="c-chat-body"><div class="c-chat-scroll" id="chatScroll">
         <div class="c-chat-msg is-me"><div class="c-chat-bubble">Where did I leave the Astro 30 plan?</div></div>
         <div class="c-chat-msg"><div class="c-chat-bubble">
           <p>You stopped at <b>Media mix</b>, 60% through. The RM 150,000 is fully
-          allocated across In-stream video, Social video and Leaderboard — but
+          allocated across In-stream video, Social video and Leaderboard, but
           nothing is pinned as a must-buy yet, and the exclusions are still empty.</p>
           <p>Two things would finish it: pin your must-buy sites, and give the
           exclusions a once-over. <a href="planner.html?step=3">Pick it up at Media mix</a>.</p>
@@ -504,7 +504,7 @@
           <div class="floating-ask-glow-outer" aria-hidden="true"></div>
           <div class="floating-ask-glow-inner" aria-hidden="true"></div>
           <div class="c-chat-input">
-            <input type="text" id="chatInput" aria-label="Reply" placeholder="Reply — or describe a plan and I'll draft it" />
+            <input type="text" id="chatInput" aria-label="Reply" placeholder="Reply, or describe a plan and I'll draft it" />
             <div class="c-chat-tools">
               <div class="c-chat-tools-l">
                 <button class="c-chat-tool" type="button" aria-label="Add image"><i class="ph ph-image"></i></button>
@@ -517,7 +517,7 @@
             </div>
           </div>
         </div>
-        <p class="c-chat-foot">The assistant is a placeholder in this prototype — replies are canned.</p>
+        <p class="c-chat-foot">The assistant is a placeholder in this prototype. Replies are canned.</p>
       </div>
     </div>
   </div>
@@ -638,7 +638,7 @@
     function sendLine(v) {
       bubble(true, '<p>' + esc(v) + '</p>');
       setTimeout(function () {
-        bubble(false, '<p>I can draft that as a plan — audience, mix and a first budget split, ' +
+        bubble(false, '<p>I can draft that as a plan: audience, mix and a first budget split, ' +
           'all yours to override. <a href="planner.html?brief=' + encodeURIComponent(v) +
           '">Open it in the planner</a>.</p>');
       }, 600);
