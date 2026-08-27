@@ -1473,7 +1473,7 @@ are `radius-sm`, matching Input Field itself:
 | Part | Spec |
 |---|---|
 | Field label (optional) | caption, weight 700, Neutral-9, spacing-4 below it — literally Input Field's own `<label>` for both variants |
-| Panel | `radius-md` (16px), 1px Neutral-3 border, `shadow-3`, Neutral-1 fill, spacing-8 below the trigger, **floating over the content beneath it** (`position:absolute` against the trigger's own field — corrected v0.9.41: the shipped CSS had `position:static`, which made this the one popover in the system that pushed the page down instead of overlaying it, contradicting the Filters/Date picker popover convention this very row cites), **always exactly the trigger's own rendered width, with no floor** (both sit in the same parent and share one `width: 100%` rule with no `min-width`, so a wider/narrower trigger drags the panel with it automatically — an earlier `min-width: 240px` floor was removed after it made the panel run wider than a trigger narrower than 240px, breaking the exact-match guarantee it was meant to be documenting) — true for both variants, in every Style. The panel keeps its own `radius-md`/popover recipe regardless of the trigger's `radius-sm` — the two aren't tied together |
+| Panel | `radius-md` (16px), 1px Neutral-3 border, `shadow-3`, Neutral-1 fill, spacing-8 below the trigger, **floating over the content beneath it** (corrected v0.9.41: in a wired-up field the panel nests inside the trigger's own `.input-wrap` — already `position:relative` from Input Field — and is absolutely anchored at `top: calc(100% + spacing-8)`, so label/helper heights can't move it; the shipped CSS had `position:static`, which made this the one popover in the system that pushed the page down instead of overlaying it, contradicting the Filters/Date picker popover convention this very row cites. A bare, un-nested panel stays in flow, for standalone anatomy displays), **always exactly the trigger's own rendered width, with no floor** (both sit in the same parent and share one `width: 100%` rule with no `min-width`, so a wider/narrower trigger drags the panel with it automatically — an earlier `min-width: 240px` floor was removed after it made the panel run wider than a trigger narrower than 240px, breaking the exact-match guarantee it was meant to be documenting) — true for both variants, in every Style. The panel keeps its own `radius-md`/popover recipe regardless of the trigger's `radius-sm` — the two aren't tied together |
 
 **Single select — Container.** The trigger box is [Input
 Field](#input-field)'s own container, reused as-is, not recreated:
@@ -3357,15 +3357,22 @@ rather than maintaining two token sources by hand:
   everything below it down the page — the one popover in the system
   that displaced content instead of floating over it, contradicting
   the "reuses Filters'/Date picker's popover convention" line in
-  Dropdown's own spec. Both panels are now `position:absolute` (their
-  parent `.c-dropdown-field`/`.c-dropdown-multi-field` gains
-  `position:relative`), with no `top` offset so the panel keeps its
-  static-position anchor directly under the trigger's `.input-wrap`
-  regardless of label/helper height, at `z-index:20` — the same
-  popover layer `.c-filter-panel` already uses. The exact-trigger-width
-  guarantee is unchanged (`width:100%` of the same field). Surfaced by
-  the Collab:Sales planner build, where an open refiner shoved the
-  whole audience step downward.
+  Dropdown's own spec. The fix: in a wired-up field the panel now
+  nests **inside the trigger's own `.input-wrap`** (already
+  `position:relative` from Input Field) and takes
+  `position:absolute; top:calc(100% + spacing-8)` at `z-index:20` —
+  the same popover layer `.c-filter-panel` already uses — so it hangs
+  off the trigger box itself and label/helper heights can't move it.
+  `width:100%` now resolves against the trigger box directly, which
+  makes the exact-trigger-width guarantee structural. A first attempt
+  left the panel a sibling of `.input-wrap` and relied on abspos
+  static positioning; that fails inside the column-flex `.c-field`,
+  where an abspos child anchors to the container's top corner, over
+  its own trigger — hence the nesting. The bare, un-nested panel rule
+  keeps `position:static`, so the gallery's standalone anatomy
+  specimens still render in flow. Surfaced by the Collab:Sales planner
+  build, where an open refiner shoved the whole audience step
+  downward.
 
 - **v0.9.40 — 2026-08-12** — Corrected and expanded the existing
   **Filters** component in place (not a new component; the same

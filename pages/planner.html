@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-<link rel="stylesheet" href="../collabrium-dls/tokens.css" />
-<link rel="stylesheet" href="../collabrium-dls/components.css" />
-<link rel="stylesheet" href="../shared/shell.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41b" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41b" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.41b" />
 <style>
   /* ── Page-local. Composes DLS tokens only — no new colors or radii. ── */
 
@@ -274,8 +274,8 @@
                   <div class="input-wrap has-trailing-icon">
                     <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
                     <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                   </div>
-                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                 </div>
               </div>
 
@@ -284,8 +284,8 @@
                   <div class="input-wrap has-trailing-icon">
                     <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Select KPI" readonly />
                     <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                   </div>
-                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                 </div>
                 <div class="c-field"><label for="b-target">Target</label>
                   <input id="b-target" type="number" value="5000" placeholder="0" /></div>
@@ -293,8 +293,8 @@
                   <div class="input-wrap has-trailing-icon">
                     <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
                     <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                   </div>
-                  <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                 </div>
               </div>
               <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
@@ -407,13 +407,13 @@
                     <div class="input-wrap has-trailing-icon">
                       <input type="text" class="c-dropdown-multi-input" id="personaTrigger" placeholder="Select personas" readonly />
                       <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-multi-chevron"></i></span>
-                    </div>
-                    <div class="c-dropdown-multi-panel" id="personaPanel" hidden>
+                      <div class="c-dropdown-multi-panel" id="personaPanel" hidden>
                       <div class="c-dropdown-multi-list" id="personaList"></div>
                       <div class="c-dropdown-multi-footer">
                         <button class="clear" id="personaClear" type="button">Clear</button>
                         <button class="done" id="personaDone" type="button">Done</button>
                       </div>
+                    </div>
                     </div>
                     <span class="c-helper" id="pickerCount">0 of 5 selected</span>
                   </div>
@@ -1284,8 +1284,8 @@
         d.innerHTML = '<label for="fs-' + f.id + '">' + f.label + '</label>' +
           '<div class="input-wrap has-trailing-icon">' +
           '<input type="text" class="c-dropdown-input" id="fs-' + f.id + '" placeholder="' + f.opts[0][1] + '" readonly />' +
-          '<span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span></div>' +
-          '<div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>';
+          '<span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>' +
+          '<div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div></div>';
         g.appendChild(d);
         initSingleSelect(d, f.opts.map(function(o){ return {v:o[0], label:o[1]}; }), undefined,
           function(v){ filterState[f.id] = v; renderAll(); });
