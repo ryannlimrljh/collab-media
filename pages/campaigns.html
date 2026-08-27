@@ -19,22 +19,29 @@
   .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
   .ld-divider{border:none; border-top:1px solid var(--color-neutral-3);
     margin:0 0 var(--spacing-24);}
+  /* Section heads follow the landing's "Where we stand" band: a bold
+     h4-size heading on the baseline with a caption note beside it — no
+     rule underneath, the type and the space carry the break. */
+  .ld-sechead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    padding-bottom:10px;}
+  .ld-sechead h2{margin:0; font-size:var(--text-h4-size);
+    line-height:var(--text-h4-lh); font-weight:var(--text-h4-weight);
+    color:var(--color-neutral-9);}
+  .ld-sechead .note{font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); flex:1 1 260px;}
+  .ld-sechead .note.count{flex:none; margin-left:auto; font-weight:700;}
+  /* Tiles are the band's own: the DS Stat card untouched — 16px padding,
+     eyebrow label, h1-size value that never wraps, caption sub-line. */
   .ld-stats{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
-  /* Hero boxes follow the mothership landing's card-fan recipe:
-     roomier 24px padding with a 12px rhythm, a quiet h3-sized label at
-     weight 500 (not the eyebrow), and the value at display size,
-     weight black. */
-  .ld-stats .c-stat{padding:var(--spacing-24); gap:var(--spacing-12);}
-  .ld-stats .c-stat-label{font-size:var(--text-h3-size); line-height:var(--text-h3-lh);
-    font-weight:var(--weight-medium); letter-spacing:0; text-transform:none;
-    color:var(--color-neutral-5);}
-  .ld-stats .c-stat-value{font-size:var(--text-display-size); line-height:1.1;
-    font-weight:var(--weight-black);}
-  /* Icon chip — the Stat card's own top-right chip slot, tinted with the
-     Sales element (Gold at the 12% chip strength). */
-  .ld-stats .icon-chip{background:color-mix(in srgb, var(--color-amber) 12%, transparent);
-    color:var(--color-amber);}
+  .ld-stats .c-stat-value{white-space:nowrap;}
+  /* Icon chips — element tints at the 12% chip strength, assigned by
+     walking the element table in order (the chart-mapping rule: never
+     arbitrary): Fire, Wood, Earth, Water. */
   .ld-stats .icon-chip i{font-size:var(--icon-md);}
+  .icon-chip.el-fire{background:color-mix(in srgb, var(--color-orange) 12%, transparent); color:var(--color-orange);}
+  .icon-chip.el-wood{background:color-mix(in srgb, var(--color-salmon-pink) 12%, transparent); color:var(--color-salmon-pink);}
+  .icon-chip.el-earth{background:color-mix(in srgb, var(--color-green) 12%, transparent); color:var(--color-green);}
+  .icon-chip.el-water{background:color-mix(in srgb, var(--color-navy) 12%, transparent); color:var(--color-navy);}
   .ld-stats .c-stat-footer{margin-top:auto;}
   /* Entrance + hover, borrowed from the landing's card reveal: rise and
      settle in a stagger, lift gently on hover. */
@@ -51,7 +58,6 @@
      whole card is interactive (Card, Interactive variant) and resumes
      the draft; the CTA is the DS Button Link recipe (underlined, 3px
      offset, no box). */
-  .ld-eyebrow{display:block; margin-bottom:var(--spacing-8);}
   .ld-resume{gap:var(--spacing-8);}
   .ld-resume .name{font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
   .ld-resume .meta{font-size:var(--text-body2-size); color:var(--color-neutral-5);}
@@ -167,7 +173,7 @@
         <div class="c-shell-span-2 ld-stack">
 
           <div>
-            <span class="c-stat-label ld-eyebrow">Where you left off</span>
+            <div class="ld-sechead"><h2>Where you left off</h2></div>
             <div class="c-card c-card-interactive ld-resume" id="resumeCard" role="link" tabindex="0"
                  aria-label="Continue building Astro 30 anniversary — stopped at Media mix, 60% complete">
               <span class="name">Astro 30 anniversary</span>
@@ -197,12 +203,13 @@
           </div>
 
           <div>
-            <span class="c-stat-label ld-eyebrow">At a glance</span>
+            <div class="ld-sechead"><h2>At a glance</h2>
+              <span class="note">Across every plan in the workspace, August month to date.</span></div>
             <div class="ld-stats">
               <div class="c-stat">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Total campaigns</span>
-                  <span class="icon-chip"><i class="ph-fill ph-megaphone"></i></span>
+                  <span class="icon-chip el-fire"><i class="ph-fill ph-megaphone"></i></span>
                 </div>
                 <span class="c-stat-value">24</span>
                 <span class="c-stat-trend up"><i class="ph-fill ph-caret-up"></i> +18% <span class="period">this month</span></span>
@@ -211,7 +218,7 @@
               <div class="c-stat">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Total budget</span>
-                  <span class="icon-chip"><i class="ph-fill ph-wallet"></i></span>
+                  <span class="icon-chip el-wood"><i class="ph-fill ph-wallet"></i></span>
                 </div>
                 <span class="c-stat-value">RM 2.2M</span>
                 <div class="c-stat-footer">across all campaigns</div>
@@ -219,7 +226,7 @@
               <div class="c-stat">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Average eCPM</span>
-                  <span class="icon-chip"><i class="ph-fill ph-gauge"></i></span>
+                  <span class="icon-chip el-earth"><i class="ph-fill ph-gauge"></i></span>
                 </div>
                 <span class="c-stat-value">RM 20.50</span>
                 <div class="c-stat-footer">booked inventory</div>
@@ -227,7 +234,7 @@
               <div class="c-stat">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Impressions booked</span>
-                  <span class="icon-chip"><i class="ph-fill ph-eye"></i></span>
+                  <span class="icon-chip el-water"><i class="ph-fill ph-eye"></i></span>
                 </div>
                 <span class="c-stat-value">7.3M</span>
                 <span class="c-stat-trend flat"><i class="ph-fill ph-minus"></i> 75% <span class="period">delivered</span></span>
@@ -239,9 +246,9 @@
         </div>
 
         <div class="c-shell-span-2 ld-plans-col">
-          <div style="display:flex; justify-content:space-between; align-items:baseline;" class="ld-eyebrow">
-            <span class="c-stat-label">My media plans</span>
-            <span class="c-stat-label" id="latestCount"></span>
+          <div class="ld-sechead">
+            <h2>My media plans</h2>
+            <span class="note count" id="latestCount"></span>
           </div>
           <div class="c-card">
             <p>Pick up where you left off.</p>
