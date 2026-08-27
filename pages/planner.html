@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-<link rel="stylesheet" href="../dls/tokens.css" />
-<link rel="stylesheet" href="../dls/components.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css" />
+<link rel="stylesheet" href="../collabrium-dls/components.css" />
 <link rel="stylesheet" href="../shared/shell.css" />
 <style>
   /* ── Page-local. Composes DLS tokens only — no new colors or radii. ── */
@@ -238,11 +238,11 @@
       <div class="c-sidebar-header">
         <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
                 aria-expanded="false" aria-label="Switch department, Sales" aria-controls="deptDropdown">
-          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
-          <img class="c-dept-logo-static js-dept-logo-static" src="../dls/logo-lockups/collabSales.svg" alt="Sales" />
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabSales.svg" alt="Sales" />
           <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
         </button>
-        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../dls/SVG/gold.svg" alt="Collab:Sales" />
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
       </div>
       <div class="c-sidebar-section">Overview</div>
       <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
@@ -770,24 +770,24 @@
 </div>
 
 <div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../dls/SVG/coin.svg">
-    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../dls/logo-lockups/collabStudio.svg" data-element-icon="../dls/SVG/fire.svg">
-    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabStudio.svg" alt="" /></span>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../dls/logo-lockups/collabSales.svg" data-element-icon="../dls/SVG/gold.svg">
-    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabSales.svg" alt="" /></span>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../dls/logo-lockups/collabInfluencers.svg" data-element-icon="../dls/SVG/earth.svg">
-    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../dls/logo-lockups/collabContent.svg" data-element-icon="../dls/SVG/wood.svg">
-    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabContent.svg" alt="" /></span>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
 </div>

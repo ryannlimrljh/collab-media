@@ -34,7 +34,7 @@ the production codebase.
 
 ## Foundation
 
-- `dls/` is a copy of the mothership DLS v0.9.40 (`tokens.css`,
+- `collabrium-dls/` is a copy of the mothership DLS v0.9.40 (`tokens.css`,
   `components.css`, `logo.html`, `SVG/`, `logo-lockups/`), taken 2026-08-27.
   Component markup uses that file's real classes; page-local CSS is
   prefixed (`p-` planner, `cl-` campaigns) and composes tokens only.

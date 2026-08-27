@@ -22,10 +22,11 @@ stylesheets plus this repo's `shared/shell.css`/`shell.js`.
 
 ## Layout
 
-- `dls/` — a copy of the mothership DLS v0.9.40 (`tokens.css`,
-  `components.css`, `logo.html`, `SVG/`, `logo-lockups/`), taken
-  2026-08-27 from `../mothership/collabrium-dls/`. Re-sync from there if
-  the system moves; don't edit here.
+- `collabrium-dls/` — the full Collabrium DLS v0.9.40 (Ryan's copy:
+  `tokens.css`, `components.css`, `logo.html`, `SVG/`, `logo-lockups/`,
+  `DESIGN-SYSTEM.md`, `preview.html`, `fonts/`). Verified byte-identical
+  to `../mothership/collabrium-dls/` for every asset the pages link.
+  This is the single source of truth here — don't edit it in place.
 - `shared/` — the shell's page-local CSS and behaviour (collapse,
   account menu, department switcher, hover labels), ported from
   feedback-v1. One deliberate departure: no auto-minimise timer.
