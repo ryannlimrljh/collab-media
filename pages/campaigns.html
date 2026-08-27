@@ -30,6 +30,23 @@
     color:var(--color-neutral-5);}
   .ld-stats .c-stat-value{font-size:var(--text-display-size); line-height:1.1;
     font-weight:var(--weight-black);}
+  /* Icon chip — the Stat card's own top-right chip slot, tinted with the
+     Sales element (Gold at the 12% chip strength). */
+  .ld-stats .icon-chip{background:color-mix(in srgb, var(--color-amber) 12%, transparent);
+    color:var(--color-amber);}
+  .ld-stats .icon-chip i{font-size:var(--icon-md);}
+  .ld-stats .c-stat-footer{margin-top:auto;}
+  /* Entrance + hover, borrowed from the landing's card reveal: rise and
+     settle in a stagger, lift gently on hover. */
+  .ld-stats .c-stat{opacity:0; transform:translateY(16px);
+    transition:opacity 650ms cubic-bezier(.22,1,.36,1),
+      transform 650ms cubic-bezier(.22,1,.36,1),
+      box-shadow var(--duration-base) var(--ease-settle);}
+  .ld-stats .c-stat.is-in{opacity:1; transform:none;}
+  .ld-stats .c-stat.is-in:hover{transform:translateY(-2px); box-shadow:var(--shadow-2);}
+  @media (prefers-reduced-motion:reduce){
+    .ld-stats .c-stat{opacity:1; transform:none; transition:none;}
+  }
   /* Where you left off — the section label sits outside the box; the
      whole card is interactive (Card, Interactive variant) and resumes
      the draft; the CTA is the DS Button Link recipe (underlined, 3px
@@ -180,26 +197,43 @@
             </div>
           </div>
 
-          <div class="ld-stats">
-            <div class="c-stat">
-              <span class="c-stat-label">Total campaigns</span>
-              <span class="c-stat-value">24</span>
-              <div class="c-stat-footer">2 booked · 22 in draft</div>
-            </div>
-            <div class="c-stat">
-              <span class="c-stat-label">Total budget</span>
-              <span class="c-stat-value">RM 2.2M</span>
-              <div class="c-stat-footer">across all campaigns</div>
-            </div>
-            <div class="c-stat">
-              <span class="c-stat-label">Average eCPM</span>
-              <span class="c-stat-value">RM 20.50</span>
-              <div class="c-stat-footer">booked inventory</div>
-            </div>
-            <div class="c-stat">
-              <span class="c-stat-label">Impressions booked</span>
-              <span class="c-stat-value">7.3M</span>
-              <div class="c-stat-footer">2 booked campaigns</div>
+          <div>
+            <span class="c-stat-label ld-eyebrow">At a glance</span>
+            <div class="ld-stats">
+              <div class="c-stat">
+                <div class="c-stat-top">
+                  <span class="c-stat-label">Total campaigns</span>
+                  <span class="icon-chip"><i class="ph-fill ph-megaphone"></i></span>
+                </div>
+                <span class="c-stat-value">24</span>
+                <span class="c-stat-trend up"><i class="ph-fill ph-caret-up"></i> +18% <span class="period">this month</span></span>
+                <div class="c-stat-footer">2 booked · 22 in draft</div>
+              </div>
+              <div class="c-stat">
+                <div class="c-stat-top">
+                  <span class="c-stat-label">Total budget</span>
+                  <span class="icon-chip"><i class="ph-fill ph-wallet"></i></span>
+                </div>
+                <span class="c-stat-value">RM 2.2M</span>
+                <div class="c-stat-footer">across all campaigns</div>
+              </div>
+              <div class="c-stat">
+                <div class="c-stat-top">
+                  <span class="c-stat-label">Average eCPM</span>
+                  <span class="icon-chip"><i class="ph-fill ph-gauge"></i></span>
+                </div>
+                <span class="c-stat-value">RM 20.50</span>
+                <div class="c-stat-footer">booked inventory</div>
+              </div>
+              <div class="c-stat">
+                <div class="c-stat-top">
+                  <span class="c-stat-label">Impressions booked</span>
+                  <span class="icon-chip"><i class="ph-fill ph-eye"></i></span>
+                </div>
+                <span class="c-stat-value">7.3M</span>
+                <span class="c-stat-trend flat"><i class="ph-fill ph-minus"></i> 75% <span class="period">delivered</span></span>
+                <div class="c-stat-footer">2 booked campaigns</div>
+              </div>
             </div>
           </div>
 
@@ -315,6 +349,11 @@
   document.getElementById('latestRows').addEventListener('click', function (e) {
     var row = e.target.closest('[data-href]');
     if (row) window.location.href = row.dataset.href;
+  });
+
+  /* Hero tiles — the landing's staggered rise-and-settle reveal. */
+  document.querySelectorAll('.ld-stats .c-stat').forEach(function (t, i) {
+    setTimeout(function () { t.classList.add('is-in'); }, 80 * i + 60);
   });
 
   /* Where you left off — the whole card resumes the draft; each step
