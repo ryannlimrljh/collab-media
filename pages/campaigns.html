@@ -155,6 +155,124 @@
     .ld-ask{transition:none; opacity:1; transform:translate(-50%, 0);}
     .ld-ask .floating-ask-glow-outer, .ld-ask .floating-ask-glow-inner{animation:none;}
   }
+  /* ── Assistant overlay — the landing's chat modal: veil, folding
+     shell, warm thread rail, and the composer that is the ask box
+     grown (same glow layers on normal blending over canvas-warm). ── */
+  .c-chat{position:fixed; inset:0; z-index:95; display:none; perspective:1600px;
+    --chat-dur:480ms; --chat-ease:cubic-bezier(.22,1,.36,1);}
+  .c-chat.is-open{display:block;}
+  .c-chat-veil{position:absolute; inset:0; background:rgba(20,20,20,.42); opacity:0;
+    transition:opacity var(--chat-dur) var(--ease-standard);}
+  .c-chat.is-shown .c-chat-veil{opacity:1;}
+  .c-chat-shell{position:absolute; inset:0; margin:auto;
+    width:min(1100px, calc(100vw - var(--spacing-48)));
+    height:min(760px, calc(100vh - var(--spacing-48)));
+    display:grid; grid-template-columns:264px minmax(0,1fr);
+    background:var(--color-neutral-1); overflow:hidden; transform-origin:0 0;
+    border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+  .c-chat-shell.is-folding-open{animation:c-chat-fold-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .c-chat-shell.is-folding-closed{animation:c-chat-fold-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes c-chat-fold-open{
+    0%{transform:translate(var(--fold-dx, 0px), var(--fold-dy, 0px)) scale(var(--fold-sx, 1), var(--fold-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--fold-dx, 0px) * .5), calc(var(--fold-dy, 0px) * .5)) scale(.72) rotateY(42deg) rotateZ(-5deg); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(-6deg) rotateZ(1deg);}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes c-chat-fold-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--fold-dx, 0px) * .5), calc(var(--fold-dy, 0px) * .5)) scale(.72) rotateY(40deg) rotateZ(-5deg); opacity:1;}
+    100%{transform:translate(var(--fold-dx, 0px), var(--fold-dy, 0px)) scale(var(--fold-sx, 1), var(--fold-sy, 1)); opacity:.35;}
+  }
+  .c-chat-shell > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
+  .c-chat.is-shown .c-chat-shell > *{opacity:1; transition-delay:180ms;}
+  .c-chat-rail{display:flex; flex-direction:column; min-height:0;
+    background:var(--color-canvas-warm); border-right:1px solid var(--color-neutral-3);
+    padding:var(--spacing-16); gap:var(--spacing-16);}
+  .c-chat-new{display:flex; align-items:center; gap:var(--spacing-8); width:100%; height:40px;
+    padding:0 var(--spacing-12); border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
+    background:var(--color-neutral-1); color:var(--color-neutral-9); font-family:inherit;
+    font-size:var(--text-body2-size); font-weight:700; cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-new:hover{background:var(--color-neutral-2);}
+  .c-chat-threads{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex;
+    flex-direction:column; gap:2px; overscroll-behavior:contain;}
+  .c-chat-threads-h{margin:var(--spacing-12) 0 var(--spacing-4); padding:0 var(--spacing-12);
+    font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-chat-thread{display:block; width:100%; padding:var(--spacing-8) var(--spacing-12); border:0;
+    border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-family:inherit; font-size:var(--text-body2-size); text-align:left; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
+  .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
+  .c-chat-hd{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-16);
+    padding:var(--spacing-20) var(--spacing-24); border-bottom:1px solid var(--color-neutral-3);}
+  .c-chat-hd h2{margin:0; font-size:var(--text-h5-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
+  .c-chat-hd p{margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .c-chat-body{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+    padding:var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-24);}
+  .c-chat-scroll{width:100%; max-width:680px; margin:0 auto; display:flex;
+    flex-direction:column; gap:var(--spacing-24);}
+  .c-chat-msg{display:flex; gap:var(--spacing-12);}
+  .c-chat-msg.is-me{justify-content:flex-end;}
+  .c-chat-msg.is-me .c-chat-bubble{max-width:78%; padding:var(--spacing-12) var(--spacing-16);
+    background:var(--color-neutral-2); border-radius:var(--radius-md); color:var(--color-neutral-9);}
+  .c-chat-bubble{font-size:var(--text-body1-size); line-height:1.65; color:var(--color-neutral-9);}
+  .c-chat-bubble p{margin:0 0 var(--spacing-12);}
+  .c-chat-bubble p:last-child{margin-bottom:0;}
+  .c-chat-bubble b{font-weight:700;}
+  .c-chat-bubble a{color:var(--color-neutral-9); font-weight:700;
+    text-decoration:underline; text-underline-offset:3px;}
+  .c-chat-cite{display:inline-flex; align-items:center; gap:var(--spacing-4); margin-top:var(--spacing-4);
+    padding:2px var(--spacing-8); border-radius:var(--radius-pill); background:var(--color-neutral-2);
+    font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-chat-composer{flex:none; padding:var(--spacing-16) var(--spacing-24) var(--spacing-24);
+    background:var(--color-canvas-warm); border-top:1px solid var(--color-neutral-3);}
+  .c-chat-inputwrap{position:relative; max-width:680px; margin:0 auto;}
+  .c-chat-input{position:relative; z-index:10; display:flex; flex-direction:column; gap:var(--spacing-12);
+    padding:var(--spacing-16); border:0; border-radius:var(--radius-lg);
+    background:var(--color-neutral-1); box-shadow:var(--shadow-2);}
+  .c-chat-inputwrap .floating-ask-glow-outer{position:absolute; inset:-7px; z-index:0;
+    border-radius:calc(var(--radius-lg) + 7px);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(13px); opacity:.4; mix-blend-mode:normal;
+    animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .c-chat-inputwrap .floating-ask-glow-inner{position:absolute; inset:-1.5px; z-index:0;
+    border-radius:calc(var(--radius-lg) + 1.5px);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(2px); opacity:.5; mix-blend-mode:normal;
+    animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .c-chat-input input{width:100%; border:0; outline:none; background:transparent; font-family:inherit;
+    font-size:var(--text-body1-size); color:var(--color-neutral-9);}
+  .c-chat-input input::placeholder{color:var(--color-neutral-5);}
+  .c-chat-tools{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);}
+  .c-chat-tools-l, .c-chat-tools-r{display:flex; align-items:center; gap:var(--spacing-8);}
+  .c-chat-tool{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-tool:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-chat-model{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-chat-send{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1);
+    font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-send:hover{background:var(--color-neutral-8);}
+  .c-chat-foot{max-width:680px; margin:var(--spacing-8) auto 0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); text-align:center;}
+  .ld-ask.is-launched{opacity:0; pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  @media (max-width:820px){
+    .c-chat-shell{grid-template-columns:minmax(0,1fr);}
+    .c-chat-rail{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .c-chat-veil, .c-chat-shell > *{transition:none;}
+    .c-chat-shell.is-folding-open, .c-chat-shell.is-folding-closed{animation:none;}
+    .c-chat-inputwrap .floating-ask-glow-outer, .c-chat-inputwrap .floating-ask-glow-inner{animation:none;}
+  }
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-2{grid-column:span 4;}
   }
@@ -324,6 +442,60 @@
   </div>
 </div>
 
+<div class="c-chat" id="chatOverlay" aria-hidden="true">
+  <div class="c-chat-veil" id="chatVeil"></div>
+  <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-label="Assistant">
+    <div class="c-chat-rail">
+      <button class="c-chat-new" type="button" id="chatNew"><i class="ph ph-plus"></i> New conversation</button>
+      <div class="c-chat-threads">
+        <div class="c-chat-threads-h">Recent</div>
+        <button class="c-chat-thread is-active" type="button">Astro 30 — where it stands</button>
+        <button class="c-chat-thread" type="button">Q4 inventory pressure</button>
+        <button class="c-chat-thread" type="button">BMW X3 wrap-up notes</button>
+      </div>
+    </div>
+    <div class="c-chat-main">
+      <div class="c-chat-hd">
+        <div>
+          <h2>Astro 30 — where it stands</h2>
+          <p>A placeholder thread — the shape is real, the wiring comes later.</p>
+        </div>
+      </div>
+      <div class="c-chat-body"><div class="c-chat-scroll" id="chatScroll">
+        <div class="c-chat-msg is-me"><div class="c-chat-bubble">Where did I leave the Astro 30 plan?</div></div>
+        <div class="c-chat-msg"><div class="c-chat-bubble">
+          <p>You stopped at <b>Media mix</b>, 60% through. The RM 150,000 is fully
+          allocated across In-stream video, Social video and Leaderboard — but
+          nothing is pinned as a must-buy yet, and the exclusions are still empty.</p>
+          <p>Two things would finish it: pin your must-buy sites, and give the
+          exclusions a once-over. <a href="planner.html?step=3">Pick it up at Media mix</a>.</p>
+          <span class="c-chat-cite"><i class="ph-fill ph-file-text"></i> From your draft · 27 Aug</span>
+        </div></div>
+      </div></div>
+      <div class="c-chat-composer">
+        <div class="c-chat-inputwrap">
+          <div class="floating-ask-glow-outer" aria-hidden="true"></div>
+          <div class="floating-ask-glow-inner" aria-hidden="true"></div>
+          <div class="c-chat-input">
+            <input type="text" id="chatInput" aria-label="Reply" placeholder="Reply — or describe a plan and I'll draft it" />
+            <div class="c-chat-tools">
+              <div class="c-chat-tools-l">
+                <button class="c-chat-tool" type="button" aria-label="Add image"><i class="ph ph-image"></i></button>
+                <button class="c-chat-tool" type="button" aria-label="Attach file"><i class="ph ph-paperclip"></i></button>
+              </div>
+              <div class="c-chat-tools-r">
+                <span class="c-chat-model">Collab AI</span>
+                <button class="c-chat-send" type="button" id="chatSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="c-chat-foot">The assistant is a placeholder in this prototype — replies are canned.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
 
 <div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
@@ -375,19 +547,107 @@
     if (row) window.location.href = row.dataset.href;
   });
 
-  /* Ask box — arrives after the tiles settle; a typed line drafts a plan
-     (the planner's one-liner brief parse), same carry-in as before. */
+  /* Ask box + assistant overlay — the pill folds open into the chat
+     modal (the landing's fold, driven by the pill's own rect). Sending
+     a line appends it to the thread; the canned reply offers to draft
+     it in the planner via the one-liner brief carry-in. */
   (function () {
     var box = document.getElementById('askBox');
     var input = document.getElementById('askInput');
+    var overlay = document.getElementById('chatOverlay');
+    var shell = document.getElementById('chatShell');
+    var scroll = document.getElementById('chatScroll');
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setTimeout(function () { box.classList.add('is-in'); }, 600);
-    function send() {
-      var v = input.value.trim();
-      if (!v) { input.focus(); return; }
-      window.location.href = 'planner.html?brief=' + encodeURIComponent(v);
+
+    function foldVars() {
+      var pr = box.getBoundingClientRect();
+      var sr = shell.getBoundingClientRect();
+      shell.style.setProperty('--fold-dx', (pr.left - sr.left) + 'px');
+      shell.style.setProperty('--fold-dy', (pr.top - sr.top) + 'px');
+      shell.style.setProperty('--fold-sx', (pr.width / sr.width).toFixed(4));
+      shell.style.setProperty('--fold-sy', (pr.height / sr.height).toFixed(4));
     }
-    document.getElementById('askSend').addEventListener('click', send);
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+    function openChat(line) {
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      box.classList.add('is-launched');
+      foldVars();
+      if (!reduced) {
+        shell.classList.remove('is-folding-closed');
+        shell.classList.add('is-folding-open');
+      }
+      requestAnimationFrame(function () { overlay.classList.add('is-shown'); });
+      if (line) sendLine(line);
+      setTimeout(function () { document.getElementById('chatInput').focus(); }, reduced ? 0 : 500);
+    }
+    function closeChat() {
+      if (!overlay.classList.contains('is-open')) return;
+      overlay.classList.remove('is-shown');
+      if (!reduced) {
+        foldVars();
+        shell.classList.remove('is-folding-open');
+        shell.classList.add('is-folding-closed');
+      }
+      setTimeout(function () {
+        overlay.classList.remove('is-open');
+        shell.classList.remove('is-folding-closed');
+        overlay.setAttribute('aria-hidden', 'true');
+        box.classList.remove('is-launched');
+      }, reduced ? 0 : 560);
+    }
+    function bubble(me, html) {
+      var m = document.createElement('div');
+      m.className = 'c-chat-msg' + (me ? ' is-me' : '');
+      m.innerHTML = '<div class="c-chat-bubble">' + html + '</div>';
+      scroll.appendChild(m);
+      scroll.parentElement.scrollTop = scroll.parentElement.scrollHeight;
+    }
+    function esc(t) {
+      var d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+    function sendLine(v) {
+      bubble(true, '<p>' + esc(v) + '</p>');
+      setTimeout(function () {
+        bubble(false, '<p>I can draft that as a plan — audience, mix and a first budget split, ' +
+          'all yours to override. <a href="planner.html?brief=' + encodeURIComponent(v) +
+          '">Open it in the planner</a>.</p>');
+      }, 600);
+    }
+
+    document.getElementById('askSend').addEventListener('click', function () {
+      var v = input.value.trim();
+      input.value = '';
+      openChat(v || null);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var v = input.value.trim();
+      input.value = '';
+      openChat(v || null);
+    });
+    box.addEventListener('click', function (e) {
+      if (e.target.closest('#askSend')) return;
+      if (document.activeElement !== input || !input.value.trim()) input.focus();
+    });
+
+    var chatInput = document.getElementById('chatInput');
+    function chatSend() {
+      var v = chatInput.value.trim();
+      if (!v) { chatInput.focus(); return; }
+      chatInput.value = '';
+      sendLine(v);
+    }
+    document.getElementById('chatSend').addEventListener('click', chatSend);
+    chatInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') chatSend(); });
+    document.getElementById('chatVeil').addEventListener('click', closeChat);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChat(); });
+    document.getElementById('chatNew').addEventListener('click', function () {
+      scroll.innerHTML = '';
+      bubble(false, '<p>Fresh page. Ask about a plan, or describe one and I\u2019ll draft it.</p>');
+    });
   })();
 
   /* Hero tiles — the landing's staggered rise-and-settle reveal. */
