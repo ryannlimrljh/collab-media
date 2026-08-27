@@ -1657,6 +1657,15 @@
   renderChips();
   resetSplit();
   renderAll();
+
+  /* A ?step=N deep link (from "Where you left off") reopens the draft at
+     the step it stopped on. */
+  (function(){
+    var m = /[?&]step=([1-4])/.exec(window.location.search);
+    if (!m) return;
+    var n = parseInt(m[1], 10);
+    if (n > 1){ maxVisited = n; go(n); }
+  })();
 })();
 </script>
 </body>
