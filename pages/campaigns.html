@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collab:Sales · Campaigns</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../dls/tokens.css" />
+<link rel="stylesheet" href="../dls/components.css" />
+<link rel="stylesheet" href="../shared/shell.css" />
+<style>
+  /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
+  .cl-controls{display:flex; flex-wrap:wrap; align-items:center;
+    gap:var(--spacing-8); margin-bottom:var(--spacing-24);}
+  .cl-controls .c-chip-group{flex:1;}
+  .cl-name{font-weight:700; color:var(--color-neutral-9);}
+  .cl-sub{display:block; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
+  .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
+  .cl-industry{white-space:nowrap;}
+  .c-datatable td.cl-action{text-align:right;}
+  .cl-pagination{margin-top:var(--spacing-16);}
+  /* The table's own rows carry a pointer because the whole row opens the
+     plan, same as the action button. */
+  @media (max-width:900px){
+    .cl-hide-narrow{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department, Sales" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../dls/logo-lockups/collabSales.svg" alt="Sales" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../dls/SVG/gold.svg" alt="Collab:Sales" />
+      </div>
+      <div class="c-sidebar-section">Overview</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
+      <div class="c-sidebar-section">Plan</div>
+      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <div class="c-sidebar-section">System</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">ST</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Sarah Tan</span>
+            <span class="c-search-input-subtitle">Sales Planner</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+
+      <header class="c-pageheader">
+        <div class="c-pageheader-row">
+          <div class="c-pageheader-text">
+            <h1>Campaigns</h1>
+            <p class="sub">Every plan you have open, and what stage it reached.</p>
+          </div>
+          <div class="c-pageheader-actions">
+            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none">
+              <i class="ph ph-plus"></i> New campaign
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div class="cl-controls">
+        <div class="c-filter-search">
+          <i class="ph ph-magnifying-glass icon-leading"></i>
+          <input type="text" id="clSearch" placeholder="Search campaigns or brands" aria-label="Search campaigns" />
+          <button class="c-filter-search-clear" id="clSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+        </div>
+        <span class="c-filter-search-divider" aria-hidden="true"></span>
+        <div class="c-chip-group" id="clFilters" role="group" aria-label="Filter by status">
+          <button class="c-chip c-chip-filter is-active" type="button" data-f="all">All</button>
+          <button class="c-chip c-chip-filter" type="button" data-f="draft">Drafts</button>
+          <button class="c-chip c-chip-filter" type="button" data-f="booked">Booked</button>
+          <button class="c-chip c-chip-filter" type="button" data-f="completed">Completed</button>
+          <button class="c-chip c-chip-filter" type="button" data-f="ai">AI drafted</button>
+        </div>
+      </div>
+
+      <div class="c-datatable" id="clTableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th class="cl-hide-narrow">Industry</th>
+              <th class="num">Budget</th>
+              <th class="cl-hide-narrow">Duration</th>
+              <th class="cl-hide-narrow">Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="clRows"></tbody>
+        </table>
+        <div id="clEmpty" hidden></div>
+      </div>
+
+      <div class="c-pagination cl-pagination">
+        <span class="count" id="clCount"></span>
+        <div class="c-page-controls">
+          <button class="c-page-btn" type="button" disabled aria-label="Previous page"><i class="ph ph-caret-left"></i></button>
+          <button class="c-page-btn current" type="button" aria-current="page">1</button>
+          <button class="c-page-btn" type="button" disabled aria-label="Next page"><i class="ph ph-caret-right"></i></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <a class="c-account-menu-item" href="campaigns.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../dls/logo-lockups/collabStudio.svg" data-element-icon="../dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../dls/logo-lockups/collabSales.svg" data-element-icon="../dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../dls/logo-lockups/collabInfluencers.svg" data-element-icon="../dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../dls/logo-lockups/collabContent.svg" data-element-icon="../dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<script src="../shared/shell.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* A cleaned sample of the live engine's campaign list — duplicates
+     collapsed, industries humanised, budgets in RM format. */
+  var CAMPAIGNS = [
+    {name:'BMW X3 launch', brand:'X3 Car', status:'booked', ai:false,
+     industry:'Automotive', budget:50000, duration:'2 weeks', updated:'27 Aug 2026'},
+    {name:'Astro 30 anniversary', brand:'Astro', status:'draft', ai:false,
+     industry:'Entertainment', budget:150000, duration:'1 week', updated:'27 Aug 2026'},
+    {name:'All new X3', brand:'BMW X3', status:'draft', ai:true,
+     industry:'Automotive', budget:200000, duration:'3 weeks', updated:'24 Aug 2026'},
+    {name:'Summer Peach perfume 2026', brand:'Perfume', status:'draft', ai:true,
+     industry:'Beauty', budget:60000, duration:'12 weeks', updated:'6 Aug 2026'},
+    {name:'Samsung S28 launch', brand:'Samsung S28', status:'draft', ai:true,
+     industry:'Tech & devices', budget:125000, duration:'8 weeks', updated:'4 Aug 2026'},
+    {name:'Switch new product launch', brand:'Apple products', status:'draft', ai:false,
+     industry:'Tech & devices', budget:90000, duration:'9 weeks', updated:'23 Jul 2026'},
+    {name:'New route launch — Malaysia to Hangzhou', brand:'AirAsia X', status:'draft', ai:false,
+     industry:'Tourism', budget:125000, duration:'4 weeks', updated:'29 Jun 2026'},
+    {name:'Mazda 6 facelift launch', brand:'Mazda 6', status:'draft', ai:true,
+     industry:'Automotive', budget:200000, duration:'8 weeks', updated:'24 Mar 2026'},
+    {name:'Lancôme perfume launch', brand:'L\'Oréal', status:'draft', ai:false,
+     industry:'Beauty', budget:100000, duration:'10 weeks', updated:'1 Mar 2026'},
+    {name:'Toyota Vios facelift 2026', brand:'Vios', status:'booked', ai:false,
+     industry:'Automotive', budget:100000, duration:'8 weeks', updated:'17 Dec 2025'}
+  ];
+
+  var filter = 'all', query = '';
+  var rowsEl = document.getElementById('clRows');
+  var emptyEl = document.getElementById('clEmpty');
+  var countEl = document.getElementById('clCount');
+
+  function rm(n){ return 'RM ' + n.toLocaleString('en-MY'); }
+
+  function badge(c){
+    if (c.status === 'booked')
+      return '<span class="c-badge c-badge-success"><i class="ph-fill ph-seal-check" style="font-size:12px"></i> Booked</span>';
+    if (c.status === 'completed')
+      return '<span class="c-badge c-badge-neutral">Completed</span>';
+    return '<span class="c-badge c-badge-neutral">Draft</span>';
+  }
+
+  function matches(c){
+    if (filter === 'draft' && c.status !== 'draft') return false;
+    if (filter === 'booked' && c.status !== 'booked') return false;
+    if (filter === 'completed' && c.status !== 'completed') return false;
+    if (filter === 'ai' && !c.ai) return false;
+    if (query){
+      var q = query.toLowerCase();
+      if (c.name.toLowerCase().indexOf(q) < 0 && c.brand.toLowerCase().indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+
+  function counts(){
+    var t = {all:CAMPAIGNS.length, draft:0, booked:0, completed:0, ai:0};
+    CAMPAIGNS.forEach(function(c){
+      if (t[c.status] !== undefined) t[c.status]++;
+      if (c.ai) t.ai++;
+    });
+    return t;
+  }
+
+  function render(){
+    var hits = CAMPAIGNS.filter(matches);
+    rowsEl.innerHTML = hits.map(function(c){
+      var action = c.status === 'booked' ? 'View' : 'Continue';
+      return '<tr data-href="planner.html">' +
+        '<td><span class="cl-name">' + c.name + '</span>' +
+          '<span class="cl-sub">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></td>' +
+        '<td>' + badge(c) + '</td>' +
+        '<td class="cl-industry cl-hide-narrow">' + c.industry + '</td>' +
+        '<td class="num">' + rm(c.budget) + '</td>' +
+        '<td class="cl-hide-narrow">' + c.duration + '</td>' +
+        '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
+        '<td class="cl-action"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
+      '</tr>';
+    }).join('');
+
+    var none = !hits.length;
+    rowsEl.closest('table').style.display = none ? 'none' : '';
+    emptyEl.hidden = !none;
+    if (none){
+      var what = query ? '“' + query + '”' : 'this filter';
+      emptyEl.innerHTML = '<div class="c-empty"><i class="ph-fill ph-tray"></i>' +
+        '<h4>Nothing here yet</h4>' +
+        '<p>No campaigns match ' + what + '. Clear the filter, or start a new plan and it lands here.</p>' +
+        '<a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none"><i class="ph ph-plus"></i> New campaign</a></div>';
+    }
+
+    countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
+      : 'Showing 1–' + hits.length + ' of ' + hits.length;
+
+    var t = counts();
+    document.querySelectorAll('#clFilters .c-chip-filter').forEach(function(ch){
+      var f = ch.dataset.f;
+      var label = {all:'All', draft:'Drafts', booked:'Booked', completed:'Completed', ai:'AI drafted'}[f];
+      ch.textContent = label + ' (' + t[f] + ')';
+      ch.classList.toggle('is-active', f === filter);
+    });
+  }
+
+  document.getElementById('clFilters').addEventListener('click', function(e){
+    var ch = e.target.closest('.c-chip-filter');
+    if (!ch) return;
+    filter = ch.dataset.f;
+    render();
+  });
+
+  var search = document.getElementById('clSearch');
+  var clear = document.getElementById('clSearchClear');
+  search.addEventListener('input', function(){
+    query = search.value.trim();
+    clear.hidden = !query;
+    render();
+  });
+  clear.addEventListener('click', function(){
+    search.value = ''; query = ''; clear.hidden = true; render(); search.focus();
+  });
+
+  rowsEl.addEventListener('click', function(e){
+    if (e.target.closest('a')) return;
+    var tr = e.target.closest('tr[data-href]');
+    if (tr) window.location.href = tr.dataset.href;
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collab:Sales · Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../dls/tokens.css" />
+<link rel="stylesheet" href="../dls/components.css" />
+<link rel="stylesheet" href="../shared/shell.css" />
+<style>
+  /* ── Page-local. Composes DLS tokens only — no new colors or radii. ── */
+
+  .p-crumb{margin-bottom:var(--spacing-8); margin-left:calc(var(--spacing-12) * -1);
+    text-decoration:none;}
+
+  /* Stepper row — the stepper plus a quiet autosave caption. Steps are
+     buttons (completed ones navigate back), so they need the button reset
+     the DS's div-based stepper never needed. */
+  .p-stepper-row{display:flex; align-items:flex-start; gap:var(--spacing-24);
+    margin-bottom:var(--spacing-32);}
+  .p-stepper-row .c-stepper{flex:1;}
+  button.c-step{background:none; border:0; padding:0; cursor:pointer;
+    font-family:inherit;}
+  button.c-step:disabled{cursor:default;}
+  button.c-step:focus-visible{outline:2px solid var(--color-obsidian);
+    outline-offset:2px; border-radius:var(--radius-sm);}
+  .c-stepper:not(.vertical) .c-step-text{white-space:nowrap;}
+  .p-saved{flex:none; display:inline-flex; align-items:center; gap:var(--spacing-4);
+    font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    margin-top:var(--spacing-4);}
+  .p-saved i{font-size:var(--icon-sm); color:var(--color-green);}
+
+  /* Rail */
+  .p-rail{position:sticky; top:var(--spacing-24); display:flex;
+    flex-direction:column; gap:var(--spacing-12);}
+  .p-stat-sep{margin-top:var(--spacing-12); padding-top:var(--spacing-12);
+    border-top:1px solid var(--color-neutral-3);}
+  .p-stat-value-sm{font-size:var(--text-h3-size); font-weight:var(--text-h1-weight);
+    font-variant-numeric:tabular-nums;}
+  .p-stat-foot{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    margin-top:var(--spacing-4);}
+  .p-ok{color:var(--color-green);}
+  .p-over{color:var(--color-red);}
+
+  /* Checklist rows — each scrolls to its field. */
+  .p-check{display:flex; align-items:flex-start; gap:var(--spacing-8); width:100%;
+    background:none; border:0; padding:var(--spacing-4) 0; margin:0;
+    font-family:inherit; font-size:var(--text-caption-size); line-height:var(--text-caption-lh);
+    text-align:left; cursor:pointer; color:var(--color-neutral-5);}
+  .p-check i{font-size:var(--icon-sm); flex:none;}
+  .p-check.ok i{color:var(--color-green);}
+  .p-check.warn{color:var(--color-neutral-9);}
+  .p-check.warn i{color:var(--color-amber);}
+  .p-check.block{color:var(--color-neutral-9); font-weight:700;}
+  .p-check.block i{color:var(--color-red);}
+  .p-check:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-flash{animation:p-flash var(--duration-slow) var(--ease-standard);}
+  @keyframes p-flash{0%{box-shadow:var(--shadow-focus);}100%{box-shadow:var(--shadow-1);}}
+
+  /* Form layout inside cards */
+  .p-grid2{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
+  .p-grid3{display:grid; grid-template-columns:2fr 1fr 1fr; gap:var(--spacing-12);}
+  .c-card .c-field{width:100%;}
+  .p-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    margin-top:var(--spacing-8);}
+
+  /* Select — Input Field's container with a caret, per the DLS Select
+     recipe (closed state styled, native option list left alone). */
+  .p-select-wrap{position:relative;}
+  .p-select{height:40px; width:100%; border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    padding:0 36px 0 var(--spacing-12); font-size:var(--text-body2-size);
+    font-family:inherit; font-weight:500; color:var(--color-neutral-9);
+    appearance:none; -webkit-appearance:none; cursor:pointer;}
+  .p-select:focus{outline:none; border:2px solid var(--color-obsidian);
+    padding:0 35px 0 11px;}
+  .p-select-caret{position:absolute; right:var(--spacing-12); top:12px;
+    font-size:var(--icon-sm); color:var(--color-neutral-5); pointer-events:none;}
+
+  /* Checkbox-option row (languages, channels) — Checkbox's own glyph in a
+     bordered option, Choice-tile selection convention. */
+  .p-checkrow{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  .p-checkopt{display:inline-flex; align-items:center; gap:var(--spacing-8);
+    height:40px; padding:0 var(--spacing-12); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    font-size:var(--text-body2-size); font-weight:500; font-family:inherit;
+    color:var(--color-neutral-9); cursor:pointer;
+    transition:border-color var(--duration-fast) var(--ease-standard);}
+  .p-checkopt:hover{border-color:var(--color-neutral-4);}
+  .p-checkopt.is-on{border:2px solid var(--color-obsidian); padding:0 11px;
+    font-weight:700;}
+  .p-checkopt:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-checkopt .c-checkbox-box{margin-top:0;}
+
+  /* Choice tiles (targeting basis) */
+  .p-choicerow{display:flex; gap:var(--spacing-8);}
+  .p-choice{flex:1; padding:var(--spacing-12); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    cursor:pointer; text-align:left; font-family:inherit;
+    transition:border-color var(--duration-fast) var(--ease-standard);}
+  .p-choice:hover{border-color:var(--color-neutral-4);}
+  .p-choice.is-selected{border:2px solid var(--color-obsidian); padding:11px;}
+  .p-choice:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-choice-t{font-size:var(--text-body2-size); font-weight:700;}
+  .p-choice-d{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    margin-top:2px;}
+
+  /* Persona picker — chip field + popover panel. */
+  .p-picker{position:relative;}
+  .p-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  .p-chip-add{display:inline-flex; align-items:center; gap:var(--spacing-4);
+    height:24px; padding:0 var(--spacing-8); border-radius:var(--radius-pill);
+    border:1px dashed var(--color-neutral-3); background:transparent;
+    color:var(--color-neutral-5); font-family:inherit;
+    font-size:var(--text-label2-size); font-weight:var(--text-label2-weight);
+    cursor:pointer;}
+  .p-chip-add:hover{color:var(--color-neutral-9); border-color:var(--color-neutral-4);}
+  .p-picker-panel{position:absolute; z-index:20; top:calc(100% + var(--spacing-8));
+    left:0; width:min(440px,100%); background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+    box-shadow:var(--shadow-3); padding:var(--spacing-12);}
+  .p-picker-panel[hidden]{display:none;}
+  .p-picker-panel .c-filter-search{width:100%;}
+  .p-picker-panel .c-filter-search input{width:100%;}
+  .p-picker-meta{display:flex; justify-content:space-between; align-items:center;
+    padding:var(--spacing-12) var(--spacing-4) var(--spacing-8);}
+  .p-picker-list{max-height:280px; overflow-y:auto; display:flex;
+    flex-direction:column; gap:2px;}
+  .p-picker-row{display:flex; align-items:center; gap:var(--spacing-12); width:100%;
+    padding:var(--spacing-8) var(--spacing-12); border-radius:var(--radius-sm);
+    border:none; background:none; cursor:pointer; text-align:left; font-family:inherit;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .p-picker-row:hover{background:var(--color-neutral-2);}
+  .p-picker-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+  .p-picker-row[disabled]{cursor:not-allowed; opacity:.4;}
+  .p-picker-row[disabled]:hover{background:none;}
+  .p-picker-name{font-size:var(--text-body2-size); color:var(--color-neutral-9);}
+  .p-picker-row.is-on .p-picker-name{font-weight:700;}
+  .p-picker-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+
+  /* Drawer — a Card whose body discloses. */
+  .p-drawer{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden;
+    transition:box-shadow var(--duration-base) var(--ease-settle);}
+  .p-drawer:hover{box-shadow:var(--shadow-2);}
+  .p-disclose{display:flex; justify-content:space-between; align-items:center;
+    width:100%; background:none; border:none; padding:var(--spacing-16);
+    cursor:pointer; text-align:left; font-family:inherit;}
+  .p-disclose:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+  .p-disclose h4{margin:0; font-size:var(--text-h5-size); font-weight:var(--text-h5-weight);}
+  .p-disclose .sub{margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); font-weight:400;}
+  .p-disclose > i{font-size:var(--icon-base); color:var(--color-neutral-5);
+    transition:transform var(--duration-base) var(--ease-settle);}
+  .p-disclose[aria-expanded="true"] > i{transform:rotate(180deg);}
+  .p-drawer-body{padding:0 var(--spacing-16) var(--spacing-16);
+    border-top:1px solid var(--color-neutral-3);}
+  .p-drawer-body[hidden]{display:none;}
+  .p-drawer-section{padding-top:var(--spacing-16);}
+  .p-drawer-section + .p-drawer-section{margin-top:var(--spacing-20);
+    padding-top:var(--spacing-16); border-top:1px solid var(--color-neutral-3);}
+
+  /* Format rows */
+  .p-rowlist{display:flex; flex-direction:column; gap:var(--spacing-8);}
+  .p-row{display:flex; align-items:center; gap:var(--spacing-12);
+    padding:var(--spacing-12); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    font-size:var(--text-body2-size); cursor:pointer; font-family:inherit;
+    text-align:left; width:100%;
+    transition:border-color var(--duration-fast) var(--ease-standard);}
+  .p-row:hover{border-color:var(--color-neutral-4);}
+  .p-row.is-on{border:2px solid var(--color-obsidian); padding:11px;}
+  .p-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-row .c-checkbox-box{margin-top:0;}
+  .p-row .name{font-weight:700; flex:1;}
+  .p-row.is-off .name{font-weight:500; color:var(--color-neutral-5);}
+  .p-row .meta{font-variant-numeric:tabular-nums; color:var(--color-neutral-5);
+    white-space:nowrap;}
+
+  /* Budget split rows */
+  .p-split{display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .p-split-row .head{display:flex; justify-content:space-between;
+    align-items:baseline; margin-bottom:var(--spacing-4);}
+  .p-split-row .head .n{font-size:var(--text-body2-size); font-weight:700;}
+  .p-split-row .head .v{font-size:var(--text-body2-size);
+    font-variant-numeric:tabular-nums; color:var(--color-neutral-5);}
+
+  /* Sites table pin button */
+  .p-pin{display:inline-flex; align-items:center; gap:var(--spacing-4);}
+
+  /* Summary chips */
+  .p-sitechips{display:flex; flex-wrap:wrap; gap:var(--spacing-8);
+    margin-top:var(--spacing-8);}
+
+  /* Footer row */
+  .p-footer{display:flex; justify-content:space-between; align-items:center;
+    margin-top:var(--spacing-32);}
+  .p-footer .right{display:flex; gap:var(--spacing-8); align-items:center;}
+
+  /* Modal overlay */
+  .p-overlay{position:fixed; inset:0; z-index:100; background:var(--shadow-overlay, rgba(8,8,8,.56));
+    display:flex; align-items:center; justify-content:center; padding:var(--spacing-24);}
+  .p-overlay[hidden]{display:none;}
+  .p-kv{display:flex; justify-content:space-between; gap:var(--spacing-16);
+    padding:var(--spacing-8) 0; border-bottom:1px solid var(--color-neutral-2);
+    font-size:var(--text-body2-size);}
+  .p-kv:last-child{border-bottom:none;}
+  .p-kv .k{color:var(--color-neutral-5);}
+  .p-kv .v{font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
+
+  .p-banner-gap{margin-bottom:var(--spacing-24);}
+  [hidden]{display:none !important;}
+
+  @media (max-width:1080px){
+    .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
+    .p-rail{position:static;}
+  }
+  @media print{
+    .c-sidebar-shell, .p-stepper-row, .p-crumb, .c-pageheader-actions,
+    .p-footer, .p-rail > .c-card:last-child, .c-toast-host{display:none !important;}
+    .c-shell{height:auto; background:var(--color-neutral-1);}
+    .c-shell-content{overflow:visible; padding:0;}
+    .c-shell-grid{display:block;}
+    .c-card, .p-drawer{box-shadow:none; break-inside:avoid; margin-bottom:var(--spacing-16);}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department, Sales" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../dls/logo-lockups/collabSales.svg" alt="Sales" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../dls/SVG/gold.svg" alt="Collab:Sales" />
+      </div>
+      <div class="c-sidebar-section">Overview</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-megaphone"></i><span class="label">Campaigns</span><span class="c-sidebar-hover-text">Campaigns</span></a>
+      <div class="c-sidebar-section">Plan</div>
+      <a class="c-sidebar-item active" href="planner.html" aria-current="page"><i class="ph-fill ph-compass-tool"></i><span class="label">Planner</span><span class="c-sidebar-hover-text">Planner</span></a>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <div class="c-sidebar-section">System</div>
+      <button class="c-sidebar-item soon" type="button" disabled><i class="ph-fill ph-gear"></i><span class="label">Admin</span><span class="c-sidebar-hover-text">Admin</span><span class="c-badge c-badge-neutral">Soon</span></button>
+      <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">ST</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Sarah Tan</span>
+            <span class="c-search-input-subtitle">Sales Planner</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+
+      <a class="c-btn c-btn-ghost c-btn-sm p-crumb" href="campaigns.html">
+        <i class="ph ph-arrow-left"></i> All campaigns
+      </a>
+
+      <header class="c-pageheader">
+        <div class="c-pageheader-row">
+          <div class="c-pageheader-text">
+            <h1 id="pageTitle">Astro 30th Anniversary</h1>
+            <p class="sub" id="pageSub">Astro · RM 150,000 · 26 Aug – 8 Sep 2026</p>
+          </div>
+          <div class="c-pageheader-actions">
+            <button class="c-btn c-btn-secondary c-btn-md" type="button" id="saveDraft">
+              <i class="ph ph-floppy-disk"></i> Save draft
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="p-stepper-row">
+        <div class="c-stepper" id="stepper">
+          <button class="c-step" data-go="1" type="button">
+            <span class="c-step-indicator active" data-ind="1">1</span>
+            <span class="c-step-text"><span class="c-step-label active" data-lab="1">Brief</span></span>
+          </button>
+          <div class="c-step-connector"></div>
+          <button class="c-step" data-go="2" type="button">
+            <span class="c-step-indicator upcoming" data-ind="2">2</span>
+            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="2">Audience</span></span>
+          </button>
+          <div class="c-step-connector"></div>
+          <button class="c-step" data-go="3" type="button">
+            <span class="c-step-indicator upcoming" data-ind="3">3</span>
+            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="3">Media mix</span></span>
+          </button>
+          <div class="c-step-connector"></div>
+          <button class="c-step" data-go="4" type="button">
+            <span class="c-step-indicator upcoming" data-ind="4">4</span>
+            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="4">Summary</span></span>
+          </button>
+        </div>
+        <span class="p-saved" id="savedNote"><i class="ph-fill ph-check-circle"></i> Saved · just now</span>
+      </div>
+
+      <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
+      <section id="view1">
+        <div class="c-shell-grid">
+          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+
+            <div class="c-card" id="askCard">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>The ask</h4>
+                <span class="c-badge c-badge-neutral">Required</span>
+              </div>
+              <p>Fill these and the planner can already draft you a directional plan. Everything after this sharpens it.</p>
+
+              <div class="c-field" style="margin-top:var(--spacing-8);">
+                <label for="b-name">Campaign name</label>
+                <input id="b-name" value="Astro 30th Anniversary" placeholder="e.g. New SUV launch Q3 2026" />
+                <span class="c-helper">A name your sales team and client will recognise later.</span>
+              </div>
+
+              <div class="p-grid2" style="margin-top:var(--spacing-12);">
+                <div class="c-field"><label for="b-brand">Advertiser brand</label>
+                  <input id="b-brand" value="Astro" placeholder="e.g. Astro, Maybank" /></div>
+                <div class="c-field"><label for="b-prod">Product</label>
+                  <input id="b-prod" value="Astro 30 celebration" placeholder="What are we advertising?" /></div>
+                <div class="c-field"><label for="b-start">Flight start</label>
+                  <input id="b-start" type="date" value="2026-08-26" /></div>
+                <div class="c-field"><label for="b-end">Flight end</label>
+                  <input id="b-end" type="date" value="2026-09-08" /></div>
+                <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
+                  <input id="b-budget" type="number" step="1000" value="150000" placeholder="0" /></div>
+                <div class="c-field"><label for="b-obj">Primary objective</label>
+                  <div class="p-select-wrap"><select class="p-select" id="b-obj">
+                    <option value="awareness" selected>Awareness</option>
+                    <option value="consideration">Consideration</option>
+                    <option value="conversion">Conversion</option>
+                    <option value="footfall">Footfall</option>
+                    <option value="leadgen">Lead generation</option>
+                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+              </div>
+
+              <div class="p-grid3" style="margin-top:var(--spacing-12);">
+                <div class="c-field"><label for="b-kpi">Primary KPI</label>
+                  <div class="p-select-wrap"><select class="p-select" id="b-kpi">
+                    <option selected>Event attendees</option><option>Net reach</option>
+                    <option>Registrations</option><option>Video completions</option>
+                    <option>Store visits</option>
+                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+                <div class="c-field"><label for="b-target">Target</label>
+                  <input id="b-target" type="number" value="5000" placeholder="0" /></div>
+                <div class="c-field"><label for="b-unit">Unit</label>
+                  <div class="p-select-wrap"><select class="p-select" id="b-unit">
+                    <option selected>people</option><option>sign-ups</option><option>views</option>
+                  </select><i class="ph ph-caret-down p-select-caret"></i></div></div>
+              </div>
+              <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
+
+              <div class="c-field" style="margin-top:var(--spacing-16);">
+                <label>Campaign languages</label>
+                <div class="p-checkrow" id="langRow" style="margin-top:var(--spacing-4);"></div>
+                <span class="c-helper" style="margin-top:var(--spacing-4);">Creative must exist in every language you pick. We'll flag formats with no matching asset in the mix.</span>
+              </div>
+            </div>
+
+            <div class="p-drawer">
+              <button class="p-disclose" data-drawer="briefContext" aria-expanded="false" aria-controls="briefContext" type="button">
+                <div>
+                  <h4>Context for the AI</h4>
+                  <p class="sub">Benefits, challenges, key message, measure of success. All optional — it sharpens the draft plan.</p>
+                </div>
+                <i class="ph ph-caret-down"></i>
+              </button>
+              <div class="p-drawer-body" id="briefContext" hidden>
+                <div class="p-drawer-section p-grid2">
+                  <div class="c-field"><label for="c-benefits">Product benefits</label>
+                    <textarea id="c-benefits" placeholder="What makes this worth someone's attention?"></textarea></div>
+                  <div class="c-field"><label for="c-challenges">Challenges</label>
+                    <textarea id="c-challenges" placeholder="What's working against this campaign — competition, budget, timing?"></textarea></div>
+                  <div class="c-field"><label for="c-task">Task</label>
+                    <textarea id="c-task" placeholder="What is this plan actually being asked to do?"></textarea></div>
+                  <div class="c-field"><label for="c-message">Key message</label>
+                    <textarea id="c-message" placeholder="The one thing the audience should take away."></textarea></div>
+                  <div class="c-field"><label for="c-success">Measure of success</label>
+                    <textarea id="c-success" placeholder="How will we know this campaign worked?"></textarea></div>
+                  <div class="c-field"><label for="c-ae">Account executive</label>
+                    <input id="c-ae" placeholder="Who's the AE on this brief?" /></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="c-shell-span-1">
+            <div class="p-rail">
+              <div class="c-card">
+                <span class="c-stat-label">Derived from the ask</span>
+                <div style="margin-top:var(--spacing-8);">
+                  <span class="c-stat-label">Flight</span>
+                  <div class="p-stat-value-sm" id="railFlight">14 days</div>
+                  <div class="p-stat-foot" id="railDaily">RM 10,714 per day</div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Budget</span>
+                  <div class="p-stat-value-sm" id="railBudget1">RM 150,000</div>
+                  <div class="p-stat-foot" id="railKpi">RM 30 per target attendee</div>
+                </div>
+              </div>
+              <div class="c-card" data-checkcard="1">
+                <h4>Before you continue</h4>
+                <div id="checks1"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-footer">
+          <span></span>
+          <button class="c-btn c-btn-primary c-btn-md" data-next="2" type="button">
+            Next: audience <i class="ph ph-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
+      <section id="view2" hidden>
+        <div class="c-shell-grid">
+          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+
+            <div class="c-card" id="whoCard">
+              <h4>Who are you trying to reach?</h4>
+              <p>Pick a targeting basis, then narrow it. One decision type on this screen — the evidence lives in the drawer below.</p>
+
+              <div class="p-choicerow" role="radiogroup" aria-label="Targeting basis" style="margin-top:var(--spacing-8);">
+                <button class="p-choice is-selected" data-mode="personas" role="radio" aria-checked="true" type="button">
+                  <div class="p-choice-t">Personas</div>
+                  <div class="p-choice-d" id="choiceSummary">2 selected · 11.2M unique</div>
+                </button>
+                <button class="p-choice" data-mode="mass" role="radio" aria-checked="false" type="button">
+                  <div class="p-choice-t">Mass targeting</div>
+                  <div class="p-choice-d">Entire Malaysia · 16.15M</div>
+                </button>
+              </div>
+
+              <div id="massBody" hidden style="margin-top:var(--spacing-12);">
+                <div class="c-banner c-banner-neutral">
+                  <i class="ph-fill ph-users-three icon"></i>
+                  <div class="body"><p class="message">Targeting the entire Malaysia population — 16.15M. Nothing to pick here; use the refiners below to narrow it.</p></div>
+                </div>
+              </div>
+
+              <div class="p-picker" id="personaBody" style="margin-top:var(--spacing-12);">
+                <div class="p-chips" id="chipRow"></div>
+                <div class="p-picker-panel" id="pickerPanel" hidden>
+                  <div class="c-filter-search">
+                    <i class="ph ph-magnifying-glass icon-leading"></i>
+                    <input id="pickerSearch" type="text" placeholder="Search personas by name or category" aria-label="Search personas" autocomplete="off" />
+                    <button class="c-filter-search-clear" id="pickerClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+                  </div>
+                  <div class="p-picker-meta">
+                    <span class="p-picker-sub" id="pickerCount">0 of 5 selected</span>
+                    <button class="c-btn c-btn-ghost c-btn-sm" id="pickerSuggest" type="button">
+                      <i class="ph ph-sparkle"></i> Suggest from brief
+                    </button>
+                  </div>
+                  <div class="p-picker-list" id="pickerList"></div>
+                  <div class="c-filter-footer">
+                    <span class="p-picker-sub" id="pickerReach" style="align-self:center;">No personas selected</span>
+                    <button class="c-btn c-btn-secondary c-btn-sm" id="pickerDone" type="button">Done</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="c-card" id="refineCard">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Refine</h4>
+                <span class="c-badge c-badge-neutral">Optional</span>
+              </div>
+              <p>Narrows reach proportionally. The rail updates as you go.</p>
+              <div class="p-grid2" id="filterGrid" style="margin-top:var(--spacing-8);"></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--spacing-12);">
+                <span class="p-note" style="margin:0;" id="filterEffect">No refiners applied</span>
+                <button class="c-btn c-btn-ghost c-btn-sm" id="filterReset" type="button">
+                  <i class="ph ph-arrow-counter-clockwise"></i> Clear refiners
+                </button>
+              </div>
+            </div>
+
+            <div class="c-card" id="intentCard">
+              <h4>Intent, behaviour, exclusions</h4>
+              <p>Free text is fine here — it refines the mix rather than driving the maths.</p>
+              <div class="p-grid2" style="margin-top:var(--spacing-8);">
+                <div class="c-field"><label for="f-intent">Specific intent or behaviours</label>
+                  <textarea id="f-intent" placeholder="Test drive intenders, K-drama binge watchers…"></textarea></div>
+                <div class="c-field"><label for="f-ex">Anyone to exclude</label>
+                  <textarea id="f-ex" placeholder="Existing customers, under 18, other regions"></textarea></div>
+              </div>
+            </div>
+
+            <div class="p-drawer">
+              <button class="p-disclose" data-drawer="whyPersonas" aria-expanded="false" aria-controls="whyPersonas" type="button">
+                <div>
+                  <h4>Why these personas?</h4>
+                  <p class="sub">Top matching Astro properties and real 90-day content performance for this audience.</p>
+                </div>
+                <i class="ph ph-caret-down"></i>
+              </button>
+              <div class="p-drawer-body" id="whyPersonas" hidden>
+                <div class="p-drawer-section">
+                  <h4 style="margin:0; font-size:var(--text-h5-size);">Top matching Astro properties</h4>
+                  <p class="p-note" style="margin-top:var(--spacing-4);">Ranked on 90-day impressions for your selected personas and an awareness objective.</p>
+                  <table class="c-table" style="margin-top:var(--spacing-8);">
+                    <thead><tr><th>Property</th><th>Platform</th><th>Tier</th><th class="num">Impressions (90d)</th><th class="num">Engagement</th></tr></thead>
+                    <tbody>
+                      <tr><td>Astro Arena</td><td>Facebook</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">425,900,599</td><td class="num">0.75%</td></tr>
+                      <tr><td>Astro Gempak</td><td>Facebook</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">406,885,181</td><td class="num">0.52%</td></tr>
+                      <tr><td>Media Hiburan</td><td>Facebook</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">319,457,190</td><td class="num">0.67%</td></tr>
+                      <tr><td>Astro Gempak</td><td>TikTok</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">272,738,257</td><td class="num">4.02%</td></tr>
+                      <tr><td>sooka</td><td>TikTok</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">224,846,947</td><td class="num">2.38%</td></tr>
+                      <tr><td>MeleTop</td><td>TikTok</td><td><span class="c-badge c-badge-neutral">Tier 1</span></td><td class="num">78,725,965</td><td class="num">5.22%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="p-drawer-section">
+                  <h4 style="margin:0; font-size:var(--text-h5-size);">Real content performance, last 90 days</h4>
+                  <p class="p-note" style="margin-top:var(--spacing-4);">Organic engagement by content type across Astro social, for this audience. It's why the draft mix leads with video.</p>
+                  <table class="c-table" style="margin-top:var(--spacing-8);">
+                    <thead><tr><th>Content type</th><th class="num">Posts</th><th class="num">Impressions</th><th class="num">Engagement</th><th>Suggested format</th></tr></thead>
+                    <tbody>
+                      <tr><td>Video</td><td class="num">64,678</td><td class="num">2,865,080,704</td><td class="num">3.25%</td><td><span class="c-badge c-badge-neutral">Social video ad</span></td></tr>
+                      <tr><td>Image</td><td class="num">49,075</td><td class="num">2,400,508,688</td><td class="num">1.40%</td><td><span class="c-badge c-badge-neutral">Image social ad</span></td></tr>
+                      <tr><td>Text</td><td class="num">4,232</td><td class="num">207,120,355</td><td class="num">0.52%</td><td><span class="p-picker-sub">No matching format</span></td></tr>
+                      <tr><td>Link</td><td class="num">3,029</td><td class="num">14,758,814</td><td class="num">0.23%</td><td><span class="p-picker-sub">No matching format</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="c-shell-span-1">
+            <div class="p-rail">
+              <div class="c-card">
+                <span class="c-stat-label">Live · updates as you pick</span>
+                <div style="margin-top:var(--spacing-8);">
+                  <span class="c-stat-label">Unique reach</span>
+                  <div class="c-stat-value" id="railReach">11.2M</div>
+                  <div class="p-stat-foot" id="railOverlap">14.2M raw · 21% overlap</div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Inventory pool</span>
+                  <div class="p-stat-value-sm">30.9M <span class="c-badge c-badge-success" style="vertical-align:4px;">High</span></div>
+                </div>
+              </div>
+              <div class="c-card" data-checkcard="2">
+                <h4>Before you continue</h4>
+                <div id="checks2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-footer">
+          <button class="c-btn c-btn-secondary c-btn-md" data-back="1" type="button"><i class="ph ph-arrow-left"></i> Back</button>
+          <button class="c-btn c-btn-primary c-btn-md" data-next="3" type="button">Next: media mix <i class="ph ph-arrow-right"></i></button>
+        </div>
+      </section>
+
+      <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
+      <section id="view3" hidden>
+        <div class="c-banner c-banner-info p-banner-gap">
+          <i class="ph-fill ph-sparkle icon"></i>
+          <div class="body"><p class="message">Drafted from your brief and audience. Override anything — we'll keep your changes.</p></div>
+          <button class="c-btn c-btn-secondary c-btn-sm" id="redraft" type="button" style="flex:none;">
+            <i class="ph ph-sparkle"></i> Re-draft from brief
+          </button>
+        </div>
+
+        <div class="c-shell-grid">
+          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+
+            <div class="c-card" id="channelCard">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Channels</h4>
+                <span class="p-picker-sub" id="channelSummary">All channels</span>
+              </div>
+              <p>Leave everything off to consider every channel. Turning one on filters the formats and sites below.</p>
+              <div class="p-checkrow" id="channelRow" style="margin-top:var(--spacing-8);"></div>
+            </div>
+
+            <div class="c-card" id="formatCard">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Formats</h4>
+                <span class="p-picker-sub">Each format carries its rate — nothing downstream is guesswork</span>
+              </div>
+              <div class="p-rowlist" id="formatList" style="margin-top:var(--spacing-8);"></div>
+            </div>
+
+            <div class="p-drawer" id="sitesDrawer">
+              <button class="p-disclose" data-drawer="sitesPanel" aria-expanded="false" aria-controls="sitesPanel" type="button">
+                <div>
+                  <h4>Sites</h4>
+                  <p class="sub" id="sitesSummary">Loading…</p>
+                </div>
+                <i class="ph ph-caret-down"></i>
+              </button>
+              <div class="p-drawer-body" id="sitesPanel" hidden>
+                <div class="p-drawer-section">
+                  <p class="p-note" style="margin:0 0 var(--spacing-8);">Pinned sites are must-buys. Everything else stays in the pool for the optimiser to move budget between.</p>
+                  <table class="c-table">
+                    <thead><tr><th>Site</th><th>Channel</th><th class="num">Est. CPM</th><th class="num">Inventory</th><th style="text-align:right;">State</th></tr></thead>
+                    <tbody id="siteRows"></tbody>
+                  </table>
+                  <p class="p-note" id="sitesFoot"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="c-card" id="splitCard">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Budget split</h4>
+                <span class="p-picker-sub" id="splitBudgetLabel">RM 150,000</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12);">
+                <p style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.</p>
+                <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
+                  <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
+                </button>
+              </div>
+              <div class="p-split" id="budgetBars" style="margin-top:var(--spacing-8);"></div>
+            </div>
+
+          </div>
+
+          <div class="c-shell-span-1">
+            <div class="p-rail">
+              <div class="c-card">
+                <span class="c-stat-label">Live · updates as you drag</span>
+                <div style="margin-top:var(--spacing-8);">
+                  <span class="c-stat-label">Unallocated</span>
+                  <div class="c-stat-value" id="railUnalloc">RM 0</div>
+                  <div class="c-progress-track size-default" style="margin-top:var(--spacing-8);">
+                    <div class="c-progress-fill tone-success" id="railAllocFill" style="width:100%;"></div>
+                  </div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Forecast</span>
+                  <div class="p-stat-value-sm" id="fcImps">8.5M imps</div>
+                  <div class="p-stat-foot" id="fcFoot">6.2M reach · 3.1 freq · RM 25 blended</div>
+                </div>
+              </div>
+              <div class="c-card" data-checkcard="3">
+                <h4>Against the brief</h4>
+                <div id="checks3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-footer">
+          <button class="c-btn c-btn-secondary c-btn-md" data-back="2" type="button"><i class="ph ph-arrow-left"></i> Back</button>
+          <button class="c-btn c-btn-primary c-btn-md" data-next="4" type="button">Next: summary <i class="ph ph-arrow-right"></i></button>
+        </div>
+      </section>
+
+      <!-- ══ STEP 4 · SUMMARY ═════════════════════════════════════════ -->
+      <section id="view4" hidden>
+        <div class="c-banner c-banner-success p-banner-gap" id="bookedBanner" hidden>
+          <i class="ph-fill ph-seal-check icon"></i>
+          <div class="body"><p class="message" id="bookedText"></p></div>
+        </div>
+
+        <div class="c-shell-grid">
+          <div class="c-shell-span-3" style="display:flex; flex-direction:column; gap:var(--spacing-16);">
+
+            <div class="c-card">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>The plan</h4>
+                <span class="p-picker-sub" id="sumFlightLabel"></span>
+              </div>
+              <p>Everything below came from steps 1 to 3. Anything you overrode is marked.</p>
+              <table class="c-table" style="margin-top:var(--spacing-8);">
+                <thead><tr><th>Decision</th><th>Value</th><th>Source</th></tr></thead>
+                <tbody id="summaryRows"></tbody>
+              </table>
+            </div>
+
+            <div class="c-card">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Budget by format</h4>
+                <span class="p-picker-sub" id="sumBudgetLabel"></span>
+              </div>
+              <p>Impressions are modelled at each format's own CPM, not the blended rate.</p>
+              <table class="c-table" style="margin-top:var(--spacing-8);">
+                <thead><tr><th>Format</th><th class="num">CPM</th><th class="num">Budget</th><th class="num">Share</th><th class="num">Impressions</th></tr></thead>
+                <tbody id="summaryBudget"></tbody>
+              </table>
+            </div>
+
+            <div class="c-card">
+              <h4>Pinned sites</h4>
+              <p>Must-buys. The optimiser can still move budget across everything left in the pool.</p>
+              <div class="p-sitechips" id="summarySites"></div>
+            </div>
+
+          </div>
+
+          <div class="c-shell-span-1">
+            <div class="p-rail">
+              <div class="c-card">
+                <span class="c-stat-label">Final forecast</span>
+                <div style="margin-top:var(--spacing-8);">
+                  <span class="c-stat-label">Net reach</span>
+                  <div class="c-stat-value" id="sumReach">—</div>
+                  <div class="p-stat-foot" id="sumReachFoot">—</div>
+                </div>
+                <div class="p-stat-sep">
+                  <span class="c-stat-label">Impressions</span>
+                  <div class="p-stat-value-sm" id="sumImps">—</div>
+                  <div class="p-stat-foot" id="sumImpsFoot">—</div>
+                </div>
+              </div>
+              <div class="c-card" data-checkcard="4">
+                <h4>Readiness</h4>
+                <div id="checks4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-footer">
+          <button class="c-btn c-btn-secondary c-btn-md" data-back="3" type="button"><i class="ph ph-arrow-left"></i> Back</button>
+          <div class="right">
+            <button class="c-btn c-btn-secondary c-btn-md" id="expPdf" type="button"><i class="ph ph-file-pdf"></i> Plan as PDF</button>
+            <button class="c-btn c-btn-secondary c-btn-md" id="expXls" type="button"><i class="ph ph-file-xls"></i> Plan as Excel</button>
+            <button class="c-btn c-btn-primary c-btn-md" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Book this plan</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <a class="c-account-menu-item" href="campaigns.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../dls/logo-lockups/collabStudio.svg" data-element-icon="../dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../dls/logo-lockups/collabSales.svg" data-element-icon="../dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../dls/logo-lockups/collabInfluencers.svg" data-element-icon="../dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../dls/logo-lockups/collabContent.svg" data-element-icon="../dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<!-- Booking modal -->
+<div class="p-overlay" id="bookOverlay" hidden>
+  <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle" style="max-width:480px;">
+    <div class="c-modal-head">
+      <h4 id="bookTitle">Book this plan</h4>
+      <button class="c-icon-btn" id="bookClose" aria-label="Close" type="button"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="c-modal-body">
+      <p style="margin:0 0 var(--spacing-12); font-size:var(--text-body2-size); color:var(--color-neutral-5);">
+        This raises an order against the plan below and hands it to the sales team. The plan locks for editing until they release it.</p>
+      <div id="bookBody"></div>
+    </div>
+    <div class="c-modal-foot">
+      <button class="c-btn c-btn-secondary c-btn-md" id="bookCancel" type="button">Cancel</button>
+      <button class="c-btn c-btn-primary c-btn-md" id="bookGo" type="button"><i class="ph ph-check-square"></i> Raise order</button>
+    </div>
+  </div>
+</div>
+
+<div class="c-toast-host" id="toastHost"></div>
+
+<script src="../shared/shell.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ═══ Data — carried over from the live engine and the KULT playbook ═══ */
+
+  var LANGS = ['Bahasa Malaysia', 'English', 'Chinese', 'Tamil'];
+  var langOn = ['Bahasa Malaysia', 'English'];
+
+  var MAX = 5, MASS = 16150000;
+  var PERSONAS = [
+    {id:'aa', name:'Action & adventure',       cat:'Entertainment', users:169600},
+    {id:'an', name:'Animation',                cat:'Entertainment', users:22600},
+    {id:'cl', name:'Comedy lover',             cat:'Entertainment', users:204600},
+    {id:'kd', name:'K-drama watchers',         cat:'Entertainment', users:512000},
+    {id:'al', name:'Active lifestyle seekers', cat:'Lifestyle',     users:2850000},
+    {id:'ae', name:'Adventure enthusiasts',    cat:'Lifestyle',     users:258100},
+    {id:'fd', name:'Food & dining',            cat:'Lifestyle',     users:1940000},
+    {id:'bd', name:'Badminton',                cat:'Sports',        users:798400},
+    {id:'fb', name:'Football followers',       cat:'Sports',        users:1120000},
+    {id:'au', name:'Automotive enthusiasts',   cat:'Automotive',    users:481800},
+    {id:'ai', name:'Automotive intent',        cat:'Automotive',    users:34700},
+    {id:'bp', name:'Business & professional',  cat:'Business',      users:1370000},
+    {id:'fi', name:'Finance & investing',      cat:'Business',      users:642000},
+    {id:'hl', name:'Home & living',            cat:'Home & living', users:889000}
+  ];
+
+  var FILTERS = [
+    {id:'race', label:'Race', opts:[['','Any race',1],
+      ['may','Malay',.58],['chi','Chinese',.23],['ind','Indian',.07],['oth','Other',.12]]},
+    {id:'gen', label:'Generation', opts:[['','Any generation',1],
+      ['z','Gen Z (18–27)',.28],['y','Millennial (28–43)',.33],
+      ['x','Gen X (44–59)',.24],['b','Boomer (60+)',.15]]},
+    {id:'inc', label:'Income band', opts:[['','Any income',1],
+      ['b40','B40 — under RM 5,250',.40],['m40','M40 — RM 5,250–11,819',.40],
+      ['t20','T20 — RM 11,820+',.20]]},
+    {id:'geo', label:'Geography', opts:[['','Nationwide',1],
+      ['kl','Klang Valley',.27],['nth','Northern region',.18],
+      ['sth','Southern region',.16],['ec','East Coast',.14],['em','East Malaysia',.20]]}
+  ];
+
+  var CHANNELS = ['TV', 'Radio', 'OTT', 'Web', 'Social'];
+
+  var FORMATS = [
+    {id:'isv', name:'In-stream video',  cpm:32, w:40, ch:'OTT',    video:true,  on:true},
+    {id:'sva', name:'Social video ad',  cpm:18, w:35, ch:'Social', video:true,  on:true},
+    {id:'ldb', name:'Leaderboard',      cpm:12, w:10, ch:'Web',    video:false, on:true},
+    {id:'msh', name:'Masthead takeover',cpm:48, w:15, ch:'Web',    video:false, on:false},
+    {id:'isa', name:'Image social ad',  cpm:14, w:10, ch:'Social', video:false, on:false},
+    {id:'tvc', name:'TV spot (30s)',    cpm:45, w:30, ch:'TV',     video:true,  on:false},
+    {id:'rad', name:'Radio adlib',      cpm:12, w:12, ch:'Radio',  video:false, on:false}
+  ];
+
+  var SITES = [
+    {id:'sooka',   name:'sooka',          ch:'OTT',    cpm:30, inv:'13.2M', pin:true,  ai:true},
+    {id:'astrogo', name:'Astro GO',       ch:'OTT',    cpm:32, inv:'9.8M',  pin:false, ai:false},
+    {id:'awani',   name:'Awani',          ch:'Web',    cpm:10, inv:'18.4M', pin:true,  ai:true},
+    {id:'stadium', name:'Stadium Astro',  ch:'Web',    cpm:12, inv:'12.7M', pin:false, ai:false},
+    {id:'gempakw', name:'Gempak',         ch:'Web',    cpm:11, inv:'11.9M', pin:false, ai:true},
+    {id:'era',     name:'ERA',            ch:'Web',    cpm:10, inv:'10.6M', pin:false, ai:false},
+    {id:'sinar',   name:'Sinar',          ch:'Web',    cpm:10, inv:'9.2M',  pin:false, ai:false},
+    {id:'rojak',   name:'RojakDaily',     ch:'Web',    cpm:9,  inv:'7.4M',  pin:false, ai:false},
+    {id:'goxuan',  name:'GoXuan',         ch:'Web',    cpm:9,  inv:'4.1M',  pin:false, ai:false},
+    {id:'gempaks', name:'Astro Gempak',   ch:'Social', cpm:18, inv:'406.9M',pin:true,  ai:true},
+    {id:'hiburan', name:'Media Hiburan',  ch:'Social', cpm:16, inv:'319.5M',pin:false, ai:true},
+    {id:'arena',   name:'Astro Arena',    ch:'Social', cpm:17, inv:'425.9M',pin:false, ai:false},
+    {id:'meletop', name:'MeleTop',        ch:'Social', cpm:20, inv:'78.7M', pin:false, ai:false}
+  ];
+
+  /* ═══ State ═══ */
+  var step = 1, maxVisited = 1;
+  var mode = 'personas', selected = ['cl', 'al'], filterState = {};
+  var chanOn = [];
+  var split = {}, splitTouched = false;
+  var booked = false;
+
+  /* ═══ Helpers ═══ */
+  function $(id){ return document.getElementById(id); }
+  function fmt(n){
+    if (n >= 1e6) return (n/1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/,'') + 'M';
+    if (n >= 1e3) return Math.round(n/1e3) + 'K';
+    return String(Math.round(n));
+  }
+  function rm(n){ return 'RM ' + Math.round(n).toLocaleString('en-MY'); }
+  function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
+  function budget(){ return parseInt($('b-budget').value, 10) || 0; }
+  function onFormats(){ return FORMATS.filter(function(f){ return f.on; }); }
+  function chanAllows(c){ return !chanOn.length || chanOn.indexOf(c) > -1; }
+
+  function toast(tone, title, msg){
+    var host = $('toastHost');
+    var el = document.createElement('div');
+    el.className = 'c-toast is-entering' + (title ? '' : ' is-message-only');
+    var icon = {success:'check-circle', warning:'warning', danger:'x-circle', neutral:'info'}[tone] || 'info';
+    el.innerHTML = '<i class="ph-fill ph-' + icon + ' tone tone-' + tone + '"></i>' +
+      '<div class="body">' + (title ? '<div class="title">' + title + '</div>' : '') +
+      '<div class="message">' + msg + '</div></div>';
+    el.setAttribute('role', 'status');
+    host.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.remove('is-entering'); });
+    setTimeout(function(){
+      el.classList.add('is-exiting');
+      setTimeout(function(){ el.remove(); }, 260);
+    }, 3400);
+  }
+
+  var savedTimer = null;
+  function markSaved(){
+    $('savedNote').innerHTML = '<i class="ph-fill ph-check-circle"></i> Saved · just now';
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(function(){
+      $('savedNote').innerHTML = '<i class="ph-fill ph-check-circle"></i> Saved';
+    }, 8000);
+  }
+
+  /* ═══ Audience maths — same-category personas overlap ~60%, cross ~25% ═══ */
+  function reach(){
+    var picked = selected.map(byId).sort(function(a,b){ return b.users - a.users; });
+    var raw = 0, uniq = 0, counted = [];
+    picked.forEach(function(p){
+      raw += p.users;
+      var worst = 0;
+      counted.forEach(function(q){ worst = Math.max(worst, q.cat === p.cat ? 0.60 : 0.25); });
+      uniq += p.users * (1 - worst);
+      counted.push(p);
+    });
+    return {raw:raw, uniq:Math.round(uniq), pct: raw ? Math.round((1 - uniq/raw) * 100) : 0};
+  }
+  function filterMult(){
+    var m = 1;
+    FILTERS.forEach(function(f){
+      var v = filterState[f.id]; if (!v) return;
+      f.opts.forEach(function(o){ if (o[0] === v) m *= o[2]; });
+    });
+    return m;
+  }
+  function audienceReach(){
+    return Math.round((mode === 'mass' ? MASS : reach().uniq) * filterMult());
+  }
+
+  /* ═══ Forecast ═══ */
+  function forecast(){
+    var imps = 0;
+    onFormats().forEach(function(f){ imps += (split[f.id] || 0) / f.cpm * 1000; });
+    var alloc = 0;
+    onFormats().forEach(function(f){ alloc += split[f.id] || 0; });
+    var blended = imps ? alloc / imps * 1000 : 0;
+    var aud = audienceReach();
+    var freq = 3.1;
+    var netReach = Math.min(aud, Math.round(imps / freq));
+    return {imps:imps, blended:blended, reach:netReach, freq:freq, alloc:alloc};
+  }
+
+  /* ═══ Validation ═══
+     Each check: {id, label, level(ok|warn|block), target} — warn never
+     blocks; block stops Next and the row scrolls to its field. */
+  function checksFor(n){
+    var out = [];
+    function add(ok, warnOnly, label, target){
+      out.push({ok:ok, level: ok ? 'ok' : (warnOnly ? 'warn' : 'block'), label:label, target:target});
+    }
+    if (n === 1){
+      add(!!$('b-name').value.trim(), false, $('b-name').value.trim() ? 'Campaign has a name' : 'Give the campaign a name', 'b-name');
+      var s = $('b-start').value, e = $('b-end').value;
+      add(!!(s && e && e > s), false, (s && e && e > s) ? 'Flight dates are set' : 'Set a flight — end after start', 'b-start');
+      add(budget() > 0, false, budget() > 0 ? 'Budget is set' : 'Set a working media budget', 'b-budget');
+      add((parseInt($('b-target').value,10) || 0) > 0, false,
+        (parseInt($('b-target').value,10) || 0) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
+      add(langOn.length > 0, false, langOn.length ? 'At least one language picked' : 'Pick at least one language', 'langRow');
+    }
+    if (n === 2){
+      var okAud = mode === 'mass' || selected.length > 0;
+      add(okAud, false, mode === 'mass' ? 'Mass targeting — no persona needed'
+        : okAud ? 'At least one persona selected' : 'Select at least one persona', 'whoCard');
+      var r = audienceReach();
+      add(r >= 1000000, true, r >= 1000000 ? 'Reach clears the campaign minimum'
+        : 'Reach is under 1M — consider widening', 'refineCard');
+      add(!!$('f-ex').value.trim(), true, $('f-ex').value.trim() ? 'Exclusions noted'
+        : 'No exclusions set — confirm this is intended', 'f-ex');
+    }
+    if (n === 3){
+      var fc = forecast();
+      add(onFormats().length > 0, false, onFormats().length ? 'At least one format selected'
+        : 'Select at least one format', 'formatCard');
+      var diff = budget() - fc.alloc;
+      add(Math.abs(diff) < 1, false, Math.abs(diff) < 1 ? 'Budget fully allocated, ' + rm(budget())
+        : (diff > 0 ? rm(diff) + ' still unallocated' : rm(-diff) + ' over budget'), 'splitCard');
+      var videoLed = onFormats().some(function(f){ return f.video; });
+      var awareness = $('b-obj').value === 'awareness';
+      add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective — video-led mix'
+        : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
+      var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
+      add(pinned, true, pinned ? 'Must-buy sites pinned' : 'No sites pinned — the optimiser buys freely', 'sitesDrawer');
+    }
+    if (n === 4){
+      checksFor(1).concat(checksFor(2), checksFor(3)).forEach(function(c){
+        if (!c.ok) out.push(c);
+      });
+      if (!out.length){
+        add(true, false, 'Brief complete', 'view1');
+        add(true, false, 'Audience locked · ' + fmt(audienceReach()) + ' reach', 'view1');
+        add(true, false, 'Mix allocated to 100%', 'view1');
+      }
+      add(!booked, true, booked ? 'Order raised — plan is locked' : 'Ready to book', null);
+    }
+    return out;
+  }
+
+  function renderChecks(n){
+    var host = $('checks' + n);
+    if (!host) return;
+    var list = checksFor(n);
+    host.innerHTML = list.map(function(c, i){
+      var icon = c.level === 'ok' ? 'check-circle' : c.level === 'warn' ? 'warning-circle' : 'x-circle';
+      return '<button class="p-check ' + c.level + '" data-target="' + (c.target || '') + '" type="button">' +
+        '<i class="ph-fill ph-' + icon + '"></i><span>' + c.label + '</span></button>';
+    }).join('');
+  }
+
+  document.addEventListener('click', function(e){
+    var chk = e.target.closest('.p-check');
+    if (!chk || !chk.dataset.target) return;
+    var el = document.getElementById(chk.dataset.target);
+    if (!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    var card = el.closest('.c-card, .p-drawer') || el;
+    card.classList.remove('p-flash');
+    requestAnimationFrame(function(){ card.classList.add('p-flash'); });
+    if (el.focus && /INPUT|SELECT|TEXTAREA/.test(el.tagName)) setTimeout(function(){ el.focus(); }, 350);
+  });
+
+  /* ═══ Navigation ═══ */
+  function go(n){
+    if (booked && n !== 4 && step === 4){
+      toast('warning', null, 'This plan is booked and locked. Ask the sales team to release it before editing.');
+      return;
+    }
+    step = n;
+    maxVisited = Math.max(maxVisited, n);
+    [1,2,3,4].forEach(function(i){
+      $('view' + i).hidden = i !== n;
+      var ind = document.querySelector('[data-ind="' + i + '"]');
+      var lab = document.querySelector('[data-lab="' + i + '"]');
+      var cls = i < n ? 'completed' : i === n ? 'active' : 'upcoming';
+      ind.className = 'c-step-indicator ' + cls;
+      ind.innerHTML = i < n ? '<i class="ph ph-check"></i>' : String(i);
+      lab.className = 'c-step-label ' + cls;
+    });
+    if (n === 4) renderSummary();
+    renderAll();
+    window.scrollTo({top:0, behavior:'smooth'});
+    var content = document.querySelector('.c-shell-content');
+    if (content) content.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function tryNext(n){
+    var current = n - 1;
+    var blockers = checksFor(current).filter(function(c){ return c.level === 'block'; });
+    if (blockers.length){
+      renderChecks(current);
+      var card = document.querySelector('[data-checkcard="' + current + '"]');
+      if (card){
+        card.scrollIntoView({behavior:'smooth', block:'center'});
+        card.classList.remove('p-flash');
+        requestAnimationFrame(function(){ card.classList.add('p-flash'); });
+      }
+      toast('warning', blockers.length === 1 ? 'One thing needs attention' : blockers.length + ' things need attention',
+        blockers[0].label + (blockers.length > 1 ? ' — and more in the checklist.' : '.'));
+      return;
+    }
+    markSaved();
+    go(n);
+  }
+
+  document.querySelectorAll('[data-next]').forEach(function(b){
+    b.addEventListener('click', function(){ tryNext(parseInt(b.dataset.next, 10)); });
+  });
+  document.querySelectorAll('[data-back]').forEach(function(b){
+    b.addEventListener('click', function(){ go(parseInt(b.dataset.back, 10)); });
+  });
+  document.querySelectorAll('.c-step[data-go]').forEach(function(s){
+    s.addEventListener('click', function(){
+      var n = parseInt(s.dataset.go, 10);
+      if (n === step) return;
+      if (n < step || n <= maxVisited) go(n);
+      else if (n === step + 1) tryNext(n);
+    });
+  });
+
+  /* ═══ Step 1 — brief ═══ */
+  function renderLangs(){
+    var row = $('langRow'); row.innerHTML = '';
+    LANGS.forEach(function(l){
+      var on = langOn.indexOf(l) > -1;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p-checkopt' + (on ? ' is-on' : '');
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
+        (on ? '<i class="ph ph-check"></i>' : '') + '</span>' + l;
+      b.addEventListener('click', function(){
+        var i = langOn.indexOf(l);
+        if (i > -1) langOn.splice(i, 1); else langOn.push(l);
+        renderLangs(); renderAll();
+      });
+      row.appendChild(b);
+    });
+  }
+
+  function renderBrief(){
+    var name = $('b-name').value.trim() || 'Untitled campaign';
+    $('pageTitle').textContent = name;
+    var s = $('b-start').value, e = $('b-end').value;
+    var days = (s && e) ? Math.max(0, Math.round((new Date(e) - new Date(s)) / 864e5)) : 0;
+    var flight = '';
+    if (s && e){
+      var f = new Date(s), t = new Date(e);
+      var mo = function(d){ return d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}); };
+      flight = mo(f) + ' – ' + mo(t) + ' ' + t.getFullYear();
+    }
+    $('pageSub').textContent = ($('b-brand').value.trim() || '—') + ' · ' + rm(budget()) + (flight ? ' · ' + flight : '');
+    $('railFlight').textContent = days ? days + ' days' : '—';
+    $('railDaily').textContent = days && budget() ? rm(budget() / days) + ' per day' : 'Set dates and budget';
+    $('railBudget1').textContent = rm(budget());
+    var target = parseInt($('b-target').value, 10) || 0;
+    $('railKpi').textContent = target && budget() ? rm(budget() / target) + ' per target ' +
+      ($('b-unit').value === 'people' ? 'attendee' : $('b-unit').value.replace(/s$/,'')) : 'Set a KPI target';
+    $('sumFlightLabel').textContent = flight;
+  }
+
+  ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
+    $(id).addEventListener('input', function(){ renderAll(); });
+  });
+  ['b-obj','b-kpi','b-unit'].forEach(function(id){
+    $(id).addEventListener('change', function(){ renderAll(); });
+  });
+  $('b-budget').addEventListener('change', function(){ resetSplit(); renderAll(); });
+
+  /* ═══ Step 2 — audience ═══ */
+  var panel = $('pickerPanel'), search = $('pickerSearch'), clearBtn = $('pickerClear');
+
+  function renderChips(){
+    var row = $('chipRow'); row.innerHTML = '';
+    selected.forEach(function(id){
+      var p = byId(id);
+      var chip = document.createElement('span');
+      chip.className = 'c-chip c-chip-input';
+      chip.innerHTML = p.name +
+        '<button class="c-chip-remove" type="button" aria-label="Remove ' + p.name + '"><i class="ph ph-x"></i></button>';
+      chip.querySelector('.c-chip-remove').addEventListener('click', function(e){
+        e.stopPropagation(); togglePersona(id);
+      });
+      row.appendChild(chip);
+    });
+    var add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'p-chip-add';
+    add.innerHTML = '<i class="ph ph-plus"></i> ' + (selected.length ? 'Add persona' : 'Choose personas');
+    add.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+    add.addEventListener('click', function(e){ e.stopPropagation(); openPicker(); });
+    row.appendChild(add);
+  }
+
+  function renderList(){
+    var q = search.value.trim().toLowerCase();
+    var hits = PERSONAS.filter(function(p){
+      return !q || p.name.toLowerCase().indexOf(q) > -1 || p.cat.toLowerCase().indexOf(q) > -1;
+    });
+    var list = $('pickerList');
+    list.innerHTML = '';
+    if (!hits.length){
+      list.innerHTML = '<p class="p-note" style="text-align:center; padding:var(--spacing-16);">Nothing matched "' +
+        search.value + '". Try a category like Sports or Lifestyle.</p>';
+      return;
+    }
+    var lastCat = null;
+    hits.forEach(function(p){
+      if (p.cat !== lastCat){
+        var g = document.createElement('div');
+        g.className = 'c-dropdown-multi-group';
+        g.textContent = p.cat;
+        list.appendChild(g);
+        lastCat = p.cat;
+      }
+      var on = selected.indexOf(p.id) > -1;
+      var full = !on && selected.length >= MAX;
+      var row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'p-picker-row' + (on ? ' is-on' : '');
+      if (full){ row.disabled = true; row.title = 'Five personas maximum'; }
+      row.setAttribute('role', 'checkbox');
+      row.setAttribute('aria-checked', on ? 'true' : 'false');
+      row.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
+          (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span style="flex:1; min-width:0;"><span class="p-picker-name" style="display:block;">' + p.name + '</span>' +
+        '<span class="p-picker-sub">' + p.cat + '</span></span>' +
+        '<span class="p-picker-sub" style="font-variant-numeric:tabular-nums;">' + fmt(p.users) + '</span>';
+      row.addEventListener('click', function(e){ e.stopPropagation(); togglePersona(p.id); });
+      list.appendChild(row);
+    });
+  }
+
+  function togglePersona(id){
+    var i = selected.indexOf(id);
+    if (i > -1) selected.splice(i, 1);
+    else if (selected.length < MAX) selected.push(id);
+    renderChips(); renderList(); renderAll();
+  }
+  function openPicker(){ panel.hidden = false; renderList(); renderChips(); search.focus(); }
+  function closePicker(){ if (!panel.hidden){ panel.hidden = true; renderChips(); } }
+
+  search.addEventListener('input', function(){
+    clearBtn.hidden = !search.value;
+    renderList();
+  });
+  clearBtn.addEventListener('click', function(){
+    search.value = ''; clearBtn.hidden = true; renderList(); search.focus();
+  });
+  $('pickerDone').addEventListener('click', function(e){ e.stopPropagation(); closePicker(); });
+  $('pickerSuggest').addEventListener('click', function(e){
+    e.stopPropagation();
+    selected = ['cl', 'al', 'kd'];   /* stand-in for the engine's own pick */
+    search.value = ''; clearBtn.hidden = true;
+    renderChips(); renderList(); renderAll();
+    toast('neutral', null, 'Suggested three personas from the brief. Swap any of them freely.');
+  });
+  panel.addEventListener('click', function(e){ e.stopPropagation(); });
+  document.addEventListener('click', function(){ closePicker(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePicker(); });
+
+  document.querySelectorAll('[data-mode]').forEach(function(tile){
+    tile.addEventListener('click', function(){
+      mode = tile.dataset.mode;
+      document.querySelectorAll('[data-mode]').forEach(function(t){
+        var on = t.dataset.mode === mode;
+        t.classList.toggle('is-selected', on);
+        t.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      $('personaBody').hidden = mode !== 'personas';
+      $('massBody').hidden = mode !== 'mass';
+      if (mode !== 'personas') closePicker();
+      renderAll();
+    });
+  });
+
+  function renderFilters(){
+    var g = $('filterGrid');
+    if (!g.children.length){
+      FILTERS.forEach(function(f){
+        var d = document.createElement('div');
+        d.className = 'c-field';
+        d.innerHTML = '<label for="fs-' + f.id + '">' + f.label + '</label>' +
+          '<div class="p-select-wrap"><select class="p-select" id="fs-' + f.id + '">' +
+          f.opts.map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') +
+          '</select><i class="ph ph-caret-down p-select-caret"></i></div>';
+        g.appendChild(d);
+        d.querySelector('select').addEventListener('change', function(e){
+          filterState[f.id] = e.target.value;
+          renderAll();
+        });
+      });
+    }
+    var m = filterMult();
+    var on = FILTERS.filter(function(f){ return filterState[f.id]; }).length;
+    $('filterEffect').textContent = on
+      ? on + ' refiner' + (on > 1 ? 's' : '') + ' applied · reach cut to ' + Math.round(m * 100) + '% of base'
+      : 'No refiners applied';
+  }
+  $('filterReset').addEventListener('click', function(){
+    filterState = {};
+    FILTERS.forEach(function(f){ var el = $('fs-' + f.id); if (el) el.value = ''; });
+    renderAll();
+  });
+  $('f-ex').addEventListener('input', function(){ renderChecks(2); });
+
+  function renderAudienceRail(){
+    var r = reach(), mult = filterMult();
+    var base = mode === 'mass' ? MASS : r.uniq;
+    var net = Math.round(base * mult);
+    var filtered = mult < 0.999;
+    $('railReach').textContent = (mode === 'mass' || selected.length) ? fmt(net) : '—';
+    $('railOverlap').textContent =
+      (mode !== 'mass' && !selected.length) ? 'Pick a persona to see reach'
+      : filtered ? fmt(base) + ' before refiners · ' + Math.round(mult * 100) + '% kept'
+      : mode === 'mass' ? 'Entire Malaysia · no persona filter'
+      : fmt(r.raw) + ' raw · ' + r.pct + '% overlap';
+    $('choiceSummary').textContent = selected.length
+      ? selected.length + ' selected · ' + fmt(r.uniq) + ' unique'
+      : 'None selected yet';
+    $('pickerCount').textContent = selected.length + ' of ' + MAX + ' selected';
+    $('pickerReach').textContent = selected.length ? fmt(r.uniq) + ' unique reach' : 'No personas selected';
+  }
+
+  /* ═══ Step 3 — media mix ═══ */
+  function renderChannels(){
+    var row = $('channelRow'); row.innerHTML = '';
+    CHANNELS.forEach(function(c){
+      var on = chanOn.indexOf(c) > -1;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p-checkopt' + (on ? ' is-on' : '');
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.innerHTML = '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' +
+        (on ? '<i class="ph ph-check"></i>' : '') + '</span>' + c;
+      b.addEventListener('click', function(){
+        var i = chanOn.indexOf(c);
+        if (i > -1) chanOn.splice(i, 1); else chanOn.push(c);
+        FORMATS.forEach(function(f){ if (!chanAllows(f.ch)) f.on = false; });
+        if (!onFormats().length){
+          var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+          if (first) first.on = true;
+        }
+        resetSplit();
+        renderAll();
+      });
+      row.appendChild(b);
+    });
+    $('channelSummary').textContent = chanOn.length ? chanOn.join(', ') : 'All channels';
+  }
+
+  function renderFormats(){
+    var list = $('formatList'); list.innerHTML = '';
+    FORMATS.filter(function(f){ return chanAllows(f.ch); }).forEach(function(f){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p-row' + (f.on ? ' is-on' : ' is-off');
+      b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', f.on ? 'true' : 'false');
+      b.innerHTML = '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' +
+          (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="name">' + f.name + '</span>' +
+        '<span class="c-tag"><span class="dot" style="background:var(--color-neutral-4);"></span>' + f.ch + '</span>' +
+        '<span class="meta">' + rm(f.cpm) + ' CPM</span>';
+      b.addEventListener('click', function(){
+        f.on = !f.on;
+        resetSplit();
+        renderAll();
+      });
+      list.appendChild(b);
+    });
+  }
+
+  function renderSites(){
+    var rows = $('siteRows'); rows.innerHTML = '';
+    var visible = SITES.filter(function(s){ return chanAllows(s.ch); });
+    visible.forEach(function(s){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td style="font-weight:700;">' + s.name +
+          (s.ai ? ' <span class="c-badge c-badge-neutral" title="In the AI draft">AI draft</span>' : '') + '</td>' +
+        '<td>' + s.ch + '</td>' +
+        '<td class="num">' + rm(s.cpm) + '</td>' +
+        '<td class="num">' + s.inv + '</td>' +
+        '<td style="text-align:right;"><button class="c-btn ' + (s.pin ? 'c-btn-secondary' : 'c-btn-ghost') +
+          ' c-btn-sm p-pin" type="button" data-site="' + s.id + '">' +
+          '<i class="ph' + (s.pin ? '-fill' : '') + ' ph-push-pin"></i> ' + (s.pin ? 'Pinned' : 'Pin') + '</button></td>';
+      rows.appendChild(tr);
+    });
+    rows.querySelectorAll('[data-site]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var s = SITES.filter(function(x){ return x.id === b.dataset.site; })[0];
+        s.pin = !s.pin;
+        renderAll();
+      });
+    });
+    var pinned = visible.filter(function(s){ return s.pin; });
+    $('sitesSummary').textContent = pinned.length
+      ? pinned.length + ' pinned as must-buy · ' + (visible.length - pinned.length) + ' in the optimiser pool'
+      : visible.length + ' sites in the optimiser pool · none pinned';
+    $('sitesFoot').textContent = 'Showing ' + visible.length + ' of ' + SITES.length +
+      ' sites for the selected channels. Est. CPMs come from the central rate card.';
+  }
+
+  function resetSplit(){
+    split = {};
+    splitTouched = false;
+    var fs = onFormats();
+    var totalW = 0;
+    fs.forEach(function(f){ totalW += f.w; });
+    var b = budget();
+    var used = 0;
+    fs.forEach(function(f, i){
+      var amt = i === fs.length - 1 ? b - used : Math.round(b * f.w / totalW / 100) * 100;
+      split[f.id] = Math.max(0, amt);
+      used += split[f.id];
+    });
+    var reset = $('splitReset');
+    if (reset) reset.hidden = true;
+    var origin = $('splitOrigin');
+    if (origin) origin.textContent = 'Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.';
+  }
+
+  function renderSplit(){
+    var host = $('budgetBars'); host.innerHTML = '';
+    var b = budget();
+    $('splitBudgetLabel').textContent = rm(b) + ' · ' + ($('b-obj').value === 'awareness' ? 'awareness' : $('b-obj').value);
+    onFormats().forEach(function(f){
+      var amt = split[f.id] || 0;
+      var row = document.createElement('div');
+      row.className = 'p-split-row';
+      row.innerHTML = '<div class="head"><span class="n">' + f.name + '</span>' +
+        '<span class="v">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%</span></div>' +
+        '<div class="c-slider-group"><div class="c-slider-rail">' +
+        '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
+        '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="500" value="' + amt +
+        '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '" /></div></div>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll('input[type="range"]').forEach(function(sl){
+      sl.addEventListener('input', function(){
+        var id = sl.dataset.fmt;
+        var val = parseInt(sl.value, 10) || 0;
+        var b2 = budget();
+        var others = onFormats().filter(function(f){ return f.id !== id; });
+        var rest = b2 - val;
+        var otherSum = 0;
+        others.forEach(function(f){ otherSum += split[f.id] || 0; });
+        others.forEach(function(f, i){
+          if (otherSum > 0) split[f.id] = Math.max(0, Math.round((split[f.id] || 0) / otherSum * rest));
+          else split[f.id] = Math.round(rest / others.length);
+        });
+        split[id] = val;
+        splitTouched = true;
+        $('splitReset').hidden = false;
+        $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
+        renderSplit(); renderMixRail(); renderChecks(3);
+      });
+      sl.addEventListener('change', function(){ markSaved(); });
+    });
+  }
+
+  $('splitReset').addEventListener('click', function(){
+    resetSplit(); renderAll();
+    toast('neutral', null, 'Back to the recommended split.');
+  });
+
+  $('redraft').addEventListener('click', function(){
+    FORMATS.forEach(function(f){ f.on = ['isv','sva','ldb'].indexOf(f.id) > -1 && chanAllows(f.ch); });
+    if (!onFormats().length){
+      var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+      if (first) first.on = true;
+    }
+    SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+    resetSplit();
+    renderAll();
+    toast('success', 'Draft refreshed', 'Formats, sites and split re-drafted from the brief. Your channels were kept.');
+  });
+
+  function renderMixRail(){
+    var fc = forecast();
+    var diff = budget() - fc.alloc;
+    var el = $('railUnalloc');
+    el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
+    el.className = 'c-stat-value ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
+    var fill = $('railAllocFill');
+    var pct = budget() ? Math.min(100, fc.alloc / budget() * 100) : 0;
+    fill.style.width = pct + '%';
+    fill.className = 'c-progress-fill ' + (Math.abs(diff) < 1 ? 'tone-success' : diff < 0 ? 'tone-error' : '');
+    $('fcImps').textContent = fmt(fc.imps) + ' imps';
+    $('fcFoot').textContent = fmt(fc.reach) + ' reach · ' + fc.freq + ' freq · ' +
+      (fc.blended ? rm(fc.blended) + ' blended' : 'no formats on');
+  }
+
+  /* ═══ Step 4 — summary ═══ */
+  function renderSummary(){
+    var fc = forecast();
+    var r = reach();
+    var langTxt = langOn.join(', ') || '—';
+    var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
+      : selected.map(function(id){ return byId(id).name; }).join(', ') || '—';
+    var refOn = FILTERS.filter(function(f){ return filterState[f.id]; }).length;
+    var chTxt = chanOn.length ? chanOn.join(', ') : 'All channels';
+    var fmts = onFormats();
+    var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
+
+    var rows = [
+      ['Objective', $('b-obj').options[$('b-obj').selectedIndex].text + ' — ' +
+        ($('b-target').value || '?') + ' ' + $('b-unit').value + ' (' + $('b-kpi').value + ')', 'Brief'],
+      ['Languages', langTxt, 'Brief'],
+      ['Audience', audTxt, selected.join(',') === 'cl,al,kd' ? 'AI draft' : 'You'],
+      ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '—'],
+      ['Channels', chTxt, chanOn.length ? 'You' : 'AI draft'],
+      ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', splitTouched ? 'You' : 'AI draft'],
+      ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
+    ];
+    $('summaryRows').innerHTML = rows.map(function(x){
+      return '<tr><td style="font-weight:700; white-space:nowrap;">' + x[0] + '</td><td>' + x[1] +
+        '</td><td><span class="c-badge c-badge-neutral">' + x[2] + '</span></td></tr>';
+    }).join('');
+
+    $('sumBudgetLabel').textContent = rm(budget());
+    $('summaryBudget').innerHTML = fmts.map(function(f){
+      var amt = split[f.id] || 0;
+      return '<tr><td style="font-weight:700;">' + f.name + '</td>' +
+        '<td class="num">' + rm(f.cpm) + '</td>' +
+        '<td class="num">' + rm(amt) + '</td>' +
+        '<td class="num">' + (budget() ? Math.round(amt / budget() * 100) : 0) + '%</td>' +
+        '<td class="num">' + fmt(amt / f.cpm * 1000) + '</td></tr>';
+    }).join('');
+
+    $('summarySites').innerHTML = pins.length ? pins.map(function(s){
+      return '<span class="c-chip c-chip-input"><i class="ph-fill ph-push-pin icon" style="font-size:12px;"></i> ' +
+        s.name + ' · ' + s.ch + '</span>';
+    }).join('') : '<span class="p-note">Nothing pinned — the optimiser buys freely across the pool.</span>';
+
+    $('sumReach').textContent = fmt(fc.reach);
+    $('sumReachFoot').textContent = 'of ' + fmt(audienceReach()) + ' addressable · ' + fc.freq + ' avg frequency';
+    $('sumImps').textContent = fmt(fc.imps);
+    $('sumImpsFoot').textContent = rm(fc.blended) + ' blended CPM · ' + rm(budget()) + ' total';
+  }
+
+  /* ═══ Booking ═══ */
+  function openBook(){
+    var fc = forecast();
+    $('bookBody').innerHTML =
+      '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + ($('b-name').value.trim() || 'Untitled') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + ($('b-brand').value.trim() || '—') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
+      '<div class="p-kv"><span class="k">Flight</span><span class="v">' + $('sumFlightLabel').textContent + '</span></div>' +
+      '<div class="p-kv"><span class="k">Forecast reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
+      '<div class="p-kv"><span class="k">Goes to</span><span class="v">Sales team — order desk</span></div>';
+    $('bookOverlay').hidden = false;
+    $('bookGo').focus();
+  }
+  function closeBook(){ $('bookOverlay').hidden = true; }
+  $('bookBtn').addEventListener('click', function(){
+    if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
+    var blockers = checksFor(4).filter(function(c){ return c.level === 'block'; });
+    if (blockers.length){
+      renderChecks(4);
+      toast('warning', 'Not ready to book', blockers[0].label + '.');
+      return;
+    }
+    openBook();
+  });
+  $('bookClose').addEventListener('click', closeBook);
+  $('bookCancel').addEventListener('click', closeBook);
+  $('bookOverlay').addEventListener('click', function(e){ if (e.target === $('bookOverlay')) closeBook(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBook(); });
+  $('bookGo').addEventListener('click', function(){
+    booked = true;
+    closeBook();
+    $('bookedBanner').hidden = false;
+    $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds — the plan is locked for editing until then.';
+    $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
+    $('bookBtn').disabled = true;
+    renderChecks(4);
+    markSaved();
+    toast('success', 'Order raised', 'The sales team has been notified with a link to this plan.');
+  });
+
+  /* ═══ Exports & draft ═══ */
+  $('expPdf').addEventListener('click', function(){ window.print(); });
+  $('expXls').addEventListener('click', function(){
+    toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.');
+  });
+  $('saveDraft').addEventListener('click', function(){
+    markSaved();
+    toast('success', null, 'Draft saved. Pick it up any time from Campaigns.');
+  });
+
+  /* ═══ Drawers ═══ */
+  document.querySelectorAll('.p-disclose').forEach(function(d){
+    d.addEventListener('click', function(){
+      var body = document.getElementById(d.dataset.drawer);
+      var open = body.hidden;
+      body.hidden = !open;
+      d.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+
+  /* ═══ Master render ═══ */
+  function renderAll(){
+    renderBrief();
+    renderAudienceRail();
+    renderFilters();
+    renderChannels();
+    renderFormats();
+    renderSites();
+    renderSplit();
+    renderMixRail();
+    if (step === 4) renderSummary();
+    [1,2,3,4].forEach(renderChecks);
+  }
+
+  renderLangs();
+  renderChips();
+  resetSplit();
+  renderAll();
+})();
+</script>
+</body>
+</html>
