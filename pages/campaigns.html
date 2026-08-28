@@ -96,14 +96,37 @@
   .ld-stats .c-tooltip-wrap{display:flex;}
   .ld-stats .c-tooltip-wrap > .c-stat{flex:1;}
   .ld-stats .c-tooltip-wrap:hover{z-index:3;}
+  /* Arrival is a gentle fade and a short rise on the settle curve
+     rather than the DS's bare 140ms opacity flick; it leaves on
+     duration-fast, so the exit stays quicker than the entrance. The
+     rise rides transform, which the cursor-follow never touches (that
+     drives left/top), so following stays lag-free.
+     Centring moves off transform onto auto margins: the DS centres
+     with left:50% + translateX(-50%), and .is-portaled drops that
+     translate — with transform transitioned, the switch would play the
+     -50% out as a 130px sideways slide on first hover. */
   .ld-stats .c-tooltip-wrap .c-tooltip-bubble{white-space:normal;
-    width:max-content; max-width:260px; text-align:center; line-height:1.45;}
+    width:max-content; max-width:260px; text-align:center; line-height:1.45;
+    left:0; right:0; margin-inline:auto;
+    transform:translateY(5px);
+    transition:opacity var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);}
+  /* Portaled, the JS owns left/top, so the centring pair steps aside. */
+  .ld-stats .c-tooltip-wrap .c-tooltip-bubble.is-portaled{right:auto;
+    margin-inline:0;}
   .ld-stats .c-tooltip-wrap:hover .c-tooltip-bubble,
-  .ld-stats .c-tooltip-wrap:focus-within .c-tooltip-bubble{opacity:1;}
+  .ld-stats .c-tooltip-wrap:focus-within .c-tooltip-bubble{opacity:1;
+    transform:translateY(0);
+    transition:opacity var(--duration-base) var(--ease-settle),
+      transform var(--duration-base) var(--ease-settle);}
   @media (prefers-reduced-motion:reduce){
     .ld-stats .c-stat{opacity:1; transform:none; transition:none;}
     .c-skeleton-bar{animation:none;}
-    .c-tooltip-bubble{transition:none;}
+    /* Matched to the rules above — a media query adds no specificity,
+       so a bare .c-tooltip-bubble here would lose to them. */
+    .ld-stats .c-tooltip-wrap .c-tooltip-bubble,
+    .ld-stats .c-tooltip-wrap:hover .c-tooltip-bubble,
+    .ld-stats .c-tooltip-wrap:focus-within .c-tooltip-bubble{transition:none;}
   }
   /* Where you left off — the section label sits outside the box; the
      whole card is interactive (Card, Interactive variant) and resumes
