@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Collab:Sales · Home</title>
+<title>Collab:Media · Home</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41b" />
-<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41b" />
-<link rel="stylesheet" href="../shared/shell.css?v=0.9.41b" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.41c" />
 <style>
   /* Page-local layout only — every component is the DS's own. */
   /* The divider sits tight under the page header, so pull the header's
@@ -79,41 +79,29 @@
   .c-skeleton-bar--title{width:72%; height:22px; margin-top:var(--spacing-8);}
   .c-skeleton-bar--footer{width:46%; height:12px; margin-top:auto;}
   @keyframes c-skeleton-shimmer{from{background-position:100% 0;} to{background-position:-200% 0;}}
-  .ld-stats .c-stat.is-loading > :not(.c-hcard-skeleton, .ld-stat-insight){opacity:0;
+  .ld-stats .c-stat.is-loading > :not(.c-hcard-skeleton){opacity:0;
     transform:translateY(8px);}
-  .ld-stats .c-stat.is-loaded > :not(.c-hcard-skeleton, .ld-stat-insight){opacity:1;
+  .ld-stats .c-stat.is-loaded > :not(.c-hcard-skeleton){opacity:1;
     transform:none;
     transition:opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1);
     transition-delay:var(--content-delay, 0ms);}
-  /* Hover insight — each tile keeps one message that matters behind it.
-     Hover (or keyboard focus) slides an element-tinted band up over the
-     footer; it sits below the skeleton so loading never leaks it, and
-     the reveal reuses the tiles' own curve. */
-  .ld-stats .c-stat{overflow:hidden;}
-  .ld-stat-insight{position:absolute; left:0; right:0; bottom:0; z-index:1;
-    display:flex; align-items:center; gap:var(--spacing-8);
-    padding:var(--spacing-12) var(--spacing-16);
-    font-size:var(--text-body2-size); line-height:1.45; font-weight:600;
-    color:var(--color-neutral-9);
-    opacity:0; transform:translateY(100%); pointer-events:none;
-    transition:opacity .35s cubic-bezier(.22,1,.36,1),
-      transform .35s cubic-bezier(.22,1,.36,1);}
-  .ld-stat-insight i{font-size:var(--icon-md); flex:none;}
-  .ld-stats .c-stat:hover .ld-stat-insight,
-  .ld-stats .c-stat:focus-visible .ld-stat-insight,
-  .ld-stats .c-stat:focus .ld-stat-insight{opacity:1; transform:none;}
-  .ld-stat-insight.in-fire{background:color-mix(in srgb, var(--color-orange) 8%, var(--color-neutral-1));}
-  .ld-stat-insight.in-fire i{color:var(--color-orange);}
-  .ld-stat-insight.in-wood{background:color-mix(in srgb, var(--color-salmon-pink) 8%, var(--color-neutral-1));}
-  .ld-stat-insight.in-wood i{color:var(--color-salmon-pink);}
-  .ld-stat-insight.in-earth{background:color-mix(in srgb, var(--color-green) 8%, var(--color-neutral-1));}
-  .ld-stat-insight.in-earth i{color:var(--color-green);}
-  .ld-stat-insight.in-water{background:color-mix(in srgb, var(--color-navy) 8%, var(--color-neutral-1));}
-  .ld-stat-insight.in-water i{color:var(--color-navy);}
+  /* Hover insight — each tile keeps one message that matters as a DS
+     Tooltip (top placement, dark bubble). The bubble is a sibling of
+     the tile inside .c-tooltip-wrap rather than a child, so the tilt
+     transform never skews it; hover or keyboard focus shows it.
+     Page-local composition: the message is a sentence, so the DS's
+     nowrap relaxes to a measured max-width. */
+  .ld-stats .c-tooltip-wrap{display:flex;}
+  .ld-stats .c-tooltip-wrap > .c-stat{flex:1;}
+  .ld-stats .c-tooltip-wrap:hover{z-index:3;}
+  .ld-stats .c-tooltip-wrap .c-tooltip-bubble{white-space:normal;
+    width:max-content; max-width:260px; text-align:center; line-height:1.45;}
+  .ld-stats .c-tooltip-wrap:hover .c-tooltip-bubble,
+  .ld-stats .c-tooltip-wrap:focus-within .c-tooltip-bubble{opacity:1;}
   @media (prefers-reduced-motion:reduce){
     .ld-stats .c-stat{opacity:1; transform:none; transition:none;}
     .c-skeleton-bar{animation:none;}
-    .ld-stat-insight{transition:none; transform:none;}
+    .c-tooltip-bubble{transition:none;}
   }
   /* Where you left off — the section label sits outside the box; the
      whole card is interactive (Card, Interactive variant) and resumes
@@ -383,10 +371,10 @@
         <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
                 aria-expanded="false" aria-label="Switch department, Sales" aria-controls="deptDropdown">
           <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
-          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabSales.svg" alt="Sales" />
+          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="Media" />
           <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
         </button>
-        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/gold.svg" alt="Collab:Sales" />
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/water.svg" alt="Collab:Media" />
       </div>
       <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
       <div class="c-sidebar-section">Workspace</div>
@@ -461,6 +449,7 @@
             <div class="ld-sechead"><h2>At a glance</h2>
               <span class="note">Across every plan in the workspace, August month to date.</span></div>
             <div class="ld-stats">
+              <div class="c-tooltip-wrap">
               <div class="c-stat" tabindex="0">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Total campaigns</span>
@@ -469,8 +458,10 @@
                 <span class="c-stat-value">24</span>
                 <span class="c-stat-trend up"><i class="ph-fill ph-caret-up"></i> +18% <span class="period">this month</span></span>
                 <div class="c-stat-footer">2 booked · 22 in draft</div>
-                <div class="ld-stat-insight in-fire"><i class="ph-fill ph-lightbulb"></i><span>22 drafts are still unbooked. Astro 30 anniversary is closest to ready.</span></div>
               </div>
+              <span class="c-tooltip-bubble" role="tooltip">22 drafts are still unbooked. Astro 30 anniversary is closest to ready.</span>
+              </div>
+              <div class="c-tooltip-wrap">
               <div class="c-stat" tabindex="0">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Total budget</span>
@@ -478,8 +469,10 @@
                 </div>
                 <span class="c-stat-value">RM 2.2M</span>
                 <div class="c-stat-footer">across all campaigns</div>
-                <div class="ld-stat-insight in-wood"><i class="ph-fill ph-warning-circle"></i><span>RM 2.05M of it sits in drafts. Booking is what turns it into revenue.</span></div>
               </div>
+              <span class="c-tooltip-bubble" role="tooltip">RM 2.05M of it sits in drafts. Booking is what turns it into revenue.</span>
+              </div>
+              <div class="c-tooltip-wrap">
               <div class="c-stat" tabindex="0">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Average eCPM</span>
@@ -487,8 +480,10 @@
                 </div>
                 <span class="c-stat-value">RM 20.50</span>
                 <div class="c-stat-footer">booked inventory</div>
-                <div class="ld-stat-insight in-earth"><i class="ph-fill ph-trend-up"></i><span>Healthy blended rate. Video-heavy mixes push it past RM 24.</span></div>
               </div>
+              <span class="c-tooltip-bubble" role="tooltip">Healthy blended rate. Video-heavy mixes push it past RM 24.</span>
+              </div>
+              <div class="c-tooltip-wrap">
               <div class="c-stat" tabindex="0">
                 <div class="c-stat-top">
                   <span class="c-stat-label">Impressions booked</span>
@@ -497,7 +492,8 @@
                 <span class="c-stat-value">7.3M</span>
                 <span class="c-stat-trend flat"><i class="ph-fill ph-minus"></i> 75% <span class="period">delivered</span></span>
                 <div class="c-stat-footer">2 booked campaigns</div>
-                <div class="ld-stat-insight in-water"><i class="ph-fill ph-clock-countdown"></i><span>1.8M impressions still need to run before the flights end.</span></div>
+              </div>
+              <span class="c-tooltip-bubble" role="tooltip">1.8M impressions still need to run before the flights end.</span>
               </div>
             </div>
           </div>
@@ -607,12 +603,16 @@
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influence" data-dept="influence" data-name="Influence" data-logo="../collabrium-dls/logo-lockups/collabInfluence.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluence.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
   <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
