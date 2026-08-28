@@ -86,9 +86,11 @@
     transition:opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1);
     transition-delay:var(--content-delay, 0ms);}
   /* Hover insight — each tile keeps one message that matters as a DS
-     Tooltip (top placement, dark bubble). The bubble is a sibling of
-     the tile inside .c-tooltip-wrap rather than a child, so the tilt
-     transform never skews it; hover or keyboard focus shows it.
+     Tooltip (dark bubble). The bubble is a sibling of the tile inside
+     .c-tooltip-wrap rather than a child, so the tilt transform never
+     skews it. With a mouse it rides the cursor via the DS's own
+     .is-portaled variant (JS below sets fixed left/top on pointermove);
+     keyboard focus falls back to the static top-centre placement.
      Page-local composition: the message is a sentence, so the DS's
      nowrap relaxes to a measured max-width. */
   .ld-stats .c-tooltip-wrap{display:flex;}
@@ -107,7 +109,11 @@
      whole card is interactive (Card, Interactive variant) and resumes
      the draft; the CTA is the DS Button Link recipe (underlined, 3px
      offset, no box). */
-  .ld-resume{gap:var(--spacing-8);}
+  /* The DS Card carries height:100% for grid cells; here the card
+     shares its wrapper with the section head, so 100% resolves to the
+     wrapper's full height and the card bleeds out the bottom by
+     exactly the head's height. Content-height is what this card wants. */
+  .ld-resume{gap:var(--spacing-8); height:auto;}
   .ld-resume .name{font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
   .ld-resume .meta{font-size:var(--text-body2-size); color:var(--color-neutral-5);}
   .ld-resume .ld-resume-progress{margin:var(--spacing-8) 0 var(--spacing-4);}
@@ -133,8 +139,8 @@
   .ld-link{display:inline-flex; align-items:center; gap:var(--spacing-4);
     background:none; border:0; padding:0; font-family:inherit;
     font-size:var(--text-body2-size); font-weight:700;
-    color:var(--color-neutral-9); text-decoration:underline;
-    text-underline-offset:3px; cursor:pointer; white-space:nowrap;}
+    color:var(--color-neutral-9); text-decoration:none;
+    cursor:pointer; white-space:nowrap;}
   .ld-link:hover{color:var(--color-neutral-5);}
   .ld-link:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .ld-link i{font-size:var(--icon-sm);}
@@ -854,6 +860,34 @@
         if (e.pointerType !== 'mouse') return;
         t.classList.remove('is-tilting');
         t.style.transform = '';
+      });
+    });
+  })();
+
+  /* Tile tooltips ride the mouse: on pointermove the bubble switches
+     to the DS's .is-portaled variant (position:fixed) and sits just
+     above the cursor, clamped to the viewport; below the cursor when
+     there's no room. Leaving the tile restores the static placement
+     so keyboard focus still gets the top-centre bubble. */
+  (function () {
+    document.querySelectorAll('.ld-stats .c-tooltip-wrap').forEach(function (w) {
+      var b = w.querySelector('.c-tooltip-bubble');
+      if (!b) return;
+      w.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        b.classList.add('is-portaled');
+        var r = b.getBoundingClientRect();
+        var x = Math.max(8, Math.min(e.clientX - r.width / 2, window.innerWidth - r.width - 8));
+        var y = e.clientY - r.height - 14;
+        if (y < 8) y = e.clientY + 18;
+        b.style.left = x + 'px';
+        b.style.top = y + 'px';
+      });
+      w.addEventListener('pointerleave', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        b.classList.remove('is-portaled');
+        b.style.left = '';
+        b.style.top = '';
       });
     });
   })();
