@@ -865,10 +865,12 @@
   })();
 
   /* Tile tooltips ride the mouse: on pointermove the bubble switches
-     to the DS's .is-portaled variant (position:fixed) and sits just
-     above the cursor, clamped to the viewport; below the cursor when
-     there's no room. Leaving the tile restores the static placement
-     so keyboard focus still gets the top-centre bubble. */
+     to the DS's .is-portaled variant (position:fixed). It hangs off
+     the cursor by its corner — left edge just right of the pointer,
+     bottom edge just above it, the way native tooltips trail a cursor —
+     flipping to the opposite side at the viewport edges. Leaving the
+     tile restores the static placement so keyboard focus still gets
+     the top-centre bubble. */
   (function () {
     document.querySelectorAll('.ld-stats .c-tooltip-wrap').forEach(function (w) {
       var b = w.querySelector('.c-tooltip-bubble');
@@ -877,10 +879,11 @@
         if (e.pointerType !== 'mouse') return;
         b.classList.add('is-portaled');
         var r = b.getBoundingClientRect();
-        var x = Math.max(8, Math.min(e.clientX - r.width / 2, window.innerWidth - r.width - 8));
-        var y = e.clientY - r.height - 14;
+        var x = e.clientX + 12;
+        if (x + r.width > window.innerWidth - 8) x = e.clientX - r.width - 12;
+        var y = e.clientY - r.height - 12;
         if (y < 8) y = e.clientY + 18;
-        b.style.left = x + 'px';
+        b.style.left = Math.max(8, x) + 'px';
         b.style.top = y + 'px';
       });
       w.addEventListener('pointerleave', function (e) {
