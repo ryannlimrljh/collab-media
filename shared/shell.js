@@ -1,11 +1,11 @@
-/* Collab:Sales planner — shell behaviour.
+/* Collab:Media planner — shell behaviour.
 
    Ported from the mothership's feedback-v1/landing-v3 shell: collapse
-   toggle, account menu, department switcher, collapsed hover labels.
-   One deliberate departure: no auto-minimise timer. The board pages
-   collapse the rail after load to clear canvas space; a planner keeps
-   the rail open because the wizard's own content column already owns
-   the width, and a rail that folds itself mid-form reads as a glitch. */
+   toggle, account menu, department switcher, collapsed hover labels,
+   and the landing's auto-minimise — the rail folds itself shortly
+   after load to hand the canvas the width, driven through the same
+   setter a manual click uses. A manual toggle before the timer fires
+   cancels it, so the auto-collapse never fights the user. */
 
 (function () {
   'use strict';
@@ -21,7 +21,17 @@
   }
   if (NARROW.matches) setCollapsed(true);
 
+  /* Auto-collapse, the landing's timing family: the nav holds open for
+     a beat after load (long enough to be read), then folds. Narrow
+     screens arrive collapsed already, so the timer only matters on
+     desktop. */
+  var AUTO_COLLAPSE_DELAY_MS = 1400;
+  var autoCollapseTimer = setTimeout(function () {
+    if (!NARROW.matches) setCollapsed(true);
+  }, AUTO_COLLAPSE_DELAY_MS);
+
   document.getElementById('sidebarToggle').addEventListener('click', function () {
+    clearTimeout(autoCollapseTimer);
     setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'));
   });
 

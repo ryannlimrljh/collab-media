@@ -42,9 +42,10 @@ the production codebase.
   landing-v3/feedback-v1: warm canvas on `.c-shell`, sidebar-only chrome,
   16px-inset 240px `.c-sidebar` collapsing to 72px, page header as the top
   of every screen. `shared/shell.css` + `shared/shell.js` port that
-  implementation; one deliberate departure — no auto-minimise timer (a
-  planner keeps its rail open; a form that folds its own nav reads as a
-  glitch).
+  implementation, including the landing's auto-minimise (originally
+  omitted; Ryan asked for parity on 2026-08-28): the rail folds itself
+  1.4s after load through the same setter a manual click uses, and a
+  manual toggle before the timer fires cancels it.
 - Department switcher defaults to **Sales** (`collabSales.svg` lockup;
   gold.svg collapsed icon, matching the mothership's own Sales mapping).
 - Account row: Sarah Tan · Sales Planner (the live app's demo planner).

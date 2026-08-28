@@ -29,7 +29,8 @@ stylesheets plus this repo's `shared/shell.css`/`shell.js`.
   This is the single source of truth here — don't edit it in place.
 - `shared/` — the shell's page-local CSS and behaviour (collapse,
   account menu, department switcher, hover labels), ported from
-  feedback-v1. One deliberate departure: no auto-minimise timer.
+  feedback-v1, plus the landing's auto-minimise: the rail folds itself
+  1.4s after load; a manual toggle before then cancels the timer.
 - `pages/campaigns.html` — the Media planner landing: a "Where you left
   off" resume band, four hero stat boxes in the mothership landing's
   card recipe, a right-aligned "Create new media plan" CTA, a "Build a
