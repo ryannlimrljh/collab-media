@@ -191,6 +191,10 @@
   .ld-row .amt{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     font-variant-numeric:tabular-nums; white-space:nowrap;}
   .ld-all{margin-top:auto; align-self:flex-start; padding-top:var(--spacing-8);}
+  /* It reads as a text link, not a button, so it drops the Ghost
+     recipe's hover pill and sits still. Focus-visible stays — that's
+     the keyboard's only cue, not a hover effect. */
+  .ld-all:hover{background:transparent;}
   /* The plans box follows the row's tallest column: the grid stretches
      the column, the column passes the height to the card. */
   .ld-plans-col{display:flex; flex-direction:column;}
