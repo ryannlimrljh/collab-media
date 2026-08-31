@@ -48,6 +48,37 @@
   .p-step-title .d{display:block; margin-top:2px;
     font-size:var(--text-body2-size); color:var(--color-neutral-5);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* Load entrance — the collapsed outline builds itself: heads cascade
+     in, connectors draw downward, then step one's indicator pulses to
+     say where the journey starts, right before it folds open. */
+  .p-journey.is-arriving .p-step{animation:p-step-arrive 420ms var(--ease-settle) both;}
+  .p-journey.is-arriving .p-step:nth-child(1){animation-delay:80ms;}
+  .p-journey.is-arriving .p-step:nth-child(2){animation-delay:170ms;}
+  .p-journey.is-arriving .p-step:nth-child(3){animation-delay:260ms;}
+  .p-journey.is-arriving .p-step:nth-child(4){animation-delay:350ms;}
+  @keyframes p-step-arrive{
+    from{opacity:0; transform:translateY(12px);}
+    to{opacity:1; transform:none;}
+  }
+  .p-journey.is-arriving .p-step::before{transform-origin:top;
+    animation:p-conn-draw 360ms var(--ease-standard) both;}
+  .p-journey.is-arriving .p-step:nth-child(1)::before{animation-delay:500ms;}
+  .p-journey.is-arriving .p-step:nth-child(2)::before{animation-delay:640ms;}
+  .p-journey.is-arriving .p-step:nth-child(3)::before{animation-delay:780ms;}
+  @keyframes p-conn-draw{ from{transform:scaleY(0);} to{transform:scaleY(1);} }
+  .p-journey.is-arriving #step1 .c-step-indicator{
+    animation:p-ind-pulse 650ms var(--ease-standard) 1100ms 1;}
+  @keyframes p-ind-pulse{
+    0%{box-shadow:0 0 0 0 rgba(8, 8, 8, .28);}
+    75%{box-shadow:0 0 0 10px rgba(8, 8, 8, 0);}
+    100%{box-shadow:0 0 0 0 rgba(8, 8, 8, 0);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .p-journey.is-arriving .p-step,
+    .p-journey.is-arriving .p-step::before,
+    .p-journey.is-arriving #step1 .c-step-indicator{animation:none;}
+  }
+
   .p-step-body{display:grid; grid-template-rows:0fr;
     transition:grid-template-rows 480ms var(--ease-settle);}
   .p-step-inner{overflow:hidden; min-width:0;}
@@ -3054,8 +3085,14 @@
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (n > 1){ go(n); return; }
     if (reduced){ go(1, true); return; }
-    /* Hold the collapsed outline long enough to be read, then fold step
-       one open over a skeleton before the real content lands. */
+    /* The collapsed outline builds itself while it holds: heads cascade,
+       connectors draw, the first indicator pulses — then step one folds
+       open over a skeleton before the real content lands. */
+    var journey = document.querySelector('.p-journey');
+    if (journey && !document.hidden){
+      journey.classList.add('is-arriving');
+      setTimeout(function(){ journey.classList.remove('is-arriving'); }, 2000);
+    }
     setTimeout(function(){
       var s1 = $('step1');
       s1.classList.add('is-loading');
