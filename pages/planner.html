@@ -91,7 +91,7 @@
     transition:height 480ms var(--ease-settle);}
   /* When the AI box holds the corner, the rail shortens to leave it
      room; when it leaves, the rail fills the gap back in. */
-  .p-railcell.has-dock .p-railbox{height:calc(100vh - 104px);}
+  .p-railcell.has-dock .p-railbox{height:calc(100vh - 120px);}
   .p-askdock{position:sticky; top:calc(100vh - 72px); margin-top:var(--spacing-12);}
   .p-ask.is-docked .p-ask-reply{top:auto; bottom:calc(100% + var(--spacing-12));
     transform:translateY(8px);}
@@ -320,6 +320,9 @@
      so the content's top padding shrinks to match; the header now lives
      inside the canvas column and keeps its own rhythm. */
   .c-shell-content{padding-top:var(--spacing-16); padding-bottom:var(--spacing-48, 48px);}
+  /* A wider gutter between the working canvas and the pinned rail. */
+  .p-canvas{padding-right:var(--spacing-16);}
+  @media (max-width:1080px){ .p-canvas{padding-right:0;} }
   .p-canvas > .c-pageheader{margin-bottom:var(--spacing-24); padding-top:var(--spacing-8);}
   /* Export actions live in the page header now — a quiet ghost group. */
   .p-actions{display:flex; align-items:center; gap:var(--spacing-4);}
@@ -1459,9 +1462,25 @@
   }
 
   var CHECK_TITLES = {1:'Checking your brief', 2:'Checking the audience', 3:'Checking the media mix'};
+  /* The checker runs only when necessary: a step that already passed
+     with this exact state walks straight through; edits since the last
+     pass, or any blocker, bring the full run back. */
+  var checkPassedSig = {};
+  function checkSig(checks){
+    return JSON.stringify(checks.map(function(c){ return c.level + '|' + c.label; }));
+  }
   function tryNext(n){
     var current = n - 1;
-    runChecker(CHECK_TITLES[current] || 'Checking', checksFor(current), $('view' + current), function(){
+    var checks = checksFor(current);
+    var sig = checkSig(checks);
+    var blocked = checks.some(function(c){ return c.level === 'block'; });
+    if (!blocked && checkPassedSig[current] === sig){
+      markSaved();
+      go(n);
+      return;
+    }
+    runChecker(CHECK_TITLES[current] || 'Checking', checks, $('view' + current), function(){
+      checkPassedSig[current] = sig;
       markSaved();
       go(n);
     });
@@ -2023,8 +2042,14 @@
   function closeBook(){ $('bookOverlay').hidden = true; }
   $('bookBtn').addEventListener('click', function(){
     if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
-    runChecker('Checking the whole plan',
-      checksFor(1).concat(checksFor(2), checksFor(3)), $('view4'), openBook);
+    var checks = checksFor(1).concat(checksFor(2), checksFor(3));
+    var sig = checkSig(checks);
+    var blocked = checks.some(function(c){ return c.level === 'block'; });
+    if (!blocked && checkPassedSig.book === sig){ openBook(); return; }
+    runChecker('Checking the whole plan', checks, $('view4'), function(){
+      checkPassedSig.book = sig;
+      openBook();
+    });
   });
   $('bookClose').addEventListener('click', closeBook);
   $('bookCancel').addEventListener('click', closeBook);
