@@ -188,8 +188,8 @@
   .p-disclose > i{font-size:var(--icon-base); color:var(--color-neutral-5);
     transition:transform var(--duration-base) var(--ease-settle);}
   .p-disclose[aria-expanded="true"] > i{transform:rotate(180deg);}
-  .p-drawer-body{padding:0 0 var(--spacing-16);
-    border-top:1px solid var(--color-neutral-3);}
+  .p-drawer-body{padding:0 0 var(--spacing-16); box-sizing:border-box;
+    transition:height 320ms var(--ease-settle);}
   .p-drawer-body[hidden]{display:none;}
   .p-drawer-section{padding-top:var(--spacing-16);}
   .p-drawer-section + .p-drawer-section{margin-top:var(--spacing-20);
@@ -2493,11 +2493,41 @@
 
   /* ═══ Drawers ═══ */
   document.querySelectorAll('.p-disclose').forEach(function(d){
+    var animTimer = null;
     d.addEventListener('click', function(){
       var body = document.getElementById(d.dataset.drawer);
-      var open = body.hidden;
-      body.hidden = !open;
-      d.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var opening = body.hidden;
+      d.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      clearTimeout(animTimer);
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      /* Instant in reduced motion or hidden tabs (no frames to ease on). */
+      if (reduced || document.hidden){
+        body.hidden = !opening;
+        body.style.height = '';
+        body.style.overflow = '';
+        return;
+      }
+      if (opening){
+        body.hidden = false;
+        body.style.overflow = 'hidden';
+        body.style.height = '0px';
+        void body.offsetHeight;
+        body.style.height = body.scrollHeight + 'px';
+        animTimer = setTimeout(function(){
+          body.style.height = '';
+          body.style.overflow = '';
+        }, 340);
+      } else {
+        body.style.overflow = 'hidden';
+        body.style.height = body.scrollHeight + 'px';
+        void body.offsetHeight;
+        body.style.height = '0px';
+        animTimer = setTimeout(function(){
+          body.hidden = true;
+          body.style.height = '';
+          body.style.overflow = '';
+        }, 340);
+      }
     });
   });
 
