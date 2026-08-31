@@ -53,6 +53,17 @@
   --color-gold-bg: #FFF6E9;        --color-gold-bg-strong: #FFEDD3;
   --color-wood-bg: #FFF2F4;        --color-wood-bg-strong: #FFE4E9;
 
+  /* Elemental pastel tints — a distinct, stronger tint than the -bg/
+     -bg-strong pair above (55% white mix, not 8%/16%): for decorative,
+     ambient effects like a gradient glow, never for surface fills or
+     backgrounds — that's what -bg/-bg-strong are for. First used by
+     Prompt input bar's glow (AI Native). */
+  --color-fire-pastel: #FFB49D;
+  --color-wood-pastel: #FFC3CD;
+  --color-earth-pastel: #8CE4BE;
+  --color-water-pastel: #95C0F4;
+  --color-gold-pastel: #FFD69D;
+
   /* Fonts */
   --font-primary: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-secondary: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -157,12 +168,16 @@
   --duration-base: 220ms;
   --duration-slow: 360ms;
   --duration-ambient: 900ms;
+  --duration-morph: 420ms;   /* pose-to-pose shape transitions, e.g. Prompt input bar's expanded/collapsed morph */
+  --duration-reveal: 550ms;  /* entrance reveals that need to read as more deliberate than duration-slow */
   --ease-standard: cubic-bezier(.2, .6, .2, 1);   /* default UI easing */
   --ease-settle: cubic-bezier(.16, .84, .24, 1);  /* earth: anchored arrivals */
   --ease-flow: cubic-bezier(.37, 0, .29, 1);      /* water: continuous */
   --ease-flare: cubic-bezier(.05, .7, .1, 1);     /* fire: pulse outward, rise */
   --ease-precise: cubic-bezier(.4, 0, .2, 1);     /* gold: sharp, decisive */
   --ease-grow: cubic-bezier(.25, .46, .45, .94);  /* wood: branching growth */
+  --ease-morph: cubic-bezier(.22, 1, .36, 1);     /* pose-to-pose shape transitions — fast out, no overshoot */
+  --ease-reveal: cubic-bezier(.16, 1, .3, 1);      /* entrance reveals — fast out, no overshoot */
 
   /* Icon sizes */
   --icon-micro: 14px;

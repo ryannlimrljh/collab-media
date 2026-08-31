@@ -142,7 +142,70 @@
   .p-kv .v{font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
 
   .p-banner-gap{margin-bottom:var(--spacing-24);}
+  .c-banner-ai .c-btn{position:relative; z-index:1;}
   [hidden]{display:none !important;}
+
+  /* Grouped brief — eyebrow section heads turn eleven flat fields into
+     four labelled rows. Same inputs, calmer card. */
+  .p-sect{margin-top:var(--spacing-20);}
+  .p-sect > .c-stat-label{display:block; margin-bottom:var(--spacing-8);}
+  .p-grid3a{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:var(--spacing-12);}
+  .p-grid3eq{display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--spacing-12);}
+  .p-grid4{display:grid; grid-template-columns:1.2fr 1.2fr .7fr .7fr; gap:var(--spacing-12);}
+  @media (max-width:1280px){ .p-grid4{grid-template-columns:1fr 1fr;} }
+  @media (max-width:1080px){ .p-grid3a, .p-grid3eq{grid-template-columns:1fr 1fr;} }
+
+  /* ── Collab AI ask pill — the landing/campaigns assistant entry point,
+     here wired to the plan itself. Same glow layers, mark and elevation;
+     the reply sheet folds up above it. ── */
+  @keyframes ask-glow-slide{ from{background-position:0% 0%;} to{background-position:200% 0%;} }
+  .c-shell-main{position:relative;}
+  .c-shell-content{padding-bottom:120px;} /* pill height + offset, so the footer scrolls clear */
+  .p-ask{position:absolute; left:50%; bottom:var(--spacing-24); z-index:60;
+    width:min(480px, calc(100% - var(--spacing-32))); transform:translateX(-50%);}
+  .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
+    animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .p-ask-glow-inner{position:absolute; inset:-1px; z-index:0; border-radius:var(--radius-pill);
+    background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
+    background-size:200% 100%; filter:blur(1px); mix-blend-mode:plus-lighter;
+    animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .p-ask-pill{position:relative; z-index:10; display:flex; align-items:center; gap:var(--spacing-8);
+    padding:var(--spacing-8) var(--spacing-8) var(--spacing-8) 48px;
+    background:var(--color-neutral-1); border-radius:var(--radius-pill); box-shadow:var(--shadow-4);}
+  .p-ask-mark{position:absolute; left:var(--spacing-16); top:50%; transform:translateY(-50%);
+    width:24px; height:24px; flex:none; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1);
+    font-size:14px; line-height:1; pointer-events:none;}
+  .p-ask input{flex:1; min-width:0; height:36px; border:0; outline:none; background:transparent;
+    font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);}
+  .p-ask input::placeholder{color:var(--color-neutral-5);}
+  .p-ask-send{width:36px; height:36px; flex:none; border-radius:var(--radius-pill);
+    background:var(--color-obsidian); color:var(--color-neutral-1); border:0; display:flex;
+    align-items:center; justify-content:center; cursor:pointer; font-size:var(--icon-sm);}
+  .p-ask-send:hover{background:var(--color-neutral-8);}
+  .p-ask-send:active{background:var(--color-neutral-7);}
+  .p-ask-send:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-ask-reply{position:absolute; left:0; right:0; bottom:calc(100% + var(--spacing-12)); z-index:10;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4); padding:var(--spacing-16);
+    opacity:0; transform:translateY(8px); pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle);}
+  .p-ask-reply.is-open{opacity:1; transform:none; pointer-events:auto;}
+  .p-ask-reply-head{display:flex; align-items:center; gap:var(--spacing-8);
+    margin-bottom:var(--spacing-8);}
+  .p-ask-reply-head > i{font-size:var(--icon-sm); color:var(--color-neutral-9);}
+  .p-ask-reply-head .who{flex:1; font-size:var(--text-caption-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .p-ask-reply-text{font-size:var(--text-body2-size); line-height:var(--text-body2-lh);
+    color:var(--color-neutral-9); min-height:20px;}
+  .p-ask-reply-actions{display:flex; flex-wrap:wrap; gap:var(--spacing-8);
+    margin-top:var(--spacing-12);}
+  @media (prefers-reduced-motion:reduce){
+    .p-ask-glow-outer, .p-ask-glow-inner{animation:none;}
+    .p-ask-reply{transition:none;}
+  }
 
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
@@ -155,7 +218,7 @@
   }
   @media print{
     .c-sidebar-shell, .p-stepper-row, .p-crumb, .c-pageheader-actions,
-    .p-footer, .c-shell-span-1, .c-toast-host{display:none !important;}
+    .p-footer, .c-shell-span-1, .c-toast-host, .p-ask{display:none !important;}
     .c-shell{height:auto; background:var(--color-neutral-1);}
     .c-shell-content{overflow:visible; padding:0;}
     .c-shell-grid{display:block;}
@@ -262,56 +325,64 @@
               </div>
               <p>Fill these and the planner can already draft you a directional plan. Everything after this sharpens it.</p>
 
-              <div class="c-field" style="margin-top:var(--spacing-8);">
-                <label for="b-name">Campaign name</label>
-                <input id="b-name" value="Astro 30th Anniversary" placeholder="e.g. New SUV launch Q3 2026" />
-                <span class="c-helper">A name your sales team and client will recognise later.</span>
-              </div>
-
-              <div class="p-grid2" style="margin-top:var(--spacing-12);">
-                <div class="c-field"><label for="b-brand">Advertiser brand</label>
-                  <input id="b-brand" value="Astro" placeholder="e.g. Astro, Maybank" /></div>
-                <div class="c-field"><label for="b-prod">Product</label>
-                  <input id="b-prod" value="Astro 30 celebration" placeholder="What are we advertising?" /></div>
-                <div class="c-field"><label for="b-start">Flight start</label>
-                  <input id="b-start" type="date" value="2026-08-26" /></div>
-                <div class="c-field"><label for="b-end">Flight end</label>
-                  <input id="b-end" type="date" value="2026-09-08" /></div>
-                <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
-                  <input id="b-budget" type="number" step="1000" value="150000" placeholder="0" /></div>
-                <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">Primary objective</label>
-                  <div class="input-wrap has-trailing-icon">
-                    <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
-                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
-                  </div>
+              <div class="p-sect" style="margin-top:var(--spacing-16);">
+                <span class="c-stat-label">Campaign</span>
+                <div class="p-grid3a">
+                  <div class="c-field"><label for="b-name">Campaign name</label>
+                    <input id="b-name" value="Astro 30th Anniversary" placeholder="e.g. New SUV launch Q3 2026" /></div>
+                  <div class="c-field"><label for="b-brand">Advertiser brand</label>
+                    <input id="b-brand" value="Astro" placeholder="e.g. Astro, Maybank" /></div>
+                  <div class="c-field"><label for="b-prod">Product</label>
+                    <input id="b-prod" value="Astro 30 celebration" placeholder="What are we advertising?" /></div>
                 </div>
               </div>
 
-              <div class="p-grid3" style="margin-top:var(--spacing-12);">
-                <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">Primary KPI</label>
-                  <div class="input-wrap has-trailing-icon">
-                    <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Select KPI" readonly />
-                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
-                  </div>
-                </div>
-                <div class="c-field"><label for="b-target">Target</label>
-                  <input id="b-target" type="number" value="5000" placeholder="0" /></div>
-                <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Unit</label>
-                  <div class="input-wrap has-trailing-icon">
-                    <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
-                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                    <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
-                  </div>
+              <div class="p-sect">
+                <span class="c-stat-label">Flight and budget</span>
+                <div class="p-grid3eq">
+                  <div class="c-field"><label for="b-start">Flight start</label>
+                    <input id="b-start" type="date" value="2026-08-26" /></div>
+                  <div class="c-field"><label for="b-end">Flight end</label>
+                    <input id="b-end" type="date" value="2026-09-08" /></div>
+                  <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
+                    <input id="b-budget" type="number" step="1000" value="150000" placeholder="0" /></div>
                 </div>
               </div>
-              <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
 
-              <div class="c-field" style="margin-top:var(--spacing-16);">
-                <label>Campaign languages</label>
-                <div class="p-choices" id="langRow" style="margin-top:var(--spacing-4);"></div>
-                <span class="c-helper" style="margin-top:var(--spacing-4);">Creative must exist in every language you pick. We'll flag formats with no matching asset in the mix.</span>
+              <div class="p-sect">
+                <span class="c-stat-label">The goal</span>
+                <div class="p-grid4">
+                  <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">Primary objective</label>
+                    <div class="input-wrap has-trailing-icon">
+                      <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
+                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                      <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                    </div>
+                  </div>
+                  <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">Primary KPI</label>
+                    <div class="input-wrap has-trailing-icon">
+                      <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Select KPI" readonly />
+                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                      <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                    </div>
+                  </div>
+                  <div class="c-field"><label for="b-target">Target</label>
+                    <input id="b-target" type="number" value="5000" placeholder="0" /></div>
+                  <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Unit</label>
+                    <div class="input-wrap has-trailing-icon">
+                      <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
+                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                      <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
+              </div>
+
+              <div class="p-sect">
+                <span class="c-stat-label">Languages</span>
+                <div class="p-choices" id="langRow"></div>
+                <span class="c-helper" style="display:block; margin-top:var(--spacing-8);">Creative must exist in every language you pick. We'll flag formats with no matching asset in the mix.</span>
               </div>
             </div>
 
@@ -410,29 +481,30 @@
               </div>
             </div>
 
-            <div class="c-card" id="refineCard">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Refine</h4>
-                <span class="c-badge c-badge-neutral">Optional</span>
-              </div>
-              <p>Narrows reach proportionally. The rail updates as you go.</p>
-              <div class="p-grid2" id="filterGrid" style="margin-top:var(--spacing-8);"></div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--spacing-12);">
-                <span class="p-note" style="margin:0;" id="filterEffect">No refiners applied</span>
-                <button class="c-btn c-btn-ghost c-btn-sm" id="filterReset" type="button">
-                  <i class="ph ph-arrow-counter-clockwise"></i> Clear refiners
-                </button>
-              </div>
-            </div>
-
-            <div class="c-card" id="intentCard">
-              <h4>Intent, behaviour, exclusions</h4>
-              <p>Free text is fine here — it refines the mix rather than driving the maths.</p>
-              <div class="p-grid2" style="margin-top:var(--spacing-8);">
-                <div class="c-field"><label for="f-intent">Specific intent or behaviours</label>
-                  <textarea id="f-intent" placeholder="Test drive intenders, K-drama binge watchers…"></textarea></div>
-                <div class="c-field"><label for="f-ex">Anyone to exclude</label>
-                  <textarea id="f-ex" placeholder="Existing customers, under 18, other regions"></textarea></div>
+            <div class="p-drawer" id="refineCard">
+              <button class="p-disclose" data-drawer="refinePanel" aria-expanded="false" aria-controls="refinePanel" type="button">
+                <div>
+                  <h4>Sharpen the audience</h4>
+                  <p class="sub" id="refineSub">All optional. Demographic refiners, intent and exclusions; the rail updates as you go.</p>
+                </div>
+                <i class="ph ph-caret-down"></i>
+              </button>
+              <div class="p-drawer-body" id="refinePanel" hidden>
+                <div class="p-drawer-section">
+                  <div class="p-grid2" id="filterGrid"></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--spacing-12);">
+                    <span class="p-note" style="margin:0;" id="filterEffect">No refiners applied</span>
+                    <button class="c-btn c-btn-ghost c-btn-sm" id="filterReset" type="button">
+                      <i class="ph ph-arrow-counter-clockwise"></i> Clear refiners
+                    </button>
+                  </div>
+                </div>
+                <div class="p-drawer-section p-grid2">
+                  <div class="c-field"><label for="f-intent">Specific intent or behaviours</label>
+                    <textarea id="f-intent" placeholder="Test drive intenders, K-drama binge watchers…"></textarea></div>
+                  <div class="c-field"><label for="f-ex">Anyone to exclude</label>
+                    <textarea id="f-ex" placeholder="Existing customers, under 18, other regions"></textarea></div>
+                </div>
               </div>
             </div>
 
@@ -486,9 +558,9 @@
 
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
       <section id="view3" hidden>
-        <div class="c-banner c-banner-info p-banner-gap">
+        <div class="c-banner c-banner-ai p-banner-gap">
           <i class="ph-fill ph-sparkle icon"></i>
-          <div class="body"><p class="message">Drafted from your brief and audience. Override anything — we'll keep your changes.</p></div>
+          <div class="body"><p class="message">Collab AI drafted this from your brief and audience. Override anything, your changes are kept.</p></div>
           <button class="c-btn c-btn-secondary c-btn-sm" id="redraft" type="button" style="flex:none;">
             <i class="ph ph-sparkle"></i> Re-draft from brief
           </button>
@@ -496,21 +568,14 @@
 
         <div class="p-stack">
 
-            <div class="c-card" id="channelCard">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Channels</h4>
-                <span class="p-picker-sub" id="channelSummary">All channels</span>
-              </div>
-              <p>Leave everything off to consider every channel. Turning one on filters the formats and sites below.</p>
-              <div class="p-choices" id="channelRow" style="margin-top:var(--spacing-8);"></div>
-            </div>
-
             <div class="c-card" id="formatCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Formats</h4>
-                <span class="p-picker-sub">Each format carries its rate — nothing downstream is guesswork</span>
+                <h4>Channels and formats</h4>
+                <span class="p-picker-sub" id="channelSummary">All channels</span>
               </div>
-              <div class="p-choice-stack" id="formatList" style="margin-top:var(--spacing-8);"></div>
+              <p>Leave channels off to consider everything. Each format carries its own rate, so nothing downstream is guesswork.</p>
+              <div class="p-choices" id="channelRow" style="margin-top:var(--spacing-8);"></div>
+              <div class="p-choice-stack" id="formatList" style="margin-top:var(--spacing-16); padding-top:var(--spacing-16); border-top:1px solid var(--color-neutral-3);"></div>
             </div>
 
             <div class="p-drawer" id="sitesDrawer">
@@ -612,8 +677,15 @@
             </div>
             <div id="railSummary" class="p-rail-pane">
               <div class="c-card">
-                <span class="c-stat-label">The plan so far</span>
-                <div style="margin-top:var(--spacing-8);">
+                <div>
+                  <span class="c-stat-label">Plan strength</span>
+                  <div class="p-stat-value-sm" id="strengthWord">—</div>
+                  <div class="c-progress-track size-compact" style="margin-top:var(--spacing-8);">
+                    <div class="c-progress-fill" id="strengthFill" style="width:0%;"></div>
+                  </div>
+                  <div class="p-stat-foot" id="strengthFoot">—</div>
+                </div>
+                <div class="p-stat-sep">
                   <span class="c-stat-label">Flight</span>
                   <div class="p-stat-value-sm" id="railFlight">—</div>
                   <div class="p-stat-foot" id="railDaily">Set dates and budget</div>
@@ -653,6 +725,25 @@
         </div>
       </div>
 
+    </div>
+
+    <div class="p-ask" id="askBox">
+      <div class="p-ask-reply" id="askReply" role="status" aria-live="polite">
+        <div class="p-ask-reply-head">
+          <i class="ph-fill ph-sparkle" aria-hidden="true"></i>
+          <span class="who">Collab AI</span>
+          <button class="c-icon-btn" id="askReplyClose" aria-label="Dismiss" type="button"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="p-ask-reply-text" id="askReplyText"></div>
+        <div class="p-ask-reply-actions" id="askReplyActions" hidden></div>
+      </div>
+      <div class="p-ask-glow-outer" aria-hidden="true"></div>
+      <div class="p-ask-glow-inner" aria-hidden="true"></div>
+      <div class="p-ask-pill">
+        <span class="p-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+        <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
+        <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
+      </div>
     </div>
   </div>
 </div>
@@ -921,9 +1012,24 @@
     return out;
   }
 
+  /* Plan strength — the share of checks clear across steps 1 to 3,
+     read as a word so it feels like a judgement, not a score. */
+  function renderStrength(){
+    var all = checksFor(1).concat(checksFor(2), checksFor(3));
+    var ok = all.filter(function(c){ return c.ok; }).length;
+    var pct = all.length ? Math.round(ok / all.length * 100) : 0;
+    var word = pct >= 100 ? 'Bookable' : pct >= 75 ? 'Nearly there' : pct >= 45 ? 'Directional' : 'Rough sketch';
+    $('strengthWord').textContent = word;
+    $('strengthFoot').textContent = ok + ' of ' + all.length + ' checks clear';
+    var fill = $('strengthFill');
+    fill.style.width = pct + '%';
+    fill.className = 'c-progress-fill' + (pct >= 100 ? ' tone-success' : '');
+  }
+
   function renderChecks(){
     var host = $('checksHost');
     if (!host) return;
+    renderStrength();
     $('checksTitle').textContent = step === 4 ? 'Readiness' : step === 3 ? 'Against the brief' : 'Before you continue';
     var list = checksFor(step);
     host.innerHTML = list.map(function(c, i){
@@ -938,6 +1044,12 @@
     if (!chk || !chk.dataset.target) return;
     var el = document.getElementById(chk.dataset.target);
     if (!el) return;
+    /* A target inside a collapsed drawer opens the drawer first. */
+    var drawerBody = el.closest('.p-drawer-body');
+    if (drawerBody && drawerBody.hidden){
+      var disclose = document.querySelector('[data-drawer="' + drawerBody.id + '"]');
+      if (disclose) disclose.click();
+    }
     el.scrollIntoView({behavior:'smooth', block:'center'});
     var card = el.closest('.c-card, .p-drawer') || el;
     card.classList.remove('p-flash');
@@ -964,6 +1076,8 @@
       lab.className = 'c-step-label ' + cls;
     });
     if (n === 4) renderSummary();
+    var hint = $('askInput');
+    if (hint) hint.placeholder = ASK_HINTS[n] || ASK_HINTS[1];
     renderAll();
     window.scrollTo({top:0, behavior:'smooth'});
     var content = document.querySelector('.c-shell-content');
@@ -1262,6 +1376,12 @@
     $('filterEffect').textContent = on
       ? on + ' refiner' + (on > 1 ? 's' : '') + ' applied · reach cut to ' + Math.round(m * 100) + '% of base'
       : 'No refiners applied';
+    var hasIntent = !!$('f-intent').value.trim(), hasEx = !!$('f-ex').value.trim();
+    $('refineSub').textContent = 'All optional. ' +
+      (on ? on + ' refiner' + (on > 1 ? 's' : '') + ' applied · ' + Math.round(m * 100) + '% of base kept'
+          : 'No refiners applied') + ' · ' +
+      (hasIntent && hasEx ? 'intent and exclusions noted'
+        : hasEx ? 'exclusions noted' : hasIntent ? 'intent noted' : 'intent and exclusions empty');
   }
   $('filterReset').addEventListener('click', function(){
     filterState = {};
@@ -1271,7 +1391,8 @@
     });
     renderAll();
   });
-  $('f-ex').addEventListener('input', function(){ renderChecks(); });
+  $('f-ex').addEventListener('input', function(){ renderFilters(); renderChecks(); });
+  $('f-intent').addEventListener('input', function(){ renderFilters(); });
 
   function renderAudienceRail(){
     var r = reach(), mult = filterMult();
@@ -1593,6 +1714,126 @@
       '</div>';
   }
 
+  /* ═══ Collab AI ask pill — the campaigns page's assistant entry, wired
+     to the plan. Canned intent matching stands in for the real engine:
+     each reply streams in (per the AI-interaction guidelines: labelled,
+     streamed, dismissible) and the applying intents change real state. ═══ */
+  var ASK_HINTS = {
+    1: 'Ask Collab AI, or try "suggest personas for this brief"',
+    2: 'Try "pick personas from the brief"',
+    3: 'Try "rebalance the split" or "pin the draft sites"',
+    4: 'Try "is this ready to book?"'
+  };
+  var typeTimer = null;
+  function askShow(text, actions){
+    var txt = $('askReplyText'), act = $('askReplyActions');
+    clearInterval(typeTimer);
+    $('askReply').classList.add('is-open');
+    act.hidden = true; act.innerHTML = '';
+    function done(){
+      if (!actions || !actions.length) return;
+      act.hidden = false;
+      actions.forEach(function(a){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-btn c-btn-secondary c-btn-sm';
+        b.innerHTML = (a.icon ? '<i class="ph ' + a.icon + '"></i> ' : '') + a.label;
+        b.addEventListener('click', a.run);
+        act.appendChild(b);
+      });
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      txt.textContent = text; done(); return;
+    }
+    txt.textContent = '';
+    var i = 0;
+    typeTimer = setInterval(function(){
+      i += 2;
+      txt.textContent = text.slice(0, i);
+      if (i >= text.length){ clearInterval(typeTimer); done(); }
+    }, 14);
+  }
+  function askHide(){ clearInterval(typeTimer); $('askReply').classList.remove('is-open'); }
+
+  function askStatus(){
+    var names = {1:'Brief', 2:'Audience', 3:'Media mix', 4:'Summary'};
+    var open = checksFor(step).filter(function(c){ return !c.ok; });
+    var t = 'You are on step ' + step + ' of 4, ' + names[step] + '. ';
+    if (!open.length){
+      t += step === 4 ? 'Everything checks out. This plan is ready to book.'
+        : 'Everything on this step checks out. Carry on to the next one.';
+    } else {
+      t += (open.length === 1 ? 'One thing is still open: '
+        : open.length + ' things are still open. First: ') + open[0].label.toLowerCase() + '.';
+    }
+    if (step >= 3 && budget()){
+      var diff = budget() - forecast().alloc;
+      if (Math.abs(diff) >= 1) t += diff > 0 ? ' ' + rm(diff) + ' is still unallocated.'
+        : ' You are ' + rm(-diff) + ' over budget.';
+    }
+    return t;
+  }
+
+  function handleAsk(qRaw){
+    var q = (qRaw || '').toLowerCase();
+    if (/persona|audience|who /.test(q)){
+      var personaTile = document.querySelector('[data-mode="personas"]');
+      if (mode !== 'personas' && personaTile) personaTile.click();
+      selected = ['cl', 'al', 'kd'];
+      if (personaOpen) renderPersonaList();
+      renderChips(); renderAll(); markSaved();
+      askShow('I read the brief as a broad entertainment play, so I picked Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
+        fmt(reach().uniq) + ' unique reach. Swap any of them freely.',
+        step === 2 ? null : [{label:'Go to Audience', icon:'ph-arrow-right', run:function(){ askHide(); go(2); }}]);
+    } else if (/pin|site|must.?buy/.test(q)){
+      SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+      renderAll(); markSaved();
+      var pinned = SITES.filter(function(s){ return s.pin; });
+      askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
+        '. Everything else stays in the pool for the optimiser to move budget between.');
+    } else if (/draft|mix|format/.test(q)){
+      FORMATS.forEach(function(f){ f.on = ['isv','sva','ldb'].indexOf(f.id) > -1 && chanAllows(f.ch); });
+      if (!onFormats().length){
+        var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+        if (first) first.on = true;
+      }
+      SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+      resetSplit(); renderAll(); markSaved();
+      askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
+        step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
+    } else if (/balanc|allocat|split|budget/.test(q)){
+      resetSplit(); renderAll(); markSaved();
+      askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
+        onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
+        step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
+    } else if (/book|ready|done|finish/.test(q)){
+      var blockers = checksFor(1).concat(checksFor(2), checksFor(3))
+        .filter(function(c){ return c.level === 'block'; });
+      askShow(blockers.length
+        ? 'Not yet. ' + (blockers.length === 1 ? 'One blocker is open: ' : blockers.length + ' blockers are open. First: ') +
+          blockers[0].label.toLowerCase() + '. The checklist in the rail jumps straight to each one.'
+        : 'Yes. Every check is clear, so the summary is ready and booking hands the plan to the sales team.',
+        blockers.length ? null : [{label:'Go to Summary', icon:'ph-arrow-right', run:function(){ askHide(); go(4); }}]);
+    } else {
+      askShow(askStatus());
+    }
+  }
+
+  function askSubmit(){
+    var v = $('askInput').value;
+    $('askInput').value = '';
+    handleAsk(v);
+  }
+  $('askSend').addEventListener('click', askSubmit);
+  $('askInput').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === 'Return') askSubmit(); });
+  $('askReplyClose').addEventListener('click', askHide);
+  document.addEventListener('click', function(e){
+    if (!$('askReply').classList.contains('is-open')) return;
+    if (e.target.closest('#askBox')) return;
+    askHide();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') askHide(); });
+
   /* ═══ Drawers ═══ */
   document.querySelectorAll('.p-disclose').forEach(function(d){
     d.addEventListener('click', function(){
@@ -1661,6 +1902,7 @@
   renderChips();
   resetSplit();
   renderAll();
+  $('askInput').placeholder = ASK_HINTS[step];
 
   /* A ?step=N deep link (from "Where you left off") reopens the draft at
      the step it stopped on. */

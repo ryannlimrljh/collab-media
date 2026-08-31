@@ -38,9 +38,9 @@ installable variable-font files for both typefaces (sourced from
 Google's official repo, not the web-embed subsets) — point people there
 instead of them hunting Google Fonts themselves. `preview.html` also has
 a live **Components** section — the 7 basics (Button, Input, Card,
-Badge & Tag, Table row, Modal, Empty state), 9 more
+Badge & Tag, Table, Modal, Empty state), 8 more
 transcribed from the teammate's real component source (SidebarNav,
-Tabs, Checkbox, Radio, Switch, Toast, Tooltip, DataTable,
+Tabs, Checkbox, Radio, Switch, Toast, Tooltip,
 ElementBadge), 4 more **designed from scratch** (Stat/KPI
 card, Filters, Pagination, Date picker, flagged red in the gallery)
 plus a Chart color mapping guideline, 3 more folded into Button/Input
