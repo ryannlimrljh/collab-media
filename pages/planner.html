@@ -28,8 +28,6 @@
     margin-bottom:var(--spacing-24); background:var(--color-neutral-1);
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
     box-shadow:var(--shadow-1); padding:var(--spacing-12) var(--spacing-16);}
-  .p-stripe-actions{display:flex; gap:var(--spacing-4); flex:none;
-    padding-left:var(--spacing-16); border-left:1px solid var(--color-neutral-3);}
   .p-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
   .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
   .p-stepper-row .c-stepper{flex:1;}
@@ -39,10 +37,6 @@
   button.c-step:focus-visible{outline:2px solid var(--color-obsidian);
     outline-offset:2px; border-radius:var(--radius-sm);}
   .c-stepper:not(.vertical) .c-step-text{white-space:nowrap;}
-  .p-saved{flex:none; display:inline-flex; align-items:center; gap:var(--spacing-4);
-    font-size:var(--text-caption-size); color:var(--color-neutral-5);
-    margin-top:var(--spacing-4);}
-  .p-saved i{font-size:var(--icon-sm); color:var(--color-green);}
 
   /* Rail */
   .p-rail{position:sticky; top:var(--spacing-24); display:flex;
@@ -167,8 +161,13 @@
   @keyframes ask-glow-slide{ from{background-position:0% 0%;} to{background-position:200% 0%;} }
   .c-shell-main{position:relative;}
   .c-shell-content{padding-bottom:120px;} /* pill height + offset, so the footer scrolls clear */
-  .p-ask{position:absolute; left:50%; bottom:var(--spacing-24); z-index:60;
-    width:min(480px, calc(100% - var(--spacing-32))); transform:translateX(-50%);}
+  .p-dock{position:absolute; left:50%; bottom:var(--spacing-24); z-index:60;
+    transform:translateX(-50%); display:flex; align-items:center; gap:var(--spacing-12);
+    width:min(620px, calc(100% - var(--spacing-32)));}
+  .p-ask{position:relative; flex:1; min-width:0;}
+  .p-actions{flex:none; display:flex; gap:var(--spacing-4); padding:var(--spacing-8);
+    background:var(--color-neutral-1); border-radius:var(--radius-pill);
+    box-shadow:var(--shadow-4);}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -226,7 +225,7 @@
   }
   @media print{
     .c-sidebar-shell, .p-stepper-row, .p-crumb, .c-pageheader-actions,
-    .p-footer, .c-shell-span-1, .c-toast-host, .p-ask{display:none !important;}
+    .p-footer, .c-shell-span-1, .c-toast-host, .p-dock{display:none !important;}
     .c-shell{height:auto; background:var(--color-neutral-1);}
     .c-shell-content{overflow:visible; padding:0;}
     .c-shell-grid{display:block;}
@@ -315,12 +314,6 @@
             <span class="c-step-text"><span class="c-step-label upcoming" data-lab="4">Summary</span></span>
           </button>
         </div>
-        <div class="p-stripe-actions">
-          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripePdf" type="button" aria-label="Plan as PDF" title="Plan as PDF"><i class="ph ph-file-pdf"></i></button>
-          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeXls" type="button" aria-label="Plan as Excel" title="Plan as Excel"><i class="ph ph-file-xls"></i></button>
-          <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft" title="Save draft"><i class="ph ph-floppy-disk"></i></button>
-        </div>
-        <span class="p-saved" id="savedNote"><i class="ph-fill ph-check-circle"></i> Saved · just now</span>
       </div>
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
@@ -743,6 +736,7 @@
 
     </div>
 
+    <div class="p-dock">
     <div class="p-ask" id="askBox">
       <div class="p-ask-reply" id="askReply" role="status" aria-live="polite">
         <div class="p-ask-reply-head">
@@ -760,6 +754,21 @@
         <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
         <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
       </div>
+    </div>
+    <div class="p-actions" role="toolbar" aria-label="Plan actions">
+      <span class="c-tooltip-wrap">
+        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripePdf" type="button" aria-label="Plan as PDF"><i class="ph ph-file-pdf"></i></button>
+        <span class="c-tooltip-bubble" role="tooltip">Plan as PDF</span>
+      </span>
+      <span class="c-tooltip-wrap">
+        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeXls" type="button" aria-label="Plan as Excel"><i class="ph ph-file-xls"></i></button>
+        <span class="c-tooltip-bubble" role="tooltip">Plan as Excel</span>
+      </span>
+      <span class="c-tooltip-wrap">
+        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft"><i class="ph ph-floppy-disk"></i></button>
+        <span class="c-tooltip-bubble" role="tooltip">Save draft</span>
+      </span>
+    </div>
     </div>
   </div>
 </div>
@@ -926,13 +935,14 @@
     }, 3400);
   }
 
-  var savedTimer = null;
+  /* Autosave feedback is a toast, not a fixture — it pops when a save
+     actually happens, throttled so a burst of edits reads as one save. */
+  var savedToastAt = 0;
   function markSaved(){
-    $('savedNote').innerHTML = '<i class="ph-fill ph-check-circle"></i> Saved · just now';
-    clearTimeout(savedTimer);
-    savedTimer = setTimeout(function(){
-      $('savedNote').innerHTML = '<i class="ph-fill ph-check-circle"></i> Saved';
-    }, 8000);
+    var now = Date.now();
+    if (now - savedToastAt < 5000) return;
+    savedToastAt = now;
+    toast('success', null, 'Saved just now');
   }
 
   /* ═══ Audience maths — same-category personas overlap ~60%, cross ~25% ═══ */
@@ -1687,7 +1697,10 @@
   /* ═══ Functional stripe + Preview tab actions ═══ */
   function actPdf(){ window.print(); }
   function actXls(){ toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.'); }
-  function actSave(){ markSaved(); toast('success', null, 'Draft saved. Pick it up any time from Campaigns.'); }
+  function actSave(){
+    savedToastAt = Date.now();
+    toast('success', null, 'Draft saved. Pick it up any time from Campaigns.');
+  }
   $('stripePdf').addEventListener('click', actPdf);
   $('stripeXls').addEventListener('click', actXls);
   $('stripeSave').addEventListener('click', actSave);
@@ -1916,6 +1929,18 @@
     askHide();
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') askHide(); });
+
+  /* ═══ Tooltips — the DS bubble, visibility on hover and keyboard focus. ═══ */
+  document.querySelectorAll('.c-tooltip-wrap').forEach(function(w){
+    var b = w.querySelector('.c-tooltip-bubble');
+    if (!b) return;
+    function show(){ b.classList.add('is-visible'); }
+    function hide(){ b.classList.remove('is-visible'); }
+    w.addEventListener('mouseenter', show);
+    w.addEventListener('mouseleave', hide);
+    w.addEventListener('focusin', show);
+    w.addEventListener('focusout', hide);
+  });
 
   /* ═══ Drawers ═══ */
   document.querySelectorAll('.p-disclose').forEach(function(d){
