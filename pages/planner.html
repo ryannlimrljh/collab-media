@@ -75,10 +75,22 @@
 
   /* Rail — one pinned box for the screen: tabs on top, everything else
      scrolls inside it. */
+  /* The rail holds max-height minus the spacing the docked AI box
+     needs at the bottom-right corner. */
   .p-railbox{position:sticky; top:0; display:flex; flex-direction:column;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
-    max-height:calc(100vh - var(--spacing-32)); overflow:hidden;}
+    max-height:calc(100vh - 104px); overflow:hidden;}
+  .p-askdock{position:sticky; top:calc(100vh - 72px); margin-top:var(--spacing-12);}
+  .p-ask.is-docked{animation:p-dock-in 320ms var(--ease-settle);}
+  @keyframes p-dock-in{
+    from{opacity:0; transform:translateY(10px) scale(.95);}
+    to{opacity:1; transform:none;}
+  }
+  .p-ask.is-docked .p-ask-reply{top:auto; bottom:calc(100% + var(--spacing-12));
+    transform:translateY(8px);}
+  .p-ask.is-docked .p-ask-reply.is-open{transform:none;}
+  @media (prefers-reduced-motion:reduce){ .p-ask.is-docked{animation:none;} }
   .p-railtabs{display:flex; justify-content:center; flex:none;
     padding:var(--spacing-12) var(--spacing-12) 0;
     border-bottom:1px solid var(--color-neutral-3);}
@@ -188,12 +200,24 @@
      four labelled rows. Same inputs, calmer card. */
   .p-sect{margin-top:var(--spacing-24);}
   .p-sect > .c-stat-label{display:block; margin-bottom:var(--spacing-16);}
-  /* Campaign and Flight sit side by side, each a vertical stack. */
-  .p-sect-cols{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-24);
+  /* Campaign and Flight sit side by side, each a vertical stack, split
+     by a fine dotted rule; Goal and Languages get dotted rules above.
+     Ample padding keeps the rules from crowding the fields. */
+  .p-sect-cols{display:grid; grid-template-columns:1fr 1fr; gap:0;
     margin-top:var(--spacing-24);}
   .p-sect-cols .p-sect{margin-top:0;}
+  .p-sect-cols > .p-sect:first-child{padding-right:var(--spacing-32);}
+  .p-sect-cols > .p-sect:last-child{border-left:1px dotted var(--color-neutral-4);
+    padding-left:var(--spacing-32);}
+  #askCard > .p-sect{border-top:1px dotted var(--color-neutral-4);
+    padding-top:var(--spacing-24); margin-top:var(--spacing-24);}
   .p-vstack{display:flex; flex-direction:column; gap:var(--spacing-12);}
-  @media (max-width:640px){ .p-sect-cols{grid-template-columns:1fr;} }
+  @media (max-width:640px){
+    .p-sect-cols{grid-template-columns:1fr; gap:var(--spacing-24);}
+    .p-sect-cols > .p-sect:first-child{padding-right:0;}
+    .p-sect-cols > .p-sect:last-child{border-left:0; padding-left:0;
+      border-top:1px dotted var(--color-neutral-4); padding-top:var(--spacing-24);}
+  }
 
   /* Skeleton — shown inside step 1 while its content "loads in". */
   @keyframes p-skel-wave{ from{background-position:100% 0;} to{background-position:0 0;} }
@@ -209,8 +233,22 @@
   .p-skel-cols{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
   @media (prefers-reduced-motion:reduce){ .p-skel-bar{animation:none;} }
 
-  /* System checker — the pre-flight overlay that runs on Next. */
+  /* System checker — runs inline in the flow, between the step's Next
+     and the step that follows. */
   @keyframes p-spin{ to{transform:rotate(360deg);} }
+  .p-checkflow{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
+    border-top:1px dotted var(--color-neutral-4);}
+  .p-checkflow-title{display:flex; align-items:center; gap:var(--spacing-8);
+    font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9);
+    margin-bottom:var(--spacing-8);}
+  .p-checkflow-title i{font-size:var(--icon-sm);}
+  .p-checkflow-title i.spin{animation:p-spin 700ms linear infinite;
+    color:var(--color-neutral-5);}
+  .p-checklink{background:none; border:0; padding:0; margin-top:var(--spacing-8);
+    font-family:inherit; font-size:var(--text-body2-size); font-weight:700;
+    color:var(--color-neutral-9); text-decoration:underline;
+    text-underline-offset:3px; cursor:pointer;}
+  .p-checklink:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .p-checkrow{display:flex; align-items:flex-start; gap:var(--spacing-8);
     padding:var(--spacing-4) 0; font-size:var(--text-body2-size);
     line-height:var(--text-body2-lh); color:var(--color-neutral-9);
@@ -314,6 +352,7 @@
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
     .p-railbox{position:static; max-height:none;}
+    .p-askdock{position:static;}
     .p-step-inner-pad{padding-left:0;}
   }
   @media print{
@@ -560,6 +599,7 @@
             Next: audience <i class="ph ph-arrow-right"></i>
           </button>
         </div>
+        <div class="p-checkflow" id="checkFlow" hidden></div>
       </section>
             </div></div></div>
           </li>
@@ -571,8 +611,6 @@
                 <span class="d" id="stepsum2">Who this plan is trying to reach.</span></span>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
-            <div class="p-ai-slot" data-slot="2"></div>
-
       <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
       <section id="view2">
         <div class="p-stack">
@@ -716,8 +754,6 @@
                 <span class="d" id="stepsum3">Channels, formats, sites and the split.</span></span>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
-            <div class="p-ai-slot" data-slot="3"></div>
-
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
       <section id="view3">
         <div class="c-banner c-banner-ai p-banner-gap">
@@ -791,8 +827,6 @@
                 <span class="d" id="stepsum4">The whole plan, ready to book.</span></span>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
-            <div class="p-ai-slot" data-slot="4"></div>
-
       <!-- ══ STEP 4 · SUMMARY ═════════════════════════════════════════ -->
       <section id="view4">
         <div class="c-banner c-banner-success p-banner-gap" id="bookedBanner" hidden>
@@ -896,6 +930,7 @@
             </div>
             </div>
           </div>
+          <div class="p-askdock" id="askDock"></div>
         </div>
       </div>
 
@@ -935,21 +970,6 @@
   <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
-  </div>
-</div>
-
-<!-- System checker — runs on Next and before booking -->
-<div class="p-overlay" id="checkOverlay" hidden>
-  <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="checkTitle" style="max-width:400px;">
-    <div class="c-modal-head">
-      <h4 id="checkTitle">Checking your brief</h4>
-      <button class="c-icon-btn" id="checkClose" aria-label="Close" type="button" hidden><i class="ph ph-x"></i></button>
-    </div>
-    <div class="c-modal-body"><div id="checkList"></div></div>
-    <div class="c-modal-foot" id="checkFoot" hidden>
-      <button class="c-btn c-btn-secondary c-btn-md" id="checkDismiss" type="button">Close</button>
-      <button class="c-btn c-btn-primary c-btn-md" id="checkFixBtn" type="button">Take me there</button>
-    </div>
   </div>
 </div>
 
@@ -1253,17 +1273,27 @@
     }, 520);
     moveAskTo(n);
     if (n === 4) renderSummary();
-    var hint = $('askInput');
-    if (hint) hint.placeholder = ASK_HINTS[n] || ASK_HINTS[1];
+    closeChecker();
     renderAll();
     if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  /* The single Collab AI box follows the open step. */
+  /* The Collab AI box lives in the step-1 banner; from step 2 on it
+     shrinks into the bottom-right dock under the rail and holds there. */
   function moveAskTo(n){
-    var slot = document.querySelector('.p-ai-slot[data-slot="' + n + '"]');
     var box = $('askBox');
-    if (slot && box && box.parentElement !== slot) slot.appendChild(box);
+    if (!box) return;
+    if (n === 1){
+      var slot = document.querySelector('.p-ai-slot[data-slot="1"]');
+      if (slot && box.parentElement !== slot) slot.appendChild(box);
+      box.classList.remove('is-docked');
+      $('askInput').placeholder = ASK_HINTS[1];
+    } else {
+      var dock = $('askDock');
+      if (dock && box.parentElement !== dock) dock.appendChild(box);
+      box.classList.add('is-docked');
+      $('askInput').placeholder = 'I will hold my position here until you need me';
+    }
     askHide();
   }
 
@@ -1271,25 +1301,28 @@
      sequence: each line lands with a spinner, resolves to its verdict,
      and the whole run either waves the user through or names what is
      still open. ═══ */
-  var checkRun = 0, checkFixTarget = null;
-  function runChecker(title, checks, onPass){
+  var checkRun = 0;
+  function runChecker(title, checks, host, onPass){
     var run = ++checkRun;
-    var overlay = $('checkOverlay'), list = $('checkList');
-    $('checkTitle').textContent = title;
-    $('checkFoot').hidden = true;
-    $('checkClose').hidden = true;
-    list.innerHTML = '';
-    overlay.hidden = false;
+    var flow = $('checkFlow');
+    if (host && flow.parentElement !== host) host.appendChild(flow);
+    flow.innerHTML = '<div class="p-checkflow-title">' +
+      '<i class="ph ph-circle-notch spin"></i><span>' + title + '…</span></div>' +
+      '<div class="p-checkflow-rows"></div>';
+    flow.hidden = false;
+    var rows = flow.querySelector('.p-checkflow-rows');
+    var titleEl = flow.querySelector('.p-checkflow-title');
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var stepMs = reduced ? 0 : 340;
     var blockers = checks.filter(function(c){ return c.level === 'block'; });
+    flow.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'nearest'});
     checks.forEach(function(c, idx){
       setTimeout(function(){
         if (run !== checkRun) return;
         var row = document.createElement('div');
         row.className = 'p-checkrow';
         row.innerHTML = '<i class="ph ph-circle-notch spin"></i><span>' + c.label + '</span>';
-        list.appendChild(row);
+        rows.appendChild(row);
         requestAnimationFrame(function(){ row.classList.add('is-in'); });
         setTimeout(function(){
           if (run !== checkRun) return;
@@ -1302,35 +1335,37 @@
     setTimeout(function(){
       if (run !== checkRun) return;
       if (!blockers.length){
-        $('checkTitle').textContent = 'All clear';
+        titleEl.innerHTML = '<i class="ph-fill ph-check-circle" style="color:var(--color-green);"></i><span>All clear</span>';
         setTimeout(function(){
           if (run !== checkRun) return;
-          overlay.hidden = true;
+          flow.hidden = true;
           onPass();
-        }, reduced ? 0 : 500);
+        }, reduced ? 0 : 550);
       } else {
-        $('checkTitle').textContent = blockers.length === 1 ? 'One thing first' : blockers.length + ' things first';
-        checkFixTarget = blockers[0].target;
-        $('checkFoot').hidden = false;
-        $('checkClose').hidden = false;
+        titleEl.innerHTML = '<i class="ph-fill ph-x-circle" style="color:var(--color-red);"></i><span>' +
+          (blockers.length === 1 ? 'One thing first' : blockers.length + ' things first') + '</span>';
+        var link = document.createElement('button');
+        link.type = 'button';
+        link.className = 'p-checklink';
+        link.textContent = 'Take me there';
+        link.addEventListener('click', function(){
+          flow.hidden = true;
+          jumpToTarget(blockers[0].target);
+        });
+        flow.appendChild(link);
       }
     }, checks.length * stepMs + (reduced ? 60 : 640));
   }
-  function closeChecker(){ checkRun++; $('checkOverlay').hidden = true; }
-  $('checkClose').addEventListener('click', closeChecker);
-  $('checkDismiss').addEventListener('click', closeChecker);
-  $('checkFixBtn').addEventListener('click', function(){
-    closeChecker();
-    if (checkFixTarget) jumpToTarget(checkFixTarget);
-  });
-  $('checkOverlay').addEventListener('click', function(e){
-    if (e.target === $('checkOverlay')) closeChecker();
-  });
+  function closeChecker(){
+    checkRun++;
+    var flow = $('checkFlow');
+    if (flow) flow.hidden = true;
+  }
 
   var CHECK_TITLES = {1:'Checking your brief', 2:'Checking the audience', 3:'Checking the media mix'};
   function tryNext(n){
     var current = n - 1;
-    runChecker(CHECK_TITLES[current] || 'Checking', checksFor(current), function(){
+    runChecker(CHECK_TITLES[current] || 'Checking', checksFor(current), $('view' + current), function(){
       markSaved();
       go(n);
     });
@@ -1876,7 +1911,7 @@
   $('bookBtn').addEventListener('click', function(){
     if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
     runChecker('Checking the whole plan',
-      checksFor(1).concat(checksFor(2), checksFor(3)), openBook);
+      checksFor(1).concat(checksFor(2), checksFor(3)), $('view4'), openBook);
   });
   $('bookClose').addEventListener('click', closeBook);
   $('bookCancel').addEventListener('click', closeBook);
@@ -2158,8 +2193,10 @@
     var v = $('askInput').value;
     $('askInput').value = '';
     /* Push the page up to the assistant first, so the reply and the
-       auto-fill washes land in view. */
-    $('askBox').scrollIntoView({behavior:'smooth', block:'start'});
+       auto-fill washes land in view. Docked, it already holds its
+       corner, so no scroll. */
+    if (!$('askBox').classList.contains('is-docked'))
+      $('askBox').scrollIntoView({behavior:'smooth', block:'start'});
     handleAsk(v);
   }
   $('askSend').addEventListener('click', askSubmit);
