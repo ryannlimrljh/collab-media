@@ -78,7 +78,7 @@
   .p-railbox{position:sticky; top:0; display:flex; flex-direction:column;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
-    max-height:calc(100vh - 96px); overflow:hidden;}
+    max-height:calc(100vh - var(--spacing-32)); overflow:hidden;}
   .p-railtabs{display:flex; justify-content:center; flex:none;
     padding:var(--spacing-12) var(--spacing-12) 0;
     border-bottom:1px solid var(--color-neutral-3);}
@@ -188,21 +188,28 @@
      four labelled rows. Same inputs, calmer card. */
   .p-sect{margin-top:var(--spacing-20);}
   .p-sect > .c-stat-label{display:block; margin-bottom:var(--spacing-8);}
-  .p-grid3a{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:var(--spacing-12);}
-  .p-grid3eq{display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--spacing-12);}
-  .p-grid4{display:grid; grid-template-columns:1.2fr 1.2fr .7fr .7fr; gap:var(--spacing-12);}
-  @media (max-width:1280px){ .p-grid4{grid-template-columns:1fr 1fr;} }
-  @media (max-width:1080px){ .p-grid3a, .p-grid3eq{grid-template-columns:1fr 1fr;} }
+  /* Insertion fields run two columns across, at every width above 640. */
+  .p-grid3a, .p-grid3eq, .p-grid4{display:grid; grid-template-columns:1fr 1fr;
+    gap:var(--spacing-12);}
   @media (max-width:640px){
     .p-grid2, .p-grid3a, .p-grid3eq, .p-grid4{grid-template-columns:1fr;}
   }
+
+  /* Dropdown panels overlay — absolute below the trigger, never pushing
+     the form around (the DS input-wrap is the positioning context). */
+  .c-dropdown-panel, .c-dropdown-multi-panel{position:absolute;
+    top:calc(100% + var(--spacing-8)); left:0; margin-top:0; z-index:60;}
 
   /* ── Collab AI ask pill — the landing/campaigns assistant entry point,
      here wired to the plan itself. Same glow layers, mark and elevation;
      the reply sheet folds up above it. ── */
   @keyframes ask-glow-slide{ from{background-position:0% 0%;} to{background-position:200% 0%;} }
   .c-shell-main{position:relative;}
-  .c-shell-content{padding-bottom:var(--spacing-48, 48px);}
+  /* The rail pins level with the floating nav (its top sits at 16px),
+     so the content's top padding shrinks to match; the header now lives
+     inside the canvas column and keeps its own rhythm. */
+  .c-shell-content{padding-top:var(--spacing-16); padding-bottom:var(--spacing-48, 48px);}
+  .p-canvas > .c-pageheader{margin-bottom:var(--spacing-24); padding-top:var(--spacing-8);}
   /* Export actions live in the page header now — a quiet ghost group. */
   .p-actions{display:flex; align-items:center; gap:var(--spacing-4);}
   .p-actions .c-btn-icon{width:40px; height:40px;}
@@ -210,9 +217,15 @@
   .p-actdiv{width:1px; height:24px; background:var(--color-neutral-3);
     margin:0 var(--spacing-4);}
   /* The ask pill sits inline at the top of the open step; the reply
-     sheet drops BELOW it, floating over the section. */
+     sheet drops BELOW it, floating over the section. On step 1 the pill
+     nests inside the AI banner, one panel. */
   .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
   .p-ask{position:relative;}
+  .p-ai-panel{flex-direction:column; align-items:stretch; gap:var(--spacing-12);
+    overflow:visible;}
+  .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
+    position:relative; z-index:1;}
+  .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -316,6 +329,9 @@
   <div class="c-shell-main">
     <div class="c-shell-content">
 
+      <div class="c-shell-grid">
+        <div class="c-shell-span-3 p-canvas">
+
       <header class="c-pageheader">
         <div class="c-pageheader-row">
           <div class="p-headrow">
@@ -345,8 +361,6 @@
         </div>
       </header>
 
-      <div class="c-shell-grid">
-        <div class="c-shell-span-3 p-canvas">
           <ol class="p-journey">
 
           <li class="p-step" id="step1" data-step="1">
@@ -359,15 +373,15 @@
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
-        <div class="c-banner c-banner-ai p-banner-gap">
-          <i class="ph-fill ph-sparkle icon"></i>
-          <div class="body"><p class="message">Start anywhere. Fill the ask by hand, or describe the campaign in one line to Collab AI below and it drafts the brief for you.</p></div>
-          <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
-            <i class="ph ph-sparkle"></i> Try it
-          </button>
-        </div>
-
-        <div class="p-ai-slot" data-slot="1">
+        <div class="c-banner c-banner-ai p-ai-panel p-banner-gap">
+          <div class="p-ai-panel-row">
+            <i class="ph-fill ph-sparkle icon"></i>
+            <div class="body"><p class="message">Start anywhere. Fill the ask by hand, or describe the campaign in one line to Collab AI below and it drafts the brief for you.</p></div>
+            <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
+              <i class="ph ph-sparkle"></i> Try it
+            </button>
+          </div>
+          <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
             <div class="p-ask-glow-inner" aria-hidden="true"></div>
@@ -385,6 +399,7 @@
               <div class="p-ask-reply-text" id="askReplyText"></div>
               <div class="p-ask-reply-actions" id="askReplyActions" hidden></div>
             </div>
+          </div>
           </div>
         </div>
 
@@ -1847,10 +1862,14 @@
     3: 'Try "rebalance the split" or "pin the draft sites"',
     4: 'Try "is this ready to book?"'
   };
-  var typeTimer = null;
+  var typeTimer = null, askAwayTimer = null;
   function askShow(text, actions){
     var txt = $('askReplyText'), act = $('askReplyActions');
     clearInterval(typeTimer);
+    /* The reply excuses itself after a while if nobody closes it;
+       engaging with it (hover or focus) keeps it around. */
+    clearTimeout(askAwayTimer);
+    askAwayTimer = setTimeout(askHide, 9000);
     $('askReply').classList.add('is-open');
     act.hidden = true; act.innerHTML = '';
     function done(){
@@ -1876,7 +1895,13 @@
       if (i >= text.length){ clearInterval(typeTimer); done(); }
     }, 14);
   }
-  function askHide(){ clearInterval(typeTimer); $('askReply').classList.remove('is-open'); }
+  function askHide(){
+    clearInterval(typeTimer);
+    clearTimeout(askAwayTimer);
+    $('askReply').classList.remove('is-open');
+  }
+  $('askReply').addEventListener('mouseenter', function(){ clearTimeout(askAwayTimer); });
+  $('askReply').addEventListener('focusin', function(){ clearTimeout(askAwayTimer); });
 
   function askStatus(){
     var names = {1:'Brief', 2:'Audience', 3:'Media mix', 4:'Summary'};
