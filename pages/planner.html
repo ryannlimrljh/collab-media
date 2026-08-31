@@ -2792,14 +2792,94 @@
     aiFillSequence(steps, done);
   }
 
+  /* ═══ Intent engine ═══
+     Three rules keep it honest:
+     1. Questions never mutate the plan; they get informative answers.
+     2. Destructive intents need an action verb, not just a topic word.
+     3. A topic without a verb gets the current state plus how to act.
+     Polite commands ("can you suggest…") count as commands. */
+  function parseRmAmount(text){
+    var m = /rm\s*([\d][\d.,]*)\s*(k|m)?/i.exec(text);
+    if (!m) return 0;
+    var amt = parseFloat(m[1].replace(/,/g, ''));
+    var suf = (m[2] || '').toLowerCase();
+    if (suf === 'k') amt *= 1000;
+    if (suf === 'm') amt *= 1000000;
+    return amt > 0 ? Math.round(amt) : 0;
+  }
+  function personaInfo(){
+    if (mode === 'mass') return 'You are on mass targeting: the whole Malaysia footprint, ' +
+      fmt(audienceReach()) + ' after refiners. Switch to personas and I can suggest a pick.';
+    return selected.length
+      ? 'Current pick: ' + selected.map(function(id){ return byId(id).name; }).join(', ') + ' — ' +
+        fmt(reach().uniq) + ' unique reach. Say "suggest personas" for my pick, or "clear personas" to start over.'
+      : 'No personas picked yet. Say "suggest personas" and I will start you off from the brief.';
+  }
+  function siteInfo(){
+    var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
+    return pins.length
+      ? 'Must-buys right now: ' + pins.map(function(s){ return s.name; }).join(', ') +
+        '. Say "pin the draft sites" to reset them to my pick.'
+      : 'Nothing is marked must-buy, so the optimiser buys freely. Say "pin the draft sites" and I will mark my pick.';
+  }
+  function mixInfo(){
+    var on = onFormats();
+    return on.length
+      ? 'The mix runs ' + on.map(function(f){ return f.name; }).join(', ') +
+        '. Say "restore the AI draft" to hand it back to me.'
+      : 'No formats are on. Say "restore the AI draft" and I will rebuild the mix from the brief.';
+  }
+  function splitInfo(){
+    var fc = forecast();
+    var diff = budget() - fc.alloc;
+    var state = Math.abs(diff) < 1 ? 'fully allocated' : diff > 0 ? rm(diff) + ' unallocated' : rm(-diff) + ' over';
+    return 'Budget is ' + rm(budget()) + ', ' + state + ' across ' + onFormats().length + ' formats' +
+      (fc.blended ? ' at a blended ' + rm(fc.blended) + ' CPM' : '') +
+      '. Say "rebalance the split" to return to the recommendation.';
+  }
+
   function handleAsk(qRaw){
-    var q = (qRaw || '').toLowerCase();
-    if (tryPendingBrief && qRaw.trim() === tryPendingLine){
+    var raw = (qRaw || '').trim();
+    var q = raw.toLowerCase();
+    var polite = /^(please\s+)?(can|could|would|will)\s+you\s+(please\s+)?/;
+    var wasPolite = polite.test(q);
+    var cmd = q.replace(polite, '').replace(/\?\s*$/, '');
+    var isQuestion = !wasPolite && (/\?\s*$/.test(raw) ||
+      /^(what|how|why|where|when|which|is|are|do|does|did|should|could|can|will|would|who)\b/.test(q));
+    function wantsAction(re){ return !isQuestion && re.test(cmd); }
+
+    /* Seeded try-line: exact match runs the full example brief. */
+    if (tryPendingBrief && raw === tryPendingLine){
       var tb = tryPendingBrief;
       tryPendingBrief = null;
       applyTryBrief(tb);
-    } else if (/rm\s*\d/i.test(q)){
-      var got = parseBriefLine(qRaw.trim());
+      return;
+    }
+
+    /* Help. */
+    if (/\bhelp\b|what can you do|what do you do|capabilit/.test(q)){
+      askShow('I can write the brief from one line (a name plus an RM amount), set the budget, suggest or clear personas, mark the draft sites as must-buys, restore the AI mix, rebalance the split, and tell you if the plan is ready to book.');
+      return;
+    }
+
+    var amount = parseRmAmount(q);
+    var editVerb = /^(set|change|update|make|bump|adjust|move|increase|decrease|raise|lower)\b/.test(cmd) ||
+      /(set|change|update|bump|adjust|increase|decrease|raise|lower)\s+(the\s+)?budget/.test(cmd);
+
+    /* Budget-only edit: an instruction about the budget with an amount. */
+    if (amount && /budget/.test(q) && editVerb && !isQuestion){
+      aiFillSequence([{el: $('b-budget'), countTo: amount,
+        apply: function(){ $('b-budget').value = amount; }}], function(){
+        resetSplit(); renderAll(); markSaved();
+        askShow('Budget set to ' + rm(amount) + ', and the split re-allocated to match.');
+      });
+      return;
+    }
+
+    /* One-liner brief: an RM amount in something that reads like a
+       description, not an instruction or a question. */
+    if (amount && !isQuestion && !editVerb){
+      var got = parseBriefLine(raw);
       askShow('Writing that into the brief now.');
       applyBriefLine(got, function(){
         var bits = [];
@@ -2812,43 +2892,88 @@
           (missing.length ? ' Still needed: ' + missing.join('; ') + '.' : ' The brief is complete.'),
           step === 1 ? null : [{label:'Review the brief', icon:'ph-arrow-right', run:function(){ askHide(); go(1); }}]);
       });
-    } else if (/persona|audience|who /.test(q)){
-      var personaTile = document.querySelector('[data-mode="personas"]');
-      if (mode !== 'personas' && personaTile) personaTile.click();
-      selected = ['cl', 'al', 'kd'];
-      personaSource = 'ai';
-      if (personaOpen) renderPersonaList();
-      renderChips(); renderAll(); markSaved();
-      aiFlash(['personaField', 'chipRow']);
-      askShow('I read the brief as a broad entertainment play, so I picked Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
-        fmt(reach().uniq) + ' unique reach. Swap any of them freely.',
-        step === 2 ? null : [{label:'Go to Audience', icon:'ph-arrow-right', run:function(){ askHide(); go(2); }}]);
-    } else if (/pin|site|must.?buy/.test(q)){
-      SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
-      renderAll(); markSaved();
-      aiFlash(['sitesDrawer']);
-      var pinned = SITES.filter(function(s){ return s.pin; });
-      askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
-        '. Everything else stays in the pool for the optimiser to move budget between.');
-    } else if (/draft|mix|format/.test(q)){
-      FORMATS.forEach(function(f){ f.on = ['isv','sva','ldb'].indexOf(f.id) > -1 && chanAllows(f.ch); });
-      if (!onFormats().length){
-        var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
-        if (first) first.on = true;
+      return;
+    }
+
+    /* Personas. */
+    if (/persona|audience|\bwho\b/.test(q)){
+      if (wantsAction(/clear|remove|empty|drop/)){
+        selected = [];
+        personaSource = null;
+        if (personaOpen) renderPersonaList();
+        renderChips(); renderAll(); markSaved();
+        askShow('Cleared the personas. Pick from the playbook, or say "suggest personas" and I will start you off.');
+      } else if (wantsAction(/suggest|pick|choose|recommend|select|give|start/)){
+        var personaTile = document.querySelector('[data-mode="personas"]');
+        if (mode !== 'personas' && personaTile) personaTile.click();
+        selected = ['cl', 'al', 'kd'];
+        personaSource = 'ai';
+        if (personaOpen) renderPersonaList();
+        renderChips(); renderAll(); markSaved();
+        aiFlash(['personaField', 'chipRow']);
+        askShow('I read the brief as a broad entertainment play, so I picked Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
+          fmt(reach().uniq) + ' unique reach. Swap any of them freely.',
+          step === 2 ? null : [{label:'Go to Audience', icon:'ph-arrow-right', run:function(){ askHide(); go(2); }}]);
+      } else {
+        askShow(personaInfo(),
+          step === 2 ? null : [{label:'Go to Audience', icon:'ph-arrow-right', run:function(){ askHide(); go(2); }}]);
       }
-      SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
-      mixSource = 'ai';
-      resetSplit(); renderAll(); markSaved();
-      animateSplitSweep();
-      askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
-        step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
-    } else if (/balanc|allocat|split|budget/.test(q)){
-      resetSplit(); renderAll(); markSaved();
-      animateSplitSweep();
-      askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
-        onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
-        step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
-    } else if (/book|ready|done|finish/.test(q)){
+      return;
+    }
+
+    /* Sites and must-buys. */
+    if (/\bpin|must.?buy|\bsites?\b/.test(q)){
+      if (wantsAction(/pin|mark|tick|reset/)){
+        SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+        mixSource = 'user';
+        renderAll(); markSaved();
+        aiFlash(['sitesDrawer']);
+        var pinned = SITES.filter(function(s){ return s.pin; });
+        askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
+          '. Everything else stays in the pool for the optimiser to move budget between.');
+      } else {
+        askShow(siteInfo());
+      }
+      return;
+    }
+
+    /* The mix. */
+    if (/draft|\bmix\b|format/.test(q)){
+      if (wantsAction(/re-?draft|restore|redo|remake|rebuild|refresh|\bdraft\b/)){
+        FORMATS.forEach(function(f){ f.on = ['isv','sva','ldb'].indexOf(f.id) > -1 && chanAllows(f.ch); });
+        if (!onFormats().length){
+          var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+          if (first) first.on = true;
+        }
+        SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+        mixSource = 'ai';
+        resetSplit(); renderAll(); markSaved();
+        animateSplitSweep();
+        askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
+          step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
+      } else {
+        askShow(mixInfo(),
+          step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
+      }
+      return;
+    }
+
+    /* The split and budget state. */
+    if (/balanc|allocat|split|budget/.test(q)){
+      if (wantsAction(/re-?balanc|reset|allocate|spread|even|balance|fix/)){
+        resetSplit(); renderAll(); markSaved();
+        animateSplitSweep();
+        askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
+          onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
+          step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
+      } else {
+        askShow(splitInfo());
+      }
+      return;
+    }
+
+    /* Booking readiness — read-only by nature. */
+    if (/book|ready|done|finish/.test(q)){
       var blockers = checksFor(1).concat(checksFor(2), checksFor(3))
         .filter(function(c){ return c.level === 'block'; });
       askShow(blockers.length
@@ -2856,17 +2981,21 @@
           blockers[0].label.toLowerCase() + '. The checklist in the rail jumps straight to each one.'
         : 'Yes. Every check is clear, so the summary is ready and booking hands the plan to the sales team.',
         blockers.length ? null : [{label:'Go to Summary', icon:'ph-arrow-right', run:function(){ askHide(); go(4); }}]);
-    } else if (step === 1 && !$('b-name').value.trim() && qRaw.trim().split(/\s+/).length >= 3 &&
-        !/[?]/.test(qRaw) && !/^(what|how|why|where|when|is|are|do|does|should|can|who)\b/.test(q)){
-      var line = parseBriefLine(qRaw.trim());
+      return;
+    }
+
+    /* A plain description on a blank brief reads as the campaign. */
+    if (step === 1 && !$('b-name').value.trim() && raw.split(/\s+/).length >= 3 && !isQuestion){
+      var line = parseBriefLine(raw);
       applyBriefLine(line, function(){
         askShow('I took that as the campaign' +
           (line.obj ? ', with ' + (/^a/i.test(line.obj) ? 'an ' : 'a ') + line.obj + ' objective' : '') +
           '. Add a budget, flight dates and a KPI target and the planner can draft the rest.');
       });
-    } else {
-      askShow(askStatus());
+      return;
     }
+
+    askShow(askStatus());
   }
 
   /* Try it — Collab AI drafts a complete example brief, drawn at
