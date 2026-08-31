@@ -276,24 +276,39 @@
     margin-bottom:var(--spacing-16); flex-wrap:wrap;}
   .p-sect-labelrow .c-stat-label{margin:0;}
   #personaAiTag i{font-size:var(--icon-micro); vertical-align:-1px; margin-right:2px;}
+  /* AI-pick badge — the step-1 banner's pastel sweep, shrunk to a chip:
+     an animated fill layer under the text and a 1px gradient rim. */
+  .p-ai-badge{position:relative; z-index:0; background:none;
+    border:1px solid transparent; overflow:hidden; color:rgba(8,8,8,.8);}
+  .p-ai-badge::before, .p-ai-badge::after{content:''; position:absolute; inset:0;
+    border-radius:inherit; pointer-events:none;
+    background-image:linear-gradient(90deg,var(--color-fire-pastel) 0%,var(--color-wood-pastel) 20%,var(--color-earth-pastel) 40%,var(--color-water-pastel) 60%,var(--color-gold-pastel) 80%,var(--color-fire-pastel) 100%);
+    background-size:200% 100%; animation:c-prompt-bar-glow-move 4s linear infinite;}
+  .p-ai-badge::before{z-index:-1; opacity:.18;}
+  .p-ai-badge::after{z-index:1; padding:1px;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;}
+  @media (prefers-reduced-motion:reduce){
+    .p-ai-badge::before, .p-ai-badge::after{animation:none;}
+  }
   .p-persona-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);
     align-items:start;}
   @media (max-width:640px){ .p-persona-row{grid-template-columns:1fr;} }
-  .p-whycard{display:flex; align-items:flex-start; gap:var(--spacing-12);
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-md); padding:var(--spacing-12) var(--spacing-16);
-    font-family:inherit; text-align:left; cursor:pointer;
+  /* One-line justification card, the same height as the picker input;
+     the evidence line lives in its hover tooltip. */
+  .p-whywrap{display:block; width:100%;}
+  .p-whycard{display:flex; align-items:center; gap:var(--spacing-12); width:100%;
+    height:40px; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+    padding:0 var(--spacing-16); font-family:inherit; text-align:left; cursor:pointer;
     transition:border-color var(--duration-fast) var(--ease-standard),
       box-shadow var(--duration-fast) var(--ease-standard);}
   .p-whycard:hover{border-color:var(--color-neutral-4); box-shadow:var(--shadow-1);}
   .p-whycard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-whycard > i{flex:none; font-size:var(--icon-base); color:var(--color-neutral-9);
-    margin-top:2px;}
-  .p-whycard .tx{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
-  .p-whycard .t{font-size:var(--text-body2-size); font-weight:700;
-    color:var(--color-neutral-9);}
-  .p-whycard .d{font-size:var(--text-caption-size); color:var(--color-neutral-5);
-    line-height:var(--text-caption-lh);}
+  .p-whycard > i{flex:none; font-size:var(--icon-base); color:var(--color-neutral-9);}
+  .p-whycard .t{flex:1; min-width:0; font-size:var(--text-body2-size); font-weight:700;
+    color:var(--color-neutral-9); white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis;}
   .p-whycard .chev{flex:none; font-size:var(--icon-sm); color:var(--color-neutral-5);}
 
   /* Fold-out modal — the landing's folding shell, veil and delayed
@@ -802,7 +817,7 @@
               <div class="p-sect" id="personaBody">
                 <div class="p-sect-labelrow">
                   <span class="c-stat-label">Personas — KULT audience playbook</span>
-                  <span class="c-badge c-badge-neutral" id="personaAiTag" hidden><i class="ph-fill ph-sparkle"></i> Picked by Collab AI · swap freely</span>
+                  <span class="c-badge p-ai-badge" id="personaAiTag" hidden><i class="ph-fill ph-sparkle"></i> Picked by Collab AI · swap freely</span>
                 </div>
                 <div class="p-persona-row">
                 <div class="c-field c-dropdown-multi-field" id="personaField">
@@ -819,14 +834,14 @@
                   </div>
                   <span class="c-helper" id="pickerCount">0 of 5 selected</span>
                 </div>
-                <button class="p-whycard" id="whyBtn" type="button" aria-haspopup="dialog">
-                  <i class="ph-fill ph-chart-bar" aria-hidden="true"></i>
-                  <span class="tx">
+                <span class="c-tooltip-wrap p-whywrap">
+                  <button class="p-whycard" id="whyBtn" type="button" aria-haspopup="dialog">
+                    <i class="ph-fill ph-chart-bar" aria-hidden="true"></i>
                     <span class="t">Why these personas?</span>
-                    <span class="d">The evidence: top matching Astro properties and real 90-day performance.</span>
-                  </span>
-                  <i class="ph ph-arrow-up-right chev" aria-hidden="true"></i>
-                </button>
+                    <i class="ph ph-arrow-up-right chev" aria-hidden="true"></i>
+                  </button>
+                  <span class="c-tooltip-bubble" role="tooltip">Top matching Astro properties and real 90-day performance</span>
+                </span>
                 </div>
                 <div class="c-chip-group p-chips" id="chipRow"></div>
               </div>
