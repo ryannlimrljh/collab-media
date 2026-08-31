@@ -547,6 +547,10 @@
   .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
   .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
+  /* In the banner, the reply stretches to the panel's outer edge so the
+     heading lines behind it cannot peek out beside the box. */
+  .p-ai-panel .p-ask-reply{left:calc(-1 * var(--spacing-16) - 1px);
+    right:calc(-1 * var(--spacing-16) - 1px);}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
