@@ -21,29 +21,71 @@
   .p-crumb{flex:none; text-decoration:none; margin-left:calc(var(--spacing-12) * -1);
     margin-top:4px;}
 
-  /* Stepper row — the stepper plus a quiet autosave caption. Steps are
-     buttons (completed ones navigate back), so they need the button reset
-     the DS's div-based stepper never needed. */
-  .p-stepper-row{display:flex; align-items:center; gap:var(--spacing-24);
-    background:var(--color-neutral-1);
-    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
-    box-shadow:var(--shadow-1); padding:var(--spacing-12) var(--spacing-16);}
-  /* Tabs share the stepper's grid row — centred against its band, so the
-     strength card below starts level with the first content card. */
-  .p-tabcell{display:flex; align-items:center; justify-content:center;}
-  .p-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
-  .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
-  .p-stepper-row .c-stepper{flex:1;}
-  button.c-step{background:none; border:0; padding:0; cursor:pointer;
-    font-family:inherit;}
-  button.c-step:disabled{cursor:default;}
-  button.c-step:focus-visible{outline:2px solid var(--color-obsidian);
+  /* ── Vertical journey — the wizard as an expanding outline. Each step
+     is a head (indicator + title + live summary) over a body that folds
+     open on the 0fr→1fr grid-row trick. The canvas is unboxed; hairline
+     dividers do the grouping the cards used to. ── */
+  .p-journey{list-style:none; margin:0; padding:0;}
+  .p-step{position:relative;}
+  .p-step + .p-step{margin-top:var(--spacing-12);}
+  .p-step::before{content:''; position:absolute; left:15px;
+    top:44px; bottom:-16px; width:2px; background:var(--color-neutral-3);}
+  .p-step:last-child::before{display:none;}
+  .p-step-head{display:flex; align-items:center; gap:var(--spacing-12);
+    width:100%; background:none; border:0; padding:var(--spacing-4) 0;
+    text-align:left; cursor:pointer; font-family:inherit;}
+  .p-step-head:focus-visible{outline:2px solid var(--color-obsidian);
     outline-offset:2px; border-radius:var(--radius-sm);}
-  .c-stepper:not(.vertical) .c-step-text{white-space:nowrap;}
+  .p-step-head .c-step-indicator{flex:none; position:relative; z-index:1;}
+  .p-step-title{min-width:0;}
+  .p-step-title .t{display:block; font-size:var(--text-h4-size);
+    font-weight:800; color:var(--color-neutral-9);}
+  .p-step-title .d{display:block; margin-top:2px;
+    font-size:var(--text-body2-size); color:var(--color-neutral-5);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .p-step-body{display:grid; grid-template-rows:0fr;
+    transition:grid-template-rows 480ms var(--ease-settle);}
+  .p-step-inner{overflow:hidden; min-width:0;}
+  .p-step.is-open .p-step-body{grid-template-rows:1fr;}
+  .p-step.is-open.is-settled .p-step-inner{overflow:visible;}
+  .p-step-inner-pad{padding:var(--spacing-16) 0 var(--spacing-24) 44px;}
+  @media (prefers-reduced-motion:reduce){ .p-step-body{transition:none;} }
 
-  /* Rail */
-  .p-rail{position:sticky; top:var(--spacing-24); display:flex;
-    flex-direction:column; gap:var(--spacing-12);}
+  /* Unboxed canvas blocks — the old cards, flattened to divided bands. */
+  .p-stack{display:flex; flex-direction:column; gap:0;}
+  .p-block{padding:var(--spacing-20) 0;}
+  .p-stack > .p-block:first-child{padding-top:0;}
+  .p-block + .p-block, .p-block + .p-drawer, .p-drawer + .p-block,
+  .p-drawer + .p-drawer{border-top:1px solid var(--color-neutral-3);}
+  .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
+
+  /* AI-assisted fields flash a pastel wash so the help is visible. */
+  @keyframes p-ai-fill{
+    0%{background-color:var(--color-water-pastel);}
+    100%{background-color:transparent;}
+  }
+  .p-ai-flash input, .p-ai-flash textarea, .p-ai-flash .c-dropdown-input{
+    animation:p-ai-fill 1.4s var(--ease-standard);}
+  .p-ai-flash-row{animation:p-ai-fill 1.4s var(--ease-standard);
+    border-radius:var(--radius-sm);}
+  @media (prefers-reduced-motion:reduce){
+    .p-ai-flash input, .p-ai-flash textarea, .p-ai-flash .c-dropdown-input,
+    .p-ai-flash-row{animation:none;}
+  }
+
+  /* Rail — one pinned box for the screen: tabs on top, everything else
+     scrolls inside it. */
+  .p-railbox{position:sticky; top:0; display:flex; flex-direction:column;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
+    max-height:calc(100vh - 96px); overflow:hidden;}
+  .p-railtabs{display:flex; justify-content:center; flex:none;
+    padding:var(--spacing-12) var(--spacing-12) 0;
+    border-bottom:1px solid var(--color-neutral-3);}
+  .p-railscroll{flex:1; min-height:0; overflow-y:auto;
+    padding:var(--spacing-16); overscroll-behavior:contain;}
+  .p-railsec + .p-railsec{margin-top:var(--spacing-16);
+    padding-top:var(--spacing-16); border-top:1px solid var(--color-neutral-3);}
   .p-stat-sep{margin-top:var(--spacing-12); padding-top:var(--spacing-12);
     border-top:1px solid var(--color-neutral-3);}
   .p-stat-value-sm{font-size:var(--text-h3-size); font-weight:var(--text-h1-weight);
@@ -71,7 +113,7 @@
   /* Form layout inside cards */
   .p-grid2{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
   .p-grid3{display:grid; grid-template-columns:2fr 1fr 1fr; gap:var(--spacing-12);}
-  .c-card .c-field{width:100%;}
+  .c-card .c-field, .p-block .c-field{width:100%;}
   .p-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     margin-top:var(--spacing-8);}
 
@@ -88,22 +130,19 @@
     color:var(--color-neutral-5); font-variant-numeric:tabular-nums;
     white-space:nowrap;}
 
-  /* Drawer — a Card whose body discloses. */
-  .p-drawer{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden;
-    transition:box-shadow var(--duration-base) var(--ease-settle);}
-  .p-drawer:hover{box-shadow:var(--shadow-2);}
+  /* Drawer — flattened to a divided disclosure band in the unboxed canvas. */
+  .p-drawer{background:none; border:0; border-radius:0; box-shadow:none;}
   .p-disclose{display:flex; justify-content:space-between; align-items:center;
-    width:100%; background:none; border:none; padding:var(--spacing-16);
+    width:100%; background:none; border:none; padding:var(--spacing-16) 0;
     cursor:pointer; text-align:left; font-family:inherit;}
-  .p-disclose:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+  .p-disclose:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .p-disclose h4{margin:0; font-size:var(--text-h5-size); font-weight:var(--text-h5-weight);}
   .p-disclose .sub{margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size);
     color:var(--color-neutral-5); font-weight:400;}
   .p-disclose > i{font-size:var(--icon-base); color:var(--color-neutral-5);
     transition:transform var(--duration-base) var(--ease-settle);}
   .p-disclose[aria-expanded="true"] > i{transform:rotate(180deg);}
-  .p-drawer-body{padding:0 var(--spacing-16) var(--spacing-16);
+  .p-drawer-body{padding:0 0 var(--spacing-16);
     border-top:1px solid var(--color-neutral-3);}
   .p-drawer-body[hidden]{display:none;}
   .p-drawer-section{padding-top:var(--spacing-16);}
@@ -163,16 +202,17 @@
      the reply sheet folds up above it. ── */
   @keyframes ask-glow-slide{ from{background-position:0% 0%;} to{background-position:200% 0%;} }
   .c-shell-main{position:relative;}
-  .c-shell-content{padding-bottom:120px;} /* pill height + offset, so the footer scrolls clear */
-  .p-dock{position:absolute; left:50%; bottom:var(--spacing-24); z-index:60;
-    transform:translateX(-50%); display:flex; align-items:center; gap:var(--spacing-12);
-    width:min(620px, calc(100% - var(--spacing-32)));}
-  .p-ask{position:relative; flex:1; min-width:0;}
-  .p-actions{flex:none; display:flex; gap:var(--spacing-4); padding:var(--spacing-8);
-    background:var(--color-neutral-1); border-radius:var(--radius-pill);
-    box-shadow:var(--shadow-4);}
+  .c-shell-content{padding-bottom:var(--spacing-48, 48px);}
+  /* Export actions live in the page header now — a quiet ghost group. */
+  .p-actions{display:flex; align-items:center; gap:var(--spacing-4);}
   .p-actions .c-btn-icon{width:40px; height:40px;}
   .p-actions .c-btn-icon i{font-size:var(--icon-md);}
+  .p-actdiv{width:1px; height:24px; background:var(--color-neutral-3);
+    margin:0 var(--spacing-4);}
+  /* The ask pill sits inline at the top of the open step; the reply
+     sheet drops BELOW it, floating over the section. */
+  .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
+  .p-ask{position:relative;}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -197,10 +237,10 @@
   .p-ask-send:hover{background:var(--color-neutral-8);}
   .p-ask-send:active{background:var(--color-neutral-7);}
   .p-ask-send:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-ask-reply{position:absolute; left:0; right:0; bottom:calc(100% + var(--spacing-12)); z-index:10;
+  .p-ask-reply{position:absolute; left:0; right:0; top:calc(100% + var(--spacing-12)); z-index:40;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-4); padding:var(--spacing-16);
-    opacity:0; transform:translateY(8px); pointer-events:none;
+    opacity:0; transform:translateY(-8px); pointer-events:none;
     transition:opacity var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle);}
   .p-ask-reply.is-open{opacity:1; transform:none; pointer-events:auto;}
   .p-ask-reply-head{display:flex; align-items:center; gap:var(--spacing-8);
@@ -219,21 +259,14 @@
 
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
-    .p-rail{position:static;}
-    /* Stacked order: stepper, content, then tabs directly above the rail
-       panes they switch. */
-    .p-tabcell{order:2;}
-    .p-railcell{order:3;}
-  }
-  /* Every step keeps its label — the DS already renders completed and
-     upcoming ones in the subtle neutral-5. Only a genuinely tiny stripe
-     falls back to dots. */
-  @media (max-width:560px){
-    .c-stepper:not(.vertical) .c-step:not(.is-current) .c-step-text{display:none;}
+    .p-railbox{position:static; max-height:none;}
+    .p-step-inner-pad{padding-left:0;}
   }
   @media print{
-    .c-sidebar-shell, .p-stepper-row, .p-crumb, .c-pageheader-actions,
-    .p-footer, .c-shell-span-1, .c-toast-host, .p-dock{display:none !important;}
+    .c-sidebar-shell, .p-crumb, .c-pageheader-actions,
+    .p-footer, .c-shell-span-1, .c-toast-host, .p-ai-slot{display:none !important;}
+    .p-step-body{grid-template-rows:1fr !important;}
+    .p-step-inner{overflow:visible !important;}
     .c-shell{height:auto; background:var(--color-neutral-1);}
     .c-shell-content{overflow:visible; padding:0;}
     .c-shell-grid{display:block;}
@@ -294,44 +327,35 @@
               <p class="sub" id="pageSub">Fill the ask below, or describe the campaign to Collab AI.</p>
             </div>
           </div>
+          <div class="c-pageheader-actions p-actions" role="toolbar" aria-label="Plan actions">
+            <span class="c-tooltip-wrap">
+              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripePdf" type="button" aria-label="Plan as PDF"><i class="ph ph-file-pdf"></i></button>
+              <span class="c-tooltip-bubble" role="tooltip">Plan as PDF</span>
+            </span>
+            <span class="c-tooltip-wrap">
+              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeXls" type="button" aria-label="Plan as Excel"><i class="ph ph-file-xls"></i></button>
+              <span class="c-tooltip-bubble" role="tooltip">Plan as Excel</span>
+            </span>
+            <span class="p-actdiv" aria-hidden="true"></span>
+            <span class="c-tooltip-wrap">
+              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft"><i class="ph ph-floppy-disk"></i></button>
+              <span class="c-tooltip-bubble" role="tooltip">Save draft</span>
+            </span>
+          </div>
         </div>
       </header>
 
       <div class="c-shell-grid">
-        <div class="c-shell-span-3">
-      <div class="p-stepper-row">
-        <div class="c-stepper" id="stepper">
-          <button class="c-step is-current" data-go="1" type="button">
-            <span class="c-step-indicator active" data-ind="1">1</span>
-            <span class="c-step-text"><span class="c-step-label active" data-lab="1">Brief</span></span>
-          </button>
-          <div class="c-step-connector"></div>
-          <button class="c-step" data-go="2" type="button">
-            <span class="c-step-indicator upcoming" data-ind="2">2</span>
-            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="2">Audience</span></span>
-          </button>
-          <div class="c-step-connector"></div>
-          <button class="c-step" data-go="3" type="button">
-            <span class="c-step-indicator upcoming" data-ind="3">3</span>
-            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="3">Media mix</span></span>
-          </button>
-          <div class="c-step-connector"></div>
-          <button class="c-step" data-go="4" type="button">
-            <span class="c-step-indicator upcoming" data-ind="4">4</span>
-            <span class="c-step-text"><span class="c-step-label upcoming" data-lab="4">Summary</span></span>
-          </button>
-        </div>
-      </div>
-        </div>
+        <div class="c-shell-span-3 p-canvas">
+          <ol class="p-journey">
 
-        <div class="c-shell-span-1 p-tabcell">
-          <div class="c-tabs" id="railTabs">
-            <button class="c-tab active" data-railtab="summary" type="button">Summary</button>
-            <button class="c-tab" data-railtab="preview" type="button">Preview</button>
-          </div>
-        </div>
-
-        <div class="c-shell-span-3">
+          <li class="p-step" id="step1" data-step="1">
+            <button class="p-step-head" data-go="1" type="button">
+              <span class="c-step-indicator active" data-ind="1">1</span>
+              <span class="p-step-title"><span class="t" data-lab="1">Brief</span>
+                <span class="d" id="stepsum1">The ask, the goal, the languages.</span></span>
+            </button>
+            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
@@ -342,9 +366,31 @@
             <i class="ph ph-sparkle"></i> Try it
           </button>
         </div>
+
+        <div class="p-ai-slot" data-slot="1">
+          <div class="p-ask" id="askBox">
+            <div class="p-ask-glow-outer" aria-hidden="true"></div>
+            <div class="p-ask-glow-inner" aria-hidden="true"></div>
+            <div class="p-ask-pill">
+              <span class="p-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+              <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
+              <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
+            </div>
+            <div class="p-ask-reply" id="askReply" role="status" aria-live="polite">
+              <div class="p-ask-reply-head">
+                <i class="ph-fill ph-sparkle" aria-hidden="true"></i>
+                <span class="who">Collab AI</span>
+                <button class="c-icon-btn" id="askReplyClose" aria-label="Dismiss" type="button"><i class="ph ph-x"></i></button>
+              </div>
+              <div class="p-ask-reply-text" id="askReplyText"></div>
+              <div class="p-ask-reply-actions" id="askReplyActions" hidden></div>
+            </div>
+          </div>
+        </div>
+
         <div class="p-stack">
 
-            <div class="c-card" id="askCard">
+            <div class="p-block" id="askCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>The ask</h4>
                 <span class="c-badge c-badge-neutral">Required</span>
@@ -447,12 +493,23 @@
           </button>
         </div>
       </section>
+            </div></div></div>
+          </li>
+
+          <li class="p-step" id="step2" data-step="2">
+            <button class="p-step-head" data-go="2" type="button">
+              <span class="c-step-indicator upcoming" data-ind="2">2</span>
+              <span class="p-step-title"><span class="t" data-lab="2">Audience</span>
+                <span class="d" id="stepsum2">Who this plan is trying to reach.</span></span>
+            </button>
+            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-ai-slot" data-slot="2"></div>
 
       <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
-      <section id="view2" hidden>
+      <section id="view2">
         <div class="p-stack">
 
-            <div class="c-card" id="whoCard">
+            <div class="p-block" id="whoCard">
               <h4>Who are you trying to reach?</h4>
               <p>Pick a targeting basis, then narrow it. One decision type on this screen — the evidence lives in the drawer below.</p>
 
@@ -581,9 +638,20 @@
           <button class="c-btn c-btn-primary c-btn-md" data-next="3" type="button">Next: media mix <i class="ph ph-arrow-right"></i></button>
         </div>
       </section>
+            </div></div></div>
+          </li>
+
+          <li class="p-step" id="step3" data-step="3">
+            <button class="p-step-head" data-go="3" type="button">
+              <span class="c-step-indicator upcoming" data-ind="3">3</span>
+              <span class="p-step-title"><span class="t" data-lab="3">Media mix</span>
+                <span class="d" id="stepsum3">Channels, formats, sites and the split.</span></span>
+            </button>
+            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-ai-slot" data-slot="3"></div>
 
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
-      <section id="view3" hidden>
+      <section id="view3">
         <div class="c-banner c-banner-ai p-banner-gap">
           <i class="ph-fill ph-sparkle icon"></i>
           <div class="body"><p class="message">Collab AI drafted this from your brief and audience. Override anything, your changes are kept.</p></div>
@@ -594,7 +662,7 @@
 
         <div class="p-stack">
 
-            <div class="c-card" id="formatCard">
+            <div class="p-block" id="formatCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>Channels and formats</h4>
                 <span class="p-picker-sub" id="channelSummary">All channels</span>
@@ -624,7 +692,7 @@
               </div>
             </div>
 
-            <div class="c-card" id="splitCard">
+            <div class="p-block" id="splitCard">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>Budget split</h4>
                 <span class="p-picker-sub" id="splitBudgetLabel">RM 150,000</span>
@@ -645,9 +713,20 @@
           <button class="c-btn c-btn-primary c-btn-md" data-next="4" type="button">Next: summary <i class="ph ph-arrow-right"></i></button>
         </div>
       </section>
+            </div></div></div>
+          </li>
+
+          <li class="p-step" id="step4" data-step="4">
+            <button class="p-step-head" data-go="4" type="button">
+              <span class="c-step-indicator upcoming" data-ind="4">4</span>
+              <span class="p-step-title"><span class="t" data-lab="4">Summary</span>
+                <span class="d" id="stepsum4">The whole plan, ready to book.</span></span>
+            </button>
+            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-ai-slot" data-slot="4"></div>
 
       <!-- ══ STEP 4 · SUMMARY ═════════════════════════════════════════ -->
-      <section id="view4" hidden>
+      <section id="view4">
         <div class="c-banner c-banner-success p-banner-gap" id="bookedBanner" hidden>
           <i class="ph-fill ph-seal-check icon"></i>
           <div class="body"><p class="message" id="bookedText"></p></div>
@@ -655,7 +734,7 @@
 
         <div class="p-stack">
 
-            <div class="c-card">
+            <div class="p-block">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>The plan</h4>
                 <span class="p-picker-sub" id="sumFlightLabel"></span>
@@ -667,7 +746,7 @@
               </table>
             </div>
 
-            <div class="c-card">
+            <div class="p-block">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>Budget by format</h4>
                 <span class="p-picker-sub" id="sumBudgetLabel"></span>
@@ -679,7 +758,7 @@
               </table>
             </div>
 
-            <div class="c-card">
+            <div class="p-block">
               <h4>Pinned sites</h4>
               <p>Must-buys. The optimiser can still move budget across everything left in the pool.</p>
               <div class="p-sitechips" id="summarySites"></div>
@@ -692,13 +771,21 @@
           <button class="c-btn c-btn-primary c-btn-md" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Book this plan</button>
         </div>
       </section>
+            </div></div></div>
+          </li>
 
+          </ol>
         </div>
 
         <div class="c-shell-span-1 p-railcell">
-          <div class="p-rail">
+          <div class="p-railbox">
+            <div class="c-tabs p-railtabs" id="railTabs">
+              <button class="c-tab active" data-railtab="summary" type="button">Summary</button>
+              <button class="c-tab" data-railtab="preview" type="button">Preview</button>
+            </div>
+            <div class="p-railscroll">
             <div id="railSummary" class="p-rail-pane">
-              <div class="c-card">
+              <div class="p-railsec">
                 <div>
                   <span class="c-stat-label">Plan strength</span>
                   <div class="p-stat-value-sm" id="strengthWord">—</div>
@@ -735,13 +822,14 @@
                   <div class="p-stat-foot" id="fcFoot">—</div>
                 </div>
               </div>
-              <div class="c-card" data-checkcard="all">
+              <div class="p-railsec" data-checkcard="all">
                 <h4 id="checksTitle">Before you continue</h4>
                 <div id="checksHost"></div>
               </div>
             </div>
             <div id="railPreview" class="p-rail-pane" hidden>
-              <div class="c-card" id="previewDoc"></div>
+              <div class="p-railsec" id="previewDoc"></div>
+            </div>
             </div>
           </div>
         </div>
@@ -749,40 +837,6 @@
 
     </div>
 
-    <div class="p-dock">
-    <div class="p-ask" id="askBox">
-      <div class="p-ask-reply" id="askReply" role="status" aria-live="polite">
-        <div class="p-ask-reply-head">
-          <i class="ph-fill ph-sparkle" aria-hidden="true"></i>
-          <span class="who">Collab AI</span>
-          <button class="c-icon-btn" id="askReplyClose" aria-label="Dismiss" type="button"><i class="ph ph-x"></i></button>
-        </div>
-        <div class="p-ask-reply-text" id="askReplyText"></div>
-        <div class="p-ask-reply-actions" id="askReplyActions" hidden></div>
-      </div>
-      <div class="p-ask-glow-outer" aria-hidden="true"></div>
-      <div class="p-ask-glow-inner" aria-hidden="true"></div>
-      <div class="p-ask-pill">
-        <span class="p-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
-        <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
-        <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
-      </div>
-    </div>
-    <div class="p-actions" role="toolbar" aria-label="Plan actions">
-      <span class="c-tooltip-wrap">
-        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripePdf" type="button" aria-label="Plan as PDF"><i class="ph ph-file-pdf"></i></button>
-        <span class="c-tooltip-bubble" role="tooltip">Plan as PDF</span>
-      </span>
-      <span class="c-tooltip-wrap">
-        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeXls" type="button" aria-label="Plan as Excel"><i class="ph ph-file-xls"></i></button>
-        <span class="c-tooltip-bubble" role="tooltip">Plan as Excel</span>
-      </span>
-      <span class="c-tooltip-wrap">
-        <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft"><i class="ph ph-floppy-disk"></i></button>
-        <span class="c-tooltip-bubble" role="tooltip">Save draft</span>
-      </span>
-    </div>
-    </div>
   </div>
 </div>
 
@@ -1085,21 +1139,27 @@
     if (!chk || !chk.dataset.target) return;
     var el = document.getElementById(chk.dataset.target);
     if (!el) return;
-    /* A target inside a collapsed drawer opens the drawer first. */
+    /* A target inside a collapsed step expands the step first… */
+    var stepLi = el.closest('.p-step');
+    if (stepLi && !stepLi.classList.contains('is-open')){
+      var sn = parseInt(stepLi.dataset.step, 10);
+      if (sn && sn <= maxVisited) go(sn);
+    }
+    /* …and one inside a collapsed drawer opens the drawer. */
     var drawerBody = el.closest('.p-drawer-body');
     if (drawerBody && drawerBody.hidden){
       var disclose = document.querySelector('[data-drawer="' + drawerBody.id + '"]');
       if (disclose) disclose.click();
     }
     el.scrollIntoView({behavior:'smooth', block:'center'});
-    var card = el.closest('.c-card, .p-drawer') || el;
+    var card = el.closest('.p-block, .p-drawer') || el;
     card.classList.remove('p-flash');
     requestAnimationFrame(function(){ card.classList.add('p-flash'); });
     if (el.focus && /INPUT|SELECT|TEXTAREA/.test(el.tagName)) setTimeout(function(){ el.focus(); }, 350);
   });
 
   /* ═══ Navigation ═══ */
-  function go(n){
+  function go(n, noScroll){
     if (booked && n !== 4 && step === 4){
       toast('warning', null, 'This plan is booked and locked. Ask the sales team to release it before editing.');
       return;
@@ -1107,22 +1167,34 @@
     step = n;
     maxVisited = Math.max(maxVisited, n);
     [1,2,3,4].forEach(function(i){
-      $('view' + i).hidden = i !== n;
+      var li = $('step' + i);
+      li.classList.toggle('is-open', i === n);
+      li.classList.remove('is-settled');
       var ind = document.querySelector('[data-ind="' + i + '"]');
-      var lab = document.querySelector('[data-lab="' + i + '"]');
       var cls = i < n ? 'completed' : i === n ? 'active' : 'upcoming';
-      ind.closest('.c-step').classList.toggle('is-current', i === n);
       ind.className = 'c-step-indicator ' + cls;
       ind.innerHTML = i < n ? '<i class="ph ph-check"></i>' : String(i);
-      lab.className = 'c-step-label ' + cls;
     });
+    /* Once the fold-open transition lands, let overflow escape so
+       dropdown panels are not clipped by the animating body. */
+    setTimeout(function(){
+      var li = $('step' + n);
+      if (li.classList.contains('is-open')) li.classList.add('is-settled');
+    }, 520);
+    moveAskTo(n);
     if (n === 4) renderSummary();
     var hint = $('askInput');
     if (hint) hint.placeholder = ASK_HINTS[n] || ASK_HINTS[1];
     renderAll();
-    window.scrollTo({top:0, behavior:'smooth'});
-    var content = document.querySelector('.c-shell-content');
-    if (content) content.scrollTo({top:0, behavior:'smooth'});
+    if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  /* The single Collab AI box follows the open step. */
+  function moveAskTo(n){
+    var slot = document.querySelector('.p-ai-slot[data-slot="' + n + '"]');
+    var box = $('askBox');
+    if (slot && box && box.parentElement !== slot) slot.appendChild(box);
+    askHide();
   }
 
   function tryNext(n){
@@ -1150,7 +1222,7 @@
   document.querySelectorAll('[data-back]').forEach(function(b){
     b.addEventListener('click', function(){ go(parseInt(b.dataset.back, 10)); });
   });
-  document.querySelectorAll('.c-step[data-go]').forEach(function(s){
+  document.querySelectorAll('.p-step-head[data-go]').forEach(function(s){
     s.addEventListener('click', function(){
       var n = parseInt(s.dataset.go, 10);
       if (n === step) return;
@@ -1703,6 +1775,7 @@
     $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
     $('bookBtn').disabled = true;
     renderChecks();
+    renderStepSums();
     markSaved();
     toast('success', 'Order raised', 'The sales team has been notified with a link to this plan.');
   });
@@ -1847,14 +1920,31 @@
       .replace(/[\s,]+(for|with|on|to|a|an|the)$/i, '').replace(/[\s,]+$/, '');
     return got;
   }
+  /* AI-touched controls flash a pastel wash so the assistance is
+     visible where it landed. */
+  function aiFlash(ids){
+    ids.forEach(function(id){
+      var el = $(id);
+      if (!el) return;
+      var host = el.closest('.c-field') || el;
+      var cls = host.classList.contains('c-field') ? 'p-ai-flash' : 'p-ai-flash-row';
+      host.classList.remove(cls);
+      void host.offsetWidth;
+      host.classList.add(cls);
+      setTimeout(function(){ host.classList.remove(cls); }, 1600);
+    });
+  }
+
   function applyBriefLine(got){
-    if (got.budget) $('b-budget').value = got.budget;
-    if (got.name) $('b-name').value = got.name;
+    var touched = [];
+    if (got.budget){ $('b-budget').value = got.budget; touched.push('b-budget'); }
+    if (got.name){ $('b-name').value = got.name; touched.push('b-name'); }
     if (got.obj){
       var f = document.querySelector('[data-dd="b-obj"]');
-      if (f && f._set) f._set(got.obj, true);
+      if (f && f._set){ f._set(got.obj, true); touched.push('b-obj'); }
     }
     resetSplit(); renderAll(); markSaved();
+    aiFlash(touched);
   }
 
   function handleAsk(qRaw){
@@ -1877,12 +1967,14 @@
       selected = ['cl', 'al', 'kd'];
       if (personaOpen) renderPersonaList();
       renderChips(); renderAll(); markSaved();
+      aiFlash(['personaField', 'chipRow']);
       askShow('I read the brief as a broad entertainment play, so I picked Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
         fmt(reach().uniq) + ' unique reach. Swap any of them freely.',
         step === 2 ? null : [{label:'Go to Audience', icon:'ph-arrow-right', run:function(){ askHide(); go(2); }}]);
     } else if (/pin|site|must.?buy/.test(q)){
       SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
       renderAll(); markSaved();
+      aiFlash(['sitesDrawer']);
       var pinned = SITES.filter(function(s){ return s.pin; });
       askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
         '. Everything else stays in the pool for the optimiser to move budget between.');
@@ -1894,10 +1986,12 @@
       }
       SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
       resetSplit(); renderAll(); markSaved();
+      aiFlash(['formatList', 'budgetBars']);
       askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
         step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
     } else if (/balanc|allocat|split|budget/.test(q)){
       resetSplit(); renderAll(); markSaved();
+      aiFlash(['budgetBars']);
       askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
         onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
         step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
@@ -1978,6 +2072,28 @@
     if (step === 4) renderSummary();
     renderChecks();
     renderPreview();
+    renderStepSums();
+  }
+
+  /* Collapsed step heads carry a live one-line summary of what is
+     inside, so the folded journey still reads as a plan. */
+  function renderStepSums(){
+    var d1 = [];
+    if ($('b-name').value.trim()) d1.push($('b-name').value.trim());
+    if (budget() > 0) d1.push(rm(budget()));
+    if (ddVal('b-obj')) d1.push($('b-obj').value);
+    $('stepsum1').textContent = d1.length ? d1.join(' · ') : 'The ask, the goal, the languages.';
+    var r = audienceReach();
+    $('stepsum2').textContent = mode === 'mass' ? 'Mass targeting · ' + fmt(r) + ' reach'
+      : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') + ' · ' + fmt(r) + ' reach'
+      : 'Who this plan is trying to reach.';
+    var fc = forecast();
+    var diff = budget() - fc.alloc;
+    $('stepsum3').textContent = onFormats().length && budget()
+      ? onFormats().length + ' formats · ' + (Math.abs(diff) < 1 ? 'fully allocated'
+        : diff > 0 ? rm(diff) + ' unallocated' : rm(-diff) + ' over')
+      : 'Channels, formats, sites and the split.';
+    $('stepsum4').textContent = booked ? 'Order raised · plan locked' : 'The whole plan, ready to book.';
   }
 
   /* Build a new plan — the campaigns page carries its fields in as
@@ -2015,13 +2131,17 @@
   renderAll();
   $('askInput').placeholder = ASK_HINTS[step];
 
-  /* A ?step=N deep link (from "Where you left off") reopens the draft at
-     the step it stopped on. */
+  /* The journey loads collapsed, then the working step folds open — a
+     ?step=N deep link (from "Where you left off") opens its step at
+     once, as does reduced motion. */
   (function(){
     var m = /[?&]step=([1-4])/.exec(window.location.search);
-    if (!m) return;
-    var n = parseInt(m[1], 10);
-    if (n > 1){ maxVisited = n; go(n); }
+    var n = m ? parseInt(m[1], 10) : 1;
+    if (n > 1) maxVisited = n;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (n > 1){ go(n); return; }
+    if (reduced){ go(1, true); return; }
+    setTimeout(function(){ go(1, true); }, 700);
   })();
 })();
 </script>
