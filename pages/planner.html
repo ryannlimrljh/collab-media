@@ -2255,8 +2255,13 @@
       else if (diff > 0){ alloc.textContent = rm(diff) + ' unallocated'; alloc.className = 'p-alloc warn'; }
       else { alloc.textContent = rm(-diff) + ' over'; alloc.className = 'p-alloc over'; }
     }
+    /* The chip and Re-draft trade places: while the mix IS the draft,
+       the chip says so and the button has nothing to do; the first
+       manual edit swaps them. */
     var mixTag = $('mixAiTag');
     if (mixTag) mixTag.hidden = mixSource !== 'ai';
+    var redraftBtn = $('redraft');
+    if (redraftBtn) redraftBtn.hidden = mixSource === 'ai';
     var el = $('railUnalloc');
     el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
     el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
