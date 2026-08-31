@@ -27,6 +27,7 @@
      dividers do the grouping the cards used to. ── */
   .p-journey{list-style:none; margin:0; padding:0;}
   .p-step{position:relative;}
+  .p-step.is-open{z-index:2;} /* its overhangs (AI reply) beat collapsed siblings */
   .p-step + .p-step{margin-top:var(--spacing-12);}
   .p-step::before{content:''; position:absolute; left:11px;
     top:34px; bottom:-16px; width:2px; background:var(--color-neutral-3);}
@@ -541,7 +542,8 @@
   /* The tips panel wraps its pill on a generous radius — the curve
      follows the pill's own, plus the panel's padding. */
   .p-ai-panel{flex-direction:column; align-items:stretch; gap:var(--spacing-12);
-    overflow:visible; border-radius:28px; padding-bottom:var(--spacing-16);}
+    overflow:visible; border-radius:28px; padding-bottom:var(--spacing-16);
+    z-index:30;} /* the reply must float over the form below */
   .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
   .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
