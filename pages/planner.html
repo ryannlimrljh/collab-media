@@ -215,6 +215,7 @@
   .p-footer{display:flex; justify-content:space-between; align-items:center;
     margin-top:var(--spacing-32);}
   .p-footer .right{display:flex; gap:var(--spacing-8); align-items:center;}
+  .p-pillbtn{border-radius:var(--radius-pill);}
 
   /* Modal overlay */
   .p-overlay{position:fixed; inset:0; z-index:100; background:var(--shadow-overlay, rgba(8,8,8,.56));
@@ -1094,8 +1095,12 @@
           </div>
 
         <div class="p-footer">
-          <button class="c-btn c-btn-secondary c-btn-md" data-back="3" type="button"><i class="ph ph-arrow-left"></i> Back</button>
-          <button class="c-btn c-btn-primary c-btn-md" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Book this plan</button>
+          <button class="c-btn c-btn-secondary c-btn-md p-pillbtn" data-back="3" type="button"><i class="ph ph-arrow-left"></i> Back</button>
+          <div class="right">
+            <button class="c-btn c-btn-secondary c-btn-md p-pillbtn" id="footPdf" type="button"><i class="ph ph-file-pdf"></i> Plan as PDF</button>
+            <button class="c-btn c-btn-secondary c-btn-md p-pillbtn" id="footXls" type="button"><i class="ph ph-file-xls"></i> Plan as Excel</button>
+            <button class="c-btn c-btn-primary c-btn-md p-pillbtn" id="bookBtn" type="button"><i class="ph ph-check-square"></i> Confirm booking</button>
+          </div>
         </div>
       </section>
             </div></div></div>
@@ -2408,6 +2413,8 @@
   $('stripePdf').addEventListener('click', actPdf);
   $('stripeXls').addEventListener('click', actXls);
   $('stripeSave').addEventListener('click', actSave);
+  $('footPdf').addEventListener('click', actPdf);
+  $('footXls').addEventListener('click', actXls);
   $('previewDoc').addEventListener('click', function(e){
     var b = e.target.closest('[data-act]');
     if (!b) return;
@@ -2568,6 +2575,22 @@
     }, 650);
   }
 
+  /* After an AI fill on the brief, a second scroll beat guides the eye
+     down to the Next CTA once the washes have played. */
+  function revealNextCta(){
+    setTimeout(function(){
+      if (step !== 1) return;
+      var f = document.querySelector('#view1 .p-footer');
+      var scroller = document.querySelector('.c-shell-content');
+      if (!f || !scroller) return;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var target = f.getBoundingClientRect().bottom - scroller.getBoundingClientRect().top +
+        scroller.scrollTop - scroller.clientHeight + 24;
+      scroller.scrollTo({top: Math.max(0, target),
+        behavior: (reduced || document.hidden) ? 'auto' : 'smooth'});
+    }, 2400);
+  }
+
   function applyBriefLine(got){
     var touched = [];
     if (got.budget){ $('b-budget').value = got.budget; touched.push('b-budget'); }
@@ -2578,6 +2601,7 @@
     }
     resetSplit(); renderAll(); markSaved();
     aiFlash(touched);
+    revealNextCta();
   }
 
   function handleAsk(qRaw){
@@ -2700,6 +2724,7 @@
     askShow('Here is a full example brief: ' + b.name + ' for ' + b.brand + ', ' +
       rm(b.budget) + ' over a three-week flight, chasing ' + fmt(b.target) + ' ' + b.unit +
       '. Every field is editable, or ask me to change any of it.');
+    revealNextCta();
   }
   /* Try it seeds the pill with a random example line; only Send performs
      the fill, so the user stays the one pulling the trigger. */
