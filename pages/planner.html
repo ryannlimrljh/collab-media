@@ -28,8 +28,8 @@
   .p-journey{list-style:none; margin:0; padding:0;}
   .p-step{position:relative;}
   .p-step + .p-step{margin-top:var(--spacing-12);}
-  .p-step::before{content:''; position:absolute; left:15px;
-    top:44px; bottom:-16px; width:2px; background:var(--color-neutral-3);}
+  .p-step::before{content:''; position:absolute; left:11px;
+    top:34px; bottom:-16px; width:2px; background:var(--color-neutral-3);}
   .p-step:last-child::before{display:none;}
   .p-step-head{display:flex; align-items:center; gap:var(--spacing-12);
     width:100%; background:none; border:0; padding:var(--spacing-4) 0;
@@ -3091,14 +3091,14 @@
     var journey = document.querySelector('.p-journey');
     if (journey && !document.hidden){
       journey.classList.add('is-arriving');
-      setTimeout(function(){ journey.classList.remove('is-arriving'); }, 2000);
+      setTimeout(function(){ journey.classList.remove('is-arriving'); }, 2700);
     }
     setTimeout(function(){
       var s1 = $('step1');
       s1.classList.add('is-loading');
       go(1, true);
       setTimeout(function(){ s1.classList.remove('is-loading'); }, 950);
-    }, 1500);
+    }, 2200);
   })();
 })();
 </script>
