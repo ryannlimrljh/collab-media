@@ -196,6 +196,12 @@
      recipe's hover pill and sits still. Focus-visible stays — that's
      the keyboard's only cue, not a hover effect. */
   .ld-all:hover{background:transparent;}
+  /* Advertiser mark on each plan row. */
+  .ld-logo{flex:none; width:28px; height:28px; margin-right:var(--spacing-12);
+    display:flex; align-items:center; justify-content:center;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-sm);}
+  .ld-logo img{width:18px; height:18px; object-fit:contain;}
   /* The plans box follows the row's tallest column: the grid stretches
      the column, the column passes the height to the card. */
   .ld-plans-col{display:flex; flex-direction:column;}
@@ -655,7 +661,7 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.42"></script>
+<script src="../shared/shell.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script>
 (function () {
@@ -709,7 +715,9 @@
   /* Latest campaigns — the six most recent; the whole row opens the plan. */
   var latest = CAMPAIGNS.slice(0, 6);
   document.getElementById('latestRows').innerHTML = latest.map(function (c) {
+    var logo = window.collabBrand && window.collabBrand.url(c.brand);
     return '<button class="ld-row" type="button" data-href="planner.html">' +
+      (logo ? '<span class="ld-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
       '<span class="who"><span class="n">' + c.name + '</span>' +
       '<span class="b">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></span>' +
       campaignBadge(c) +

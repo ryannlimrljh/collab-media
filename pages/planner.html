@@ -20,6 +20,12 @@
   .p-headrow{display:flex; align-items:flex-start; gap:var(--spacing-8); min-width:0;}
   .p-crumb{flex:none; text-decoration:none; margin-left:calc(var(--spacing-12) * -1);
     margin-top:4px;}
+  /* Advertiser logo chip beside the title, resolved from the brand. */
+  .p-brandmark{flex:none; width:36px; height:36px; margin-top:4px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-sm);}
+  .p-brandmark img{width:22px; height:22px; object-fit:contain;}
 
   /* ── Vertical journey — the wizard as an expanding outline. Each step
      is a head (indicator + title + live summary) over a body that folds
@@ -664,6 +670,7 @@
             <a class="c-btn c-btn-ghost c-btn-sm c-btn-icon p-crumb" href="campaigns.html" aria-label="Back to campaigns" title="Back to campaigns">
               <i class="ph ph-arrow-left"></i>
             </a>
+            <span class="p-brandmark" id="brandMark" hidden><img id="brandMarkImg" alt="" /></span>
             <div class="c-pageheader-text">
               <h1 id="pageTitle" contenteditable="plaintext-only" spellcheck="false" data-placeholder="New media plan" aria-label="Campaign name"></h1>
               <p class="sub" id="pageSub">Fill the ask below, or describe the campaign to Collab AI.</p>
@@ -1291,7 +1298,7 @@
 
 <div class="c-toast-host" id="toastHost"></div>
 
-<script src="../shared/shell.js?v=0.9.42"></script>
+<script src="../shared/shell.js?v=0.9.43"></script>
 <script>
 (function () {
   'use strict';
@@ -1943,6 +1950,7 @@
       flight = mo(f) + ' – ' + mo(t) + ' ' + t.getFullYear();
     }
     var subParts = [];
+    updateBrandMark($('b-brand').value.trim());
     if ($('b-brand').value.trim()) subParts.push($('b-brand').value.trim());
     if (budget() > 0) subParts.push(rm(budget()));
     if (flight) subParts.push(flight);
@@ -2940,6 +2948,33 @@
   $('askInput').addEventListener('input', function(){
     document.querySelector('.p-ask-pill').classList.toggle('has-text', !!this.value);
   });
+
+  /* Brand logo chip — debounced so typing does not spray requests;
+     the img's own load/error events decide visibility. */
+  var brandMarkTimer = null;
+  function updateBrandMark(brand){
+    clearTimeout(brandMarkTimer);
+    brandMarkTimer = setTimeout(function(){
+      var img = $('brandMarkImg');
+      if (!img || !window.collabBrand) return;
+      var u = brand ? window.collabBrand.url(brand) : null;
+      if (!u){
+        $('brandMark').hidden = true;
+        img.dataset.src = '';
+        img.removeAttribute('src');
+        return;
+      }
+      if (img.dataset.src === u) return;
+      img.dataset.src = u;
+      $('brandMark').hidden = true;
+      img.src = u;
+    }, 400);
+  }
+  (function(){
+    var img = $('brandMarkImg');
+    img.addEventListener('load', function(){ $('brandMark').hidden = false; });
+    img.addEventListener('error', function(){ $('brandMark').hidden = true; });
+  })();
 
   /* Editable page title — Notion-style: type in place, Enter commits,
      the campaign-name field stays the source of truth. */

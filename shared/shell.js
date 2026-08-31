@@ -10,6 +10,50 @@
 (function () {
   'use strict';
 
+  /* ── Brand logo lookup ──
+     Known brands map to their real domains, served through Google's
+     favicon endpoint (reliable, no key, correct domain = correct mark).
+     Unknown brands fall back to a .com guess through DuckDuckGo's icon
+     service, whose genuine 404s let an onerror hide the mark instead
+     of showing a generic globe. Matching scans for a known token inside
+     the typed brand, so "BMW X3" still resolves to bmw. */
+  var BRAND_DOMAINS = {
+    astro: 'astro.com.my', maybank: 'maybank.com', proton: 'proton.com.my',
+    nestle: 'nestle.com.my', milo: 'milo.com.my', petronas: 'petronas.com',
+    touchngo: 'touchngo.com.my', tng: 'touchngo.com.my', sooka: 'sooka.my',
+    grab: 'grab.com', celcom: 'celcomdigi.com', digi: 'celcomdigi.com',
+    bmw: 'bmw.com.my', mazda: 'mazda.com.my', toyota: 'toyota.com.my',
+    samsung: 'samsung.com', apple: 'apple.com', airasia: 'airasia.com',
+    loreal: 'loreal.com', lancome: 'lancome.com', shopee: 'shopee.com.my',
+    lazada: 'lazada.com.my', kfc: 'kfc.com.my', mcdonalds: 'mcdonalds.com.my'
+  };
+  window.collabBrand = {
+    domain: function (brand) {
+      if (!brand) return null;
+      var slug = brand.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!slug) return null;
+      if (BRAND_DOMAINS[slug]) return BRAND_DOMAINS[slug];
+      for (var key in BRAND_DOMAINS) {
+        if (slug.indexOf(key) > -1) return BRAND_DOMAINS[key];
+      }
+      return slug + '.com';
+    },
+    known: function (brand) {
+      var slug = (brand || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!slug) return false;
+      if (BRAND_DOMAINS[slug]) return true;
+      for (var key in BRAND_DOMAINS) { if (slug.indexOf(key) > -1) return true; }
+      return false;
+    },
+    url: function (brand) {
+      var d = window.collabBrand.domain(brand);
+      if (!d) return null;
+      return window.collabBrand.known(brand)
+        ? 'https://www.google.com/s2/favicons?domain=' + d + '&sz=64'
+        : 'https://icons.duckduckgo.com/ip3/' + d + '.ico';
+    }
+  };
+
   var NARROW = window.matchMedia('(max-width:640px)');
   var NAV_KEY = 'collab-nav-collapsed';
 
