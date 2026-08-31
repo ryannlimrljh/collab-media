@@ -91,7 +91,7 @@
     transition:height 480ms var(--ease-settle);}
   /* When the AI box holds the corner, the rail shortens to leave it
      room; when it leaves, the rail fills the gap back in. */
-  .p-railcell.has-dock .p-railbox{height:calc(100vh - 120px);}
+  .p-railcell.has-dock .p-railbox{height:calc(100vh - 104px);} /* 16px clear of the dock */
   .p-askdock{position:sticky; top:calc(100vh - 72px); margin-top:var(--spacing-12);}
   .p-ask.is-docked .p-ask-reply{top:auto; bottom:calc(100% + var(--spacing-12));
     transform:translateY(8px);}
@@ -2254,7 +2254,11 @@
 
   function handleAsk(qRaw){
     var q = (qRaw || '').toLowerCase();
-    if (/rm\s*\d/i.test(q)){
+    if (tryPendingBrief && qRaw.trim() === tryPendingLine){
+      var tb = tryPendingBrief;
+      tryPendingBrief = null;
+      applyTryBrief(tb);
+    } else if (/rm\s*\d/i.test(q)){
       var got = parseBriefLine(qRaw.trim());
       applyBriefLine(got);
       var bits = [];
@@ -2339,8 +2343,10 @@
       obj:'leadgen', kpi:'Video completions', target:600000, unit:'views',
       langs:['Bahasa Malaysia','English','Chinese']}
   ];
-  $('briefAiTry').addEventListener('click', function(){
-    var b = TRY_BRIEFS[Math.floor(Math.random() * TRY_BRIEFS.length)];
+  function tryLine(b){
+    return b.name + ' for ' + b.brand + ', RM ' + Math.round(b.budget / 1000) + 'k, ' + b.obj;
+  }
+  function applyTryBrief(b){
     $('b-name').value = b.name;
     $('b-brand').value = b.brand;
     $('b-prod').value = b.prod;
@@ -2364,6 +2370,18 @@
     askShow('Here is a full example brief: ' + b.name + ' for ' + b.brand + ', ' +
       rm(b.budget) + ' over a three-week flight, chasing ' + fmt(b.target) + ' ' + b.unit +
       '. Every field is editable, or ask me to change any of it.');
+  }
+  /* Try it seeds the pill with a random example line; only Send performs
+     the fill, so the user stays the one pulling the trigger. */
+  var tryPendingBrief = null, tryPendingLine = '';
+  $('briefAiTry').addEventListener('click', function(){
+    var b = TRY_BRIEFS[Math.floor(Math.random() * TRY_BRIEFS.length)];
+    tryPendingBrief = b;
+    tryPendingLine = tryLine(b);
+    var i = $('askInput');
+    i.value = tryPendingLine;
+    i.focus();
+    i.select();
   });
 
   function askSubmit(){
