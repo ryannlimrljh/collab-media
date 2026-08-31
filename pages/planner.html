@@ -157,6 +157,9 @@
   .p-grid4{display:grid; grid-template-columns:1.2fr 1.2fr .7fr .7fr; gap:var(--spacing-12);}
   @media (max-width:1280px){ .p-grid4{grid-template-columns:1fr 1fr;} }
   @media (max-width:1080px){ .p-grid3a, .p-grid3eq{grid-template-columns:1fr 1fr;} }
+  @media (max-width:640px){
+    .p-grid2, .p-grid3a, .p-grid3eq, .p-grid4{grid-template-columns:1fr;}
+  }
 
   /* ── Collab AI ask pill — the landing/campaigns assistant entry point,
      here wired to the plan itself. Same glow layers, mark and elevation;
@@ -215,8 +218,10 @@
     .p-rail{position:static;}
   }
   /* In a tight stripe, only the active step keeps its label — the dots
-     carry the rest. Same trick the collapsed rail plays with its icons. */
-  @media (max-width:960px){
+     carry the rest. Same trick the collapsed rail plays with its icons.
+     The stripe now lives in the main column, beside the rail, so the
+     collapse point sits higher than it did at full width. */
+  @media (max-width:1200px){
     .c-stepper:not(.vertical) .c-step:not(.is-current) .c-step-text{display:none;}
   }
   @media print{
@@ -285,6 +290,9 @@
         </div>
       </header>
 
+      <div class="c-shell-grid">
+        <div class="c-shell-span-3">
+
       <div class="p-stepper-row">
         <div class="c-stepper" id="stepper">
           <button class="c-step is-current" data-go="1" type="button">
@@ -314,9 +322,6 @@
         </div>
         <span class="p-saved" id="savedNote"><i class="ph-fill ph-check-circle"></i> Saved · just now</span>
       </div>
-
-      <div class="c-shell-grid">
-        <div class="c-shell-span-3">
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
