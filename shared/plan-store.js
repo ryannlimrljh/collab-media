@@ -10,6 +10,7 @@
   'use strict';
 
   var KEY = 'collab-plans';
+  var HIDE_KEY = 'collab-hidden-seeds';
   var CAP = 50;
 
   function read() {
@@ -18,6 +19,10 @@
   }
   function write(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+  }
+  function hiddenSeeds() {
+    try { return JSON.parse(localStorage.getItem(HIDE_KEY)) || []; }
+    catch (e) { return []; }
   }
 
   window.collabPlans = {
@@ -36,10 +41,19 @@
     remove: function (id) {
       write(read().filter(function (p) { return p.id !== id; }));
     },
+    /* Seeded demo rows are not records we can remove, so a delete
+       there hides the row by name instead, persistently. */
+    hideSeed: function (name) {
+      var list = hiddenSeeds();
+      if (list.indexOf(name) < 0) list.push(name);
+      try { localStorage.setItem(HIDE_KEY, JSON.stringify(list)); } catch (e) {}
+    },
     /* Listing view: saved plans first, then the seeded sample. */
     merged: function (seed) {
+      var hidden = hiddenSeeds();
       var mine = read().map(function (p) {
         return {
+          id: p.id,
           name: p.name || 'Untitled plan',
           brand: p.brand || '—',
           status: p.status || 'draft',
@@ -52,7 +66,10 @@
           saved: true
         };
       });
-      return mine.concat(seed || []);
+      var kept = (seed || []).filter(function (s) {
+        return hidden.indexOf(s.name) < 0;
+      });
+      return mine.concat(kept);
     }
   };
 })();
