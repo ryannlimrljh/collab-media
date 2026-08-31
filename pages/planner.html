@@ -2320,7 +2320,7 @@
         '</label>' +
         '<div class="c-slider-group"><div class="c-slider-rail">' +
           '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
-          '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="500" value="' + amt +
+          '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="100" value="' + amt +
           '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '"' + (f.on ? '' : ' disabled') + ' /></div></div>' +
         '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
         '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
@@ -2338,12 +2338,21 @@
         var val = parseInt(sl.value, 10) || 0;
         var b2 = budget();
         var others = onFormats().filter(function(f){ return f.id !== id; });
-        var rest = b2 - val;
+        var rest = Math.max(0, b2 - val);
         var otherSum = 0;
         others.forEach(function(f){ otherSum += split[f.id] || 0; });
-        others.forEach(function(f){
-          if (otherSum > 0) split[f.id] = Math.max(0, Math.round((split[f.id] || 0) / otherSum * rest));
-          else split[f.id] = Math.round(rest / others.length);
+        /* proportional shares, but the LAST row takes the exact
+           remainder — independent rounding used to leave a phantom
+           few ringgit "unallocated" that no drag could ever clear. */
+        var used = 0;
+        others.forEach(function(f, i){
+          var amt;
+          if (i === others.length - 1) amt = rest - used;
+          else if (otherSum > 0) amt = Math.round((split[f.id] || 0) / otherSum * rest);
+          else amt = Math.round(rest / others.length);
+          amt = Math.max(0, Math.min(amt, rest - used));
+          split[f.id] = amt;
+          used += amt;
         });
         split[id] = val;
         splitTouched = true;
@@ -2411,7 +2420,7 @@
         if (run !== sweepRun){ clearInterval(timer); return; }
         k += 1;
         var eased = 1 - Math.pow(1 - k / ticks, 3);
-        var v = Math.round(r0.target * eased / 500) * 500;
+        var v = Math.round(r0.target * eased / 100) * 100;
         r0.sl.value = v;
         r0.row.querySelector('.c-slider-fill').style.width = (b ? Math.min(100, v / b * 100) : 0) + '%';
         r0.row.querySelector('[data-val]').innerHTML = rm(v) + ' · ' + (b ? Math.round(v / b * 100) : 0) + '%' +
