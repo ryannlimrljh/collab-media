@@ -356,11 +356,18 @@
   /* Formats and split in one row: checkbox, live slider, amount. Off
      rows keep the grid so everything stays aligned. */
   .p-fmtlist{display:flex; flex-direction:column;}
-  .p-fmtrow{display:grid; grid-template-columns:minmax(220px, 1fr) minmax(160px, 2fr) 150px;
+  .p-fmtrow{display:grid; grid-template-columns:minmax(220px, 1fr) minmax(160px, 2fr) 170px;
     gap:var(--spacing-16); align-items:center; padding:var(--spacing-8) 0;}
   .p-fmtrow + .p-fmtrow{border-top:1px dotted var(--color-neutral-3);}
-  .p-fmtrow .v{font-size:var(--text-body2-size); font-variant-numeric:tabular-nums;
+  .p-fmtrow .v{display:flex; flex-direction:column; align-items:flex-end;
+    font-size:var(--text-body2-size); font-variant-numeric:tabular-nums;
     color:var(--color-neutral-9); text-align:right; white-space:nowrap;}
+  .p-fmtrow .v .imp{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    font-weight:400;}
+  .p-alloc{font-size:var(--text-caption-size); font-weight:700;}
+  .p-alloc.ok{color:var(--color-green);}
+  .p-alloc.warn{color:var(--color-amber);}
+  .p-alloc.over{color:var(--color-red);}
   .p-fmtrow.is-off .v, .p-fmtrow.is-off .c-slider-group{visibility:hidden;}
   @media (max-width:640px){
     .p-fmtrow{grid-template-columns:1fr; gap:var(--spacing-8);}
@@ -949,25 +956,24 @@
             <div class="p-step-inner-pad">
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
       <section id="view3">
-        <div class="c-banner c-banner-ai p-banner-gap">
-          <i class="ph-fill ph-sparkle icon"></i>
-          <div class="body"><p class="message">Collab AI drafted this from your brief and audience. Override anything, your changes are kept.</p></div>
-          <button class="c-btn c-btn-secondary c-btn-sm" id="redraft" type="button" style="flex:none;">
-            <i class="ph ph-sparkle"></i> Re-draft from brief
-          </button>
-        </div>
-
         <div class="p-stack">
 
             <div class="p-block" id="formatCard">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Channels and formats</h4>
-                <span class="p-picker-sub" id="channelSummary">All channels</span>
+              <div style="display:flex; align-items:center; gap:var(--spacing-12);">
+                <h4 style="margin:0;">Channels and formats</h4>
+                <span class="c-badge p-ai-badge" id="mixAiTag"><i class="ph-fill ph-sparkle"></i> Drafted by Collab AI · override freely</span>
+                <span style="flex:1;"></span>
+                <button class="c-btn c-btn-ghost c-btn-sm" id="redraft" type="button" style="flex:none;">
+                  <i class="ph ph-sparkle"></i> Re-draft from brief
+                </button>
               </div>
               <p>Leave channels off to consider everything. Tick a format and it joins the split right beside it; each carries its own rate.</p>
 
               <div class="p-sect">
-                <span class="c-stat-label">Channels</span>
+                <div class="p-sect-labelrow">
+                  <span class="c-stat-label">Channels</span>
+                  <span class="p-picker-sub" id="channelSummary">All channels</span>
+                </div>
                 <div class="p-choices" id="channelRow"></div>
               </div>
 
@@ -975,6 +981,7 @@
                 <div class="p-sect-labelrow">
                   <span class="c-stat-label">Formats and split</span>
                   <span class="p-picker-sub" id="splitBudgetLabel">RM 0</span>
+                  <span class="p-alloc" id="splitAllocState"></span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-8);">
                   <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.</p>
@@ -1278,7 +1285,7 @@
 
   /* ═══ State ═══ */
   var step = 1, maxVisited = 1;
-  var mode = 'personas', selected = [], filterState = {}, personaSource = null;
+  var mode = 'personas', selected = [], filterState = {}, personaSource = null, mixSource = 'ai';
   var chanOn = [];
   var split = {}, splitTouched = false;
   var booked = false;
@@ -2079,6 +2086,7 @@
         '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
         '<span class="text"><span class="label">' + c + '</span></span>';
       lab.querySelector('input').addEventListener('change', function(){
+        mixSource = 'user';
         var i = chanOn.indexOf(c);
         if (i > -1) chanOn.splice(i, 1); else chanOn.push(c);
         FORMATS.forEach(function(f){ if (!chanAllows(f.ch)) f.on = false; });
@@ -2116,9 +2124,11 @@
           '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
           '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="500" value="' + amt +
           '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '"' + (f.on ? '' : ' disabled') + ' /></div></div>' +
-        '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%</span>';
+        '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
+        '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
       row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
         f.on = !f.on;
+        mixSource = 'user';
         resetSplit();
         renderAll();
       });
@@ -2139,6 +2149,7 @@
         });
         split[id] = val;
         splitTouched = true;
+        mixSource = 'user';
         $('splitReset').hidden = false;
         $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
         syncSplitRows();
@@ -2161,7 +2172,8 @@
       if (!row) return;
       if (document.activeElement !== sl) sl.value = amt;
       row.querySelector('.c-slider-fill').style.width = (b ? Math.min(100, amt / b * 100) : 0) + '%';
-      row.querySelector('[data-val]').textContent = rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%';
+      row.querySelector('[data-val]').innerHTML = rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
+        '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span>';
     });
   }
 
@@ -2185,6 +2197,7 @@
       cb.addEventListener('change', function(){
         var s = SITES.filter(function(x){ return x.id === cb.dataset.site; })[0];
         s.pin = !s.pin;
+        mixSource = 'user';
         renderAll();
       });
     });
@@ -2227,6 +2240,7 @@
       if (first) first.on = true;
     }
     SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+    mixSource = 'ai';
     resetSplit();
     renderAll();
     toast('success', 'Draft refreshed', 'Formats, sites and split re-drafted from the brief. Your channels were kept.');
@@ -2235,6 +2249,14 @@
   function renderMixRail(){
     var fc = forecast();
     var diff = budget() - fc.alloc;
+    var alloc = $('splitAllocState');
+    if (alloc){
+      if (Math.abs(diff) < 1){ alloc.textContent = 'fully allocated'; alloc.className = 'p-alloc ok'; }
+      else if (diff > 0){ alloc.textContent = rm(diff) + ' unallocated'; alloc.className = 'p-alloc warn'; }
+      else { alloc.textContent = rm(-diff) + ' over'; alloc.className = 'p-alloc over'; }
+    }
+    var mixTag = $('mixAiTag');
+    if (mixTag) mixTag.hidden = mixSource !== 'ai';
     var el = $('railUnalloc');
     el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
     el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
@@ -2560,6 +2582,7 @@
         if (first) first.on = true;
       }
       SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
+      mixSource = 'ai';
       resetSplit(); renderAll(); markSaved();
       aiFlash(['formatList']);
       askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
