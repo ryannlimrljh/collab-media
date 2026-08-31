@@ -31,6 +31,12 @@ stylesheets plus this repo's `shared/shell.css`/`shell.js`.
   account menu, department switcher, hover labels), ported from
   feedback-v1, plus the landing's auto-minimise: the rail folds itself
   1.4s after load; a manual toggle before then cancels the timer.
+  `shared/threads.js` is the one conversation store behind every
+  assistant surface — the landing's localStorage model
+  (`[{id, title, at, msgs}]`, newest first, capped at 50) plus a
+  `source` naming the plan a thread came from. The planner mirrors its
+  per-plan Collab AI thread into it, so Home's assistant rail lists
+  plan conversations beside the ones started there.
 - `pages/campaigns.html` — the Media planner landing: a "Where you left
   off" resume band, four hero stat boxes in the mothership landing's
   card recipe, a right-aligned "Create new media plan" CTA, a "Build a

@@ -323,13 +323,45 @@
   .c-chat-threads-h{margin:var(--spacing-12) 0 var(--spacing-4); padding:0 var(--spacing-12);
     font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
     text-transform:uppercase; color:var(--color-neutral-5);}
-  .c-chat-thread{display:block; width:100%; padding:var(--spacing-8) var(--spacing-12); border:0;
+  .c-chat-thread{display:flex; flex-direction:column; gap:1px; width:100%;
+    padding:var(--spacing-8) var(--spacing-12); border:0;
     border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
     font-family:inherit; font-size:var(--text-body2-size); text-align:left; cursor:pointer;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-thread-t{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* Where the conversation happened, as TEXT: under a mixed rail this is
+     the only thing saying a thread came out of a plan, and colour alone
+     carrying meaning is what the accessibility rules rule out. Not
+     uppercased — plan names are proper nouns, and the eyebrow recipe
+     would flatten them. */
+  .c-chat-thread-p{display:block; font-size:var(--text-label3-size); font-weight:700;
+    color:var(--color-neutral-4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
   .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
+  .c-chat-empty{margin:var(--spacing-12) 0 0; padding:0 var(--spacing-12);
+    font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  /* A real thread row is a wrapper, not a lone button: the option dots
+     cannot be a button inside a button. Dots ride hover and focus-within,
+     and stay faintly present on touch, where hover cannot summon them. */
+  .c-chat-titem{position:relative; display:flex; align-items:stretch;}
+  .c-chat-titem .c-chat-thread{flex:1 1 auto; min-width:0; padding-right:34px;}
+  .c-chat-topts{position:absolute; top:50%; right:4px; transform:translateY(-50%);
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-size:15px; cursor:pointer; opacity:0;
+    transition:opacity var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-titem:hover .c-chat-topts, .c-chat-titem:focus-within .c-chat-topts,
+  .c-chat-topts[aria-expanded="true"]{opacity:1;}
+  @media (pointer:coarse){ .c-chat-topts{opacity:.55;} }
+  .c-chat-topts:hover{background:var(--color-neutral-3); color:var(--color-neutral-9);}
+  .c-chat-tmenu{position:absolute; z-index:6; top:calc(100% - 4px); right:4px; min-width:136px;
+    padding:var(--spacing-4); border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
+    background:var(--color-neutral-1); box-shadow:0 8px 24px rgba(189,189,189,.4);}
+  .c-chat-tmenu button{display:flex; align-items:center; gap:var(--spacing-8); width:100%;
+    padding:var(--spacing-8) var(--spacing-12); border:0; border-radius:var(--radius-sm);
+    background:transparent; font-family:inherit; font-size:var(--text-body2-size); font-weight:600;
+    color:var(--color-red); text-align:left; cursor:pointer;}
+  .c-chat-tmenu button:hover{background:rgba(253,51,67,.10);}
   .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
   .c-chat-hd{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-16);
     padding:var(--spacing-20) var(--spacing-24); border-bottom:1px solid var(--color-neutral-3);}
@@ -578,31 +610,16 @@
   <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-label="Assistant">
     <div class="c-chat-rail">
       <button class="c-chat-new" type="button" id="chatNew"><i class="ph ph-plus"></i> New conversation</button>
-      <div class="c-chat-threads">
-        <div class="c-chat-threads-h">Recent</div>
-        <button class="c-chat-thread is-active" type="button">Astro 30: where it stands</button>
-        <button class="c-chat-thread" type="button">Q4 inventory pressure</button>
-        <button class="c-chat-thread" type="button">BMW X3 wrap-up notes</button>
-      </div>
+      <div class="c-chat-threads" id="chatThreads"></div>
     </div>
     <div class="c-chat-main">
       <div class="c-chat-hd">
         <div>
-          <h2>Astro 30: where it stands</h2>
-          <p>A placeholder thread. The shape is real, the wiring comes later.</p>
+          <h2 id="chatTitle">New conversation</h2>
+          <p id="chatSub">Ask about a plan, or describe one and I'll draft it.</p>
         </div>
       </div>
-      <div class="c-chat-body"><div class="c-chat-scroll" id="chatScroll">
-        <div class="c-chat-msg is-me"><div class="c-chat-bubble">Where did I leave the Astro 30 plan?</div></div>
-        <div class="c-chat-msg"><div class="c-chat-bubble">
-          <p>You stopped at <b>Media mix</b>, 60% through. The RM 150,000 is fully
-          allocated across In-stream video, Social video and Leaderboard, but
-          nothing is pinned as a must-buy yet, and the exclusions are still empty.</p>
-          <p>Two things would finish it: pin your must-buy sites, and give the
-          exclusions a once-over. <a href="planner.html?step=3">Pick it up at Media mix</a>.</p>
-          <span class="c-chat-cite"><i class="ph-fill ph-file-text"></i> From your draft · 27 Aug</span>
-        </div></div>
-      </div></div>
+      <div class="c-chat-body" id="chatBody"><div class="c-chat-scroll" id="chatScroll"></div></div>
       <div class="c-chat-composer">
         <div class="c-chat-inputwrap">
           <div class="floating-ask-glow-outer" aria-hidden="true"></div>
@@ -662,6 +679,7 @@
 </div>
 
 <script src="../shared/shell.js?v=0.9.43"></script>
+<script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script>
 (function () {
@@ -790,12 +808,148 @@
       d.textContent = t;
       return d.innerHTML;
     }
+
+    /* ── Threads, the landing's model: one persistent store, a rail
+       grouped Today / Earlier, titles taken from the first question,
+       and a per-row menu that deletes. The store is shared, so the
+       planner's per-plan conversations sit in this same rail — those
+       carry the plan's name under the title, since under a mixed list
+       that line is the only thing saying where a thread happened. ── */
+    var store = window.collabThreads;
+    var rail = document.getElementById('chatThreads');
+    var titleEl = document.getElementById('chatTitle');
+    var subEl = document.getElementById('chatSub');
+    var SUB_IDLE = subEl.textContent;
+    var cur = null;             /* the open thread, or null for a fresh one */
+
+    function closeMenus() {
+      var open = document.querySelectorAll('.c-chat-tmenu');
+      for (var k = 0; k < open.length; k++) open[k].parentNode.removeChild(open[k]);
+      var dots = document.querySelectorAll('.c-chat-topts[aria-expanded="true"]');
+      for (var j = 0; j < dots.length; j++) dots[j].setAttribute('aria-expanded', 'false');
+    }
+    function openMenu(item, dots, t) {
+      var was = item.querySelector('.c-chat-tmenu');
+      closeMenus();
+      if (was) return;          /* second click on the same dots: just close */
+      var m = document.createElement('div');
+      m.className = 'c-chat-tmenu';
+      m.setAttribute('role', 'menu');
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.setAttribute('role', 'menuitem');
+      del.innerHTML = '<i class="ph ph-trash" aria-hidden="true"></i>Delete';
+      del.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        store.remove(t.id);
+        if (cur && cur.id === t.id) freshChat(); else renderRail();
+      });
+      m.appendChild(del);
+      item.appendChild(m);
+      dots.setAttribute('aria-expanded', 'true');
+      del.focus();
+    }
+    function renderRail() {
+      var all = store.list();
+      rail.innerHTML = '';
+      if (!all.length) {
+        var e = document.createElement('p');
+        e.className = 'c-chat-empty';
+        e.textContent = 'No conversations yet. Ask something here, or in a plan.';
+        rail.appendChild(e);
+        return;
+      }
+      var today = [], earlier = [], k0 = new Date().toDateString();
+      all.forEach(function (t) {
+        (new Date(t.at).toDateString() === k0 ? today : earlier).push(t);
+      });
+      [['Today', today], ['Earlier', earlier]].forEach(function (g) {
+        if (!g[1].length) return;
+        var hd = document.createElement('div');
+        hd.className = 'c-chat-threads-h';
+        hd.textContent = g[0];
+        rail.appendChild(hd);
+        g[1].forEach(function (t) {
+          var item = document.createElement('div');
+          item.className = 'c-chat-titem';
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'c-chat-thread' + (cur && cur.id === t.id ? ' is-active' : '');
+          if (cur && cur.id === t.id) b.setAttribute('aria-current', 'true');
+          var tt = document.createElement('span');
+          tt.className = 'c-chat-thread-t';
+          tt.textContent = t.title || 'Untitled';
+          b.appendChild(tt);
+          var isPlan = t.source && t.source.kind === 'plan';
+          var tp = document.createElement('span');
+          tp.className = 'c-chat-thread-p';
+          tp.textContent = isPlan ? 'In plan · ' + store.stamp(t.at) : store.stamp(t.at);
+          b.appendChild(tp);
+          b.addEventListener('click', function () { cur = t; paintThread(t); renderRail(); });
+          var dots = document.createElement('button');
+          dots.type = 'button';
+          dots.className = 'c-chat-topts';
+          dots.setAttribute('aria-label', 'Options for “' + (t.title || 'thread') + '”');
+          dots.setAttribute('aria-haspopup', 'menu');
+          dots.setAttribute('aria-expanded', 'false');
+          dots.innerHTML = '<i class="ph ph-dots-three" aria-hidden="true"></i>';
+          dots.addEventListener('click', function (ev) { ev.stopPropagation(); openMenu(item, dots, t); });
+          item.appendChild(b); item.appendChild(dots);
+          rail.appendChild(item);
+        });
+      });
+    }
+    /* Menus close on any outside click, and on Escape BEFORE the
+       overlay's own Escape handler takes the whole chat down with them. */
+    document.addEventListener('click', closeMenus);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.querySelector('.c-chat-tmenu')) {
+        e.stopPropagation(); closeMenus();
+      }
+    }, true);
+
+    function paintThread(t) {
+      scroll.innerHTML = '';
+      titleEl.textContent = t.title || 'Conversation';
+      subEl.textContent = (t.source && t.source.kind === 'plan')
+        ? 'From the ' + t.source.label + ' plan · everything Collab AI did there is on the record.'
+        : SUB_IDLE;
+      (t.msgs || []).forEach(function (m) {
+        bubble(m.role === 'user', '<p>' + esc(m.content) + '</p>');
+      });
+      if (!(t.msgs || []).length) {
+        bubble(false, '<p>Nothing on the record in this one yet.</p>');
+      }
+    }
+    function freshChat() {
+      cur = null;
+      scroll.innerHTML = '';
+      titleEl.textContent = 'New conversation';
+      subEl.textContent = SUB_IDLE;
+      bubble(false, '<p>Fresh page. Ask about a plan, or describe one and I’ll draft it.</p>');
+      renderRail();
+    }
+
     function sendLine(v) {
+      if (!cur) {
+        cur = { id: store.newId(), title: store.titleFrom(v), at: Date.now(),
+                source: { kind: 'home' }, msgs: [] };
+        titleEl.textContent = cur.title;
+      }
+      cur.msgs.push({ role: 'user', content: v });
+      cur.at = Date.now();
+      store.save(cur);
+      renderRail();
       bubble(true, '<p>' + esc(v) + '</p>');
       setTimeout(function () {
-        bubble(false, '<p>I can draft that as a plan: audience, mix and a first budget split, ' +
-          'all yours to override. <a href="planner.html?brief=' + encodeURIComponent(v) +
-          '">Open it in the planner</a>.</p>');
+        var reply = 'I can draft that as a plan: audience, mix and a first budget split, ' +
+          'all yours to override.';
+        cur.msgs.push({ role: 'assistant', content: reply });
+        cur.at = Date.now();
+        store.save(cur);
+        renderRail();
+        bubble(false, '<p>' + esc(reply) + ' <a href="planner.html?brief=' +
+          encodeURIComponent(v) + '">Open it in the planner</a>.</p>');
       }, 600);
     }
 
@@ -835,9 +989,20 @@
     chatInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') chatSend(); });
     document.getElementById('chatVeil').addEventListener('click', closeChat);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeChat(); });
-    document.getElementById('chatNew').addEventListener('click', function () {
-      scroll.innerHTML = '';
-      bubble(false, '<p>Fresh page. Ask about a plan, or describe one and I\u2019ll draft it.</p>');
+    document.getElementById('chatNew').addEventListener('click', freshChat);
+
+    /* Opening the assistant lands on the newest conversation, whichever
+       surface it came from, so a thread left inside a plan is what you
+       see first. Nothing stored yet means a fresh page. */
+    function primeChat() {
+      var all = store.list();
+      if (all.length) { cur = all[0]; paintThread(cur); renderRail(); }
+      else freshChat();
+    }
+    primeChat();
+    /* A plan open in another tab writes to the same store. */
+    window.addEventListener('storage', function (e) {
+      if (e.key === store.KEY) renderRail();
     });
   })();
 
