@@ -11,46 +11,130 @@
   'use strict';
 
   /* ── Brand logo lookup ──
-     Known brands map to their real domains, served through Google's
-     favicon endpoint (reliable, no key, correct domain = correct mark).
-     Unknown brands fall back to a .com guess through DuckDuckGo's icon
-     service, whose genuine 404s let an onerror hide the mark instead
-     of showing a generic globe. Matching scans for a known token inside
-     the typed brand, so "BMW X3" still resolves to bmw. */
+     Maximising hit rate: every brand gets an ordered CHAIN of candidate
+     URLs — the curated map's real domain first (Clearbit for quality,
+     Google's favicon endpoint as a guaranteed backstop), then guesses
+     built from the brand's tokens across .com / .com.my / .my, served
+     by sources whose real 404s let the chain advance. The first URL
+     that loads is cached in localStorage; a fully exhausted chain hides
+     the mark. Wire an <img> with collabBrand.attach(img, brand). */
   var BRAND_DOMAINS = {
     astro: 'astro.com.my', maybank: 'maybank.com', proton: 'proton.com.my',
     nestle: 'nestle.com.my', milo: 'milo.com.my', petronas: 'petronas.com',
     touchngo: 'touchngo.com.my', tng: 'touchngo.com.my', sooka: 'sooka.my',
     grab: 'grab.com', celcom: 'celcomdigi.com', digi: 'celcomdigi.com',
     bmw: 'bmw.com.my', mazda: 'mazda.com.my', toyota: 'toyota.com.my',
-    samsung: 'samsung.com', apple: 'apple.com', airasia: 'airasia.com',
+    honda: 'honda.com.my', perodua: 'perodua.com.my', vios: 'toyota.com.my',
+    samsung: 'samsung.com', apple: 'apple.com', xiaomi: 'mi.com',
+    airasia: 'airasia.com', malaysiaairlines: 'malaysiaairlines.com',
     loreal: 'loreal.com', lancome: 'lancome.com', shopee: 'shopee.com.my',
-    lazada: 'lazada.com.my', kfc: 'kfc.com.my', mcdonalds: 'mcdonalds.com.my'
+    lazada: 'lazada.com.my', kfc: 'kfc.com.my', mcdonalds: 'mcdonalds.com.my',
+    coway: 'coway.com.my', cuckoo: 'cuckoo.com.my', tesco: 'lotuss.com.my',
+    aeon: 'aeonretail.com.my', maxis: 'maxis.com.my', unifi: 'unifi.com.my',
+    cimb: 'cimb.com.my', publicbank: 'pbebank.com', hsbc: 'hsbc.com.my',
+    guinness: 'guinness.com', heineken: 'heinekenmalaysia.com',
+    fandf: 'fnnfoods.com', dutchlady: 'dutchlady.com.my', yeos: 'yeos.com.my'
   };
+  var LOGO_CACHE_KEY = 'collab-logo-cache';
+  function logoCache() {
+    try { return JSON.parse(localStorage.getItem(LOGO_CACHE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function logoCacheSet(slug, url) {
+    try {
+      var c = logoCache();
+      c[slug] = url;
+      localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify(c));
+    } catch (e) {}
+  }
+  function fold(brand) {
+    /* Accent folding so Nestlé → nestle, L'Oréal → l'oreal. */
+    var t = (brand || '').toLowerCase();
+    try { t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+    return t;
+  }
+  function slugOf(brand) {
+    return fold(brand).replace(/[^a-z0-9]/g, '');
+  }
+  function knownDomain(brand) {
+    var slug = slugOf(brand);
+    if (!slug) return null;
+    if (BRAND_DOMAINS[slug]) return BRAND_DOMAINS[slug];
+    for (var key in BRAND_DOMAINS) {
+      if (slug.indexOf(key) > -1) return BRAND_DOMAINS[key];
+    }
+    /* word-level: "Mazda 6" → mazda; "Apple products" → apple */
+    var words = fold(brand).split(/[^a-z0-9]+/).filter(Boolean);
+    for (var i = 0; i < words.length; i++) {
+      if (BRAND_DOMAINS[words[i]]) return BRAND_DOMAINS[words[i]];
+    }
+    return null;
+  }
   window.collabBrand = {
-    domain: function (brand) {
-      if (!brand) return null;
-      var slug = brand.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (!slug) return null;
-      if (BRAND_DOMAINS[slug]) return BRAND_DOMAINS[slug];
-      for (var key in BRAND_DOMAINS) {
-        if (slug.indexOf(key) > -1) return BRAND_DOMAINS[key];
+    domain: knownDomain,
+    known: function (brand) { return !!knownDomain(brand); },
+    /* Best text to resolve from: the brand when it maps (or when there
+       is nothing better), otherwise a plan name that hits the curated
+       map ("Coway water filter launch" with a blank brand field). */
+    pick: function (brand, name) {
+      if (brand && knownDomain(brand)) return brand;
+      if (name && knownDomain(name)) return name;
+      return brand || '';
+    },
+    /* Ordered candidates, best quality and confidence first. */
+    candidates: function (brand) {
+      var out = [];
+      var d = knownDomain(brand);
+      if (d) {
+        out.push('https://logo.clearbit.com/' + d);
+        out.push('https://www.google.com/s2/favicons?domain=' + d + '&sz=64');
+        return out;
       }
-      return slug + '.com';
+      var slug = slugOf(brand);
+      if (!slug) return out;
+      var words = fold(brand).split(/[^a-z0-9]+/)
+        .filter(function (w) { return w.length > 2 && !/^\d+$/.test(w); });
+      var bases = [];
+      if (words[0] && words[0] !== slug) bases.push(words[0]);
+      bases.push(slug);
+      bases.forEach(function (b2) {
+        out.push('https://logo.clearbit.com/' + b2 + '.com');
+        out.push('https://icons.duckduckgo.com/ip3/' + b2 + '.com.my.ico');
+        out.push('https://icons.duckduckgo.com/ip3/' + b2 + '.com.ico');
+      });
+      return out.slice(0, 6);
     },
-    known: function (brand) {
-      var slug = (brand || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (!slug) return false;
-      if (BRAND_DOMAINS[slug]) return true;
-      for (var key in BRAND_DOMAINS) { if (slug.indexOf(key) > -1) return true; }
-      return false;
-    },
+    /* legacy single-url helper: best first candidate */
     url: function (brand) {
-      var d = window.collabBrand.domain(brand);
-      if (!d) return null;
-      return window.collabBrand.known(brand)
-        ? 'https://www.google.com/s2/favicons?domain=' + d + '&sz=64'
-        : 'https://icons.duckduckgo.com/ip3/' + d + '.ico';
+      var cached = logoCache()[slugOf(brand)];
+      if (cached === 'none') return null;
+      if (cached) return cached;
+      return window.collabBrand.candidates(brand)[0] || null;
+    },
+    /* Attach the chain to an <img>: steps to the next candidate on
+       error, caches the winner on load. onDone(ok) is optional; the
+       default hides the img's parent when every candidate fails. */
+    attach: function (img, brand, onDone) {
+      var fin = onDone || function (ok) {
+        if (!ok && img.parentNode) img.parentNode.style.visibility = 'hidden';
+      };
+      var slug = slugOf(brand);
+      var cached = logoCache()[slug];
+      if (cached === 'none') { fin(false); return; }
+      var list = cached ? [cached] : window.collabBrand.candidates(brand);
+      if (!list.length) { fin(false); return; }
+      var i = 0;
+      img.onerror = function () {
+        i += 1;
+        if (i < list.length) { img.src = list[i]; return; }
+        if (!cached) logoCacheSet(slug, 'none');
+        fin(false);
+      };
+      img.onload = function () {
+        if (!cached) logoCacheSet(slug, list[i]);
+        fin(true);
+      };
+      img.src = list[0];
     }
   };
 

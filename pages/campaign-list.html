@@ -226,7 +226,7 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.43"></script>
+<script src="../shared/shell.js?v=0.9.46"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=1"></script>
 <script>
@@ -269,11 +269,10 @@
     var hits = ALLPLANS.filter(matches);
     rowsEl.innerHTML = hits.map(function(c){
       var action = c.status === 'booked' ? 'View' : 'Continue';
-      var logo = window.collabBrand && window.collabBrand.url(c.brand);
       var href = c.href || 'planner.html';
       return '<tr class="is-interactive is-clickable" data-href="' + href + '">' +
         '<td><span class="cl-cell">' +
-          (logo ? '<span class="cl-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
+          '<span class="cl-logo"><img alt="" /></span>' +
           '<span class="cl-txt"><span class="cl-name">' + c.name + '</span>' +
           '<span class="cl-sub">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></span></span></td>' +
         '<td>' + campaignBadge(c) + '</td>' +
@@ -284,6 +283,15 @@
         '<td class="c-table-action-col"><a class="c-btn c-btn-secondary c-btn-sm" href="' + href + '" style="text-decoration:none">' + action + '</a></td>' +
       '</tr>';
     }).join('');
+
+    if (window.collabBrand){
+      var logoImgs = rowsEl.querySelectorAll('.cl-logo img');
+      hits.forEach(function(c, i){
+        if (!logoImgs[i]) return;
+        var b = collabBrand.pick(c.brand === '\u2014' ? '' : c.brand, c.name);
+        collabBrand.attach(logoImgs[i], b);
+      });
+    }
 
     var none = !hits.length;
     rowsEl.closest('table').style.display = none ? 'none' : '';

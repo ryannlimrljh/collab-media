@@ -679,7 +679,7 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.43"></script>
+<script src="../shared/shell.js?v=0.9.46"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=1"></script>
@@ -737,14 +737,22 @@
   var ALLPLANS = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
   var latest = ALLPLANS.slice(0, 6);
   document.getElementById('latestRows').innerHTML = latest.map(function (c) {
-    var logo = window.collabBrand && window.collabBrand.url(c.brand);
     return '<button class="ld-row" type="button" data-href="' + (c.href || 'planner.html') + '">' +
-      (logo ? '<span class="ld-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
+      '<span class="ld-logo"><img alt="" /></span>' +
       '<span class="who"><span class="n">' + c.name + '</span>' +
       '<span class="b">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></span>' +
       campaignBadge(c) +
       '<span class="amt">' + rmFmt(c.budget) + '</span></button>';
   }).join('');
+  (function(){
+    if (!window.collabBrand) return;
+    var imgs = document.querySelectorAll('#latestRows .ld-logo img');
+    latest.forEach(function(c, i){
+      if (!imgs[i]) return;
+      var b = collabBrand.pick(c.brand === '\u2014' ? '' : c.brand, c.name);
+      collabBrand.attach(imgs[i], b);
+    });
+  })();
   document.getElementById('latestCount').textContent = latest.length + ' of ' + ALLPLANS.length;
   document.getElementById('latestRows').addEventListener('click', function (e) {
     var row = e.target.closest('[data-href]');
