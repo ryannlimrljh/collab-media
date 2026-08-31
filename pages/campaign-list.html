@@ -228,6 +228,7 @@
 
 <script src="../shared/shell.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
+<script src="../shared/plan-store.js?v=1"></script>
 <script>
 (function () {
   'use strict';
@@ -264,11 +265,13 @@
   }
 
   function render(){
-    var hits = CAMPAIGNS.filter(matches);
+    var ALLPLANS = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
+    var hits = ALLPLANS.filter(matches);
     rowsEl.innerHTML = hits.map(function(c){
       var action = c.status === 'booked' ? 'View' : 'Continue';
       var logo = window.collabBrand && window.collabBrand.url(c.brand);
-      return '<tr class="is-interactive is-clickable" data-href="planner.html">' +
+      var href = c.href || 'planner.html';
+      return '<tr class="is-interactive is-clickable" data-href="' + href + '">' +
         '<td><span class="cl-cell">' +
           (logo ? '<span class="cl-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
           '<span class="cl-txt"><span class="cl-name">' + c.name + '</span>' +
@@ -278,7 +281,7 @@
         '<td class="num">' + rmFmt(c.budget) + '</td>' +
         '<td class="cl-hide-narrow">' + c.duration + '</td>' +
         '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
-        '<td class="c-table-action-col"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
+        '<td class="c-table-action-col"><a class="c-btn c-btn-secondary c-btn-sm" href="' + href + '" style="text-decoration:none">' + action + '</a></td>' +
       '</tr>';
     }).join('');
 
@@ -292,7 +295,7 @@
         '<p>No plans match ' + what + '. Clear the filter, or start a new plan from Home.</p>' +
         '<a class="c-btn c-btn-primary c-btn-md" href="campaigns.html" style="text-decoration:none"><i class="ph ph-arrow-left"></i> Back to media planner</a></div>';
     }
-    countEl.textContent = none ? 'Showing 0 of ' + CAMPAIGNS.length
+    countEl.textContent = none ? 'Showing 0 of ' + ALLPLANS.length
       : 'Showing 1\u2013' + hits.length + ' of ' + hits.length;
 
     /* Trigger count + applied pills + Clear all — never visually silent */

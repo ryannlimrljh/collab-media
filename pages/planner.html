@@ -1346,6 +1346,7 @@
 <div class="c-toast-host" id="toastHost"></div>
 
 <script src="../shared/shell.js?v=0.9.43"></script>
+<script src="../shared/plan-store.js?v=1"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script>
 (function () {
@@ -1453,10 +1454,68 @@
     }, 3400);
   }
 
+  /* ═══ Persistence — every save writes the plan into the mini
+     database (localStorage via plan-store.js), so it shows up in All
+     media plans and can be reopened with ?plan=<id>. ═══ */
+  var planId = (function(){
+    var m = /[?&]plan=([^&]+)/.exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  })();
+  function snapshotState(){
+    return {
+      fields: {
+        name: $('b-name').value, brand: $('b-brand').value, prod: $('b-prod').value,
+        start: $('b-start').value, end: $('b-end').value,
+        budget: $('b-budget').value, target: $('b-target').value
+      },
+      dd: {obj: ddVal('b-obj'), kpi: $('b-kpi').value, unit: $('b-unit').value},
+      langOn: langOn.slice(),
+      mode: mode, selected: selected.slice(), personaSource: personaSource,
+      filterState: JSON.parse(JSON.stringify(filterState)),
+      intent: $('f-intent').value, exclude: $('f-ex').value,
+      chanOn: chanOn.slice(),
+      formats: FORMATS.filter(function(f){ return f.on; }).map(function(f){ return f.id; }),
+      split: JSON.parse(JSON.stringify(split)), splitTouched: splitTouched,
+      pins: SITES.filter(function(s){ return s.pin; }).map(function(s){ return s.id; }),
+      mixSource: mixSource,
+      step: step, maxVisited: maxVisited, booked: booked
+    };
+  }
+  function persistPlan(){
+    if (!window.collabPlans) return;
+    var name = $('b-name').value.trim();
+    if (!name && !(budget() > 0)) return; /* nothing worth keeping yet */
+    if (!planId){
+      planId = 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      try {
+        var u = new URL(window.location.href);
+        u.searchParams.set('plan', planId);
+        history.replaceState(null, '', u.toString());
+      } catch (e) {}
+    }
+    var st = snapshotState();
+    var days = (st.fields.start && st.fields.end)
+      ? Math.max(0, Math.round((new Date(st.fields.end) - new Date(st.fields.start)) / 864e5)) : 0;
+    collabPlans.save({
+      id: planId,
+      name: name || 'Untitled plan',
+      brand: $('b-brand').value.trim(),
+      status: booked ? 'booked' : 'draft',
+      ai: personaSource === 'ai' || mixSource === 'ai',
+      industry: '—',
+      budget: budget(),
+      duration: days ? (days >= 14 ? Math.round(days / 7) + ' weeks' : days + ' days') : '—',
+      updated: new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}),
+      updatedAt: Date.now(),
+      state: st
+    });
+  }
+
   /* Autosave feedback is a toast, not a fixture — it pops when a save
      actually happens, throttled so a burst of edits reads as one save. */
   var savedToastAt = 0;
   function markSaved(){
+    persistPlan();
     var now = Date.now();
     if (now - savedToastAt < 5000) return;
     savedToastAt = now;
@@ -1630,6 +1689,7 @@
     if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
     if (n === 2) boardStep2();
     if (n === 3) boardStep3();
+    persistPlan(); /* keep the stored snapshot on the step actually shown */
   }
 
   /* First arrival on Audience: the step opens over a skeleton, the
@@ -2573,6 +2633,7 @@
   function actPdf(){ window.print(); }
   function actXls(){ toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.'); }
   function actSave(){
+    persistPlan();
     savedToastAt = Date.now();
     toast('success', null, 'Draft saved. Pick it up any time from Campaigns.');
   }
@@ -3472,10 +3533,74 @@
   renderAll();
   $('askInput').placeholder = ASK_HINTS[step];
 
+  /* Reopening a saved plan: rebuild the whole state from its snapshot,
+     skip the arrival theatrics, land on the step it was left at. */
+  function hydratePlan(){
+    if (!planId || !window.collabPlans) return false;
+    var rec = collabPlans.get(planId);
+    if (!rec || !rec.state) return false;
+    var st = rec.state;
+    $('b-name').value = st.fields.name || '';
+    $('b-brand').value = st.fields.brand || '';
+    $('b-prod').value = st.fields.prod || '';
+    $('b-start').value = st.fields.start || '';
+    $('b-end').value = st.fields.end || '';
+    $('b-budget').value = st.fields.budget || '';
+    $('b-target').value = st.fields.target || '';
+    var setDD = function(id, v){
+      if (!v) return;
+      var f = document.querySelector('[data-dd="' + id + '"]');
+      if (f && f._set) f._set(v, true);
+    };
+    setDD('b-obj', st.dd.obj); setDD('b-kpi', st.dd.kpi); setDD('b-unit', st.dd.unit);
+    langOn = st.langOn || [];
+    renderLangs();
+    selected = st.selected || [];
+    personaSource = st.personaSource || null;
+    filterState = st.filterState || {};
+    Object.keys(filterState).forEach(function(k){
+      var el = $('fs-' + k);
+      var f = el && el.closest('.c-dropdown-field');
+      if (f && f._set) f._set(filterState[k], true);
+    });
+    $('f-intent').value = st.intent || '';
+    $('f-ex').value = st.exclude || '';
+    chanOn = st.chanOn || [];
+    FORMATS.forEach(function(f){ f.on = (st.formats || []).indexOf(f.id) > -1; });
+    split = st.split || {};
+    splitTouched = !!st.splitTouched;
+    if (splitTouched){
+      $('splitReset').hidden = false;
+      $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
+    }
+    SITES.forEach(function(s2){ s2.pin = (st.pins || []).indexOf(s2.id) > -1; });
+    mixSource = st.mixSource || 'ai';
+    if (st.mode === 'mass'){
+      var massTile = document.querySelector('[data-mode="mass"]');
+      if (massTile) massTile.click();
+    }
+    renderChips();
+    if (st.booked){
+      booked = true;
+      $('bookedBanner').hidden = false;
+      $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds — the plan is locked for editing until then.';
+      $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
+      $('bookBtn').disabled = true;
+    }
+    step2Boarded = true;
+    step3Boarded = true;
+    maxVisited = st.maxVisited || 1;
+    renderAll();
+    go(Math.min(st.step || 1, 4), true);
+    toast('neutral', 'Plan reopened', 'Picked up where you left it. Everything is editable.');
+    return true;
+  }
+
   /* The journey loads collapsed, then the working step folds open — a
      ?step=N deep link (from "Where you left off") opens its step at
-     once, as does reduced motion. */
+     once, as does reduced motion. A saved plan skips straight in. */
   (function(){
+    if (hydratePlan()) return;
     var m = /[?&]step=([1-4])/.exec(window.location.search);
     var n = m ? parseInt(m[1], 10) : 1;
     if (n > 1) maxVisited = n;

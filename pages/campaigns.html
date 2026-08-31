@@ -682,6 +682,7 @@
 <script src="../shared/shell.js?v=0.9.43"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
+<script src="../shared/plan-store.js?v=1"></script>
 <script>
 (function () {
   'use strict';
@@ -695,7 +696,8 @@
     var g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
     var who = document.querySelector('.c-sidebar-account .c-search-input-title');
     var first = who ? who.textContent.trim().split(/\s+/)[0] : '';
-    var drafts = CAMPAIGNS.filter(function (c) { return c.status === 'draft'; }).length;
+    var drafts = (window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS)
+      .filter(function (c) { return c.status === 'draft'; }).length;
     var msgs = [
       first ? g + ', ' + first : g,
       'Ready to build your next plan?',
@@ -732,17 +734,18 @@
   })();
 
   /* Latest campaigns — the six most recent; the whole row opens the plan. */
-  var latest = CAMPAIGNS.slice(0, 6);
+  var ALLPLANS = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
+  var latest = ALLPLANS.slice(0, 6);
   document.getElementById('latestRows').innerHTML = latest.map(function (c) {
     var logo = window.collabBrand && window.collabBrand.url(c.brand);
-    return '<button class="ld-row" type="button" data-href="planner.html">' +
+    return '<button class="ld-row" type="button" data-href="' + (c.href || 'planner.html') + '">' +
       (logo ? '<span class="ld-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
       '<span class="who"><span class="n">' + c.name + '</span>' +
       '<span class="b">' + c.brand + (c.ai ? ' · AI drafted' : '') + '</span></span>' +
       campaignBadge(c) +
       '<span class="amt">' + rmFmt(c.budget) + '</span></button>';
   }).join('');
-  document.getElementById('latestCount').textContent = latest.length + ' of ' + CAMPAIGNS.length;
+  document.getElementById('latestCount').textContent = latest.length + ' of ' + ALLPLANS.length;
   document.getElementById('latestRows').addEventListener('click', function (e) {
     var row = e.target.closest('[data-href]');
     if (row) window.location.href = row.dataset.href;
