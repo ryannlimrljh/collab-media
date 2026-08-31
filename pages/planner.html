@@ -2880,14 +2880,66 @@
 
   function applyBriefLine(got, onDone, instant){
     var steps = [];
+    var defaults = [];
+    var setDD = function(id, v){
+      var f = document.querySelector('[data-dd="' + id + '"]');
+      if (f && f._set) f._set(v, true);
+    };
     if (got.name) steps.push({el: $('b-name'), typeText: got.name,
       apply: function(){ $('b-name').value = got.name; }});
     if (got.budget) steps.push({el: $('b-budget'), countTo: got.budget,
       apply: function(){ $('b-budget').value = got.budget; }});
-    if (got.obj) steps.push({el: $('b-obj'), apply: function(){
-      var f = document.querySelector('[data-dd="b-obj"]');
-      if (f && f._set) f._set(got.obj, true);
-    }});
+    if (got.obj) steps.push({el: $('b-obj'), apply: function(){ setDD('b-obj', got.obj); }});
+
+    /* Fill up the rest of the ask with a starting point — only fields
+       the user has not already set, so a line completes the brief
+       instead of leaving a homework list. */
+    var iso = function(d){ return d.toISOString().slice(0, 10); };
+    if (!$('b-start').value && !$('b-end').value){
+      var s0 = new Date(); s0.setDate(s0.getDate() + 14);
+      var e0 = new Date(); e0.setDate(e0.getDate() + 35);
+      steps.push({el: $('b-start'), apply: function(){ $('b-start').value = iso(s0); }});
+      steps.push({el: $('b-end'), apply: function(){ $('b-end').value = iso(e0); }});
+      defaults.push('a three-week flight from ' +
+        s0.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'}));
+    }
+    var effObj = got.obj || ddVal('b-obj');
+    if (!effObj){
+      effObj = 'awareness';
+      steps.push({el: $('b-obj'), apply: function(){ setDD('b-obj', 'awareness'); }});
+      defaults.push('an awareness objective');
+    }
+    var KPI_FOR = {awareness: ['Net reach', 'people'], consideration: ['Video completions', 'views'],
+      conversion: ['Registrations', 'sign-ups'], footfall: ['Store visits', 'people'],
+      leadgen: ['Registrations', 'sign-ups']};
+    var pick = KPI_FOR[effObj] || ['Net reach', 'people'];
+    var unitForTarget = $('b-unit').value || pick[1];
+    if (!$('b-kpi').value){
+      steps.push({el: $('b-kpi'), apply: function(){ setDD('b-kpi', pick[0]); }});
+      steps.push({el: $('b-unit'), apply: function(){ setDD('b-unit', pick[1]); }});
+      unitForTarget = pick[1];
+      defaults.push(pick[0] + ' as the KPI');
+    }
+    if (!(parseInt($('b-target').value, 10) > 0)){
+      var bud = got.budget || budget();
+      if (bud > 0){
+        var tgt = unitForTarget === 'views' ? Math.round(bud * 3 / 1000) * 1000
+          : unitForTarget === 'sign-ups' ? Math.round(bud / 75 / 100) * 100
+          : Math.round(bud / 30 / 100) * 100;
+        steps.push({el: $('b-target'), countTo: tgt,
+          apply: function(){ $('b-target').value = tgt; }});
+        defaults.push(fmt(tgt) + ' as the target');
+      }
+    }
+    if (!langOn.length){
+      steps.push({el: $('langRow'), apply: function(){
+        langOn = ['Bahasa Malaysia', 'English'];
+        renderLangs();
+      }});
+      defaults.push('BM and English');
+    }
+    got._defaults = defaults;
+
     var done = function(){
       resetSplit(); renderAll(); markSaved(); revealNextCta();
       if (onDone) onDone();
@@ -2996,8 +3048,11 @@
         if (got.name) bits.push('named "' + got.name + '"');
         var missing = checksFor(1).filter(function(c){ return c.level === 'block'; })
           .map(function(c){ return c.label.toLowerCase(); });
-        askShow('Drafted the ask from your line: ' + bits.join(', ') + '.' +
-          (missing.length ? ' Still needed: ' + missing.join('; ') + '.' : ' The brief is complete.'),
+        var extras = (got._defaults && got._defaults.length)
+          ? ' I filled the rest with a starting point: ' + got._defaults.join(', ') + '. Adjust anything.'
+          : '';
+        askShow('Drafted the ask from your line: ' + bits.join(', ') + '.' + extras +
+          (missing.length ? ' Still needed: ' + missing.join('; ') + '.' : ''),
           step === 1 ? null : [{label:'Review the brief', icon:'ph-arrow-right', run:function(){ askHide(); go(1); }}]);
       });
       return;
@@ -3096,9 +3151,11 @@
     if (step === 1 && !$('b-name').value.trim() && raw.split(/\s+/).length >= 3 && !isQuestion){
       var line = parseBriefLine(raw);
       applyBriefLine(line, function(){
-        askShow('I took that as the campaign' +
-          (line.obj ? ', with ' + (/^a/i.test(line.obj) ? 'an ' : 'a ') + line.obj + ' objective' : '') +
-          '. Add a budget, flight dates and a KPI target and the planner can draft the rest.');
+        var extras = (line._defaults && line._defaults.length)
+          ? ' I filled in ' + line._defaults.join(', ') + '.'
+          : '';
+        askShow('I took that as the campaign.' + extras +
+          ' Give it a budget and the planner can draft the whole mix.');
       });
       return;
     }
