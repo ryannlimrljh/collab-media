@@ -25,9 +25,12 @@
      buttons (completed ones navigate back), so they need the button reset
      the DS's div-based stepper never needed. */
   .p-stepper-row{display:flex; align-items:center; gap:var(--spacing-24);
-    margin-bottom:var(--spacing-24); background:var(--color-neutral-1);
+    background:var(--color-neutral-1);
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
     box-shadow:var(--shadow-1); padding:var(--spacing-12) var(--spacing-16);}
+  /* Tabs share the stepper's grid row — centred against its band, so the
+     strength card below starts level with the first content card. */
+  .p-tabcell{display:flex; align-items:center; justify-content:center;}
   .p-stack{display:flex; flex-direction:column; gap:var(--spacing-16);}
   .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
   .p-stepper-row .c-stepper{flex:1;}
@@ -168,6 +171,8 @@
   .p-actions{flex:none; display:flex; gap:var(--spacing-4); padding:var(--spacing-8);
     background:var(--color-neutral-1); border-radius:var(--radius-pill);
     box-shadow:var(--shadow-4);}
+  .p-actions .c-btn-icon{width:40px; height:40px;}
+  .p-actions .c-btn-icon i{font-size:var(--icon-md);}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -215,12 +220,15 @@
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
     .p-rail{position:static;}
+    /* Stacked order: stepper, content, then tabs directly above the rail
+       panes they switch. */
+    .p-tabcell{order:2;}
+    .p-railcell{order:3;}
   }
-  /* In a tight stripe, only the active step keeps its label — the dots
-     carry the rest. Same trick the collapsed rail plays with its icons.
-     The stripe now lives in the main column, beside the rail, so the
-     collapse point sits higher than it did at full width. */
-  @media (max-width:1200px){
+  /* Every step keeps its label — the DS already renders completed and
+     upcoming ones in the subtle neutral-5. Only a genuinely tiny stripe
+     falls back to dots. */
+  @media (max-width:560px){
     .c-stepper:not(.vertical) .c-step:not(.is-current) .c-step-text{display:none;}
   }
   @media print{
@@ -291,7 +299,6 @@
 
       <div class="c-shell-grid">
         <div class="c-shell-span-3">
-
       <div class="p-stepper-row">
         <div class="c-stepper" id="stepper">
           <button class="c-step is-current" data-go="1" type="button">
@@ -315,6 +322,16 @@
           </button>
         </div>
       </div>
+        </div>
+
+        <div class="c-shell-span-1 p-tabcell">
+          <div class="c-tabs" id="railTabs">
+            <button class="c-tab active" data-railtab="summary" type="button">Summary</button>
+            <button class="c-tab" data-railtab="preview" type="button">Preview</button>
+          </div>
+        </div>
+
+        <div class="c-shell-span-3">
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
@@ -678,12 +695,8 @@
 
         </div>
 
-        <div class="c-shell-span-1">
+        <div class="c-shell-span-1 p-railcell">
           <div class="p-rail">
-            <div class="c-tabs" id="railTabs">
-              <button class="c-tab active" data-railtab="summary" type="button">Summary</button>
-              <button class="c-tab" data-railtab="preview" type="button">Preview</button>
-            </div>
             <div id="railSummary" class="p-rail-pane">
               <div class="c-card">
                 <div>
