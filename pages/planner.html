@@ -563,6 +563,10 @@
   .p-actions .c-btn-icon i{font-size:var(--icon-md);}
   .p-actdiv{width:1px; height:24px; background:var(--color-neutral-3);
     margin:0 var(--spacing-4);}
+  /* Header-action tooltips open downward — above them is off-canvas,
+     so the DS's default top placement clips at the scroll edge. */
+  .p-actions .c-tooltip-bubble{bottom:auto; top:calc(100% + 8px);
+    left:auto; right:0; transform:none;}
   /* The ask pill sits inline at the top of the open step; the reply
      sheet drops BELOW it, floating over the section. On step 1 the pill
      nests inside the AI banner, one panel. */
