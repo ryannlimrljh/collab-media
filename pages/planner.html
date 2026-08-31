@@ -38,6 +38,11 @@
     outline-offset:2px; border-radius:var(--radius-sm);}
   .p-step-head .c-step-indicator{flex:none; position:relative; z-index:1;}
   .p-step-title{min-width:0;}
+  /* Right-aligned expand affordance on the head row. */
+  .p-step-caret{flex:none; margin-left:auto; font-size:var(--icon-base);
+    color:var(--color-neutral-5);
+    transition:transform var(--duration-base) var(--ease-settle);}
+  .p-step.is-open .p-step-caret{transform:rotate(180deg);}
   .p-step-title .t{display:block; font-size:var(--text-h4-size);
     font-weight:800; color:var(--color-neutral-9);}
   .p-step-title .d{display:block; margin-top:2px;
@@ -54,6 +59,8 @@
   /* Unboxed canvas blocks — the old cards, flattened to divided bands. */
   .p-stack{display:flex; flex-direction:column; gap:0;}
   .p-block{padding:var(--spacing-20) 0;}
+  /* Heading and its sub sit tight together. */
+  .p-block > p, .p-block > div + p{margin:var(--spacing-4) 0 0;}
   .p-stack > .p-block:first-child{padding-top:0;}
   .p-block + .p-block, .p-block + .p-drawer, .p-drawer + .p-block,
   .p-drawer + .p-drawer{border-top:1px solid var(--color-neutral-3);}
@@ -80,17 +87,39 @@
   .p-railbox{position:sticky; top:0; display:flex; flex-direction:column;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
-    max-height:calc(100vh - 104px); overflow:hidden;}
+    height:calc(100vh - 32px); overflow:hidden;
+    transition:height 480ms var(--ease-settle);}
+  /* When the AI box holds the corner, the rail shortens to leave it
+     room; when it leaves, the rail fills the gap back in. */
+  .p-railcell.has-dock .p-railbox{height:calc(100vh - 104px);}
   .p-askdock{position:sticky; top:calc(100vh - 72px); margin-top:var(--spacing-12);}
-  .p-ask.is-docked{animation:p-dock-in 320ms var(--ease-settle);}
-  @keyframes p-dock-in{
-    from{opacity:0; transform:translateY(10px) scale(.95);}
-    to{opacity:1; transform:none;}
-  }
   .p-ask.is-docked .p-ask-reply{top:auto; bottom:calc(100% + var(--spacing-12));
     transform:translateY(8px);}
   .p-ask.is-docked .p-ask-reply.is-open{transform:none;}
-  @media (prefers-reduced-motion:reduce){ .p-ask.is-docked{animation:none;} }
+  /* Docked ghost line — the hold message slides gently inside the pill. */
+  .p-ask-ghost{position:absolute; left:48px; right:52px; top:0; bottom:0;
+    display:none; align-items:center; overflow:hidden; pointer-events:none;
+    white-space:nowrap; font-size:var(--text-body1-size); color:var(--color-neutral-5);
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+            mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);}
+  .p-ask.is-docked .p-ask-ghost{display:flex;}
+  .p-ask-pill.has-text .p-ask-ghost, .p-ask-pill:focus-within .p-ask-ghost{display:none !important;}
+  .p-ask-ghost-t{display:inline-block; white-space:nowrap;}
+  .p-ask-ghost.is-running .p-ask-ghost-t{
+    animation:p-ask-marquee var(--ask-dur, 9s) var(--ease-standard) infinite;}
+  @keyframes p-ask-marquee{
+    0%, 16%  { transform:translateX(0); }
+    50%, 66% { transform:translateX(var(--ask-dx, 0px)); }
+    100%     { transform:translateX(0); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .p-ask-ghost.is-running .p-ask-ghost-t{animation:none;}
+    .p-railbox{transition:none;}
+  }
+
+  /* Notion-style editable page title. */
+  #pageTitle{outline:none; cursor:text; min-width:220px;}
+  #pageTitle:empty::before{content:attr(data-placeholder); color:var(--color-neutral-4);}
   .p-railtabs{display:flex; justify-content:center; flex:none;
     padding:var(--spacing-12) var(--spacing-12) 0;
     border-bottom:1px solid var(--color-neutral-3);}
@@ -142,8 +171,11 @@
     color:var(--color-neutral-5); font-variant-numeric:tabular-nums;
     white-space:nowrap;}
 
-  /* Drawer — flattened to a divided disclosure band in the unboxed canvas. */
-  .p-drawer{background:none; border:0; border-radius:0; box-shadow:none;}
+  /* Drawer — flattened to a divided disclosure band, indented off the
+     step's own edge so the inner collapse reads as a different level. */
+  .p-drawer{background:none; border:0; border-radius:0; box-shadow:none;
+    margin-left:var(--spacing-16); padding-left:var(--spacing-16);
+    border-left:2px solid var(--color-neutral-2);}
   .p-disclose{display:flex; justify-content:space-between; align-items:center;
     width:100%; background:none; border:none; padding:var(--spacing-16) 0;
     cursor:pointer; text-align:left; font-family:inherit;}
@@ -300,8 +332,10 @@
      nests inside the AI banner, one panel. */
   .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
   .p-ask{position:relative;}
+  /* The tips panel wraps its pill on a generous radius — the curve
+     follows the pill's own, plus the panel's padding. */
   .p-ai-panel{flex-direction:column; align-items:stretch; gap:var(--spacing-12);
-    overflow:visible;}
+    overflow:visible; border-radius:28px;}
   .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
   .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
@@ -351,7 +385,7 @@
 
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
-    .p-railbox{position:static; max-height:none;}
+    .p-railbox{position:static; height:auto; max-height:none;}
     .p-askdock{position:static;}
     .p-step-inner-pad{padding-left:0;}
   }
@@ -419,7 +453,7 @@
               <i class="ph ph-arrow-left"></i>
             </a>
             <div class="c-pageheader-text">
-              <h1 id="pageTitle">New media plan</h1>
+              <h1 id="pageTitle" contenteditable="plaintext-only" spellcheck="false" data-placeholder="New media plan" aria-label="Campaign name"></h1>
               <p class="sub" id="pageSub">Fill the ask below, or describe the campaign to Collab AI.</p>
             </div>
           </div>
@@ -448,6 +482,7 @@
               <span class="c-step-indicator active" data-ind="1">1</span>
               <span class="p-step-title"><span class="t" data-lab="1">Brief</span>
                 <span class="d" id="stepsum1">The ask, the goal, the languages.</span></span>
+              <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
             <div class="p-step-body"><div class="p-step-inner">
             <div class="p-skel" aria-hidden="true">
@@ -478,6 +513,7 @@
             <div class="p-ask-pill">
               <span class="p-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
               <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
+              <span class="p-ask-ghost" id="askGhost" aria-hidden="true"><span class="p-ask-ghost-t" id="askGhostT"></span></span>
               <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
             </div>
             <div class="p-ask-reply" id="askReply" role="status" aria-live="polite">
@@ -609,6 +645,7 @@
               <span class="c-step-indicator upcoming" data-ind="2">2</span>
               <span class="p-step-title"><span class="t" data-lab="2">Audience</span>
                 <span class="d" id="stepsum2">Who this plan is trying to reach.</span></span>
+              <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
       <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
@@ -752,6 +789,7 @@
               <span class="c-step-indicator upcoming" data-ind="3">3</span>
               <span class="p-step-title"><span class="t" data-lab="3">Media mix</span>
                 <span class="d" id="stepsum3">Channels, formats, sites and the split.</span></span>
+              <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
@@ -825,6 +863,7 @@
               <span class="c-step-indicator upcoming" data-ind="4">4</span>
               <span class="p-step-title"><span class="t" data-lab="4">Summary</span>
                 <span class="d" id="stepsum4">The whole plan, ready to book.</span></span>
+              <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
             <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
       <!-- ══ STEP 4 · SUMMARY ═════════════════════════════════════════ -->
@@ -1278,21 +1317,67 @@
     if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
   }
 
+  /* Docked ghost line — slides only when the message overflows the
+     pill; re-measured whenever the dock or viewport changes. */
+  function updateGhostMarquee(){
+    var box = $('askBox'), ghost = $('askGhost'), ghostT = $('askGhostT');
+    if (!box || !box.classList.contains('is-docked')){ return; }
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var overflow = ghost.clientWidth - ghostT.scrollWidth;
+    if (overflow < -8 && !reduced){
+      ghost.style.setProperty('--ask-dx', overflow + 'px');
+      ghost.style.setProperty('--ask-dur', Math.max(6, Math.abs(overflow) / 12) + 's');
+      ghost.classList.add('is-running');
+    } else {
+      ghost.classList.remove('is-running');
+    }
+  }
+  window.addEventListener('resize', updateGhostMarquee);
+
   /* The Collab AI box lives in the step-1 banner; from step 2 on it
-     shrinks into the bottom-right dock under the rail and holds there. */
+     shrinks into the bottom-right dock under the rail and holds there.
+     The move itself is a FLIP: measure, re-home, then animate the
+     transform back from where it came. */
   function moveAskTo(n){
     var box = $('askBox');
     if (!box) return;
+    var dest = n === 1 ? document.querySelector('.p-ai-slot[data-slot="1"]') : $('askDock');
+    if (!dest) return;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var moving = box.parentElement !== dest;
+    var first = moving && !reduced ? box.getBoundingClientRect() : null;
+    if (moving) dest.appendChild(box);
+    box.classList.toggle('is-docked', n !== 1);
+    var railcell = document.querySelector('.p-railcell');
+    if (railcell) railcell.classList.toggle('has-dock', n !== 1);
+    var input = $('askInput'), ghost = $('askGhost'), ghostT = $('askGhostT');
     if (n === 1){
-      var slot = document.querySelector('.p-ai-slot[data-slot="1"]');
-      if (slot && box.parentElement !== slot) slot.appendChild(box);
-      box.classList.remove('is-docked');
-      $('askInput').placeholder = ASK_HINTS[1];
+      input.placeholder = ASK_HINTS[1];
+      ghost.classList.remove('is-running');
     } else {
-      var dock = $('askDock');
-      if (dock && box.parentElement !== dock) dock.appendChild(box);
-      box.classList.add('is-docked');
-      $('askInput').placeholder = 'I will hold my position here until you need me';
+      input.placeholder = '';
+      ghostT.textContent = 'I will hold my position here until you need me';
+      /* A timer, not rAF — rAF never fires in a hidden tab, and the
+         dock can happen while the page is backgrounded. */
+      setTimeout(updateGhostMarquee, 60);
+    }
+    if (first && first.width){
+      var last = box.getBoundingClientRect();
+      if (last.width){
+        var dx = first.left - last.left, dy = first.top - last.top;
+        var s = first.width / last.width;
+        box.style.transition = 'none';
+        box.style.transformOrigin = 'top left';
+        box.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ')';
+        setTimeout(function(){
+          box.style.transition = 'transform 480ms var(--ease-settle)';
+          box.style.transform = '';
+        }, 20);
+        setTimeout(function(){
+          box.style.transition = '';
+          box.style.transformOrigin = '';
+        }, 560);
+      }
     }
     askHide();
   }
@@ -1315,7 +1400,18 @@
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var stepMs = reduced ? 0 : 340;
     var blockers = checks.filter(function(c){ return c.level === 'block'; });
-    flow.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'nearest'});
+    /* Anchor the page up so the run happens in front of the user —
+       computed on the shell scroller directly, since appending rows
+       mid-scroll makes the browser abandon a scrollIntoView. */
+    setTimeout(function(){
+      if (run !== checkRun) return;
+      var scroller = document.querySelector('.c-shell-content');
+      if (!scroller) return;
+      var target = flow.getBoundingClientRect().top - scroller.getBoundingClientRect().top +
+        scroller.scrollTop - Math.max(80, scroller.clientHeight * 0.35);
+      scroller.scrollTo({top: Math.max(0, target),
+        behavior: (reduced || document.hidden) ? 'auto' : 'smooth'});
+    }, 60);
     checks.forEach(function(c, idx){
       setTimeout(function(){
         if (run !== checkRun) return;
@@ -1380,7 +1476,19 @@
   document.querySelectorAll('.p-step-head[data-go]').forEach(function(s){
     s.addEventListener('click', function(){
       var n = parseInt(s.dataset.go, 10);
-      if (n === step) return;
+      if (n === step){
+        /* The working step's head toggles its own body. */
+        var li = $('step' + n);
+        var opening = !li.classList.contains('is-open');
+        li.classList.toggle('is-open', opening);
+        li.classList.remove('is-settled');
+        if (opening){
+          setTimeout(function(){
+            if (li.classList.contains('is-open')) li.classList.add('is-settled');
+          }, 520);
+        }
+        return;
+      }
       if (n < step || n <= maxVisited) go(n);
       else if (n === step + 1) tryNext(n);
     });
@@ -1479,8 +1587,13 @@
   }
 
   function renderBrief(){
-    var name = $('b-name').value.trim() || 'New media plan';
-    $('pageTitle').textContent = name;
+    /* The title is editable in place, Notion-style — never rewrite it
+       under the user's caret; empty shows the placeholder via CSS. */
+    var titleEl = $('pageTitle');
+    if (document.activeElement !== titleEl){
+      var name = $('b-name').value.trim();
+      if (titleEl.textContent !== name) titleEl.textContent = name;
+    }
     var s = $('b-start').value, e = $('b-end').value;
     var days = (s && e) ? Math.max(0, Math.round((new Date(e) - new Date(s)) / 864e5)) : 0;
     var flight = '';
@@ -2200,6 +2313,23 @@
     handleAsk(v);
   }
   $('askSend').addEventListener('click', askSubmit);
+  $('askInput').addEventListener('input', function(){
+    document.querySelector('.p-ask-pill').classList.toggle('has-text', !!this.value);
+  });
+
+  /* Editable page title — Notion-style: type in place, Enter commits,
+     the campaign-name field stays the source of truth. */
+  (function(){
+    var titleEl = $('pageTitle');
+    titleEl.addEventListener('input', function(){
+      $('b-name').value = titleEl.textContent.replace(/\n/g, ' ').trim();
+      renderAll();
+    });
+    titleEl.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.preventDefault(); titleEl.blur(); }
+    });
+    titleEl.addEventListener('blur', function(){ renderAll(); });
+  })();
   $('askInput').addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === 'Return') askSubmit(); });
   $('askReplyClose').addEventListener('click', askHide);
   document.addEventListener('click', function(e){
