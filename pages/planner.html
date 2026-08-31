@@ -92,7 +92,9 @@
   /* When the AI box holds the corner, the rail shortens to leave it
      room; when it leaves, the rail fills the gap back in. */
   .p-railcell.has-dock .p-railbox{height:calc(100vh - 104px);} /* 16px clear of the dock */
-  .p-askdock{position:sticky; top:calc(100vh - 72px); margin-top:var(--spacing-12);}
+  /* The dock is truly fixed to the screen — it never rides the scroll.
+     JS keeps its left/width matched to the rail column. */
+  .p-railcell.has-dock .p-askdock{position:fixed; bottom:var(--spacing-16); z-index:70;}
   .p-ask.is-docked .p-ask-reply{top:auto; bottom:calc(100% + var(--spacing-12));
     transform:translateY(8px);}
   .p-ask.is-docked .p-ask-reply.is-open{transform:none;}
@@ -389,7 +391,7 @@
   @media (max-width:1080px){
     .c-shell-grid > .c-shell-span-3, .c-shell-grid > .c-shell-span-1{grid-column:span 4;}
     .p-railbox{position:static; height:auto; max-height:none;}
-    .p-askdock{position:static;}
+    .p-railcell.has-dock .p-askdock{position:static; left:auto; width:auto;}
     .p-step-inner-pad{padding-left:0;}
   }
   @media print{
@@ -1337,6 +1339,23 @@
   }
   window.addEventListener('resize', updateGhostMarquee);
 
+  /* Keep the fixed dock aligned with the rail column. */
+  function placeDock(){
+    var dock = $('askDock');
+    if (!dock) return;
+    if (window.matchMedia('(max-width:1080px)').matches){
+      dock.style.left = '';
+      dock.style.width = '';
+      return;
+    }
+    var rail = document.querySelector('.p-railbox');
+    if (!rail) return;
+    var r = rail.getBoundingClientRect();
+    dock.style.left = Math.round(r.left) + 'px';
+    dock.style.width = Math.round(r.width) + 'px';
+  }
+  window.addEventListener('resize', placeDock);
+
   /* The Collab AI box lives in the step-1 banner; from step 2 on it
      shrinks into the bottom-right dock under the rail and holds there.
      The move itself is a FLIP: measure, re-home, then animate the
@@ -1353,6 +1372,7 @@
     box.classList.toggle('is-docked', n !== 1);
     var railcell = document.querySelector('.p-railcell');
     if (railcell) railcell.classList.toggle('has-dock', n !== 1);
+    if (n !== 1) placeDock();
     var input = $('askInput'), ghost = $('askGhost'), ghostT = $('askGhostT');
     if (n === 1){
       input.placeholder = ASK_HINTS[1];
