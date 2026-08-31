@@ -15,8 +15,11 @@
 <style>
   /* ── Page-local. Composes DLS tokens only — no new colors or radii. ── */
 
-  .p-crumb{margin-bottom:var(--spacing-8); margin-left:calc(var(--spacing-12) * -1);
-    text-decoration:none;}
+  /* Back sits in the header row itself — one row instead of two. The
+     arrow hangs half out of the grid so the title stays on the margin. */
+  .p-headrow{display:flex; align-items:flex-start; gap:var(--spacing-8); min-width:0;}
+  .p-crumb{flex:none; text-decoration:none; margin-left:calc(var(--spacing-12) * -1);
+    margin-top:4px;}
 
   /* Stepper row — the stepper plus a quiet autosave caption. Steps are
      buttons (completed ones navigate back), so they need the button reset
@@ -268,15 +271,16 @@
   <div class="c-shell-main">
     <div class="c-shell-content">
 
-      <a class="c-btn c-btn-ghost c-btn-sm p-crumb" href="campaigns.html">
-        <i class="ph ph-arrow-left"></i> Back
-      </a>
-
       <header class="c-pageheader">
         <div class="c-pageheader-row">
-          <div class="c-pageheader-text">
-            <h1 id="pageTitle">Astro 30th Anniversary</h1>
-            <p class="sub" id="pageSub">Astro · RM 150,000 · 26 Aug – 8 Sep 2026</p>
+          <div class="p-headrow">
+            <a class="c-btn c-btn-ghost c-btn-sm c-btn-icon p-crumb" href="campaigns.html" aria-label="Back to campaigns" title="Back to campaigns">
+              <i class="ph ph-arrow-left"></i>
+            </a>
+            <div class="c-pageheader-text">
+              <h1 id="pageTitle">New media plan</h1>
+              <p class="sub" id="pageSub">Fill the ask below, or describe the campaign to Collab AI.</p>
+            </div>
           </div>
         </div>
       </header>
@@ -316,6 +320,13 @@
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
+        <div class="c-banner c-banner-ai p-banner-gap">
+          <i class="ph-fill ph-sparkle icon"></i>
+          <div class="body"><p class="message">Start anywhere. Fill the ask by hand, or describe the campaign in one line to Collab AI below and it drafts the brief for you.</p></div>
+          <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
+            <i class="ph ph-sparkle"></i> Try it
+          </button>
+        </div>
         <div class="p-stack">
 
             <div class="c-card" id="askCard">
@@ -329,11 +340,11 @@
                 <span class="c-stat-label">Campaign</span>
                 <div class="p-grid3a">
                   <div class="c-field"><label for="b-name">Campaign name</label>
-                    <input id="b-name" value="Astro 30th Anniversary" placeholder="e.g. New SUV launch Q3 2026" /></div>
+                    <input id="b-name" placeholder="e.g. New SUV launch Q3 2026" /></div>
                   <div class="c-field"><label for="b-brand">Advertiser brand</label>
-                    <input id="b-brand" value="Astro" placeholder="e.g. Astro, Maybank" /></div>
+                    <input id="b-brand" placeholder="e.g. Astro, Maybank" /></div>
                   <div class="c-field"><label for="b-prod">Product</label>
-                    <input id="b-prod" value="Astro 30 celebration" placeholder="What are we advertising?" /></div>
+                    <input id="b-prod" placeholder="What are we advertising?" /></div>
                 </div>
               </div>
 
@@ -341,11 +352,11 @@
                 <span class="c-stat-label">Flight and budget</span>
                 <div class="p-grid3eq">
                   <div class="c-field"><label for="b-start">Flight start</label>
-                    <input id="b-start" type="date" value="2026-08-26" /></div>
+                    <input id="b-start" type="date" /></div>
                   <div class="c-field"><label for="b-end">Flight end</label>
-                    <input id="b-end" type="date" value="2026-09-08" /></div>
+                    <input id="b-end" type="date" /></div>
                   <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
-                    <input id="b-budget" type="number" step="1000" value="150000" placeholder="0" /></div>
+                    <input id="b-budget" type="number" step="1000" placeholder="0" /></div>
                 </div>
               </div>
 
@@ -367,7 +378,7 @@
                     </div>
                   </div>
                   <div class="c-field"><label for="b-target">Target</label>
-                    <input id="b-target" type="number" value="5000" placeholder="0" /></div>
+                    <input id="b-target" type="number" placeholder="0" /></div>
                   <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Unit</label>
                     <div class="input-wrap has-trailing-icon">
                       <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
@@ -436,7 +447,7 @@
                   <span class="c-radio-circle on"><span class="dot"></span></span>
                   <span class="text">
                     <span class="label">Personas</span>
-                    <span class="desc" id="choiceSummary">2 selected · 3M unique</span>
+                    <span class="desc" id="choiceSummary">None selected yet</span>
                   </span>
                 </label>
                 <label class="c-choice" data-mode="mass">
@@ -811,7 +822,7 @@
   /* ═══ Data — carried over from the live engine and the KULT playbook ═══ */
 
   var LANGS = ['Bahasa Malaysia', 'English', 'Chinese', 'Tamil'];
-  var langOn = ['Bahasa Malaysia', 'English'];
+  var langOn = [];
 
   var MAX = 5, MASS = 16150000;
   var PERSONAS = [
@@ -875,7 +886,7 @@
 
   /* ═══ State ═══ */
   var step = 1, maxVisited = 1;
-  var mode = 'personas', selected = ['cl', 'al'], filterState = {};
+  var mode = 'personas', selected = [], filterState = {};
   var chanOn = [];
   var split = {}, splitTouched = false;
   var booked = false;
@@ -973,6 +984,8 @@
       add((parseInt($('b-target').value,10) || 0) > 0, false,
         (parseInt($('b-target').value,10) || 0) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
       add(langOn.length > 0, false, langOn.length ? 'At least one language picked' : 'Pick at least one language', 'langRow');
+      var goalSet = !!ddVal('b-obj') && !!$('b-kpi').value;
+      add(goalSet, true, goalSet ? 'Objective and KPI picked' : 'Pick an objective and KPI', 'b-obj');
     }
     if (n === 2){
       var okAud = mode === 'mass' || selected.length > 0;
@@ -1181,14 +1194,14 @@
     {v:'awareness', label:'Awareness'}, {v:'consideration', label:'Consideration'},
     {v:'conversion', label:'Conversion'}, {v:'footfall', label:'Footfall'},
     {v:'leadgen', label:'Lead generation'}
-  ], 'awareness', function(){ renderAll(); markSaved(); });
+  ], undefined, function(){ renderAll(); markSaved(); });
   initSingleSelect(document.querySelector('[data-dd="b-kpi"]'),
     ['Event attendees','Net reach','Registrations','Video completions','Store visits']
       .map(function(x){ return {v:x, label:x}; }),
-    'Event attendees', function(){ renderAll(); });
+    undefined, function(){ renderAll(); });
   initSingleSelect(document.querySelector('[data-dd="b-unit"]'),
     ['people','sign-ups','views'].map(function(x){ return {v:x, label:x}; }),
-    'people', function(){ renderAll(); });
+    undefined, function(){ renderAll(); });
 
   /* ═══ Step 1 — brief ═══ */
   /* Languages — the DS Checkbox (.c-choice + .c-checkbox-box), inline. */
@@ -1211,7 +1224,7 @@
   }
 
   function renderBrief(){
-    var name = $('b-name').value.trim() || 'Untitled campaign';
+    var name = $('b-name').value.trim() || 'New media plan';
     $('pageTitle').textContent = name;
     var s = $('b-start').value, e = $('b-end').value;
     var days = (s && e) ? Math.max(0, Math.round((new Date(e) - new Date(s)) / 864e5)) : 0;
@@ -1221,13 +1234,18 @@
       var mo = function(d){ return d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}); };
       flight = mo(f) + ' – ' + mo(t) + ' ' + t.getFullYear();
     }
-    $('pageSub').textContent = ($('b-brand').value.trim() || '—') + ' · ' + rm(budget()) + (flight ? ' · ' + flight : '');
+    var subParts = [];
+    if ($('b-brand').value.trim()) subParts.push($('b-brand').value.trim());
+    if (budget() > 0) subParts.push(rm(budget()));
+    if (flight) subParts.push(flight);
+    $('pageSub').textContent = subParts.length ? subParts.join(' · ')
+      : 'Fill the ask below, or describe the campaign to Collab AI.';
     $('railFlight').textContent = days ? days + ' days' : '—';
     $('railDaily').textContent = days && budget() ? rm(budget() / days) + ' per day' : 'Set dates and budget';
     $('railBudget1').textContent = rm(budget());
     var target = parseInt($('b-target').value, 10) || 0;
     $('railKpi').textContent = target && budget() ? rm(budget() / target) + ' per target ' +
-      ($('b-unit').value === 'people' ? 'attendee' : $('b-unit').value.replace(/s$/,'')) : 'Set a KPI target';
+      ($('b-unit').value === 'people' ? 'attendee' : ($('b-unit').value || 'unit').replace(/s$/,'')) : 'Set a KPI target';
     $('sumFlightLabel').textContent = flight;
   }
 
@@ -1508,7 +1526,8 @@
   function renderSplit(){
     var host = $('budgetBars'); host.innerHTML = '';
     var b = budget();
-    $('splitBudgetLabel').textContent = rm(b) + ' · ' + $('b-obj').value.toLowerCase();
+    $('splitBudgetLabel').textContent = rm(b) +
+      ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
     onFormats().forEach(function(f){
       var amt = split[f.id] || 0;
       var row = document.createElement('div');
@@ -1589,8 +1608,8 @@
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
     var rows = [
-      ['Objective', $('b-obj').value + ' — ' +
-        ($('b-target').value || '?') + ' ' + $('b-unit').value + ' (' + $('b-kpi').value + ')', 'Brief'],
+      ['Objective', ($('b-obj').value || 'Not set') + ' — ' +
+        ($('b-target').value || '?') + ' ' + ($('b-unit').value || 'units') + ' (' + ($('b-kpi').value || 'no KPI') + ')', 'Brief'],
       ['Languages', langTxt, 'Brief'],
       ['Audience', audTxt, selected.join(',') === 'cl,al,kd' ? 'AI draft' : 'You'],
       ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '—'],
@@ -1719,7 +1738,7 @@
      each reply streams in (per the AI-interaction guidelines: labelled,
      streamed, dismissible) and the applying intents change real state. ═══ */
   var ASK_HINTS = {
-    1: 'Ask Collab AI, or try "suggest personas for this brief"',
+    1: 'Try "Maybank Raya campaign, RM 200k, awareness"',
     2: 'Try "pick personas from the brief"',
     3: 'Try "rebalance the split" or "pin the draft sites"',
     4: 'Try "is this ready to book?"'
@@ -1774,9 +1793,54 @@
     return t;
   }
 
+  /* One-liner brief parsing — budget, objective keyword, and the rest
+     becomes the name. Shared with the ?brief= deep link. */
+  function parseBriefLine(text){
+    var got = {budget:0, obj:'', name:''};
+    var bm = /rm\s*([\d][\d.,]*)\s*(k|m)?/i.exec(text);
+    if (bm){
+      var amt = parseFloat(bm[1].replace(/,/g, ''));
+      var suffix = (bm[2] || '').toLowerCase();
+      if (suffix === 'k') amt *= 1000;
+      if (suffix === 'm') amt *= 1000000;
+      if (amt > 0) got.budget = Math.round(amt);
+      text = text.replace(bm[0], '');
+    }
+    var om = /awareness|consideration|conversion|footfall|lead\s*gen(?:eration)?|leads?\b/i.exec(text);
+    if (om){
+      got.obj = /^lead/i.test(om[0]) ? 'leadgen' : om[0].toLowerCase();
+      text = text.replace(om[0], '');
+    }
+    got.name = text
+      .replace(/^[\s,]+|[\s,]+$/g, '').replace(/\s{2,}/g, ' ').replace(/\s*,\s*,/g, ',')
+      .replace(/[\s,]+(for|with|on|to|a|an|the)$/i, '').replace(/[\s,]+$/, '');
+    return got;
+  }
+  function applyBriefLine(got){
+    if (got.budget) $('b-budget').value = got.budget;
+    if (got.name) $('b-name').value = got.name;
+    if (got.obj){
+      var f = document.querySelector('[data-dd="b-obj"]');
+      if (f && f._set) f._set(got.obj, true);
+    }
+    resetSplit(); renderAll(); markSaved();
+  }
+
   function handleAsk(qRaw){
     var q = (qRaw || '').toLowerCase();
-    if (/persona|audience|who /.test(q)){
+    if (/rm\s*\d/i.test(q)){
+      var got = parseBriefLine(qRaw.trim());
+      applyBriefLine(got);
+      var bits = [];
+      if (got.budget) bits.push(rm(got.budget) + ' budget');
+      if (got.obj) bits.push(got.obj + ' objective');
+      if (got.name) bits.push('named "' + got.name + '"');
+      var missing = checksFor(1).filter(function(c){ return c.level === 'block'; })
+        .map(function(c){ return c.label.toLowerCase(); });
+      askShow('Drafted the ask from your line: ' + bits.join(', ') + '.' +
+        (missing.length ? ' Still needed: ' + missing.join('; ') + '.' : ' The brief is complete.'),
+        step === 1 ? null : [{label:'Review the brief', icon:'ph-arrow-right', run:function(){ askHide(); go(1); }}]);
+    } else if (/persona|audience|who /.test(q)){
       var personaTile = document.querySelector('[data-mode="personas"]');
       if (mode !== 'personas' && personaTile) personaTile.click();
       selected = ['cl', 'al', 'kd'];
@@ -1814,10 +1878,24 @@
           blockers[0].label.toLowerCase() + '. The checklist in the rail jumps straight to each one.'
         : 'Yes. Every check is clear, so the summary is ready and booking hands the plan to the sales team.',
         blockers.length ? null : [{label:'Go to Summary', icon:'ph-arrow-right', run:function(){ askHide(); go(4); }}]);
+    } else if (step === 1 && !$('b-name').value.trim() && qRaw.trim().split(/\s+/).length >= 3 &&
+        !/[?]/.test(qRaw) && !/^(what|how|why|where|when|is|are|do|does|should|can|who)\b/.test(q)){
+      var line = parseBriefLine(qRaw.trim());
+      applyBriefLine(line);
+      askShow('I took that as the campaign' +
+        (line.obj ? ', with ' + (/^a/i.test(line.obj) ? 'an ' : 'a ') + line.obj + ' objective' : '') +
+        '. Add a budget, flight dates and a KPI target and the planner can draft the rest.');
     } else {
       askShow(askStatus());
     }
   }
+
+  $('briefAiTry').addEventListener('click', function(){
+    var i = $('askInput');
+    i.value = 'Maybank Raya campaign, RM 200k, awareness';
+    i.focus();
+    i.select();
+  });
 
   function askSubmit(){
     var v = $('askInput').value;
@@ -1884,17 +1962,7 @@
     if (!m) return;
     var text = decodeURIComponent(m[1].replace(/\+/g, ' ')).trim();
     if (!text) return;
-    var bm = /rm\s*([\d][\d.,]*)\s*(k|m)?/i.exec(text);
-    if (bm){
-      var amt = parseFloat(bm[1].replace(/,/g, ''));
-      var suffix = (bm[2] || '').toLowerCase();
-      if (suffix === 'k') amt *= 1000;
-      if (suffix === 'm') amt *= 1000000;
-      if (amt > 0) $('b-budget').value = Math.round(amt);
-      text = text.replace(bm[0], '');
-    }
-    var name = text.replace(/^[\s,]+|[\s,]+$/g, '').replace(/\s{2,}/g, ' ').replace(/\s*,\s*,/g, ',');
-    if (name) $('b-name').value = name;
+    applyBriefLine(parseBriefLine(text));
     toast('neutral', 'Drafted from your one-liner', 'Check the ask, then walk the steps — everything is editable.');
   })();
 
