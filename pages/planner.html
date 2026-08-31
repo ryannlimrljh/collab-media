@@ -1093,7 +1093,7 @@
                   <span class="p-alloc" id="splitAllocState"></span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-8);">
-                  <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.</p>
+                  <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag freely; unspent budget shows as unallocated.</p>
                   <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
@@ -2336,30 +2336,16 @@
       sl.addEventListener('input', function(){
         var id = sl.dataset.fmt;
         var val = parseInt(sl.value, 10) || 0;
-        var b2 = budget();
-        var others = onFormats().filter(function(f){ return f.id !== id; });
-        var rest = Math.max(0, b2 - val);
-        var otherSum = 0;
-        others.forEach(function(f){ otherSum += split[f.id] || 0; });
-        /* proportional shares, but the LAST row takes the exact
-           remainder — independent rounding used to leave a phantom
-           few ringgit "unallocated" that no drag could ever clear. */
-        var used = 0;
-        others.forEach(function(f, i){
-          var amt;
-          if (i === others.length - 1) amt = rest - used;
-          else if (otherSum > 0) amt = Math.round((split[f.id] || 0) / otherSum * rest);
-          else amt = Math.round(rest / others.length);
-          amt = Math.max(0, Math.min(amt, rest - used));
-          split[f.id] = amt;
-          used += amt;
-        });
+        /* Each dial moves alone — nothing auto-absorbs the difference.
+           What you leave unspent shows live as unallocated (and blocks
+           Next until it closes); Reset or the AI rebalance close it in
+           one move. */
         split[id] = val;
         splitTouched = true;
         mixSource = 'user';
         sweepRun++;
         $('splitReset').hidden = false;
-        $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
+        $('splitOrigin').textContent = 'Your split. Unspent budget shows as unallocated; Reset closes it in one move.';
         syncSplitRows();
         renderMixRail(); renderChecks(); renderPreview(); renderStepSums();
       });
@@ -2485,7 +2471,7 @@
     var reset = $('splitReset');
     if (reset) reset.hidden = true;
     var origin = $('splitOrigin');
-    if (origin) origin.textContent = 'Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.';
+    if (origin) origin.textContent = 'Recommended split — arrives fully allocated. Drag freely; unspent budget shows as unallocated.';
   }
 
   $('splitReset').addEventListener('click', function(){
