@@ -365,6 +365,29 @@
     text-overflow:ellipsis;}
   .p-whycard .chev{flex:none; font-size:var(--icon-sm); color:var(--color-neutral-5);}
 
+  /* Thread modal — one conversation per plan. */
+  .p-ask.is-docked .p-ask-pill, .p-ask.is-docked .p-ask-pill input{cursor:pointer;}
+  .p-thread-body{display:flex; flex-direction:column; gap:var(--spacing-12);
+    padding-top:var(--spacing-16);}
+  .p-msg{max-width:82%; padding:var(--spacing-8) var(--spacing-12);
+    border-radius:var(--radius-md); font-size:var(--text-body2-size);
+    line-height:var(--text-body2-lh); color:var(--color-neutral-9);}
+  .p-msg.me{align-self:flex-end; background:var(--color-neutral-2);}
+  .p-msg.ai{align-self:flex-start; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3);}
+  .p-msg .who{display:block; font-size:var(--text-caption-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); margin-bottom:2px;}
+  .p-fold-composer{flex:none; display:flex; align-items:center; gap:var(--spacing-8);
+    padding:var(--spacing-12) var(--spacing-24) var(--spacing-16);
+    border-top:1px solid var(--color-neutral-3);}
+  .p-fold-composer input{flex:1; min-width:0; height:40px;
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill);
+    padding:0 var(--spacing-16); font-family:inherit;
+    font-size:var(--text-body1-size); color:var(--color-neutral-9); outline:none;
+    background:var(--color-neutral-1);}
+  .p-fold-composer input:focus{border-color:var(--color-obsidian);}
+
   /* Fold-out modal — the landing's folding shell, veil and delayed
      content fade, aimed at whatever trigger opened it. */
   .p-fold{position:fixed; inset:0; z-index:95; display:none; perspective:1600px;}
@@ -1277,6 +1300,25 @@
   </div>
 </div>
 
+<!-- Collab AI thread — one conversation per plan, folding out of the dock -->
+<div class="p-fold" id="threadOverlay" aria-hidden="true">
+  <div class="p-fold-veil" id="threadVeil"></div>
+  <div class="p-fold-shell" role="dialog" aria-modal="true" aria-labelledby="threadTitle">
+    <div class="p-fold-head">
+      <div>
+        <h4 id="threadTitle">Collab AI</h4>
+        <p class="sub">One thread for this plan. Everything I have done here is on the record.</p>
+      </div>
+      <button class="c-icon-btn" id="threadClose" aria-label="Close" type="button"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="p-fold-body p-thread-body" id="threadBody"></div>
+    <div class="p-fold-composer">
+      <input type="text" id="threadInput" placeholder="Ask for a change to this plan" aria-label="Message Collab AI" autocomplete="off" />
+      <button class="p-ask-send" id="threadSend" type="button" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
+    </div>
+  </div>
+</div>
+
 <!-- Booking modal -->
 <div class="p-overlay" id="bookOverlay" hidden>
   <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle" style="max-width:480px;">
@@ -1684,9 +1726,11 @@
     var input = $('askInput'), ghost = $('askGhost'), ghostT = $('askGhostT');
     if (n === 1){
       input.placeholder = ASK_HINTS[1];
+      input.readOnly = false;
       ghost.classList.remove('is-running');
     } else {
       input.placeholder = '';
+      input.readOnly = true;
       ghostT.textContent = 'I will hold my position here until you need me';
       /* A timer, not rAF — rAF never fires in a hidden tab, and the
          dock can happen while the page is backgrounded. */
@@ -2504,7 +2548,7 @@
   $('bookCancel').addEventListener('click', closeBook);
   $('bookOverlay').addEventListener('click', function(e){ if (e.target === $('bookOverlay')) closeBook(); });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); }
+    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); closeThread(); }
   });
   $('bookGo').addEventListener('click', function(){
     booked = true;
@@ -2590,6 +2634,8 @@
   };
   var typeTimer = null, askAwayTimer = null;
   function askShow(text, actions){
+    aiThread.push({who: 'ai', text: text});
+    if ($('threadOverlay') && $('threadOverlay').classList.contains('is-open')) renderThread();
     var txt = $('askReplyText'), act = $('askReplyActions');
     clearInterval(typeTimer);
     /* The reply excuses itself after a while if nobody closes it;
@@ -3064,13 +3110,13 @@
   });
 
   function askSubmit(){
+    if ($('askBox').classList.contains('is-docked')){ openThread(); return; }
     var v = $('askInput').value;
     $('askInput').value = '';
+    if (v.trim()) aiThread.push({who: 'user', text: v.trim()});
     /* Push the page up to the assistant first, so the reply and the
-       auto-fill washes land in view. Docked, it already holds its
-       corner, so no scroll. */
-    if (!$('askBox').classList.contains('is-docked'))
-      $('askBox').scrollIntoView({behavior:'smooth', block:'start'});
+       auto-fill washes land in view. */
+    $('askBox').scrollIntoView({behavior:'smooth', block:'start'});
     handleAsk(v);
   }
   $('askSend').addEventListener('click', askSubmit);
@@ -3189,6 +3235,106 @@
   $('whyBtn').addEventListener('click', openWhy);
   $('whyClose').addEventListener('click', closeWhy);
   $('whyVeil').addEventListener('click', closeWhy);
+
+  /* ═══ The Collab AI thread — one conversation per plan. The docked
+     box opens it with the landing's fold; asking for a change closes
+     the modal, anchors the canvas to the section in question, then
+     runs the edit with the usual AI indications. ═══ */
+  var aiThread = [];
+  function renderThread(){
+    var body = $('threadBody');
+    if (!body) return;
+    if (!aiThread.length){
+      body.innerHTML = '<div class="p-msg ai"><span class="who">Collab AI</span>' +
+        'Nothing on the record yet. Ask me to draft, pick, pin or rebalance and it all lands here.</div>';
+      return;
+    }
+    body.innerHTML = aiThread.map(function(m){
+      return '<div class="p-msg ' + (m.who === 'user' ? 'me' : 'ai') + '">' +
+        (m.who === 'user' ? '' : '<span class="who">Collab AI</span>') +
+        m.text.replace(/</g, '&lt;') + '</div>';
+    }).join('');
+    body.scrollTop = body.scrollHeight;
+  }
+  function openThread(){
+    var ov = $('threadOverlay');
+    var shell = ov.querySelector('.p-fold-shell');
+    renderThread();
+    ov.classList.add('is-open');
+    ov.setAttribute('aria-hidden', 'false');
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced && !document.hidden){
+      var t = $('askBox').getBoundingClientRect();
+      var sr = shell.getBoundingClientRect();
+      if (t.width && sr.width){
+        shell.style.setProperty('--fold-dx', (t.left - sr.left) + 'px');
+        shell.style.setProperty('--fold-dy', (t.top - sr.top) + 'px');
+        shell.style.setProperty('--fold-sx', Math.max(.05, t.width / sr.width));
+        shell.style.setProperty('--fold-sy', Math.max(.05, t.height / sr.height));
+        shell.classList.remove('is-folding-closed');
+        void shell.offsetWidth;
+        shell.classList.add('is-folding-open');
+      }
+    }
+    setTimeout(function(){ ov.classList.add('is-shown'); }, 20);
+    setTimeout(function(){ $('threadInput').focus(); }, 300);
+  }
+  function closeThread(){
+    var ov = $('threadOverlay');
+    if (!ov.classList.contains('is-open')) return;
+    var shell = ov.querySelector('.p-fold-shell');
+    ov.classList.remove('is-shown');
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || document.hidden){
+      ov.classList.remove('is-open');
+      shell.classList.remove('is-folding-open');
+      ov.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    shell.classList.remove('is-folding-open');
+    shell.classList.add('is-folding-closed');
+    setTimeout(function(){
+      ov.classList.remove('is-open');
+      shell.classList.remove('is-folding-closed');
+      ov.setAttribute('aria-hidden', 'true');
+    }, 560);
+  }
+  /* Which section a request belongs to, for the anchor choreography. */
+  function intentAnchor(q){
+    if (/persona|audience|\bwho\b/.test(q)) return {step: 2, target: 'personaBody'};
+    if (/\bpin|must.?buy|\bsites?\b/.test(q)) return {step: 3, target: 'sitesDrawer'};
+    if (/draft|\bmix\b|format|balanc|allocat|split/.test(q)) return {step: 3, target: 'formatCard'};
+    if (/budget/.test(q)) return {step: 1, target: 'b-budget'};
+    if (/rm\s*\d/.test(q)) return {step: 1, target: 'askCard'};
+    if (/book|ready/.test(q)) return {step: 4, target: null};
+    return {};
+  }
+  function threadSubmit(){
+    var v = $('threadInput').value.trim();
+    if (!v) return;
+    $('threadInput').value = '';
+    aiThread.push({who: 'user', text: v});
+    closeThread();
+    var anchor = intentAnchor(v.toLowerCase());
+    setTimeout(function(){
+      /* AI-driven anchoring may open a step the user has not walked to
+         yet — the edit just happened there, so showing it is the point. */
+      if (anchor.step && step !== anchor.step) go(anchor.step);
+      if (anchor.target) setTimeout(function(){ jumpToTarget(anchor.target); }, 450);
+      setTimeout(function(){ handleAsk(v); }, 700);
+    }, 620);
+  }
+  $('threadSend').addEventListener('click', threadSubmit);
+  $('threadInput').addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === 'Return') threadSubmit();
+  });
+  $('threadClose').addEventListener('click', closeThread);
+  $('threadVeil').addEventListener('click', closeThread);
+  $('askBox').addEventListener('click', function(e){
+    if (!$('askBox').classList.contains('is-docked')) return;
+    if (e.target.closest('.p-ask-reply')) return;
+    openThread();
+  });
 
   /* ═══ Drawers ═══ */
   document.querySelectorAll('.p-disclose').forEach(function(d){
