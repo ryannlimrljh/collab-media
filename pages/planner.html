@@ -62,8 +62,7 @@
   /* Heading and its sub sit tight together. */
   .p-block > p, .p-block > div + p{margin:var(--spacing-4) 0 0;}
   .p-stack > .p-block:first-child{padding-top:0;}
-  .p-block + .p-block, .p-block + .p-drawer, .p-drawer + .p-block,
-  .p-drawer + .p-drawer{border-top:1px solid var(--color-neutral-3);}
+  .p-block + .p-block{border-top:1px solid var(--color-neutral-3);}
   .p-rail-pane{display:flex; flex-direction:column; gap:var(--spacing-12);}
 
   /* AI-assisted fields flash a pastel wash so the help is visible. */
@@ -173,11 +172,12 @@
     color:var(--color-neutral-5); font-variant-numeric:tabular-nums;
     white-space:nowrap;}
 
-  /* Drawer — flattened to a divided disclosure band, indented off the
-     step's own edge so the inner collapse reads as a different level. */
-  .p-drawer{background:none; border:0; border-radius:0; box-shadow:none;
-    margin-left:var(--spacing-16); padding-left:var(--spacing-16);
-    border-left:2px solid var(--color-neutral-2);}
+  /* Drawer — a quiet inset panel, flush with the section edge. The fill
+     and radius do the nesting work; no indent, no left rule. */
+  .p-drawer{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); box-shadow:none;
+    margin:var(--spacing-16) 0; padding:0 var(--spacing-16);}
+  .p-drawer .c-field{width:100%;}
   .p-disclose{display:flex; justify-content:space-between; align-items:center;
     width:100%; background:none; border:none; padding:var(--spacing-16) 0;
     cursor:pointer; text-align:left; font-family:inherit;}
@@ -248,6 +248,14 @@
   #askCard > .p-sect{border-top:1px dotted var(--color-neutral-4);
     padding-top:var(--spacing-24); margin-top:var(--spacing-24);}
   .p-vstack{display:flex; flex-direction:column; gap:var(--spacing-12);}
+  /* Budget — the dial and the open field share one line. */
+  .p-budget-row{display:flex; align-items:center; gap:var(--spacing-12);}
+  .p-budget-row .c-slider-group{flex:1; min-width:0;}
+  .p-budget-row #b-budget{flex:none; width:128px;}
+  .p-budget-row + .c-helper{display:block; margin-top:var(--spacing-8);}
+  /* The range input must not inherit the field's boxed-input skin. */
+  .p-budget-row input[type="range"]{border:0; background:none; padding:0;
+    height:24px; box-shadow:none; border-radius:0;}
   @media (max-width:640px){
     .p-sect-cols{grid-template-columns:1fr; gap:var(--spacing-24);}
     .p-sect-cols > .p-sect:first-child{padding-right:0;}
@@ -342,7 +350,7 @@
   /* The tips panel wraps its pill on a generous radius — the curve
      follows the pill's own, plus the panel's padding. */
   .p-ai-panel{flex-direction:column; align-items:stretch; gap:var(--spacing-12);
-    overflow:visible; border-radius:28px;}
+    overflow:visible; border-radius:28px; padding-bottom:var(--spacing-16);}
   .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
   .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
@@ -566,11 +574,13 @@
                     <div class="c-field"><label for="b-end">Flight end</label>
                       <input id="b-end" type="date" /></div>
                     <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
-                      <input id="b-budget" type="number" step="1000" placeholder="0" />
-                      <div class="c-slider-group" style="margin-top:var(--spacing-8);"><div class="c-slider-rail">
-                        <div class="c-slider-track"><div class="c-slider-fill" id="budgetDialFill" style="width:0%;"></div></div>
-                        <input class="c-slider-input" id="b-budget-dial" type="range" min="0" max="500000" step="5000" value="0" aria-label="Working media budget dial" />
-                      </div></div>
+                      <div class="p-budget-row">
+                        <div class="c-slider-group"><div class="c-slider-rail">
+                          <div class="c-slider-track"><div class="c-slider-fill" id="budgetDialFill" style="width:0%;"></div></div>
+                          <input class="c-slider-input" id="b-budget-dial" type="range" min="0" max="500000" step="5000" value="0" aria-label="Working media budget dial" />
+                        </div></div>
+                        <input id="b-budget" type="number" step="1000" placeholder="0" />
+                      </div>
                       <span class="c-helper">Dial up to RM 500K, or type any amount.</span>
                     </div>
                   </div>
