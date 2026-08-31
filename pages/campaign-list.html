@@ -14,20 +14,45 @@
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.44" />
 <style>
   /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
-  .cl-crumb{margin-bottom:var(--spacing-8); margin-left:calc(var(--spacing-12) * -1);
-    text-decoration:none;}
+  /* Back sits in the header row itself, the planner's own move: the
+     arrow hangs half out of the grid so the title stays on the margin. */
+  .cl-headrow{display:flex; align-items:flex-start; gap:var(--spacing-8); min-width:0;}
+  .cl-crumb{flex:none; text-decoration:none;
+    margin-left:calc(var(--spacing-12) * -1); margin-top:4px;}
+  /* The divider sits tight under the page header, same as Home. */
+  .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
+  .cl-divider{border:none; border-top:1px solid var(--color-neutral-3);
+    margin:0 0 var(--spacing-24);}
   .cl-controls{display:flex; flex-wrap:wrap; align-items:center;
     gap:var(--spacing-8); margin-bottom:var(--spacing-16);}
+  /* Load entrance — the same arrival family as the planner's outline and
+     the landing's tiles: controls first, then the rows cascade, then the
+     pagination. The class leaves after the run so filtering and search
+     never replay it. */
+  @keyframes cl-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  .cl-arriving .cl-controls{animation:cl-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .cl-arriving .c-table-standalone-wrap{animation:cl-arrive 420ms var(--ease-settle) both; animation-delay:120ms;}
+  .cl-arriving .cl-pagination{animation:cl-arrive 420ms var(--ease-settle) both; animation-delay:560ms;}
+  .cl-arriving tbody tr{animation:cl-arrive 380ms var(--ease-settle) both; animation-delay:540ms;}
+  .cl-arriving tbody tr:nth-child(1){animation-delay:200ms;}
+  .cl-arriving tbody tr:nth-child(2){animation-delay:240ms;}
+  .cl-arriving tbody tr:nth-child(3){animation-delay:280ms;}
+  .cl-arriving tbody tr:nth-child(4){animation-delay:320ms;}
+  .cl-arriving tbody tr:nth-child(5){animation-delay:360ms;}
+  .cl-arriving tbody tr:nth-child(6){animation-delay:400ms;}
+  .cl-arriving tbody tr:nth-child(7){animation-delay:440ms;}
+  .cl-arriving tbody tr:nth-child(8){animation-delay:480ms;}
+  @media (prefers-reduced-motion:reduce){
+    .cl-arriving .cl-controls, .cl-arriving .c-datatable,
+    .cl-arriving .cl-pagination, .cl-arriving tbody tr{animation:none;}
+  }
   .c-filter-tray{margin-bottom:var(--spacing-16);}
   .cl-name{font-weight:700; color:var(--color-neutral-9);}
   .cl-sub{display:block; font-size:var(--text-caption-size);
     color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
   .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
   .cl-industry{white-space:nowrap;}
-  .c-datatable td.cl-action{text-align:right;}
   .cl-pagination{margin-top:var(--spacing-16);}
-  /* The table's own rows carry a pointer because the whole row opens the
-     plan, same as the action button. */
   @media (max-width:900px){
     .cl-hide-narrow{display:none;}
   }
@@ -81,20 +106,28 @@
   </div>
 
   <div class="c-shell-main">
-    <div class="c-shell-content">
-
-      <a class="c-btn c-btn-ghost c-btn-sm cl-crumb" href="campaigns.html">
-        <i class="ph ph-arrow-left"></i> Back
-      </a>
+    <div class="c-shell-content cl-arriving" id="clContent">
 
       <header class="c-pageheader">
         <div class="c-pageheader-row">
-          <div class="c-pageheader-text">
-            <h1>All media plans</h1>
-            <p class="sub">Every plan you have open, and what stage it reached.</p>
+          <div class="cl-headrow">
+            <a class="c-btn c-btn-ghost c-btn-sm c-btn-icon cl-crumb" href="campaigns.html" aria-label="Back to Home" title="Back to Home">
+              <i class="ph ph-arrow-left"></i>
+            </a>
+            <div class="c-pageheader-text">
+              <h1>All media plans</h1>
+              <p class="sub">Every plan you have open, and what stage it reached.</p>
+            </div>
+          </div>
+          <div class="c-pageheader-actions">
+            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none;">
+              <i class="ph ph-plus"></i> Create new media plan
+            </a>
           </div>
         </div>
       </header>
+
+      <hr class="cl-divider" />
 
       <div class="cl-controls">
         <div class="c-filterbar" style="flex:1;">
@@ -124,8 +157,12 @@
       </div>
       <div class="c-filter-tray" id="clTray" hidden></div>
 
-      <div class="c-datatable" id="clTableWrap">
-        <table>
+      <!-- DLS Table, Standalone variant: the table is the page's primary
+           surface, so it owns its bordered radius-lg container. Row
+           hover, pointer, and the divider under every row are the
+           component's own rules, not page-local ones. -->
+      <div class="c-table-standalone-wrap c-table-scroll-x" id="clTableWrap">
+        <table class="c-table c-table-standalone">
           <thead>
             <tr>
               <th>Campaign</th>
@@ -134,7 +171,7 @@
               <th class="num">Budget</th>
               <th class="cl-hide-narrow">Duration</th>
               <th class="cl-hide-narrow">Updated</th>
-              <th></th>
+              <th class="no-sort c-table-action-col"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody id="clRows"></tbody>
@@ -231,7 +268,7 @@
     rowsEl.innerHTML = hits.map(function(c){
       var action = c.status === 'booked' ? 'View' : 'Continue';
       var logo = window.collabBrand && window.collabBrand.url(c.brand);
-      return '<tr data-href="planner.html">' +
+      return '<tr class="is-interactive is-clickable" data-href="planner.html">' +
         '<td><span class="cl-cell">' +
           (logo ? '<span class="cl-logo"><img src="' + logo + '" alt="" onerror="this.parentNode.style.visibility=\'hidden\'" /></span>' : '') +
           '<span class="cl-txt"><span class="cl-name">' + c.name + '</span>' +
@@ -241,7 +278,7 @@
         '<td class="num">' + rmFmt(c.budget) + '</td>' +
         '<td class="cl-hide-narrow">' + c.duration + '</td>' +
         '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
-        '<td class="cl-action"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
+        '<td class="c-table-action-col"><a class="c-btn c-btn-secondary c-btn-sm" href="planner.html" style="text-decoration:none">' + action + '</a></td>' +
       '</tr>';
     }).join('');
 
@@ -348,6 +385,12 @@
   });
 
   render();
+
+  /* The arrival ran once with the first render; drop the class so
+     later renders (filter, search) paint without replaying it. */
+  setTimeout(function(){
+    document.getElementById('clContent').classList.remove('cl-arriving');
+  }, 1000);
 })();
 </script>
 </body>
