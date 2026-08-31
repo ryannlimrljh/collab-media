@@ -11,6 +11,7 @@
   'use strict';
 
   var NARROW = window.matchMedia('(max-width:640px)');
+  var NAV_KEY = 'collab-nav-collapsed';
 
   function setCollapsed(on) {
     document.getElementById('shellSidebarNav').classList.toggle('is-collapsed', on);
@@ -18,20 +19,24 @@
     t.setAttribute('aria-label', on ? 'Expand sidebar' : 'Collapse sidebar');
     document.getElementById('sidebarArrow').setAttribute('d',
       on ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+    try { sessionStorage.setItem(NAV_KEY, on ? '1' : '0'); } catch (e) {}
   }
-  if (NARROW.matches) setCollapsed(true);
 
-  /* Auto-collapse, the landing's timing family: the nav holds open for
-     a beat after load (long enough to be read), then folds. Narrow
-     screens arrive collapsed already, so the timer only matters on
-     desktop. */
+  /* The nav follows the previous screen's condition: whatever state the
+     user left it in carries across pages in this tab. Only a first-ever
+     view gets the landing's auto-minimise timing. */
+  var storedNav = null;
+  try { storedNav = sessionStorage.getItem(NAV_KEY); } catch (e) {}
+  if (NARROW.matches) setCollapsed(true);
+  else if (storedNav !== null) setCollapsed(storedNav === '1');
+
   var AUTO_COLLAPSE_DELAY_MS = 1400;
-  var autoCollapseTimer = setTimeout(function () {
-    if (!NARROW.matches) setCollapsed(true);
-  }, AUTO_COLLAPSE_DELAY_MS);
+  var autoCollapseTimer = (storedNav === null && !NARROW.matches)
+    ? setTimeout(function () { if (!NARROW.matches) setCollapsed(true); }, AUTO_COLLAPSE_DELAY_MS)
+    : null;
 
   document.getElementById('sidebarToggle').addEventListener('click', function () {
-    clearTimeout(autoCollapseTimer);
+    if (autoCollapseTimer) clearTimeout(autoCollapseTimer);
     setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'));
   });
 

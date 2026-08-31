@@ -186,8 +186,49 @@
 
   /* Grouped brief — eyebrow section heads turn eleven flat fields into
      four labelled rows. Same inputs, calmer card. */
-  .p-sect{margin-top:var(--spacing-20);}
-  .p-sect > .c-stat-label{display:block; margin-bottom:var(--spacing-8);}
+  .p-sect{margin-top:var(--spacing-24);}
+  .p-sect > .c-stat-label{display:block; margin-bottom:var(--spacing-16);}
+  /* Campaign and Flight sit side by side, each a vertical stack. */
+  .p-sect-cols{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-24);
+    margin-top:var(--spacing-24);}
+  .p-sect-cols .p-sect{margin-top:0;}
+  .p-vstack{display:flex; flex-direction:column; gap:var(--spacing-12);}
+  @media (max-width:640px){ .p-sect-cols{grid-template-columns:1fr;} }
+
+  /* Skeleton — shown inside step 1 while its content "loads in". */
+  @keyframes p-skel-wave{ from{background-position:100% 0;} to{background-position:0 0;} }
+  .p-skel{display:none;}
+  .p-step.is-loading .p-step-inner{position:relative;}
+  .p-step.is-loading .p-step-inner-pad{visibility:hidden;}
+  .p-step.is-loading .p-skel{display:flex; position:absolute;
+    inset:var(--spacing-16) 0 var(--spacing-24) 44px; z-index:5;
+    flex-direction:column; gap:var(--spacing-16); overflow:hidden;}
+  .p-skel-bar{flex:none; border-radius:var(--radius-md);
+    background:linear-gradient(90deg, var(--color-neutral-2) 25%, var(--color-neutral-3) 37%, var(--color-neutral-2) 63%);
+    background-size:400% 100%; animation:p-skel-wave 1.1s linear infinite;}
+  .p-skel-cols{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
+  @media (prefers-reduced-motion:reduce){ .p-skel-bar{animation:none;} }
+
+  /* System checker — the pre-flight overlay that runs on Next. */
+  @keyframes p-spin{ to{transform:rotate(360deg);} }
+  .p-checkrow{display:flex; align-items:flex-start; gap:var(--spacing-8);
+    padding:var(--spacing-4) 0; font-size:var(--text-body2-size);
+    line-height:var(--text-body2-lh); color:var(--color-neutral-9);
+    opacity:0; transform:translateY(4px);
+    transition:opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-standard);}
+  .p-checkrow.is-in{opacity:1; transform:none;}
+  .p-checkrow i{flex:none; font-size:var(--icon-sm); margin-top:2px;
+    color:var(--color-neutral-5);}
+  .p-checkrow i.spin{animation:p-spin 700ms linear infinite;}
+  .p-checkrow.ok i{color:var(--color-green);}
+  .p-checkrow.warn i{color:var(--color-amber);}
+  .p-checkrow.block i{color:var(--color-red);}
+  .p-checkrow.block{font-weight:700;}
+  @media (prefers-reduced-motion:reduce){
+    .p-checkrow{transition:none; opacity:1; transform:none;}
+    .p-checkrow i.spin{animation:none;}
+  }
   /* Insertion fields run two columns across, at every width above 640. */
   .p-grid3a, .p-grid3eq, .p-grid4{display:grid; grid-template-columns:1fr 1fr;
     gap:var(--spacing-12);}
@@ -369,7 +410,17 @@
               <span class="p-step-title"><span class="t" data-lab="1">Brief</span>
                 <span class="d" id="stepsum1">The ask, the goal, the languages.</span></span>
             </button>
-            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-step-body"><div class="p-step-inner">
+            <div class="p-skel" aria-hidden="true">
+              <div class="p-skel-bar" style="height:104px;"></div>
+              <div class="p-skel-cols">
+                <div class="p-skel-bar" style="height:200px;"></div>
+                <div class="p-skel-bar" style="height:200px;"></div>
+              </div>
+              <div class="p-skel-bar" style="height:110px;"></div>
+              <div class="p-skel-bar" style="height:48px;"></div>
+            </div>
+            <div class="p-step-inner-pad">
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
@@ -412,27 +463,29 @@
               </div>
               <p>Fill these and the planner can already draft you a directional plan. Everything after this sharpens it.</p>
 
-              <div class="p-sect" style="margin-top:var(--spacing-16);">
-                <span class="c-stat-label">Campaign</span>
-                <div class="p-grid3a">
-                  <div class="c-field"><label for="b-name">Campaign name</label>
-                    <input id="b-name" placeholder="e.g. New SUV launch Q3 2026" /></div>
-                  <div class="c-field"><label for="b-brand">Advertiser brand</label>
-                    <input id="b-brand" placeholder="e.g. Astro, Maybank" /></div>
-                  <div class="c-field"><label for="b-prod">Product</label>
-                    <input id="b-prod" placeholder="What are we advertising?" /></div>
+              <div class="p-sect-cols">
+                <div class="p-sect">
+                  <span class="c-stat-label">Campaign</span>
+                  <div class="p-vstack">
+                    <div class="c-field"><label for="b-name">Campaign name</label>
+                      <input id="b-name" placeholder="e.g. New SUV launch Q3 2026" /></div>
+                    <div class="c-field"><label for="b-brand">Advertiser brand</label>
+                      <input id="b-brand" placeholder="e.g. Astro, Maybank" /></div>
+                    <div class="c-field"><label for="b-prod">Product</label>
+                      <input id="b-prod" placeholder="What are we advertising?" /></div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="p-sect">
-                <span class="c-stat-label">Flight and budget</span>
-                <div class="p-grid3eq">
-                  <div class="c-field"><label for="b-start">Flight start</label>
-                    <input id="b-start" type="date" /></div>
-                  <div class="c-field"><label for="b-end">Flight end</label>
-                    <input id="b-end" type="date" /></div>
-                  <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
-                    <input id="b-budget" type="number" step="1000" placeholder="0" /></div>
+                <div class="p-sect">
+                  <span class="c-stat-label">Flight and budget</span>
+                  <div class="p-vstack">
+                    <div class="c-field"><label for="b-start">Flight start</label>
+                      <input id="b-start" type="date" /></div>
+                    <div class="c-field"><label for="b-end">Flight end</label>
+                      <input id="b-end" type="date" /></div>
+                    <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
+                      <input id="b-budget" type="number" step="1000" placeholder="0" /></div>
+                  </div>
                 </div>
               </div>
 
@@ -837,10 +890,6 @@
                   <div class="p-stat-foot" id="fcFoot">—</div>
                 </div>
               </div>
-              <div class="p-railsec" data-checkcard="all">
-                <h4 id="checksTitle">Before you continue</h4>
-                <div id="checksHost"></div>
-              </div>
             </div>
             <div id="railPreview" class="p-rail-pane" hidden>
               <div class="p-railsec" id="previewDoc"></div>
@@ -889,6 +938,21 @@
   </div>
 </div>
 
+<!-- System checker — runs on Next and before booking -->
+<div class="p-overlay" id="checkOverlay" hidden>
+  <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="checkTitle" style="max-width:400px;">
+    <div class="c-modal-head">
+      <h4 id="checkTitle">Checking your brief</h4>
+      <button class="c-icon-btn" id="checkClose" aria-label="Close" type="button" hidden><i class="ph ph-x"></i></button>
+    </div>
+    <div class="c-modal-body"><div id="checkList"></div></div>
+    <div class="c-modal-foot" id="checkFoot" hidden>
+      <button class="c-btn c-btn-secondary c-btn-md" id="checkDismiss" type="button">Close</button>
+      <button class="c-btn c-btn-primary c-btn-md" id="checkFixBtn" type="button">Take me there</button>
+    </div>
+  </div>
+</div>
+
 <!-- Booking modal -->
 <div class="p-overlay" id="bookOverlay" hidden>
   <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle" style="max-width:480px;">
@@ -910,7 +974,7 @@
 
 <div class="c-toast-host" id="toastHost"></div>
 
-<script src="../shared/shell.js?v=0.9.41c"></script>
+<script src="../shared/shell.js?v=0.9.42"></script>
 <script>
 (function () {
   'use strict';
@@ -1136,23 +1200,14 @@
     fill.className = 'c-progress-fill' + (pct >= 100 ? ' tone-success' : '');
   }
 
+  /* The checklist no longer lives in the rail — the system checker runs
+     it on Next. The rail keeps the strength meter. */
   function renderChecks(){
-    var host = $('checksHost');
-    if (!host) return;
     renderStrength();
-    $('checksTitle').textContent = step === 4 ? 'Readiness' : step === 3 ? 'Against the brief' : 'Before you continue';
-    var list = checksFor(step);
-    host.innerHTML = list.map(function(c, i){
-      var icon = c.level === 'ok' ? 'check-circle' : c.level === 'warn' ? 'warning-circle' : 'x-circle';
-      return '<button class="p-check ' + c.level + '" data-target="' + (c.target || '') + '" type="button">' +
-        '<i class="ph-fill ph-' + icon + '"></i><span>' + c.label + '</span></button>';
-    }).join('');
   }
 
-  document.addEventListener('click', function(e){
-    var chk = e.target.closest('.p-check');
-    if (!chk || !chk.dataset.target) return;
-    var el = document.getElementById(chk.dataset.target);
+  function jumpToTarget(targetId){
+    var el = document.getElementById(targetId);
     if (!el) return;
     /* A target inside a collapsed step expands the step first… */
     var stepLi = el.closest('.p-step');
@@ -1171,7 +1226,7 @@
     card.classList.remove('p-flash');
     requestAnimationFrame(function(){ card.classList.add('p-flash'); });
     if (el.focus && /INPUT|SELECT|TEXTAREA/.test(el.tagName)) setTimeout(function(){ el.focus(); }, 350);
-  });
+  }
 
   /* ═══ Navigation ═══ */
   function go(n, noScroll){
@@ -1212,23 +1267,73 @@
     askHide();
   }
 
+  /* ═══ System checker — Next runs the step's checks as a staged
+     sequence: each line lands with a spinner, resolves to its verdict,
+     and the whole run either waves the user through or names what is
+     still open. ═══ */
+  var checkRun = 0, checkFixTarget = null;
+  function runChecker(title, checks, onPass){
+    var run = ++checkRun;
+    var overlay = $('checkOverlay'), list = $('checkList');
+    $('checkTitle').textContent = title;
+    $('checkFoot').hidden = true;
+    $('checkClose').hidden = true;
+    list.innerHTML = '';
+    overlay.hidden = false;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var stepMs = reduced ? 0 : 340;
+    var blockers = checks.filter(function(c){ return c.level === 'block'; });
+    checks.forEach(function(c, idx){
+      setTimeout(function(){
+        if (run !== checkRun) return;
+        var row = document.createElement('div');
+        row.className = 'p-checkrow';
+        row.innerHTML = '<i class="ph ph-circle-notch spin"></i><span>' + c.label + '</span>';
+        list.appendChild(row);
+        requestAnimationFrame(function(){ row.classList.add('is-in'); });
+        setTimeout(function(){
+          if (run !== checkRun) return;
+          var icon = c.level === 'ok' ? 'check-circle' : c.level === 'warn' ? 'warning-circle' : 'x-circle';
+          row.classList.add(c.level);
+          row.querySelector('i').className = 'ph-fill ph-' + icon;
+        }, reduced ? 0 : 240);
+      }, idx * stepMs);
+    });
+    setTimeout(function(){
+      if (run !== checkRun) return;
+      if (!blockers.length){
+        $('checkTitle').textContent = 'All clear';
+        setTimeout(function(){
+          if (run !== checkRun) return;
+          overlay.hidden = true;
+          onPass();
+        }, reduced ? 0 : 500);
+      } else {
+        $('checkTitle').textContent = blockers.length === 1 ? 'One thing first' : blockers.length + ' things first';
+        checkFixTarget = blockers[0].target;
+        $('checkFoot').hidden = false;
+        $('checkClose').hidden = false;
+      }
+    }, checks.length * stepMs + (reduced ? 60 : 640));
+  }
+  function closeChecker(){ checkRun++; $('checkOverlay').hidden = true; }
+  $('checkClose').addEventListener('click', closeChecker);
+  $('checkDismiss').addEventListener('click', closeChecker);
+  $('checkFixBtn').addEventListener('click', function(){
+    closeChecker();
+    if (checkFixTarget) jumpToTarget(checkFixTarget);
+  });
+  $('checkOverlay').addEventListener('click', function(e){
+    if (e.target === $('checkOverlay')) closeChecker();
+  });
+
+  var CHECK_TITLES = {1:'Checking your brief', 2:'Checking the audience', 3:'Checking the media mix'};
   function tryNext(n){
     var current = n - 1;
-    var blockers = checksFor(current).filter(function(c){ return c.level === 'block'; });
-    if (blockers.length){
-      renderChecks();
-      var card = document.querySelector('[data-checkcard]');
-      if (card){
-        card.scrollIntoView({behavior:'smooth', block:'center'});
-        card.classList.remove('p-flash');
-        requestAnimationFrame(function(){ card.classList.add('p-flash'); });
-      }
-      toast('warning', blockers.length === 1 ? 'One thing needs attention' : blockers.length + ' things need attention',
-        blockers[0].label + (blockers.length > 1 ? ' — and more in the checklist.' : '.'));
-      return;
-    }
-    markSaved();
-    go(n);
+    runChecker(CHECK_TITLES[current] || 'Checking', checksFor(current), function(){
+      markSaved();
+      go(n);
+    });
   }
 
   document.querySelectorAll('[data-next]').forEach(function(b){
@@ -1770,18 +1875,15 @@
   function closeBook(){ $('bookOverlay').hidden = true; }
   $('bookBtn').addEventListener('click', function(){
     if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
-    var blockers = checksFor(4).filter(function(c){ return c.level === 'block'; });
-    if (blockers.length){
-      renderChecks();
-      toast('warning', 'Not ready to book', blockers[0].label + '.');
-      return;
-    }
-    openBook();
+    runChecker('Checking the whole plan',
+      checksFor(1).concat(checksFor(2), checksFor(3)), openBook);
   });
   $('bookClose').addEventListener('click', closeBook);
   $('bookCancel').addEventListener('click', closeBook);
   $('bookOverlay').addEventListener('click', function(e){ if (e.target === $('bookOverlay')) closeBook(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBook(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape'){ closeBook(); closeChecker(); }
+  });
   $('bookGo').addEventListener('click', function(){
     booked = true;
     closeBook();
@@ -1948,16 +2050,21 @@
   /* AI-touched controls flash a pastel wash so the assistance is
      visible where it landed. */
   function aiFlash(ids){
-    ids.forEach(function(id){
-      var el = $(id);
-      if (!el) return;
-      var host = el.closest('.c-field') || el;
-      var cls = host.classList.contains('c-field') ? 'p-ai-flash' : 'p-ai-flash-row';
-      host.classList.remove(cls);
-      void host.offsetWidth;
-      host.classList.add(cls);
-      setTimeout(function(){ host.classList.remove(cls); }, 1600);
-    });
+    /* Sequenced after the reply starts streaming, so the interaction
+       reads: scroll up, Collab AI answers, then the fields it touched
+       light up. */
+    setTimeout(function(){
+      ids.forEach(function(id){
+        var el = $(id);
+        if (!el) return;
+        var host = el.closest('.c-field') || el;
+        var cls = host.classList.contains('c-field') ? 'p-ai-flash' : 'p-ai-flash-row';
+        host.classList.remove(cls);
+        void host.offsetWidth;
+        host.classList.add(cls);
+        setTimeout(function(){ host.classList.remove(cls); }, 1600);
+      });
+    }, 650);
   }
 
   function applyBriefLine(got){
@@ -2050,6 +2157,9 @@
   function askSubmit(){
     var v = $('askInput').value;
     $('askInput').value = '';
+    /* Push the page up to the assistant first, so the reply and the
+       auto-fill washes land in view. */
+    $('askBox').scrollIntoView({behavior:'smooth', block:'start'});
     handleAsk(v);
   }
   $('askSend').addEventListener('click', askSubmit);
@@ -2166,7 +2276,14 @@
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (n > 1){ go(n); return; }
     if (reduced){ go(1, true); return; }
-    setTimeout(function(){ go(1, true); }, 700);
+    /* Hold the collapsed outline long enough to be read, then fold step
+       one open over a skeleton before the real content lands. */
+    setTimeout(function(){
+      var s1 = $('step1');
+      s1.classList.add('is-loading');
+      go(1, true);
+      setTimeout(function(){ s1.classList.remove('is-loading'); }, 950);
+    }, 1500);
   })();
 })();
 </script>
