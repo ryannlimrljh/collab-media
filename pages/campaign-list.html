@@ -52,7 +52,9 @@
     color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
   .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
   .c-table-action-col{text-align:right;}
-  .cl-actions{display:inline-flex; align-items:center; justify-content:flex-end; gap:6px;}
+  /* Full-width flex so the kebab pins to the cell's right edge on
+     every row, whatever width the Continue/View button takes. */
+  .cl-actions{display:flex; width:100%; align-items:center; justify-content:flex-end; gap:6px;}
   .cl-more{position:relative; display:inline-flex;}
   .cl-more-btn{color:var(--color-neutral-5); width:32px; height:32px;}
   .cl-more:hover .cl-more-btn, .cl-more.is-open .cl-more-btn{color:var(--color-neutral-9); background:var(--color-neutral-2);}
