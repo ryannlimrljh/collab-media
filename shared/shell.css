@@ -22,6 +22,22 @@ body{font-family:var(--font-primary); color:var(--color-neutral-9);
 
 a.c-sidebar-item{text-decoration:none;}
 
+/* ── Beta pill — the DS Badge, outlined instead of filled, sitting
+   beside the lockup as an eyebrow (same move as CollabSales' own nav).
+   It is a sibling of the department trigger, never a child: inside that
+   button it would join the click target and read as part of the
+   control. Uppercased in CSS rather than in the markup, so the
+   accessible name stays "Beta", and it leaves with the wordmark when
+   the rail collapses. */
+/* Padding trimmed off the Badge's own 8px: at the rail's 240px the
+   lockup, chevron and pill leave only a few px before the collapse
+   toggle, and the toggle paints a hover square right up to it. */
+.c-sidebar-beta{margin-left:var(--spacing-8); padding:1px 6px;
+  background:transparent; color:var(--color-neutral-5);
+  border-color:var(--color-neutral-3);
+  text-transform:uppercase; letter-spacing:var(--tracking-eyebrow);}
+.c-sidebar.is-collapsed .c-sidebar-beta{display:none;}
+
 /* ── Account row — composed from Search input's avatar/name/role classes,
    same as the dashboard and feedback board. */
 .c-sidebar-account{display:flex; align-items:center; gap:var(--spacing-12);
