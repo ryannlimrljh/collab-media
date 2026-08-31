@@ -227,6 +227,8 @@
   .p-kv .v{font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
 
   .p-banner-gap{margin-bottom:var(--spacing-24);}
+  /* Toasts rise clear of the docked AI box. */
+  .c-toast-host{bottom:88px;}
   .c-banner-ai .c-btn{position:relative; z-index:1;}
   [hidden]{display:none !important;}
 
@@ -564,7 +566,13 @@
                     <div class="c-field"><label for="b-end">Flight end</label>
                       <input id="b-end" type="date" /></div>
                     <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
-                      <input id="b-budget" type="number" step="1000" placeholder="0" /></div>
+                      <input id="b-budget" type="number" step="1000" placeholder="0" />
+                      <div class="c-slider-group" style="margin-top:var(--spacing-8);"><div class="c-slider-rail">
+                        <div class="c-slider-track"><div class="c-slider-fill" id="budgetDialFill" style="width:0%;"></div></div>
+                        <input class="c-slider-input" id="b-budget-dial" type="range" min="0" max="500000" step="5000" value="0" aria-label="Working media budget dial" />
+                      </div></div>
+                      <span class="c-helper">Dial up to RM 500K, or type any amount.</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1654,12 +1662,32 @@
     $('railKpi').textContent = target && budget() ? rm(budget() / target) + ' per target ' +
       ($('b-unit').value === 'people' ? 'attendee' : ($('b-unit').value || 'unit').replace(/s$/,'')) : 'Set a KPI target';
     $('sumFlightLabel').textContent = flight;
+    syncBudgetDial();
   }
 
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
     $(id).addEventListener('input', function(){ renderAll(); });
   });
   $('b-budget').addEventListener('change', function(){ resetSplit(); renderAll(); });
+
+  /* Budget dial and open field reflect each other; the field stays the
+     source of truth, so typing can go past the dial's ceiling and the
+     dial simply pins at its max. */
+  function syncBudgetDial(){
+    var sl = $('b-budget-dial');
+    if (!sl) return;
+    var v = budget();
+    var max = parseInt(sl.max, 10) || 500000;
+    sl.value = Math.min(max, v);
+    $('budgetDialFill').style.width = Math.min(100, v / max * 100) + '%';
+  }
+  $('b-budget-dial').addEventListener('input', function(){
+    $('b-budget').value = this.value;
+    renderAll();
+  });
+  $('b-budget-dial').addEventListener('change', function(){
+    resetSplit(); renderAll(); markSaved();
+  });
 
   /* ═══ Step 2 — audience. Persona picker is the DS Dropdown, Multiple
      select (.c-dropdown-multi-field): count-based trigger, grouped
