@@ -561,6 +561,8 @@
   .p-actions{display:flex; align-items:center; gap:var(--spacing-4);}
   .p-actions .c-btn-icon{width:40px; height:40px;}
   .p-actions .c-btn-icon i{font-size:var(--icon-md);}
+  #stripeDel:hover{color:var(--color-red);} /* Danger Ghost recipe */
+  #stripeDel.is-armed{color:var(--color-red); background:rgba(253,51,67,.08);}
   .p-actdiv{width:1px; height:24px; background:var(--color-neutral-3);
     margin:0 var(--spacing-4);}
   /* Header-action tooltips open downward — above them is off-canvas,
@@ -717,6 +719,10 @@
             <span class="c-tooltip-wrap">
               <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeSave" type="button" aria-label="Save draft"><i class="ph ph-floppy-disk"></i></button>
               <span class="c-tooltip-bubble" role="tooltip">Save draft</span>
+            </span>
+            <span class="c-tooltip-wrap">
+              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeDel" type="button" aria-label="Delete plan"><i class="ph ph-trash"></i></button>
+              <span class="c-tooltip-bubble" role="tooltip" id="stripeDelTip">Delete plan</span>
             </span>
           </div>
         </div>
@@ -1481,8 +1487,9 @@
       step: step, maxVisited: maxVisited, booked: booked
     };
   }
+  var planDeleted = false;
   function persistPlan(){
-    if (!window.collabPlans) return;
+    if (!window.collabPlans || planDeleted) return;
     var name = $('b-name').value.trim();
     if (!name && !(budget() > 0)) return; /* nothing worth keeping yet */
     if (!planId){
@@ -2632,9 +2639,31 @@
     savedToastAt = Date.now();
     toast('success', null, 'Draft saved. Pick it up any time from Campaigns.');
   }
+  /* Delete arms on the first click (icon turns red, tooltip explains)
+     and deletes on the second; it disarms itself after a moment. */
+  var delArmTimer = null;
+  function actDel(){
+    var b = $('stripeDel'), tip = $('stripeDelTip');
+    if (!b.classList.contains('is-armed')){
+      b.classList.add('is-armed');
+      tip.textContent = 'Click again to delete';
+      clearTimeout(delArmTimer);
+      delArmTimer = setTimeout(function(){
+        b.classList.remove('is-armed');
+        tip.textContent = 'Delete plan';
+      }, 3500);
+      return;
+    }
+    clearTimeout(delArmTimer);
+    planDeleted = true;
+    if (planId && window.collabPlans) collabPlans.remove(planId);
+    toast('neutral', null, 'Plan deleted. Taking you back to all media plans.');
+    setTimeout(function(){ window.location.href = 'campaign-list.html'; }, 900);
+  }
   $('stripePdf').addEventListener('click', actPdf);
   $('stripeXls').addEventListener('click', actXls);
   $('stripeSave').addEventListener('click', actSave);
+  $('stripeDel').addEventListener('click', actDel);
   $('footPdf').addEventListener('click', actPdf);
   $('footXls').addEventListener('click', actXls);
   $('previewDoc').addEventListener('click', function(e){

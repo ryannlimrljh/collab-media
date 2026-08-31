@@ -51,11 +51,30 @@
   .cl-sub{display:block; font-size:var(--text-caption-size);
     color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
   .cl-updated{color:var(--color-neutral-5); white-space:nowrap;}
-  .cl-actions{display:inline-flex; align-items:center; gap:6px;}
-  .cl-del{color:var(--color-neutral-5);} /* Danger Ghost recipe: c-btn-ghost + color override */
-  .cl-del:hover{color:var(--color-red);}
-  .cl-del.is-armed{color:var(--color-red); background:rgba(253,51,67,.08); font-weight:600; white-space:nowrap;}
-  .cl-del.is-armed:hover{background:rgba(253,51,67,.14);}
+  .c-table-action-col{text-align:right;}
+  .cl-actions{display:inline-flex; align-items:center; justify-content:flex-end; gap:6px;}
+  .cl-more{position:relative; display:inline-flex;}
+  .cl-more-btn{color:var(--color-neutral-5); width:32px; height:32px;}
+  .cl-more:hover .cl-more-btn, .cl-more.is-open .cl-more-btn{color:var(--color-neutral-9); background:var(--color-neutral-2);}
+  /* Fly-out opens to the LEFT so it never clips against the table's
+     scroll container, top or bottom row alike. */
+  .cl-menu{position:absolute; right:calc(100% + 4px); top:50%;
+    transform:translateY(-50%) translateX(4px);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-3);
+    padding:4px; white-space:nowrap; z-index:5;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard), visibility 0s linear var(--duration-fast);}
+  .cl-more:hover .cl-menu, .cl-more:focus-within .cl-menu, .cl-more.is-open .cl-menu{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transform:translateY(-50%) translateX(0); transition-delay:0s;}
+  .cl-menu-del{display:inline-flex; align-items:center; gap:6px;
+    border:0; background:transparent; cursor:pointer; font:inherit;
+    font-size:13px; color:var(--color-red);
+    padding:6px 10px; border-radius:var(--radius-sm);}
+  .cl-menu-del:hover{background:rgba(253,51,67,.08);}
+  .cl-menu-del i{font-size:14px;}
   #clRows tr.is-leaving{opacity:0; transition:opacity .2s ease;}
   .cl-industry{white-space:nowrap;}
   .cl-pagination{margin-top:var(--spacing-16);}
@@ -289,7 +308,10 @@
         '<td class="cl-updated cl-hide-narrow">' + c.updated + '</td>' +
         '<td class="c-table-action-col"><span class="cl-actions">' +
           '<a class="c-btn c-btn-secondary c-btn-sm" href="' + href + '" style="text-decoration:none">' + action + '</a>' +
-          '<button class="c-btn c-btn-ghost c-btn-sm cl-del" type="button" data-idx="' + i + '" aria-label="Delete plan"><i class="ph ph-trash"></i></button>' +
+          '<span class="cl-more">' +
+            '<button class="c-btn c-btn-ghost c-btn-sm c-btn-icon cl-more-btn" type="button" aria-label="Row options" aria-haspopup="true"><i class="ph ph-dots-three-vertical"></i></button>' +
+            '<span class="cl-menu"><button class="cl-menu-del" type="button" data-idx="' + i + '"><i class="ph ph-trash"></i> Delete plan</button></span>' +
+          '</span>' +
         '</span></td>' +
       '</tr>';
     }).join('');
@@ -402,31 +424,28 @@
     search.value = ''; query = ''; clear.hidden = true; render(); search.focus();
   });
 
-  /* Delete is two clicks on the same control: the first arms it
-     (\u201cDelete?\u201d, red), the second removes the plan. It disarms on
-     its own after a moment or when the pointer goes anywhere else. */
+  /* Row options live behind the kebab: hovering (or clicking, for
+     touch) reveals a fly-out with Delete. Choosing it removes the
+     plan straight away; opening the menu is the deliberate step. */
   var lastHits = [];
-  var delTimer = null;
-  function disarmDel(){
-    clearTimeout(delTimer);
-    var b = rowsEl.querySelector('.cl-del.is-armed');
-    if (b){
-      b.classList.remove('is-armed');
-      b.innerHTML = '<i class="ph ph-trash"></i>';
-    }
+  function closeMenus(){
+    rowsEl.querySelectorAll('.cl-more.is-open').forEach(function(m){
+      m.classList.remove('is-open');
+    });
   }
   rowsEl.addEventListener('click', function(e){
-    var del = e.target.closest('.cl-del');
+    var kebab = e.target.closest('.cl-more-btn');
+    if (kebab){
+      e.stopPropagation();
+      var wrap = kebab.parentNode;
+      var open = wrap.classList.contains('is-open');
+      closeMenus();
+      if (!open) wrap.classList.add('is-open');
+      return;
+    }
+    var del = e.target.closest('.cl-menu-del');
     if (del){
       e.stopPropagation();
-      if (!del.classList.contains('is-armed')){
-        disarmDel();
-        del.classList.add('is-armed');
-        del.textContent = 'Delete?';
-        delTimer = setTimeout(disarmDel, 3500);
-        return;
-      }
-      clearTimeout(delTimer);
       var rec = lastHits[Number(del.dataset.idx)];
       if (!rec) return;
       if (rec.saved && rec.id) collabPlans.remove(rec.id);
@@ -441,7 +460,7 @@
     if (tr) window.location.href = tr.dataset.href;
   });
   document.addEventListener('click', function(e){
-    if (!e.target.closest('.cl-del')) disarmDel();
+    if (!e.target.closest('.cl-more')) closeMenus();
   });
 
   render();
