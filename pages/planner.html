@@ -353,6 +353,21 @@
     .p-fold-veil{transition:none;}
     .p-fold-shell > *{transition:none; opacity:1;}
   }
+  /* Formats and split in one row: checkbox, live slider, amount. Off
+     rows keep the grid so everything stays aligned. */
+  .p-fmtlist{display:flex; flex-direction:column;}
+  .p-fmtrow{display:grid; grid-template-columns:minmax(220px, 1fr) minmax(160px, 2fr) 150px;
+    gap:var(--spacing-16); align-items:center; padding:var(--spacing-8) 0;}
+  .p-fmtrow + .p-fmtrow{border-top:1px dotted var(--color-neutral-3);}
+  .p-fmtrow .v{font-size:var(--text-body2-size); font-variant-numeric:tabular-nums;
+    color:var(--color-neutral-9); text-align:right; white-space:nowrap;}
+  .p-fmtrow.is-off .v, .p-fmtrow.is-off .c-slider-group{visibility:hidden;}
+  @media (max-width:640px){
+    .p-fmtrow{grid-template-columns:1fr; gap:var(--spacing-8);}
+    .p-fmtrow.is-off .v, .p-fmtrow.is-off .c-slider-group{display:none;}
+  }
+  .p-mustbuy{justify-content:flex-end;}
+
   /* Budget — the dial and the open field share one line. */
   .p-budget-row{display:flex; align-items:center; gap:var(--spacing-12);}
   .p-budget-row .c-slider-group{flex:1; min-width:0;}
@@ -923,7 +938,15 @@
                 <span class="d" id="stepsum3">Channels, formats, sites and the split.</span></span>
               <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
-            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-step-body"><div class="p-step-inner">
+            <div class="p-skel" aria-hidden="true">
+              <div class="p-skel-bar" style="height:64px;"></div>
+              <div class="p-skel-bar" style="height:48px;"></div>
+              <div class="p-skel-bar" style="height:56px;"></div>
+              <div class="p-skel-bar" style="height:56px;"></div>
+              <div class="p-skel-bar" style="height:56px;"></div>
+            </div>
+            <div class="p-step-inner-pad">
       <!-- ══ STEP 3 · MEDIA MIX ═══════════════════════════════════════ -->
       <section id="view3">
         <div class="c-banner c-banner-ai p-banner-gap">
@@ -941,9 +964,26 @@
                 <h4>Channels and formats</h4>
                 <span class="p-picker-sub" id="channelSummary">All channels</span>
               </div>
-              <p>Leave channels off to consider everything. Each format carries its own rate, so nothing downstream is guesswork.</p>
-              <div class="p-choices" id="channelRow" style="margin-top:var(--spacing-8);"></div>
-              <div class="p-choice-stack" id="formatList" style="margin-top:var(--spacing-16); padding-top:var(--spacing-16); border-top:1px solid var(--color-neutral-3);"></div>
+              <p>Leave channels off to consider everything. Tick a format and it joins the split right beside it; each carries its own rate.</p>
+
+              <div class="p-sect">
+                <span class="c-stat-label">Channels</span>
+                <div class="p-choices" id="channelRow"></div>
+              </div>
+
+              <div class="p-sect">
+                <div class="p-sect-labelrow">
+                  <span class="c-stat-label">Formats and split</span>
+                  <span class="p-picker-sub" id="splitBudgetLabel">RM 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-8);">
+                  <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.</p>
+                  <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
+                  </button>
+                </div>
+                <div class="p-fmtlist" id="formatList"></div>
+              </div>
             </div>
 
             <div class="p-drawer" id="sitesDrawer">
@@ -956,28 +996,14 @@
               </button>
               <div class="p-drawer-body" id="sitesPanel" hidden>
                 <div class="p-drawer-section">
-                  <p class="p-note" style="margin:0 0 var(--spacing-8);">Pinned sites are must-buys. Everything else stays in the pool for the optimiser to move budget between.</p>
+                  <p class="p-note" style="margin:0 0 var(--spacing-8);">Tick a site to make it a guaranteed must-buy. Everything left unticked stays in the pool for the optimiser to move budget between.</p>
                   <table class="c-table">
-                    <thead><tr><th>Site</th><th>Channel</th><th class="num">Est. CPM</th><th class="num">Inventory</th><th style="text-align:right;">State</th></tr></thead>
+                    <thead><tr><th>Site</th><th>Channel</th><th class="num">Est. CPM</th><th class="num">Inventory</th><th style="text-align:right;">Must buy</th></tr></thead>
                     <tbody id="siteRows"></tbody>
                   </table>
                   <p class="p-note" id="sitesFoot"></p>
                 </div>
               </div>
-            </div>
-
-            <div class="p-block" id="splitCard">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Budget split</h4>
-                <span class="p-picker-sub" id="splitBudgetLabel">RM 150,000</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12);">
-                <p style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.</p>
-                <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
-                  <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
-                </button>
-              </div>
-              <div class="p-split" id="budgetBars" style="margin-top:var(--spacing-8);"></div>
             </div>
 
           </div>
@@ -1032,8 +1058,8 @@
             </div>
 
             <div class="p-block">
-              <h4>Pinned sites</h4>
-              <p>Must-buys. The optimiser can still move budget across everything left in the pool.</p>
+              <h4>Must-buy sites</h4>
+              <p>Guaranteed placements. The optimiser can still move budget across everything left in the pool.</p>
               <div class="p-sitechips" id="summarySites"></div>
             </div>
 
@@ -1370,13 +1396,13 @@
         : 'Select at least one format', 'formatCard');
       var diff = budget() - fc.alloc;
       add(Math.abs(diff) < 1, false, Math.abs(diff) < 1 ? 'Budget fully allocated, ' + rm(budget())
-        : (diff > 0 ? rm(diff) + ' still unallocated' : rm(-diff) + ' over budget'), 'splitCard');
+        : (diff > 0 ? rm(diff) + ' still unallocated' : rm(-diff) + ' over budget'), 'formatCard');
       var videoLed = onFormats().some(function(f){ return f.video; });
       var awareness = ddVal('b-obj') === 'awareness';
       add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective — video-led mix'
         : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
       var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
-      add(pinned, true, pinned ? 'Must-buy sites pinned' : 'No sites pinned — the optimiser buys freely', 'sitesDrawer');
+      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked — the optimiser buys freely', 'sitesDrawer');
     }
     if (n === 4){
       checksFor(1).concat(checksFor(2), checksFor(3)).forEach(function(c){
@@ -1463,6 +1489,7 @@
     renderAll();
     if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
     if (n === 2) boardStep2();
+    if (n === 3) boardStep3();
   }
 
   /* First arrival on Audience: the step opens over a skeleton, the
@@ -1485,6 +1512,25 @@
         askShow('I read the brief as a broad entertainment play and picked three personas to start: Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
           fmt(reach().uniq) + ' unique reach. Swap any of them freely.');
       }
+    }
+    if (reduced || document.hidden){ finish(); return; }
+    li.classList.add('is-loading');
+    setTimeout(finish, 900);
+  }
+
+  /* First arrival on Media mix: same rhythm — skeleton, the drafted
+     mix loads in, Collab AI explains the draft. */
+  var step3Boarded = false;
+  function boardStep3(){
+    if (step3Boarded) return;
+    step3Boarded = true;
+    var li = $('step3');
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function finish(){
+      li.classList.remove('is-loading');
+      if (step !== 3) return;
+      aiFlash(['formatList', 'sitesDrawer']);
+      askShow('I drafted the mix from your brief and audience: a video-led format set, the draft sites marked as must-buys, and the budget fully allocated. Override anything; your changes are kept.');
     }
     if (reduced || document.hidden){ finish(); return; }
     li.classList.add('is-loading');
@@ -2048,21 +2094,74 @@
     $('channelSummary').textContent = chanOn.length ? chanOn.join(', ') : 'All channels';
   }
 
+  /* Formats and split are one thing: ticking a format gives it a live
+     slider on the same row, so selection and allocation stay associated. */
   function renderFormats(){
     var list = $('formatList'); list.innerHTML = '';
+    var b = budget();
+    $('splitBudgetLabel').textContent = rm(b) +
+      ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
     FORMATS.filter(function(f){ return chanAllows(f.ch); }).forEach(function(f){
-      var lab = document.createElement('label');
-      lab.className = 'c-choice';
-      lab.innerHTML = '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
-        '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-        '<span class="text"><span class="label">' + f.name + '</span>' +
-        '<span class="desc">' + f.ch + ' · ' + rm(f.cpm) + ' CPM</span></span>';
-      lab.querySelector('input').addEventListener('change', function(){
+      var amt = f.on ? (split[f.id] || 0) : 0;
+      var row = document.createElement('div');
+      row.className = 'p-fmtrow' + (f.on ? '' : ' is-off');
+      row.innerHTML =
+        '<label class="c-choice">' +
+          '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
+          '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+          '<span class="text"><span class="label">' + f.name + '</span>' +
+          '<span class="desc">' + f.ch + ' · ' + rm(f.cpm) + ' CPM</span></span>' +
+        '</label>' +
+        '<div class="c-slider-group"><div class="c-slider-rail">' +
+          '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
+          '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="500" value="' + amt +
+          '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '"' + (f.on ? '' : ' disabled') + ' /></div></div>' +
+        '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%</span>';
+      row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
         f.on = !f.on;
         resetSplit();
         renderAll();
       });
-      list.appendChild(lab);
+      list.appendChild(row);
+    });
+    list.querySelectorAll('input[type="range"]').forEach(function(sl){
+      sl.addEventListener('input', function(){
+        var id = sl.dataset.fmt;
+        var val = parseInt(sl.value, 10) || 0;
+        var b2 = budget();
+        var others = onFormats().filter(function(f){ return f.id !== id; });
+        var rest = b2 - val;
+        var otherSum = 0;
+        others.forEach(function(f){ otherSum += split[f.id] || 0; });
+        others.forEach(function(f){
+          if (otherSum > 0) split[f.id] = Math.max(0, Math.round((split[f.id] || 0) / otherSum * rest));
+          else split[f.id] = Math.round(rest / others.length);
+        });
+        split[id] = val;
+        splitTouched = true;
+        $('splitReset').hidden = false;
+        $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
+        syncSplitRows();
+        renderMixRail(); renderChecks(); renderPreview(); renderStepSums();
+      });
+      sl.addEventListener('change', function(){ markSaved(); });
+    });
+  }
+
+  /* Update the split widgets in place — a drag must never rebuild the
+     slider under the pointer. */
+  function syncSplitRows(){
+    var list = $('formatList');
+    if (!list) return;
+    var b = budget();
+    onFormats().forEach(function(f){
+      var amt = split[f.id] || 0;
+      var sl = list.querySelector('input[data-fmt="' + f.id + '"]');
+      var row = sl && sl.closest('.p-fmtrow');
+      if (!row) return;
+      if (document.activeElement !== sl) sl.value = amt;
+      row.querySelector('.c-slider-fill').style.width = (b ? Math.min(100, amt / b * 100) : 0) + '%';
+      row.querySelector('[data-val]').textContent = rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%';
     });
   }
 
@@ -2076,22 +2175,23 @@
         '<td>' + s.ch + '</td>' +
         '<td class="num">' + rm(s.cpm) + '</td>' +
         '<td class="num">' + s.inv + '</td>' +
-        '<td style="text-align:right;"><button class="c-btn ' + (s.pin ? 'c-btn-secondary' : 'c-btn-ghost') +
-          ' c-btn-sm p-pin" type="button" data-site="' + s.id + '">' +
-          '<i class="ph' + (s.pin ? '-fill' : '') + ' ph-push-pin"></i> ' + (s.pin ? 'Pinned' : 'Pin') + '</button></td>';
+        '<td style="text-align:right;"><label class="c-choice p-mustbuy">' +
+          '<input type="checkbox"' + (s.pin ? ' checked' : '') + ' aria-label="Must buy ' + s.name + '" data-site="' + s.id + '" />' +
+          '<span class="c-checkbox-box' + (s.pin ? ' on' : '') + '">' + (s.pin ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+          '</label></td>';
       rows.appendChild(tr);
     });
-    rows.querySelectorAll('[data-site]').forEach(function(b){
-      b.addEventListener('click', function(){
-        var s = SITES.filter(function(x){ return x.id === b.dataset.site; })[0];
+    rows.querySelectorAll('input[data-site]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var s = SITES.filter(function(x){ return x.id === cb.dataset.site; })[0];
         s.pin = !s.pin;
         renderAll();
       });
     });
     var pinned = visible.filter(function(s){ return s.pin; });
     $('sitesSummary').textContent = pinned.length
-      ? pinned.length + ' pinned as must-buy · ' + (visible.length - pinned.length) + ' in the optimiser pool'
-      : visible.length + ' sites in the optimiser pool · none pinned';
+      ? pinned.length + ' must-buys · ' + (visible.length - pinned.length) + ' in the optimiser pool'
+      : visible.length + ' sites in the optimiser pool · none marked must-buy';
     $('sitesFoot').textContent = 'Showing ' + visible.length + ' of ' + SITES.length +
       ' sites for the selected channels. Est. CPMs come from the central rate card.';
   }
@@ -2113,46 +2213,6 @@
     if (reset) reset.hidden = true;
     var origin = $('splitOrigin');
     if (origin) origin.textContent = 'Recommended split — arrives fully allocated. Drag any slider to override; the rest rebalance.';
-  }
-
-  function renderSplit(){
-    var host = $('budgetBars'); host.innerHTML = '';
-    var b = budget();
-    $('splitBudgetLabel').textContent = rm(b) +
-      ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
-    onFormats().forEach(function(f){
-      var amt = split[f.id] || 0;
-      var row = document.createElement('div');
-      row.className = 'p-split-row';
-      row.innerHTML = '<div class="head"><span class="n">' + f.name + '</span>' +
-        '<span class="v">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%</span></div>' +
-        '<div class="c-slider-group"><div class="c-slider-rail">' +
-        '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
-        '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="500" value="' + amt +
-        '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '" /></div></div>';
-      host.appendChild(row);
-    });
-    host.querySelectorAll('input[type="range"]').forEach(function(sl){
-      sl.addEventListener('input', function(){
-        var id = sl.dataset.fmt;
-        var val = parseInt(sl.value, 10) || 0;
-        var b2 = budget();
-        var others = onFormats().filter(function(f){ return f.id !== id; });
-        var rest = b2 - val;
-        var otherSum = 0;
-        others.forEach(function(f){ otherSum += split[f.id] || 0; });
-        others.forEach(function(f, i){
-          if (otherSum > 0) split[f.id] = Math.max(0, Math.round((split[f.id] || 0) / otherSum * rest));
-          else split[f.id] = Math.round(rest / others.length);
-        });
-        split[id] = val;
-        splitTouched = true;
-        $('splitReset').hidden = false;
-        $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
-        renderSplit(); renderMixRail(); renderChecks(); renderPreview();
-      });
-      sl.addEventListener('change', function(){ markSaved(); });
-    });
   }
 
   $('splitReset').addEventListener('click', function(){
@@ -2227,7 +2287,7 @@
     $('summarySites').innerHTML = pins.length ? pins.map(function(s){
       return '<span class="c-chip c-chip-input"><i class="ph-fill ph-push-pin icon" style="font-size:12px;"></i> ' +
         s.name + ' · ' + s.ch + '</span>';
-    }).join('') : '<span class="p-note">Nothing pinned — the optimiser buys freely across the pool.</span>';
+    }).join('') : '<span class="p-note">No must-buys — the optimiser buys freely across the pool.</span>';
 
   }
 
@@ -2323,7 +2383,7 @@
       fmts.map(function(f){
         return '<div class="p-kv"><span class="k">' + f.name + '</span><span class="v">' + rm(split[f.id] || 0) + '</span></div>';
       }).join('') +
-      '<div class="p-kv"><span class="k">Pinned sites</span><span class="v">' +
+      '<div class="p-kv"><span class="k">Must-buys</span><span class="v">' +
         (pins.length ? pins.map(function(x){ return x.name; }).join(', ') : 'None') + '</span></div>' +
       '<div style="display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:var(--spacing-16);">' +
         '<button class="c-btn c-btn-secondary c-btn-sm" data-act="save" type="button"><i class="ph ph-floppy-disk"></i> Save draft</button>' +
@@ -2501,12 +2561,12 @@
       }
       SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
       resetSplit(); renderAll(); markSaved();
-      aiFlash(['formatList', 'budgetBars']);
+      aiFlash(['formatList']);
       askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
         step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
     } else if (/balanc|allocat|split|budget/.test(q)){
       resetSplit(); renderAll(); markSaved();
-      aiFlash(['budgetBars']);
+      aiFlash(['formatList']);
       askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
         onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
         step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
@@ -2735,7 +2795,6 @@
     renderChannels();
     renderFormats();
     renderSites();
-    renderSplit();
     renderMixRail();
     if (step === 4) renderSummary();
     renderChecks();
