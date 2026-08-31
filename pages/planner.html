@@ -2295,11 +2295,50 @@
     }
   }
 
+  /* Try it — Collab AI drafts a complete example brief, drawn at
+     random from a small pool, so every field lands filled and washed. */
+  var TRY_BRIEFS = [
+    {name:'Proton X50 facelift launch', brand:'Proton', prod:'X50 facelift', budget:250000,
+      obj:'conversion', kpi:'Registrations', target:1200, unit:'sign-ups',
+      langs:['Bahasa Malaysia','English']},
+    {name:'MILO back to school', brand:'Nestlé', prod:'MILO family packs', budget:120000,
+      obj:'awareness', kpi:'Net reach', target:2000000, unit:'people',
+      langs:['Bahasa Malaysia','English','Chinese','Tamil']},
+    {name:'Astro 30th Anniversary', brand:'Astro', prod:'Astro 30 celebration', budget:150000,
+      obj:'awareness', kpi:'Event attendees', target:5000, unit:'people',
+      langs:['Bahasa Malaysia','English']},
+    {name:'TnG eWallet Raya rewards', brand:"Touch 'n Go", prod:'Raya cashback push', budget:90000,
+      obj:'consideration', kpi:'Registrations', target:8000, unit:'sign-ups',
+      langs:['Bahasa Malaysia','English']},
+    {name:'sooka Copa binge pass', brand:'sooka', prod:'Sports VIP pass', budget:180000,
+      obj:'leadgen', kpi:'Video completions', target:600000, unit:'views',
+      langs:['Bahasa Malaysia','English','Chinese']}
+  ];
   $('briefAiTry').addEventListener('click', function(){
-    var i = $('askInput');
-    i.value = 'Maybank Raya campaign, RM 200k, awareness';
-    i.focus();
-    i.select();
+    var b = TRY_BRIEFS[Math.floor(Math.random() * TRY_BRIEFS.length)];
+    $('b-name').value = b.name;
+    $('b-brand').value = b.brand;
+    $('b-prod').value = b.prod;
+    $('b-budget').value = b.budget;
+    var iso = function(d){ return d.toISOString().slice(0, 10); };
+    var s = new Date(); s.setDate(s.getDate() + 14);
+    var e = new Date(); e.setDate(e.getDate() + 35);
+    $('b-start').value = iso(s);
+    $('b-end').value = iso(e);
+    $('b-target').value = b.target;
+    var setDD = function(id, v){
+      var f = document.querySelector('[data-dd="' + id + '"]');
+      if (f && f._set) f._set(v, true);
+    };
+    setDD('b-obj', b.obj); setDD('b-kpi', b.kpi); setDD('b-unit', b.unit);
+    langOn = b.langs.slice();
+    renderLangs();
+    resetSplit(); renderAll(); markSaved();
+    aiFlash(['b-name','b-brand','b-prod','b-start','b-end','b-budget',
+      'b-target','b-obj','b-kpi','b-unit','langRow']);
+    askShow('Here is a full example brief: ' + b.name + ' for ' + b.brand + ', ' +
+      rm(b.budget) + ' over a three-week flight, chasing ' + fmt(b.target) + ' ' + b.unit +
+      '. Every field is editable, or ask me to change any of it.');
   });
 
   function askSubmit(){
@@ -2334,7 +2373,7 @@
   $('askReplyClose').addEventListener('click', askHide);
   document.addEventListener('click', function(e){
     if (!$('askReply').classList.contains('is-open')) return;
-    if (e.target.closest('#askBox')) return;
+    if (e.target.closest('#askBox') || e.target.closest('#briefAiTry')) return;
     askHide();
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') askHide(); });
