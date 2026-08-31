@@ -177,6 +177,7 @@
   .p-drawer{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-md); box-shadow:none;
     margin:var(--spacing-16) 0; padding:0 var(--spacing-16);}
+  .p-drawer + .p-drawer{margin-top:calc(var(--spacing-8) * -1);}
   .p-drawer .c-field{width:100%;}
   .p-disclose{display:flex; justify-content:space-between; align-items:center;
     width:100%; background:none; border:none; padding:var(--spacing-16) 0;
@@ -245,9 +246,31 @@
   .p-sect-cols > .p-sect:first-child{padding-right:var(--spacing-32);}
   .p-sect-cols > .p-sect:last-child{border-left:1px dotted var(--color-neutral-4);
     padding-left:var(--spacing-32);}
-  #askCard > .p-sect{border-top:1px dotted var(--color-neutral-4);
-    padding-top:var(--spacing-24); margin-top:var(--spacing-24);}
+  /* Any labelled section that follows another gets the dotted rule —
+     the same rhythm on every step. */
+  .p-block > .p-sect + .p-sect, .p-block > .p-sect-cols + .p-sect{
+    border-top:1px dotted var(--color-neutral-4); padding-top:var(--spacing-24);}
   .p-vstack{display:flex; flex-direction:column; gap:var(--spacing-12);}
+  /* Targeting basis — two big selectable cards, half width each. */
+  .p-bigchoice{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);}
+  .p-bigcard{position:relative; display:flex; flex-direction:column;
+    gap:var(--spacing-8); background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+    padding:var(--spacing-16); cursor:pointer;
+    transition:border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);}
+  .p-bigcard:hover{border-color:var(--color-neutral-4);}
+  .p-bigcard.is-selected{border-color:var(--color-obsidian);
+    box-shadow:0 0 0 1px var(--color-obsidian);}
+  .p-bigcard input{position:absolute; opacity:0; pointer-events:none;}
+  .p-bigcard .head{display:flex; align-items:center; gap:var(--spacing-8);}
+  .p-bigcard .t{font-size:var(--text-h5-size); font-weight:800;
+    color:var(--color-neutral-9);}
+  .p-bigcard .desc{font-size:var(--text-body2-size); line-height:var(--text-body2-lh);
+    color:var(--color-neutral-5);}
+  .p-bigcard .meta{margin-top:auto; font-size:var(--text-caption-size);
+    font-weight:700; color:var(--color-neutral-9);}
+  @media (max-width:640px){ .p-bigchoice{grid-template-columns:1fr;} }
   /* Budget — the dial and the open field share one line. */
   .p-budget-row{display:flex; align-items:center; gap:var(--spacing-12);}
   .p-budget-row .c-slider-group{flex:1; min-width:0;}
@@ -670,7 +693,17 @@
                 <span class="d" id="stepsum2">Who this plan is trying to reach.</span></span>
               <i class="ph ph-caret-down p-step-caret" aria-hidden="true"></i>
             </button>
-            <div class="p-step-body"><div class="p-step-inner"><div class="p-step-inner-pad">
+            <div class="p-step-body"><div class="p-step-inner">
+            <div class="p-skel" aria-hidden="true">
+              <div class="p-skel-cols">
+                <div class="p-skel-bar" style="height:150px;"></div>
+                <div class="p-skel-bar" style="height:150px;"></div>
+              </div>
+              <div class="p-skel-bar" style="height:64px;"></div>
+              <div class="p-skel-bar" style="height:56px;"></div>
+              <div class="p-skel-bar" style="height:56px;"></div>
+            </div>
+            <div class="p-step-inner-pad">
       <!-- ══ STEP 2 · AUDIENCE ════════════════════════════════════════ -->
       <section id="view2">
         <div class="p-stack">
@@ -679,52 +712,41 @@
               <h4>Who are you trying to reach?</h4>
               <p>Pick a targeting basis, then narrow it. One decision type on this screen — the evidence lives in the drawer below.</p>
 
-              <div class="p-choices" role="radiogroup" aria-label="Targeting basis" style="margin-top:var(--spacing-8);">
-                <label class="c-choice" data-mode="personas">
-                  <input type="radio" name="basis" checked />
-                  <span class="c-radio-circle on"><span class="dot"></span></span>
-                  <span class="text">
-                    <span class="label">Personas</span>
-                    <span class="desc" id="choiceSummary">None selected yet</span>
-                  </span>
-                </label>
-                <label class="c-choice" data-mode="mass">
-                  <input type="radio" name="basis" />
-                  <span class="c-radio-circle"><span class="dot" hidden></span></span>
-                  <span class="text">
-                    <span class="label">Mass targeting</span>
-                    <span class="desc">Entire Malaysia · 16.15M</span>
-                  </span>
-                </label>
-              </div>
-
-              <div id="massBody" hidden style="margin-top:var(--spacing-12);">
-                <div class="c-banner c-banner-neutral">
-                  <i class="ph-fill ph-users-three icon"></i>
-                  <div class="body"><p class="message">Targeting the entire Malaysia population — 16.15M. Nothing to pick here; use the refiners below to narrow it.</p></div>
+              <div class="p-sect">
+                <span class="c-stat-label">Targeting basis</span>
+                <div class="p-bigchoice" role="radiogroup" aria-label="Targeting basis">
+                  <label class="p-bigcard is-selected" data-mode="personas">
+                    <input type="radio" name="basis" checked />
+                    <span class="head"><span class="c-radio-circle on"><span class="dot"></span></span>
+                      <span class="t">Personas</span></span>
+                    <span class="desc">Audience segments from the KULT playbook, built on real Astro viewing and engagement behaviour. Pick up to five and the planner models their overlap.</span>
+                    <span class="meta" id="choiceSummary">None selected yet</span>
+                  </label>
+                  <label class="p-bigcard" data-mode="mass">
+                    <input type="radio" name="basis" />
+                    <span class="head"><span class="c-radio-circle"><span class="dot" hidden></span></span>
+                      <span class="t">Mass targeting</span></span>
+                    <span class="desc">The whole Malaysia footprint, no segmentation. Reach everyone, then use the refiners below if it needs narrowing.</span>
+                    <span class="meta">Entire Malaysia · 16.15M</span>
+                  </label>
                 </div>
               </div>
 
-              <div id="personaBody" style="margin-top:var(--spacing-12);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:var(--spacing-12);">
-                  <div class="c-field c-dropdown-multi-field" id="personaField" style="flex:1; max-width:440px;">
-                    <label for="personaTrigger">Personas — KULT audience playbook</label>
-                    <div class="input-wrap has-trailing-icon">
-                      <input type="text" class="c-dropdown-multi-input" id="personaTrigger" placeholder="Select personas" readonly />
-                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-multi-chevron"></i></span>
-                      <div class="c-dropdown-multi-panel" id="personaPanel" hidden>
-                      <div class="c-dropdown-multi-list" id="personaList"></div>
-                      <div class="c-dropdown-multi-footer">
-                        <button class="clear" id="personaClear" type="button">Clear</button>
-                        <button class="done" id="personaDone" type="button">Done</button>
-                      </div>
+              <div class="p-sect" id="personaBody">
+                <span class="c-stat-label">Personas — KULT audience playbook</span>
+                <div class="c-field c-dropdown-multi-field" id="personaField" style="max-width:440px;">
+                  <div class="input-wrap has-trailing-icon">
+                    <input type="text" class="c-dropdown-multi-input" id="personaTrigger" placeholder="Select personas" readonly aria-label="Personas" />
+                    <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-multi-chevron"></i></span>
+                    <div class="c-dropdown-multi-panel" id="personaPanel" hidden>
+                    <div class="c-dropdown-multi-list" id="personaList"></div>
+                    <div class="c-dropdown-multi-footer">
+                      <button class="clear" id="personaClear" type="button">Clear</button>
+                      <button class="done" id="personaDone" type="button">Done</button>
                     </div>
-                    </div>
-                    <span class="c-helper" id="pickerCount">0 of 5 selected</span>
                   </div>
-                  <button class="c-btn c-btn-ghost c-btn-sm" id="pickerSuggest" type="button" style="flex:none; margin-bottom:26px;">
-                    <i class="ph ph-sparkle"></i> Suggest from brief
-                  </button>
+                  </div>
+                  <span class="c-helper" id="pickerCount">0 of 5 selected</span>
                 </div>
                 <div class="c-chip-group p-chips" id="chipRow"></div>
               </div>
@@ -1338,6 +1360,32 @@
     closeChecker();
     renderAll();
     if (!noScroll) $('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
+    if (n === 2) boardStep2();
+  }
+
+  /* First arrival on Audience: the step opens over a skeleton, the
+     selection loads in, then Collab AI assists with a starting pick. */
+  var step2Boarded = false;
+  function boardStep2(){
+    if (step2Boarded) return;
+    step2Boarded = true;
+    var li = $('step2');
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function finish(){
+      li.classList.remove('is-loading');
+      var hasBrief = $('b-name').value.trim() || budget() > 0;
+      if (mode === 'personas' && !selected.length && step === 2 && hasBrief){
+        selected = ['cl', 'al', 'kd'];
+        if (personaOpen) renderPersonaList();
+        renderChips(); renderAll();
+        aiFlash(['personaField', 'chipRow']);
+        askShow('I read the brief as a broad entertainment play and picked three personas to start: Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
+          fmt(reach().uniq) + ' unique reach. Swap any of them freely.');
+      }
+    }
+    if (reduced || document.hidden){ finish(); return; }
+    li.classList.add('is-loading');
+    setTimeout(finish, 900);
   }
 
   /* Docked ghost line — slides only when the message overflows the
@@ -1787,29 +1835,22 @@
     selected = [];
     renderPersonaList(); renderChips(); renderAll();
   });
-  $('pickerSuggest').addEventListener('click', function(e){
-    e.stopPropagation();
-    selected = ['cl', 'al', 'kd'];   /* stand-in for the engine's own pick */
-    if (personaOpen) renderPersonaList();
-    renderChips(); renderAll();
-    toast('neutral', null, 'Suggested three personas from the brief. Swap any of them freely.');
-  });
   document.addEventListener('click', function(){ closePicker(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePicker(); });
 
-  /* Targeting basis — the DS Radio with description. */
+  /* Targeting basis — two big cards carrying the DS radio glyph. */
   document.querySelectorAll('[data-mode]').forEach(function(tile){
     tile.addEventListener('click', function(){
       mode = tile.dataset.mode;
       document.querySelectorAll('[data-mode]').forEach(function(t){
         var on = t.dataset.mode === mode;
         t.querySelector('input').checked = on;
+        t.classList.toggle('is-selected', on);
         var circ = t.querySelector('.c-radio-circle');
         circ.classList.toggle('on', on);
         circ.querySelector('.dot').hidden = !on;
       });
       $('personaBody').hidden = mode !== 'personas';
-      $('massBody').hidden = mode !== 'mass';
       if (mode !== 'personas') closePicker();
       renderAll();
     });
