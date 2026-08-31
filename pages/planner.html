@@ -1608,7 +1608,8 @@
     function finish(){
       li.classList.remove('is-loading');
       if (step !== 3) return;
-      aiFlash(['formatList', 'sitesDrawer']);
+      aiFlash(['sitesDrawer']);
+      animateSplitSweep();
       askShow('I drafted the mix from your brief and audience: a video-led format set, the draft sites marked as must-buys, and the budget fully allocated. Override anything; your changes are kept.');
     }
     if (reduced || document.hidden){ finish(); return; }
@@ -2223,6 +2224,7 @@
         split[id] = val;
         splitTouched = true;
         mixSource = 'user';
+        sweepRun++;
         $('splitReset').hidden = false;
         $('splitOrigin').textContent = 'Your split. The recommendation is one click away if you want it back.';
         syncSplitRows();
@@ -2248,6 +2250,58 @@
       row.querySelector('[data-val]').innerHTML = rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
         '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span>';
     });
+  }
+
+  /* AI split sweep — when Collab AI sets the split, the dials travel:
+     rows zero out, then each slider sweeps to its drafted value in
+     turn, washing as it lands. A manual drag cancels the show. */
+  var sweepRun = 0;
+  function animateSplitSweep(){
+    var run = ++sweepRun;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || document.hidden) return;
+    var list = $('formatList');
+    if (!list) return;
+    var b = budget();
+    var rows = onFormats().map(function(f){
+      var sl = list.querySelector('input[data-fmt="' + f.id + '"]');
+      return sl ? {f: f, sl: sl, row: sl.closest('.p-fmtrow'), target: split[f.id] || 0} : null;
+    }).filter(Boolean);
+    if (!rows.length) return;
+    rows.forEach(function(r0){
+      r0.sl.value = 0;
+      r0.row.querySelector('.c-slider-fill').style.width = '0%';
+      r0.row.querySelector('[data-val]').innerHTML = rm(0) + ' · 0%' +
+        '<span class="imp">0 imps</span>';
+    });
+    var i = 0;
+    function nextRow(){
+      if (run !== sweepRun || i >= rows.length){
+        if (run === sweepRun) syncSplitRows();
+        return;
+      }
+      var r0 = rows[i++];
+      r0.row.classList.add('p-ai-flash-row');
+      var k = 0, ticks = 14;
+      var timer = setInterval(function(){
+        if (run !== sweepRun){ clearInterval(timer); return; }
+        k += 1;
+        var eased = 1 - Math.pow(1 - k / ticks, 3);
+        var v = Math.round(r0.target * eased / 500) * 500;
+        r0.sl.value = v;
+        r0.row.querySelector('.c-slider-fill').style.width = (b ? Math.min(100, v / b * 100) : 0) + '%';
+        r0.row.querySelector('[data-val]').innerHTML = rm(v) + ' · ' + (b ? Math.round(v / b * 100) : 0) + '%' +
+          '<span class="imp">' + fmt(v / r0.f.cpm * 1000) + ' imps</span>';
+        if (k >= ticks){
+          clearInterval(timer);
+          (function(rowEl){
+            setTimeout(function(){ rowEl.classList.remove('p-ai-flash-row'); }, 900);
+          })(r0.row);
+          setTimeout(nextRow, 90);
+        }
+      }, 28);
+    }
+    setTimeout(nextRow, 550);
   }
 
   function renderSites(){
@@ -2303,6 +2357,7 @@
 
   $('splitReset').addEventListener('click', function(){
     resetSplit(); renderAll();
+    animateSplitSweep();
     toast('neutral', null, 'Back to the recommended split.');
   });
 
@@ -2317,7 +2372,8 @@
     resetSplit();
     renderAll();
     markSaved();
-    aiFlash(['formatList', 'sitesDrawer']);
+    aiFlash(['sitesDrawer']);
+    animateSplitSweep();
     askShow('Re-drafted the formats, sites and split from your brief and audience. Your channel picks were kept.');
   });
 
@@ -2769,12 +2825,12 @@
       SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
       mixSource = 'ai';
       resetSplit(); renderAll(); markSaved();
-      aiFlash(['formatList']);
+      animateSplitSweep();
       askShow('Re-drafted the formats, sites and split from your brief and audience. Video leads the mix, since that is what this audience actually engages with. Your channel picks were kept.',
         step === 3 ? null : [{label:'See the mix', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
     } else if (/balanc|allocat|split|budget/.test(q)){
       resetSplit(); renderAll(); markSaved();
-      aiFlash(['formatList']);
+      animateSplitSweep();
       askShow('Budget is back on the recommended split, fully allocated: ' + rm(budget()) + ' across ' +
         onFormats().length + ' formats at a blended ' + rm(forecast().blended) + ' CPM.',
         step === 3 ? null : [{label:'See the split', icon:'ph-arrow-right', run:function(){ askHide(); go(3); }}]);
