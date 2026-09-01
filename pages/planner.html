@@ -1242,6 +1242,7 @@
                   <div class="c-progress-track size-compact" style="margin-top:var(--spacing-8);">
                     <div class="c-progress-fill tone-success" id="railAllocFill" style="width:100%;"></div>
                   </div>
+                  <div class="p-stat-foot" id="railUnallocFoot">The draft split spends the full budget</div>
                 </div>
                 <div class="p-stat-sep">
                   <span class="c-stat-label">Forecast</span>
@@ -2107,7 +2108,24 @@
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
     $(id).addEventListener('input', function(){ renderAll(); });
   });
-  $('b-budget').addEventListener('change', function(){ resetSplit(); renderAll(); });
+  /* While the split is still the untouched AI draft, it follows the
+     budget and stays fully allocated. Once the user has shaped it,
+     the dials hold their ground and a budget change surfaces as
+     unallocated (or over) instead of silently rewriting their work. */
+  function budgetFollowSplit(){
+    if (mixSource === 'ai' && !splitTouched){ resetSplit(); return true; }
+    return false;
+  }
+  $('b-budget').addEventListener('input', function(){ budgetFollowSplit(); renderAll(); });
+  $('b-budget').addEventListener('change', function(){
+    if (!budgetFollowSplit()){
+      var reset = $('splitReset');
+      if (reset) reset.hidden = false;
+      var origin = $('splitOrigin');
+      if (origin) origin.textContent = 'Budget changed but your dials held still. The difference sits in unallocated; Restore AI draft re-spreads it.';
+    }
+    renderAll();
+  });
 
   /* Budget dial and open field reflect each other; the field stays the
      source of truth, so typing can go past the dial's ceiling and the
@@ -2122,10 +2140,17 @@
   }
   $('b-budget-dial').addEventListener('input', function(){
     $('b-budget').value = this.value;
+    budgetFollowSplit();
     renderAll();
   });
   $('b-budget-dial').addEventListener('change', function(){
-    resetSplit(); renderAll(); markSaved();
+    if (!budgetFollowSplit()){
+      var reset = $('splitReset');
+      if (reset) reset.hidden = false;
+      var origin = $('splitOrigin');
+      if (origin) origin.textContent = 'Budget changed but your dials held still. The difference sits in unallocated; Restore AI draft re-spreads it.';
+    }
+    renderAll(); markSaved();
   });
 
   /* ═══ Step 2 — audience. Persona picker is the DS Dropdown, Multiple
@@ -2555,6 +2580,15 @@
     var el = $('railUnalloc');
     el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
     el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
+    var foot = $('railUnallocFoot');
+    if (foot){
+      foot.textContent = Math.abs(diff) < 1
+        ? (mixSource === 'ai' && !splitTouched
+            ? 'The draft split spends the full budget'
+            : 'Every ringgit is placed in the split')
+        : diff > 0 ? 'Not yet placed in the format split'
+        : 'The dials ask for more than the budget';
+    }
     var fill = $('railAllocFill');
     var pct = budget() ? Math.min(100, fc.alloc / budget() * 100) : 0;
     fill.style.width = pct + '%';
