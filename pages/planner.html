@@ -106,7 +106,8 @@
   /* Field being written by the AI right now — an animated gradient
      ring in the border, plus a soft halo. */
   @keyframes p-ai-ring{ from{background-position:0 0, 0% 0;} to{background-position:0 0, 200% 0;} }
-  .p-ai-active input, .p-ai-active textarea, .p-ai-active .c-dropdown-input{
+  .p-ai-active input, .p-ai-active textarea, .p-ai-active .c-dropdown-input,
+  .p-ai-active .c-dp-trigger{
     border-color:transparent !important;
     background-image:linear-gradient(var(--color-neutral-1), var(--color-neutral-1)),
       linear-gradient(90deg,var(--color-fire-pastel) 0%,var(--color-wood-pastel) 20%,var(--color-earth-pastel) 40%,var(--color-water-pastel) 60%,var(--color-gold-pastel) 80%,var(--color-fire-pastel) 100%);
@@ -115,8 +116,21 @@
     animation:p-ai-ring 1.1s linear infinite;
     box-shadow:0 0 0 3px rgba(140, 170, 255, .14);}
   @media (prefers-reduced-motion:reduce){
-    .p-ai-active input, .p-ai-active textarea, .p-ai-active .c-dropdown-input{animation:none;}
+    .p-ai-active input, .p-ai-active textarea, .p-ai-active .c-dropdown-input,
+    .p-ai-active .c-dp-trigger{animation:none;}
   }
+  /* DLS Date picker, page wiring: the c-dp recipe is the DLS's own;
+     this only anchors the popover and hides the native input that
+     keeps holding the ISO value for the rest of the page. */
+  .p-dp{position:relative;}
+  .p-dp .c-dp-trigger{width:100%; cursor:pointer; text-align:left;
+    transition:border-color var(--duration-fast) var(--ease-standard);}
+  .p-dp .c-dp-trigger:hover{border-color:var(--color-neutral-4);}
+  .p-dp .c-dp-trigger:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-dp .c-dp-trigger [data-dp-label].is-placeholder{color:var(--color-neutral-5);}
+  .p-dp-native{position:absolute; width:1px; height:1px; opacity:0;
+    pointer-events:none; border:0; padding:0; margin:0;}
+  .p-dp-panel{position:absolute; top:calc(100% + 8px); left:0; z-index:40;}
 
   /* AI-assisted fields flash a pastel wash so the help is visible. */
   @keyframes p-ai-fill{
@@ -809,10 +823,18 @@
                 <div class="p-sect">
                   <span class="c-stat-label">Campaign dates and budget</span>
                   <div class="p-vstack">
-                    <div class="c-field"><label for="b-start">Campaign start</label>
-                      <input id="b-start" type="date" /></div>
-                    <div class="c-field"><label for="b-end">Campaign end</label>
-                      <input id="b-end" type="date" /></div>
+                    <div class="c-field p-dp"><label for="dpTrig-b-start">Campaign start</label>
+                      <button type="button" class="c-dp-trigger" id="dpTrig-b-start" aria-haspopup="dialog" aria-expanded="false">
+                        <i class="ph-fill ph-calendar"></i><span data-dp-label class="is-placeholder">Pick a date</span>
+                      </button>
+                      <input id="b-start" type="date" class="p-dp-native" tabindex="-1" aria-hidden="true" />
+                      <div class="c-dp-panel p-dp-panel" id="dpPanel-b-start" hidden role="dialog" aria-label="Campaign start calendar"></div></div>
+                    <div class="c-field p-dp"><label for="dpTrig-b-end">Campaign end</label>
+                      <button type="button" class="c-dp-trigger" id="dpTrig-b-end" aria-haspopup="dialog" aria-expanded="false">
+                        <i class="ph-fill ph-calendar"></i><span data-dp-label class="is-placeholder">Pick a date</span>
+                      </button>
+                      <input id="b-end" type="date" class="p-dp-native" tabindex="-1" aria-hidden="true" />
+                      <div class="c-dp-panel p-dp-panel" id="dpPanel-b-end" hidden role="dialog" aria-label="Campaign end calendar"></div></div>
                     <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
                       <div class="p-budget-row">
                         <div class="c-slider-group"><div class="c-slider-rail">
@@ -2052,6 +2074,109 @@
     ['people','sign-ups','views'].map(function(x){ return {v:x, label:x}; }),
     undefined, function(){ renderAll(); });
 
+  /* ═══ DLS Date picker — the c-dp trigger/panel recipe wired to the
+     hidden native inputs, so every reader of $('b-start').value keeps
+     working. Both panels shade the start-to-end range. ═══ */
+  var dpSyncs = [];
+  function initDatePicker(fieldId, opts){
+    var input = $(fieldId);
+    var trig = $('dpTrig-' + fieldId);
+    var panel = $('dpPanel-' + fieldId);
+    var labelSpan = trig.querySelector('[data-dp-label]');
+    var view = null;
+    function parseISO(v){
+      if (!v) return null;
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+      return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+    function iso(d){
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+    function fmtDay(d){
+      return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+    }
+    function sameDay(a, b){ return a && b && a.getTime() === b.getTime(); }
+    function render(){
+      var sel = parseISO(input.value);
+      var base = view || sel || new Date();
+      view = new Date(base.getFullYear(), base.getMonth(), 1);
+      var start = parseISO($('b-start').value);
+      var end = parseISO($('b-end').value);
+      var minD = (opts && opts.minFrom) ? parseISO($(opts.minFrom).value) : null;
+      var now = new Date();
+      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var monthLabel = view.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+      var html = '<div class="c-dp-header">' +
+        '<button class="c-icon-btn" type="button" data-nav="-1" aria-label="Previous month"><i class="ph ph-caret-left"></i></button>' +
+        '<h5>' + monthLabel + '</h5>' +
+        '<button class="c-icon-btn" type="button" data-nav="1" aria-label="Next month"><i class="ph ph-caret-right"></i></button>' +
+        '</div><div class="c-dp-grid">' +
+        ['Mo','Tu','We','Th','Fr','Sa','Su'].map(function(w){
+          return '<span class="c-dp-weekday">' + w + '</span>';
+        }).join('');
+      var lead = (new Date(view.getFullYear(), view.getMonth(), 1).getDay() + 6) % 7;
+      var days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+      for (var i = 0; i < lead; i++) html += '<span></span>';
+      for (var d = 1; d <= days; d++){
+        var cur = new Date(view.getFullYear(), view.getMonth(), d);
+        var cls = 'c-dp-day';
+        var disabled = minD && cur <= minD;
+        if (disabled) cls += ' disabled';
+        if (sameDay(cur, today)) cls += ' today';
+        if (start && end && end > start){
+          if (sameDay(cur, start)) cls += ' range-start';
+          else if (sameDay(cur, end)) cls += ' range-end';
+          else if (cur > start && cur < end) cls += ' range';
+        } else if (sameDay(cur, sel)) cls += ' selected';
+        html += '<button type="button" class="' + cls + '"' +
+          (disabled ? ' disabled' : ' data-iso="' + iso(cur) + '"') + '>' + d + '</button>';
+      }
+      panel.innerHTML = html + '</div>';
+    }
+    function open(){
+      view = parseISO(input.value) ||
+        ((opts && opts.minFrom) ? parseISO($(opts.minFrom).value) : null) || new Date();
+      render();
+      panel.hidden = false;
+      trig.setAttribute('aria-expanded', 'true');
+    }
+    function close(){
+      panel.hidden = true;
+      trig.setAttribute('aria-expanded', 'false');
+    }
+    trig.addEventListener('click', function(){
+      if (panel.hidden) open(); else close();
+    });
+    panel.addEventListener('click', function(e){
+      var nav = e.target.closest('[data-nav]');
+      if (nav){
+        view = new Date(view.getFullYear(), view.getMonth() + Number(nav.dataset.nav), 1);
+        render();
+        return;
+      }
+      var day = e.target.closest('.c-dp-day[data-iso]');
+      if (!day) return;
+      input.value = day.dataset.iso;
+      input.dispatchEvent(new Event('input', {bubbles: true}));
+      close();
+      markSaved();
+    });
+    document.addEventListener('click', function(e){
+      if (!panel.hidden && !e.target.closest('#' + trig.id) && !e.target.closest('#' + panel.id)) close();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && !panel.hidden) close();
+    });
+    dpSyncs.push(function(){
+      var d = parseISO(input.value);
+      labelSpan.textContent = d ? fmtDay(d) : 'Pick a date';
+      labelSpan.classList.toggle('is-placeholder', !d);
+      if (!panel.hidden) render();
+    });
+  }
+  initDatePicker('b-start');
+  initDatePicker('b-end', {minFrom: 'b-start'});
+
   /* ═══ Step 1 — brief ═══ */
   /* Languages — the DS Checkbox (.c-choice + .c-checkbox-box), inline. */
   function renderLangs(){
@@ -2103,6 +2228,7 @@
       ($('b-unit').value === 'people' ? 'attendee' : ($('b-unit').value || 'unit').replace(/s$/,'')) : 'Set a KPI target';
     $('sumFlightLabel').textContent = flight;
     syncBudgetDial();
+    dpSyncs.forEach(function(f){ f(); });
   }
 
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
