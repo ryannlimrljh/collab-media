@@ -3221,28 +3221,74 @@
      random from a small pool, so every field lands filled and washed. */
   var TRY_BRIEFS = [
     {name:'Proton X50 facelift launch', brand:'Proton', prod:'X50 facelift', budget:250000,
-      obj:'conversion', kpi:'Registrations', target:1200, unit:'sign-ups',
+      obj:'conversion', kpi:'Registrations', target:1200, unit:'sign-ups', weeks:4,
       langs:['Bahasa Malaysia','English']},
     {name:'MILO back to school', brand:'Nestlé', prod:'MILO family packs', budget:120000,
-      obj:'awareness', kpi:'Net reach', target:2000000, unit:'people',
+      obj:'awareness', kpi:'Net reach', target:2000000, unit:'people', weeks:3,
       langs:['Bahasa Malaysia','English','Chinese','Tamil']},
     {name:'Astro 30th Anniversary', brand:'Astro', prod:'Astro 30 celebration', budget:150000,
-      obj:'awareness', kpi:'Event attendees', target:5000, unit:'people',
+      obj:'awareness', kpi:'Event attendees', target:5000, unit:'people', weeks:6,
       langs:['Bahasa Malaysia','English']},
     {name:'TnG eWallet Raya rewards', brand:"Touch 'n Go", prod:'Raya cashback push', budget:90000,
-      obj:'consideration', kpi:'Registrations', target:8000, unit:'sign-ups',
+      obj:'consideration', kpi:'Registrations', target:8000, unit:'sign-ups', weeks:3,
       langs:['Bahasa Malaysia','English']},
     {name:'sooka Copa binge pass', brand:'sooka', prod:'Sports VIP pass', budget:180000,
-      obj:'leadgen', kpi:'Video completions', target:600000, unit:'views',
-      langs:['Bahasa Malaysia','English','Chinese']}
+      obj:'leadgen', kpi:'Video completions', target:600000, unit:'views', weeks:2,
+      langs:['Bahasa Malaysia','English','Chinese']},
+    {name:'Maybank SME week', brand:'Maybank', prod:'SME digital financing', budget:200000,
+      obj:'leadgen', kpi:'Registrations', target:3500, unit:'sign-ups', weeks:4,
+      langs:['English','Bahasa Malaysia']},
+    {name:'Perodua Myvi 20th edition', brand:'Perodua', prod:'Myvi anniversary edition', budget:300000,
+      obj:'conversion', kpi:'Registrations', target:2500, unit:'sign-ups', weeks:5,
+      langs:['Bahasa Malaysia','English']},
+    {name:'AirAsia year-end seat sale', brand:'AirAsia', prod:'Free-seat mega sale', budget:160000,
+      obj:'conversion', kpi:'Registrations', target:15000, unit:'sign-ups', weeks:2,
+      langs:['English','Bahasa Malaysia','Chinese']},
+    {name:'Shopee 11.11 teaser', brand:'Shopee', prod:'11.11 mega sale', budget:220000,
+      obj:'awareness', kpi:'Net reach', target:4500000, unit:'people', weeks:2,
+      langs:['Bahasa Malaysia','English','Chinese','Tamil']},
+    {name:'Samsung Galaxy fold reveal', brand:'Samsung', prod:'Galaxy Z series', budget:280000,
+      obj:'consideration', kpi:'Video completions', target:900000, unit:'views', weeks:3,
+      langs:['English','Chinese']},
+    {name:'CIMB first-jobber account', brand:'CIMB', prod:'Graduate banking bundle', budget:110000,
+      obj:'leadgen', kpi:'Registrations', target:6000, unit:'sign-ups', weeks:6,
+      langs:['English','Bahasa Malaysia']},
+    {name:'Coway mega home fair', brand:'Coway', prod:'Water and air purifiers', budget:140000,
+      obj:'footfall', kpi:'Store visits', target:12000, unit:'people', weeks:3,
+      langs:['Bahasa Malaysia','English','Chinese']},
+    {name:'KFC midnight delivery', brand:'KFC', prod:'Late-night delivery menu', budget:85000,
+      obj:'consideration', kpi:'Video completions', target:400000, unit:'views', weeks:4,
+      langs:['Bahasa Malaysia','English']},
+    {name:'Aeon Merdeka weekend', brand:'Aeon', prod:'Storewide Merdeka deals', budget:95000,
+      obj:'footfall', kpi:'Store visits', target:30000, unit:'people', weeks:1,
+      langs:['Bahasa Malaysia','English','Chinese']},
+    {name:'Maxis 5G home upgrade', brand:'Maxis', prod:'5G home fibre bundle', budget:190000,
+      obj:'conversion', kpi:'Registrations', target:4000, unit:'sign-ups', weeks:5,
+      langs:['English','Bahasa Malaysia','Tamil']},
+    {name:'Dutch Lady school milk drive', brand:'Dutch Lady', prod:'Growing-up milk range', budget:75000,
+      obj:'awareness', kpi:'Net reach', target:1500000, unit:'people', weeks:4,
+      langs:['Bahasa Malaysia','English','Tamil']},
+    {name:'Heineken Oktoberfest circuit', brand:'Heineken', prod:'Oktoberfest event series', budget:130000,
+      obj:'awareness', kpi:'Event attendees', target:9000, unit:'people', weeks:3,
+      langs:['English','Chinese']},
+    {name:'Lancôme holiday gifting', brand:'Lancôme', prod:'Holiday beauty sets', budget:105000,
+      obj:'consideration', kpi:'Video completions', target:350000, unit:'views', weeks:4,
+      langs:['English','Chinese']},
+    {name:'Malaysia Airlines Visit Malaysia push', brand:'Malaysia Airlines', prod:'Domestic escapes fares', budget:240000,
+      obj:'awareness', kpi:'Net reach', target:3800000, unit:'people', weeks:6,
+      langs:['English','Bahasa Malaysia','Chinese','Tamil']},
+    {name:'Xiaomi fan festival', brand:'Xiaomi', prod:'Mi fan festival deals', budget:70000,
+      obj:'conversion', kpi:'Registrations', target:9000, unit:'sign-ups', weeks:2,
+      langs:['Chinese','English','Bahasa Malaysia']}
   ];
   function tryLine(b){
     return b.name + ' for ' + b.brand + ', RM ' + Math.round(b.budget / 1000) + 'k, ' + b.obj;
   }
   function applyTryBrief(b){
     var iso = function(d){ return d.toISOString().slice(0, 10); };
+    var weeks = b.weeks || 3;
     var s = new Date(); s.setDate(s.getDate() + 14);
-    var e = new Date(); e.setDate(e.getDate() + 35);
+    var e = new Date(); e.setDate(e.getDate() + 14 + weeks * 7);
     var setDD = function(id, v){
       var f = document.querySelector('[data-dd="' + id + '"]');
       if (f && f._set) f._set(v, true);
@@ -3264,16 +3310,20 @@
     aiFillSequence(steps, function(){
       resetSplit(); renderAll(); markSaved();
       askShow('Done: ' + b.name + ' for ' + b.brand + ', ' + rm(b.budget) +
-        ' over a three-week campaign, chasing ' + fmt(b.target) + ' ' + b.unit +
+        ' over a ' + (weeks === 1 ? 'one-week' : weeks + '-week') + ' campaign, chasing ' +
+        fmt(b.target) + ' ' + b.unit +
         '. Every field is editable, or ask me to change any of it.');
       revealNextCta();
     });
   }
   /* Try it seeds the pill with a random example line; only Send performs
      the fill, so the user stays the one pulling the trigger. */
-  var tryPendingBrief = null, tryPendingLine = '';
+  var tryPendingBrief = null, tryPendingLine = '', lastTryIdx = -1;
   $('briefAiTry').addEventListener('click', function(){
-    var b = TRY_BRIEFS[Math.floor(Math.random() * TRY_BRIEFS.length)];
+    var idx;
+    do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
+    lastTryIdx = idx;
+    var b = TRY_BRIEFS[idx];
     tryPendingBrief = b;
     tryPendingLine = tryLine(b);
     var i = $('askInput');
