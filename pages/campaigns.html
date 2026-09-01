@@ -23,8 +23,15 @@
   .ld-divider{border:none; border-top:1px solid var(--color-neutral-3);
     margin:0 0 var(--spacing-24);}
   /* Typewriter header: the caret blinks in steps; the h1 holds at least
-     one line so short messages don't collapse the header row. */
+     one line so short messages don't collapse the header row.
+     One line always. The advisories run longer than a greeting and would
+     wrap the h1 to two lines, shoving the whole page down mid-loop, so
+     the line lives in a clipping viewport with a track that slides: the
+     JS keeps the caret in view while typing, then rolls the track back
+     to the start and out again so a long line can still be read whole. */
   #pageGreeting{min-height:var(--text-h1-lh);}
+  .ld-type-vp{display:block; overflow:hidden; white-space:nowrap;}
+  .ld-type-track{display:inline-block; white-space:nowrap; will-change:transform;}
   .ld-caret{display:inline-block; width:3px; height:.82em; margin-left:6px;
     background:var(--color-neutral-9); vertical-align:baseline;
     animation:ld-caret-blink 1.1s steps(2, start) infinite;}
@@ -507,7 +514,7 @@
       <header class="c-pageheader">
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
-            <h1 id="pageGreeting"><span class="ld-type" id="typeTarget" aria-hidden="true"></span><span class="ld-caret" aria-hidden="true"></span><span class="ld-sr" id="greetSr">Home</span></h1>
+            <h1 id="pageGreeting"><span class="ld-type-vp"><span class="ld-type-track" id="typeTrack"><span class="ld-type" id="typeTarget" aria-hidden="true"></span><span class="ld-caret" aria-hidden="true"></span></span></span><span class="ld-sr" id="greetSr">Home</span></h1>
             <p class="sub">Where things stand, and the fastest way into a new plan.</p>
           </div>
           <div class="c-pageheader-actions">
@@ -777,17 +784,49 @@
       target.textContent = msgs[0];
       return;
     }
+    /* The line never wraps, so anything wider than the header has to
+       travel. `over` is how much is hanging off the right; parking the
+       track at -over keeps the newest character, and the caret, in
+       view while typing and again while deleting. */
+    var vp = document.querySelector('.ld-type-vp');
+    var trackEl = document.getElementById('typeTrack');
+    function over() {
+      return Math.max(0, Math.ceil(trackEl.getBoundingClientRect().width - vp.clientWidth));
+    }
+    function shift(px, ms) {
+      trackEl.style.transition = ms ? 'transform ' + ms + 'ms linear' : 'none';
+      trackEl.style.transform = 'translateX(-' + px + 'px)';
+    }
+    /* Constant speed whatever the overrun, so a slightly long line does
+       not crawl and a very long one does not race. */
+    function rollMs(px) { return Math.min(1800, Math.max(450, Math.round(px * 7))); }
+
+    var HOLD = 4800;
     var mi = 0, ci = 0, deleting = false;
     function tick() {
       var msg = msgs[mi];
       if (!deleting) {
         ci++;
         target.textContent = msg.slice(0, ci);
-        if (ci === msg.length) { deleting = true; setTimeout(tick, 4800); return; }
+        shift(over(), 0);
+        if (ci === msg.length) {
+          deleting = true;
+          var ov = over();
+          if (!ov) { setTimeout(tick, HOLD); return; }
+          /* Read it whole: sit on the tail just typed, roll back to the
+             head, dwell there, then return to the tail so deletion starts
+             where the caret already is. */
+          var r = rollMs(ov), dwell = Math.max(600, HOLD - (2 * r) - 700);
+          setTimeout(function () { shift(0, r); }, 700);
+          setTimeout(function () { shift(ov, r); }, 700 + r + dwell);
+          setTimeout(tick, 700 + r + dwell + r);
+          return;
+        }
         setTimeout(tick, 45);
       } else {
         ci--;
         target.textContent = msg.slice(0, ci);
+        shift(over(), 0);
         if (ci === 0) {
           deleting = false;
           mi = (mi + 1) % msgs.length;
@@ -798,6 +837,9 @@
       }
     }
     setTimeout(tick, 300);
+    /* A resize changes what overflows, so re-park rather than leave the
+       track shifted for a width that no longer applies. */
+    window.addEventListener('resize', function () { shift(over(), 0); });
   })();
 
   /* Latest campaigns — the six most recent; the whole row opens the plan. */
