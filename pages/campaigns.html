@@ -1108,24 +1108,51 @@
     });
   })();
 
-  /* Where you left off — the whole card resumes the draft; each step
-     dot deep-links into that step of the planner. */
+  /* Where you left off — always the newest saved plan that is not yet
+     booked, straight from the plan store. The seeded Astro card only
+     shows when the store has no drafts at all. */
   (function () {
     var card = document.getElementById('resumeCard');
     if (!card) return;
-    function resume(step) {
-      window.location.href = 'planner.html?step=' + (step || 3);
+    var resumeHref = 'planner.html?step=3';
+    var pctTarget = 60;
+    var draft = window.collabPlans
+      ? collabPlans.list().filter(function (p) { return p.status !== 'booked'; })[0] || null
+      : null;
+    if (draft) {
+      var stepAt = Math.min(4, Math.max(1,
+        (draft.state && (draft.state.maxVisited || draft.state.step)) || 1));
+      var stepName = ['Brief', 'Audience', 'Media mix', 'Summary'][stepAt - 1];
+      pctTarget = [15, 40, 60, 85][stepAt - 1];
+      resumeHref = 'planner.html?plan=' + encodeURIComponent(draft.id);
+      var name = draft.name || 'Untitled plan';
+      card.querySelector('.name').textContent = name;
+      var brand = (draft.brand && draft.brand !== '\u2013' && draft.brand !== '\u2014')
+        ? draft.brand + ' \u00b7 ' : '';
+      card.querySelector('.meta').textContent = brand +
+        'RM ' + (draft.budget || 0).toLocaleString('en-MY') +
+        (draft.updated ? ' \u00b7 updated ' + draft.updated : '');
+      card.querySelector('.stopped').textContent =
+        'Stopped at ' + stepName + ' \u00b7 ' + pctTarget + '% complete';
+      card.querySelector('.c-progress-value').textContent = pctTarget + '%';
+      var track = card.querySelector('[role="progressbar"]');
+      if (track) track.setAttribute('aria-valuenow', pctTarget);
+      var link = card.querySelector('.ld-link');
+      if (link) link.href = resumeHref;
+      card.setAttribute('aria-label', 'Continue building ' + name +
+        ', stopped at ' + stepName + ', ' + pctTarget + '% complete');
     }
+    function resume() { window.location.href = resumeHref; }
     card.addEventListener('click', function (e) {
       if (e.target.closest('a')) return;
-      resume(3);
+      resume();
     });
     setTimeout(function () {
       var fill = document.getElementById('resumeFill');
-      if (fill) fill.style.width = '60%';
+      if (fill) fill.style.width = pctTarget + '%';
     }, 450);
     card.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && e.target === card) resume(3);
+      if (e.key === 'Enter' && e.target === card) resume();
     });
   })();
 
