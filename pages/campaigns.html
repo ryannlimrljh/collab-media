@@ -136,12 +136,17 @@
      shares its wrapper with the section head, so 100% resolves to the
      wrapper's full height and the card bleeds out the bottom by
      exactly the head's height. Content-height is what this card wants. */
-  /* Up to three unfinished plans ride a snap track; dots and carets
-     live in the section head, right-aligned. */
-  .ld-resume-track{display:flex; gap:var(--spacing-16); overflow-x:auto;
-    scroll-snap-type:x mandatory; scrollbar-width:none;}
-  .ld-resume-track::-webkit-scrollbar{display:none;}
-  .ld-resume-track .ld-resume{flex:0 0 100%; scroll-snap-align:start;}
+  /* Up to three unfinished plans share ONE stationary card; only the
+     content strip slides, on the DLS's own motion tokens. Dots and
+     carets live in the section head, right-aligned. */
+  .ld-resume-viewport{overflow:hidden; width:100%;}
+  .ld-resume-strip{display:flex; width:100%;
+    transition:transform var(--duration-base) var(--ease-standard);}
+  .ld-resume-slide{flex:0 0 100%; min-width:0;
+    display:flex; flex-direction:column; gap:var(--spacing-8);}
+  @media (prefers-reduced-motion:reduce){
+    .ld-resume-strip{transition:none;}
+  }
   .ld-resume-nav{flex:none; margin-left:auto; display:inline-flex;
     align-items:center; gap:var(--spacing-8); align-self:center;}
   .ld-resume-arrow{display:inline-flex; align-items:center; justify-content:center;
@@ -523,7 +528,11 @@
                 <button class="ld-resume-arrow" id="resumeNext" type="button" aria-label="Next plan"><i class="ph ph-caret-right"></i></button>
               </span>
             </div>
-            <div class="ld-resume-track" id="resumeTrack"></div>
+            <div class="c-card c-card-interactive ld-resume" id="resumeCard" role="link" tabindex="0">
+              <div class="ld-resume-viewport">
+                <div class="ld-resume-strip" id="resumeStrip"></div>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -1116,12 +1125,13 @@
     });
   })();
 
-  /* Where you left off — a slider of the newest saved plans that are
-     not yet booked, up to three. The seeded Astro card only shows when
-     the store has no drafts at all. */
+  /* Where you left off — one stationary card; the content strip inside
+     it slides between the newest unfinished plans, up to three. The
+     seeded Astro slide only shows when the store has no drafts. */
   (function () {
-    var track = document.getElementById('resumeTrack');
-    if (!track) return;
+    var card = document.getElementById('resumeCard');
+    var strip = document.getElementById('resumeStrip');
+    if (!card || !strip) return;
     function esc(t){
       return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     }
@@ -1145,9 +1155,8 @@
       name: 'Astro 30 anniversary', meta: 'Astro \u00b7 RM 150,000 \u00b7 updated 27 Aug 2026',
       stepName: 'Media mix', pct: 60, href: 'planner.html?step=3'
     }];
-    track.innerHTML = cards.map(function (c) {
-      return '<div class="c-card c-card-interactive ld-resume" role="link" tabindex="0" data-href="' + esc(c.href) + '"' +
-        ' aria-label="Continue building ' + esc(c.name) + ', stopped at ' + c.stepName + ', ' + c.pct + '% complete">' +
+    strip.innerHTML = cards.map(function (c, i) {
+      return '<div class="ld-resume-slide"' + (i === 0 ? '' : ' aria-hidden="true"') + '>' +
         '<span class="name">' + esc(c.name) + '</span>' +
         '<span class="meta">' + esc(c.meta) + '</span>' +
         '<div class="c-progress ld-resume-progress">' +
@@ -1158,20 +1167,31 @@
             '<div class="c-progress-fill tone-water" data-pct="' + c.pct + '" style="width:0%;"></div></div>' +
         '</div>' +
         '<span class="stopped">Stopped at ' + c.stepName + ' \u00b7 ' + c.pct + '% complete</span>' +
-        '<a class="ld-link" href="' + esc(c.href) + '">Continue building <i class="ph ph-arrow-right"></i></a>' +
+        '<a class="ld-link" href="' + esc(c.href) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">Continue building <i class="ph ph-arrow-right"></i></a>' +
       '</div>';
     }).join('');
-    track.addEventListener('click', function (e) {
+    var at = 0;
+    function syncCard(){
+      var c = cards[at];
+      card.setAttribute('aria-label', 'Continue building ' + c.name +
+        ', stopped at ' + c.stepName + ', ' + c.pct + '% complete');
+      strip.querySelectorAll('.ld-resume-slide').forEach(function (sl, i) {
+        if (i === at) sl.removeAttribute('aria-hidden');
+        else sl.setAttribute('aria-hidden', 'true');
+        var link = sl.querySelector('.ld-link');
+        if (link) link.tabIndex = i === at ? 0 : -1;
+      });
+    }
+    syncCard();
+    card.addEventListener('click', function (e) {
       if (e.target.closest('a')) return;
-      var card = e.target.closest('[data-href]');
-      if (card) window.location.href = card.dataset.href;
+      window.location.href = cards[at].href;
     });
-    track.addEventListener('keydown', function (e) {
-      var card = e.target.closest('[data-href]');
-      if (card && e.key === 'Enter' && e.target === card) window.location.href = card.dataset.href;
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target === card) window.location.href = cards[at].href;
     });
     setTimeout(function () {
-      track.querySelectorAll('.c-progress-fill[data-pct]').forEach(function (f) {
+      strip.querySelectorAll('.c-progress-fill[data-pct]').forEach(function (f) {
         f.style.width = f.dataset.pct + '%';
       });
     }, 450);
@@ -1185,33 +1205,20 @@
         return '<button class="ld-resume-dot' + (i === 0 ? ' on' : '') + '" type="button"' +
           ' data-i="' + i + '" aria-label="Show plan ' + (i + 1) + ' of ' + cards.length + '"></button>';
       }).join('');
-      function slideW(){ return track.clientWidth + 16; }
-      function activeIdx(){
-        return Math.max(0, Math.min(cards.length - 1, Math.round(track.scrollLeft / slideW())));
-      }
-      function syncDots(){
-        var at = activeIdx();
-        dotsEl.querySelectorAll('.ld-resume-dot').forEach(function (d, i) {
-          d.classList.toggle('on', i === at);
-        });
-      }
       function goTo(i){
-        var at = Math.max(0, Math.min(cards.length - 1, i));
-        track.scrollTo({left: at * slideW(), behavior: document.hidden ? 'auto' : 'smooth'});
-        /* Set the dots straight away rather than waiting on scroll
-           events, which some embedded browsers never deliver. */
+        at = Math.max(0, Math.min(cards.length - 1, i));
+        strip.style.transform = 'translateX(-' + (at * 100) + '%)';
         dotsEl.querySelectorAll('.ld-resume-dot').forEach(function (d, k) {
           d.classList.toggle('on', k === at);
         });
+        syncCard();
       }
       dotsEl.addEventListener('click', function (e) {
         var d = e.target.closest('.ld-resume-dot');
         if (d) goTo(Number(d.dataset.i));
       });
-      document.getElementById('resumePrev').addEventListener('click', function(){ goTo(activeIdx() - 1); });
-      document.getElementById('resumeNext').addEventListener('click', function(){ goTo(activeIdx() + 1); });
-      track.addEventListener('scroll', function(){ clearTimeout(track._dotT);
-        track._dotT = setTimeout(syncDots, 80); });
+      document.getElementById('resumePrev').addEventListener('click', function(){ goTo(at - 1); });
+      document.getElementById('resumeNext').addEventListener('click', function(){ goTo(at + 1); });
     }
   })();
 
