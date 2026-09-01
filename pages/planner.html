@@ -2482,7 +2482,7 @@
     visible.forEach(function(s){
       var tr = document.createElement('tr');
       tr.innerHTML = '<td style="font-weight:700;">' + s.name +
-          (s.ai ? ' <span class="c-badge c-badge-neutral" title="In the AI draft">AI draft</span>' : '') + '</td>' +
+          (s.ai ? ' <span class="c-badge p-ai-badge" title="In the AI draft">AI draft</span>' : '') + '</td>' +
         '<td>' + s.ch + '</td>' +
         '<td class="num">' + rm(s.cpm) + '</td>' +
         '<td class="num">' + s.inv + '</td>' +
@@ -2635,8 +2635,9 @@
       ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
     ];
     $('summaryRows').innerHTML = rows.map(function(x){
+      var badge = x[2] === 'AI draft' ? 'c-badge p-ai-badge' : 'c-badge c-badge-neutral';
       return '<tr><td style="font-weight:700; white-space:nowrap;">' + x[0] + '</td><td>' + x[1] +
-        '</td><td><span class="c-badge c-badge-neutral">' + x[2] + '</span></td></tr>';
+        '</td><td><span class="' + badge + '">' + x[2] + '</span></td></tr>';
     }).join('');
 
     $('sumBudgetLabel').textContent = rm(budget());
