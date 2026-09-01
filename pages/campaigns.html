@@ -136,6 +136,25 @@
      shares its wrapper with the section head, so 100% resolves to the
      wrapper's full height and the card bleeds out the bottom by
      exactly the head's height. Content-height is what this card wants. */
+  /* Up to three unfinished plans ride a snap track; dots and carets
+     live in the section head, right-aligned. */
+  .ld-resume-track{display:flex; gap:var(--spacing-16); overflow-x:auto;
+    scroll-snap-type:x mandatory; scrollbar-width:none;}
+  .ld-resume-track::-webkit-scrollbar{display:none;}
+  .ld-resume-track .ld-resume{flex:0 0 100%; scroll-snap-align:start;}
+  .ld-resume-nav{flex:none; margin-left:auto; display:inline-flex;
+    align-items:center; gap:var(--spacing-8); align-self:center;}
+  .ld-resume-arrow{display:inline-flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border:0; border-radius:var(--radius-full);
+    background:transparent; color:var(--color-neutral-5); cursor:pointer;
+    transition:background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .ld-resume-arrow:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .ld-resume-arrow:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .ld-resume-dots{display:inline-flex; align-items:center; gap:6px;}
+  .ld-resume-dot{width:6px; height:6px; border:0; padding:0; cursor:pointer;
+    border-radius:var(--radius-full); background:var(--color-neutral-3);
+    transition:background var(--duration-fast) var(--ease-standard), width var(--duration-fast) var(--ease-standard);}
+  .ld-resume-dot.on{width:16px; border-radius:3px; background:var(--color-obsidian);}
   .ld-resume{gap:var(--spacing-8); height:auto;}
   .ld-resume .name{font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
   .ld-resume .meta{font-size:var(--text-body2-size); color:var(--color-neutral-5);}
@@ -497,25 +516,14 @@
         <div class="c-shell-span-2 ld-stack">
 
           <div>
-            <div class="ld-sechead"><h2>Where you left off</h2></div>
-            <div class="c-card c-card-interactive ld-resume" id="resumeCard" role="link" tabindex="0"
-                 aria-label="Continue building Astro 30 anniversary, stopped at Media mix, 60% complete">
-              <span class="name">Astro 30 anniversary</span>
-              <span class="meta">Astro · RM 150,000 · updated 27 Aug 2026</span>
-              <div class="c-progress ld-resume-progress">
-                <div class="c-progress-header">
-                  <span class="c-progress-title">Plan progress</span>
-                  <span class="c-progress-value">60%</span>
-                </div>
-                <div class="c-progress-track size-default" role="progressbar"
-                     aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
-                     aria-label="Plan progress">
-                  <div class="c-progress-fill tone-water" id="resumeFill" style="width:0%;"></div>
-                </div>
-              </div>
-              <span class="stopped">Stopped at Media mix · 60% complete</span>
-              <a class="ld-link" href="planner.html?step=3">Continue building <i class="ph ph-arrow-right"></i></a>
+            <div class="ld-sechead"><h2>Where you left off</h2>
+              <span class="ld-resume-nav" id="resumeNav" hidden>
+                <button class="ld-resume-arrow" id="resumePrev" type="button" aria-label="Previous plan"><i class="ph ph-caret-left"></i></button>
+                <span class="ld-resume-dots" id="resumeDots"></span>
+                <button class="ld-resume-arrow" id="resumeNext" type="button" aria-label="Next plan"><i class="ph ph-caret-right"></i></button>
+              </span>
             </div>
+            <div class="ld-resume-track" id="resumeTrack"></div>
           </div>
 
           <div>
@@ -1108,52 +1116,103 @@
     });
   })();
 
-  /* Where you left off — always the newest saved plan that is not yet
-     booked, straight from the plan store. The seeded Astro card only
-     shows when the store has no drafts at all. */
+  /* Where you left off — a slider of the newest saved plans that are
+     not yet booked, up to three. The seeded Astro card only shows when
+     the store has no drafts at all. */
   (function () {
-    var card = document.getElementById('resumeCard');
-    if (!card) return;
-    var resumeHref = 'planner.html?step=3';
-    var pctTarget = 60;
-    var draft = window.collabPlans
-      ? collabPlans.list().filter(function (p) { return p.status !== 'booked'; })[0] || null
-      : null;
-    if (draft) {
-      var stepAt = Math.min(4, Math.max(1,
-        (draft.state && (draft.state.maxVisited || draft.state.step)) || 1));
-      var stepName = ['Brief', 'Audience', 'Media mix', 'Summary'][stepAt - 1];
-      pctTarget = [15, 40, 60, 85][stepAt - 1];
-      resumeHref = 'planner.html?plan=' + encodeURIComponent(draft.id);
-      var name = draft.name || 'Untitled plan';
-      card.querySelector('.name').textContent = name;
-      var brand = (draft.brand && draft.brand !== '\u2013' && draft.brand !== '\u2014')
-        ? draft.brand + ' \u00b7 ' : '';
-      card.querySelector('.meta').textContent = brand +
-        'RM ' + (draft.budget || 0).toLocaleString('en-MY') +
-        (draft.updated ? ' \u00b7 updated ' + draft.updated : '');
-      card.querySelector('.stopped').textContent =
-        'Stopped at ' + stepName + ' \u00b7 ' + pctTarget + '% complete';
-      card.querySelector('.c-progress-value').textContent = pctTarget + '%';
-      var track = card.querySelector('[role="progressbar"]');
-      if (track) track.setAttribute('aria-valuenow', pctTarget);
-      var link = card.querySelector('.ld-link');
-      if (link) link.href = resumeHref;
-      card.setAttribute('aria-label', 'Continue building ' + name +
-        ', stopped at ' + stepName + ', ' + pctTarget + '% complete');
+    var track = document.getElementById('resumeTrack');
+    if (!track) return;
+    function esc(t){
+      return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     }
-    function resume() { window.location.href = resumeHref; }
-    card.addEventListener('click', function (e) {
+    var drafts = window.collabPlans
+      ? collabPlans.list().filter(function (p) { return p.status !== 'booked'; }).slice(0, 3)
+      : [];
+    var cards = drafts.map(function (p) {
+      var stepAt = Math.min(4, Math.max(1,
+        (p.state && (p.state.maxVisited || p.state.step)) || 1));
+      var brand = (p.brand && p.brand !== '\u2013' && p.brand !== '\u2014') ? p.brand + ' \u00b7 ' : '';
+      return {
+        name: p.name || 'Untitled plan',
+        meta: brand + 'RM ' + (p.budget || 0).toLocaleString('en-MY') +
+          (p.updated ? ' \u00b7 updated ' + p.updated : ''),
+        stepName: ['Brief', 'Audience', 'Media mix', 'Summary'][stepAt - 1],
+        pct: [15, 40, 60, 85][stepAt - 1],
+        href: 'planner.html?plan=' + encodeURIComponent(p.id)
+      };
+    });
+    if (!cards.length) cards = [{
+      name: 'Astro 30 anniversary', meta: 'Astro \u00b7 RM 150,000 \u00b7 updated 27 Aug 2026',
+      stepName: 'Media mix', pct: 60, href: 'planner.html?step=3'
+    }];
+    track.innerHTML = cards.map(function (c) {
+      return '<div class="c-card c-card-interactive ld-resume" role="link" tabindex="0" data-href="' + esc(c.href) + '"' +
+        ' aria-label="Continue building ' + esc(c.name) + ', stopped at ' + c.stepName + ', ' + c.pct + '% complete">' +
+        '<span class="name">' + esc(c.name) + '</span>' +
+        '<span class="meta">' + esc(c.meta) + '</span>' +
+        '<div class="c-progress ld-resume-progress">' +
+          '<div class="c-progress-header"><span class="c-progress-title">Plan progress</span>' +
+          '<span class="c-progress-value">' + c.pct + '%</span></div>' +
+          '<div class="c-progress-track size-default" role="progressbar" aria-valuenow="' + c.pct + '"' +
+            ' aria-valuemin="0" aria-valuemax="100" aria-label="Plan progress">' +
+            '<div class="c-progress-fill tone-water" data-pct="' + c.pct + '" style="width:0%;"></div></div>' +
+        '</div>' +
+        '<span class="stopped">Stopped at ' + c.stepName + ' \u00b7 ' + c.pct + '% complete</span>' +
+        '<a class="ld-link" href="' + esc(c.href) + '">Continue building <i class="ph ph-arrow-right"></i></a>' +
+      '</div>';
+    }).join('');
+    track.addEventListener('click', function (e) {
       if (e.target.closest('a')) return;
-      resume();
+      var card = e.target.closest('[data-href]');
+      if (card) window.location.href = card.dataset.href;
+    });
+    track.addEventListener('keydown', function (e) {
+      var card = e.target.closest('[data-href]');
+      if (card && e.key === 'Enter' && e.target === card) window.location.href = card.dataset.href;
     });
     setTimeout(function () {
-      var fill = document.getElementById('resumeFill');
-      if (fill) fill.style.width = pctTarget + '%';
+      track.querySelectorAll('.c-progress-fill[data-pct]').forEach(function (f) {
+        f.style.width = f.dataset.pct + '%';
+      });
     }, 450);
-    card.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && e.target === card) resume();
-    });
+
+    /* Dots and carets only appear once there is something to slide. */
+    var nav = document.getElementById('resumeNav');
+    var dotsEl = document.getElementById('resumeDots');
+    if (cards.length > 1 && nav) {
+      nav.hidden = false;
+      dotsEl.innerHTML = cards.map(function (c, i) {
+        return '<button class="ld-resume-dot' + (i === 0 ? ' on' : '') + '" type="button"' +
+          ' data-i="' + i + '" aria-label="Show plan ' + (i + 1) + ' of ' + cards.length + '"></button>';
+      }).join('');
+      function slideW(){ return track.clientWidth + 16; }
+      function activeIdx(){
+        return Math.max(0, Math.min(cards.length - 1, Math.round(track.scrollLeft / slideW())));
+      }
+      function syncDots(){
+        var at = activeIdx();
+        dotsEl.querySelectorAll('.ld-resume-dot').forEach(function (d, i) {
+          d.classList.toggle('on', i === at);
+        });
+      }
+      function goTo(i){
+        var at = Math.max(0, Math.min(cards.length - 1, i));
+        track.scrollTo({left: at * slideW(), behavior: document.hidden ? 'auto' : 'smooth'});
+        /* Set the dots straight away rather than waiting on scroll
+           events, which some embedded browsers never deliver. */
+        dotsEl.querySelectorAll('.ld-resume-dot').forEach(function (d, k) {
+          d.classList.toggle('on', k === at);
+        });
+      }
+      dotsEl.addEventListener('click', function (e) {
+        var d = e.target.closest('.ld-resume-dot');
+        if (d) goTo(Number(d.dataset.i));
+      });
+      document.getElementById('resumePrev').addEventListener('click', function(){ goTo(activeIdx() - 1); });
+      document.getElementById('resumeNext').addEventListener('click', function(){ goTo(activeIdx() + 1); });
+      track.addEventListener('scroll', function(){ clearTimeout(track._dotT);
+        track._dotT = setTimeout(syncDots, 80); });
+    }
   })();
 
 })();
