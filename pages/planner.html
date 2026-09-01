@@ -807,11 +807,11 @@
                 </div>
 
                 <div class="p-sect">
-                  <span class="c-stat-label">Flight and budget</span>
+                  <span class="c-stat-label">Campaign dates and budget</span>
                   <div class="p-vstack">
-                    <div class="c-field"><label for="b-start">Flight start</label>
+                    <div class="c-field"><label for="b-start">Campaign start</label>
                       <input id="b-start" type="date" /></div>
-                    <div class="c-field"><label for="b-end">Flight end</label>
+                    <div class="c-field"><label for="b-end">Campaign end</label>
                       <input id="b-end" type="date" /></div>
                     <div class="c-field"><label for="b-budget">Working media budget (RM)</label>
                       <div class="p-budget-row">
@@ -1222,7 +1222,7 @@
                   <div class="p-stat-foot" id="strengthFoot">—</div>
                 </div>
                 <div class="p-stat-sep">
-                  <span class="c-stat-label">Flight</span>
+                  <span class="c-stat-label">Campaign</span>
                   <div class="p-stat-value-sm" id="railFlight">—</div>
                   <div class="p-stat-foot" id="railDaily">Set dates and budget</div>
                 </div>
@@ -1599,7 +1599,7 @@
     if (n === 1){
       add(!!$('b-name').value.trim(), false, $('b-name').value.trim() ? 'Campaign has a name' : 'Give the campaign a name', 'b-name');
       var s = $('b-start').value, e = $('b-end').value;
-      add(!!(s && e && e > s), false, (s && e && e > s) ? 'Flight dates are set' : 'Set a flight — end after start', 'b-start');
+      add(!!(s && e && e > s), false, (s && e && e > s) ? 'Campaign dates are set' : 'Set campaign dates — end after start', 'b-start');
       add(budget() > 0, false, budget() > 0 ? 'Budget is set' : 'Set a working media budget', 'b-budget');
       add((parseInt($('b-target').value,10) || 0) > 0, false,
         (parseInt($('b-target').value,10) || 0) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
@@ -2615,7 +2615,7 @@
       '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + ($('b-name').value.trim() || 'Untitled') + '</span></div>' +
       '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + ($('b-brand').value.trim() || '—') + '</span></div>' +
       '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
-      '<div class="p-kv"><span class="k">Flight</span><span class="v">' + $('sumFlightLabel').textContent + '</span></div>' +
+      '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + $('sumFlightLabel').textContent + '</span></div>' +
       '<div class="p-kv"><span class="k">Forecast reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
       '<div class="p-kv"><span class="k">Goes to</span><span class="v">Sales team — order desk</span></div>';
     $('bookOverlay').hidden = false;
@@ -2954,7 +2954,7 @@
       var e0 = new Date(); e0.setDate(e0.getDate() + 35);
       steps.push({el: $('b-start'), apply: function(){ $('b-start').value = iso(s0); }});
       steps.push({el: $('b-end'), apply: function(){ $('b-end').value = iso(e0); }});
-      defaults.push('a three-week flight from ' +
+      defaults.push('a three-week campaign from ' +
         s0.toLocaleDateString('en-GB', {day: 'numeric', month: 'short'}));
     }
     var effObj = got.obj || ddVal('b-obj');
@@ -3264,7 +3264,7 @@
     aiFillSequence(steps, function(){
       resetSplit(); renderAll(); markSaved();
       askShow('Done: ' + b.name + ' for ' + b.brand + ', ' + rm(b.budget) +
-        ' over a three-week flight, chasing ' + fmt(b.target) + ' ' + b.unit +
+        ' over a three-week campaign, chasing ' + fmt(b.target) + ' ' + b.unit +
         '. Every field is editable, or ask me to change any of it.');
       revealNextCta();
     });
