@@ -868,7 +868,7 @@
               <button class="p-disclose" data-drawer="briefContext" aria-expanded="false" aria-controls="briefContext" type="button">
                 <div>
                   <h4>Add context</h4>
-                  <p class="sub">Benefits, challenges, key message, measure of success. All optional — it sharpens the draft plan.</p>
+                  <p class="sub">Benefits, challenges, key message, measure of success. All optional, and each one sharpens the draft plan.</p>
                 </div>
                 <i class="ph ph-caret-down"></i>
               </button>
@@ -877,7 +877,7 @@
                   <div class="c-field"><label for="c-benefits">Product benefits</label>
                     <textarea id="c-benefits" placeholder="What makes this worth someone's attention?"></textarea></div>
                   <div class="c-field"><label for="c-challenges">Challenges</label>
-                    <textarea id="c-challenges" placeholder="What's working against this campaign — competition, budget, timing?"></textarea></div>
+                    <textarea id="c-challenges" placeholder="What's working against this campaign? Competition, budget, timing."></textarea></div>
                   <div class="c-field"><label for="c-task">Task</label>
                     <textarea id="c-task" placeholder="What is this plan actually being asked to do?"></textarea></div>
                   <div class="c-field"><label for="c-message">Key message</label>
@@ -927,7 +927,7 @@
 
             <div class="p-block" id="whoCard">
               <h4>Who are you trying to reach?</h4>
-              <p>Pick a targeting basis, then narrow it. One decision type on this screen — the evidence lives in the drawer below.</p>
+              <p>Pick a targeting basis, then narrow it. One decision type on this screen. The evidence lives in the drawer below.</p>
 
               <div class="p-sect">
                 <span class="c-stat-label">Targeting basis</span>
@@ -951,7 +951,7 @@
 
               <div class="p-sect" id="personaBody">
                 <div class="p-sect-labelrow">
-                  <span class="c-stat-label">Personas — KULT audience playbook</span>
+                  <span class="c-stat-label">Personas from the KULT audience playbook</span>
                   <span class="c-badge p-ai-badge" id="personaAiTag" hidden><i class="ph-fill ph-sparkle"></i> Picked by Collab AI · swap freely</span>
                   <span style="flex:1;"></span>
                   <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="repick" type="button" hidden style="flex:none;">
@@ -1101,7 +1101,7 @@
                   <span class="p-alloc" id="splitAllocState"></span>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-8);">
-                  <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split — arrives fully allocated. Drag freely; unspent budget shows as unallocated.</p>
+                  <p class="p-note" style="margin:0;" id="splitOrigin">Recommended split, arriving fully allocated. Drag freely; unspent budget shows as unallocated.</p>
                   <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
@@ -1215,25 +1215,25 @@
               <div class="p-railsec">
                 <div>
                   <span class="c-stat-label">Plan strength</span>
-                  <div class="p-stat-value-sm" id="strengthWord">—</div>
+                  <div class="p-stat-value-sm" id="strengthWord">–</div>
                   <div class="c-progress-track size-compact" style="margin-top:var(--spacing-8);">
                     <div class="c-progress-fill" id="strengthFill" style="width:0%;"></div>
                   </div>
-                  <div class="p-stat-foot" id="strengthFoot">—</div>
+                  <div class="p-stat-foot" id="strengthFoot">–</div>
                 </div>
                 <div class="p-stat-sep">
                   <span class="c-stat-label">Campaign</span>
-                  <div class="p-stat-value-sm" id="railFlight">—</div>
+                  <div class="p-stat-value-sm" id="railFlight">–</div>
                   <div class="p-stat-foot" id="railDaily">Set dates and budget</div>
                 </div>
                 <div class="p-stat-sep">
                   <span class="c-stat-label">Budget</span>
-                  <div class="p-stat-value-sm" id="railBudget1">—</div>
+                  <div class="p-stat-value-sm" id="railBudget1">–</div>
                   <div class="p-stat-foot" id="railKpi">Set a KPI target</div>
                 </div>
                 <div class="p-stat-sep">
                   <span class="c-stat-label">Unique reach</span>
-                  <div class="p-stat-value-sm" id="railReach">—</div>
+                  <div class="p-stat-value-sm" id="railReach">–</div>
                   <div class="p-stat-foot" id="railOverlap">Pick a persona to see reach</div>
                 </div>
                 <div class="p-stat-sep">
@@ -1246,8 +1246,8 @@
                 </div>
                 <div class="p-stat-sep">
                   <span class="c-stat-label">Forecast</span>
-                  <div class="p-stat-value-sm" id="fcImps">—</div>
-                  <div class="p-stat-foot" id="fcFoot">—</div>
+                  <div class="p-stat-value-sm" id="fcImps">–</div>
+                  <div class="p-stat-foot" id="fcFoot">–</div>
                 </div>
               </div>
             </div>
@@ -1373,7 +1373,7 @@
 <div class="c-toast-host" id="toastHost"></div>
 
 <script src="../shared/shell.js?v=0.9.46"></script>
-<script src="../shared/plan-store.js?v=2"></script>
+<script src="../shared/plan-store.js?v=3"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script>
 (function () {
@@ -1409,8 +1409,8 @@
       ['z','Gen Z (18–27)',.28],['y','Millennial (28–43)',.33],
       ['x','Gen X (44–59)',.24],['b','Boomer (60+)',.15]]},
     {id:'inc', label:'Income band', opts:[['','Any income',1],
-      ['b40','B40 — under RM 5,250',.40],['m40','M40 — RM 5,250–11,819',.40],
-      ['t20','T20 — RM 11,820+',.20]]},
+      ['b40','B40: under RM 5,250',.40],['m40','M40: RM 5,250–11,819',.40],
+      ['t20','T20: RM 11,820+',.20]]},
     {id:'geo', label:'Geography', opts:[['','Nationwide',1],
       ['kl','Klang Valley',.27],['nth','Northern region',.18],
       ['sth','Southern region',.16],['ec','East Coast',.14],['em','East Malaysia',.20]]}
@@ -1530,9 +1530,9 @@
       brand: $('b-brand').value.trim(),
       status: booked ? 'booked' : 'draft',
       ai: personaSource === 'ai' || mixSource === 'ai',
-      industry: '—',
+      industry: '–',
       budget: budget(),
-      duration: days ? (days >= 14 ? Math.round(days / 7) + ' weeks' : days + ' days') : '—',
+      duration: days ? (days >= 14 ? Math.round(days / 7) + ' weeks' : days + ' days') : '–',
       updated: new Date().toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}),
       updatedAt: Date.now(),
       state: st
@@ -1600,7 +1600,7 @@
     if (n === 1){
       add(!!$('b-name').value.trim(), false, $('b-name').value.trim() ? 'Campaign has a name' : 'Give the campaign a name', 'b-name');
       var s = $('b-start').value, e = $('b-end').value;
-      add(!!(s && e && e > s), false, (s && e && e > s) ? 'Campaign dates are set' : 'Set campaign dates — end after start', 'b-start');
+      add(!!(s && e && e > s), false, (s && e && e > s) ? 'Campaign dates are set' : 'Set campaign dates, with the end after the start', 'b-start');
       add(budget() > 0, false, budget() > 0 ? 'Budget is set' : 'Set a working media budget', 'b-budget');
       add((parseInt($('b-target').value,10) || 0) > 0, false,
         (parseInt($('b-target').value,10) || 0) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
@@ -1610,13 +1610,13 @@
     }
     if (n === 2){
       var okAud = mode === 'mass' || selected.length > 0;
-      add(okAud, false, mode === 'mass' ? 'Mass targeting — no persona needed'
+      add(okAud, false, mode === 'mass' ? 'Mass targeting, no persona needed'
         : okAud ? 'At least one persona selected' : 'Select at least one persona', 'whoCard');
       var r = audienceReach();
       add(r >= 1000000, true, r >= 1000000 ? 'Reach clears the campaign minimum'
-        : 'Reach is under 1M — consider widening', 'refineCard');
+        : 'Reach is under 1M; consider widening', 'refineCard');
       add(!!$('f-ex').value.trim(), true, $('f-ex').value.trim() ? 'Exclusions noted'
-        : 'No exclusions set — confirm this is intended', 'f-ex');
+        : 'No exclusions set; confirm this is intended', 'f-ex');
     }
     if (n === 3){
       var fc = forecast();
@@ -1627,10 +1627,10 @@
         : (diff > 0 ? rm(diff) + ' still unallocated' : rm(-diff) + ' over budget'), 'formatCard');
       var videoLed = onFormats().some(function(f){ return f.video; });
       var awareness = ddVal('b-obj') === 'awareness';
-      add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective — video-led mix'
+      add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective with a video-led mix'
         : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
       var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
-      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked — the optimiser buys freely', 'sitesDrawer');
+      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked, so the optimiser buys freely', 'sitesDrawer');
     }
     if (n === 4){
       checksFor(1).concat(checksFor(2), checksFor(3)).forEach(function(c){
@@ -1641,7 +1641,7 @@
         add(true, false, 'Audience locked · ' + fmt(audienceReach()) + ' reach', 'view1');
         add(true, false, 'Mix allocated to 100%', 'view1');
       }
-      add(!booked, true, booked ? 'Order raised — plan is locked' : 'Ready to book', null);
+      add(!booked, true, booked ? 'Order raised; the plan is locked' : 'Ready to book', null);
     }
     return out;
   }
@@ -2095,7 +2095,7 @@
     if (flight) subParts.push(flight);
     $('pageSub').textContent = subParts.length ? subParts.join(' · ')
       : 'Fill the ask below, or describe the campaign to Collab AI.';
-    $('railFlight').textContent = days ? days + ' days' : '—';
+    $('railFlight').textContent = days ? days + ' days' : '–';
     $('railDaily').textContent = days && budget() ? rm(budget() / days) + ' per day' : 'Set dates and budget';
     $('railBudget1').textContent = rm(budget());
     var target = parseInt($('b-target').value, 10) || 0;
@@ -2311,7 +2311,7 @@
     var base = mode === 'mass' ? MASS : r.uniq;
     var net = Math.round(base * mult);
     var filtered = mult < 0.999;
-    $('railReach').textContent = (mode === 'mass' || selected.length) ? fmt(net) : '—';
+    $('railReach').textContent = (mode === 'mass' || selected.length) ? fmt(net) : '–';
     $('railOverlap').textContent =
       (mode !== 'mass' && !selected.length) ? 'Pick a persona to see reach'
       : filtered ? fmt(base) + ' before refiners · ' + Math.round(mult * 100) + '% kept'
@@ -2524,7 +2524,7 @@
     var reset = $('splitReset');
     if (reset) reset.hidden = true;
     var origin = $('splitOrigin');
-    if (origin) origin.textContent = 'Recommended split — arrives fully allocated. Drag freely; unspent budget shows as unallocated.';
+    if (origin) origin.textContent = 'Recommended split, arriving fully allocated. Drag freely; unspent budget shows as unallocated.';
   }
 
   $('splitReset').addEventListener('click', function(){
@@ -2588,7 +2588,7 @@
       el.textContent = rm(budget());
       el.className = 'p-stat-value-sm';
       if (foot) foot.textContent = budget() > 0
-        ? 'Nothing placed yet — the media mix lands in step 3'
+        ? 'Nothing placed yet; the media mix lands in step 3'
         : 'Set a budget to start placing money';
       fill.style.width = '0%';
       fill.className = 'c-progress-fill';
@@ -2616,20 +2616,20 @@
   function renderSummary(){
     var fc = forecast();
     var r = reach();
-    var langTxt = langOn.join(', ') || '—';
+    var langTxt = langOn.join(', ') || '–';
     var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
-      : selected.map(function(id){ return byId(id).name; }).join(', ') || '—';
+      : selected.map(function(id){ return byId(id).name; }).join(', ') || '–';
     var refOn = FILTERS.filter(function(f){ return filterState[f.id]; }).length;
     var chTxt = chanOn.length ? chanOn.join(', ') : 'All channels';
     var fmts = onFormats();
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
     var rows = [
-      ['Objective', ($('b-obj').value || 'Not set') + ' — ' +
+      ['Objective', ($('b-obj').value || 'Not set') + ', ' +
         ($('b-target').value || '?') + ' ' + ($('b-unit').value || 'units') + ' (' + ($('b-kpi').value || 'no KPI') + ')', 'Brief'],
       ['Languages', langTxt, 'Brief'],
       ['Audience', audTxt, personaSource === 'ai' ? 'AI draft' : 'You'],
-      ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '—'],
+      ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '–'],
       ['Channels', chTxt, chanOn.length ? 'You' : 'AI draft'],
       ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', splitTouched ? 'You' : 'AI draft'],
       ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
@@ -2652,7 +2652,7 @@
     $('summarySites').innerHTML = pins.length ? pins.map(function(s){
       return '<span class="c-chip c-chip-input"><i class="ph-fill ph-push-pin icon" style="font-size:12px;"></i> ' +
         s.name + ' · ' + s.ch + '</span>';
-    }).join('') : '<span class="p-note">No must-buys — the optimiser buys freely across the pool.</span>';
+    }).join('') : '<span class="p-note">No must-buys, so the optimiser buys freely across the pool.</span>';
 
   }
 
@@ -2661,17 +2661,17 @@
     var fc = forecast();
     $('bookBody').innerHTML =
       '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + ($('b-name').value.trim() || 'Untitled') + '</span></div>' +
-      '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + ($('b-brand').value.trim() || '—') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + ($('b-brand').value.trim() || '–') + '</span></div>' +
       '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
       '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + $('sumFlightLabel').textContent + '</span></div>' +
       '<div class="p-kv"><span class="k">Forecast reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
-      '<div class="p-kv"><span class="k">Goes to</span><span class="v">Sales team — order desk</span></div>';
+      '<div class="p-kv"><span class="k">Goes to</span><span class="v">Sales team order desk</span></div>';
     $('bookOverlay').hidden = false;
     $('bookGo').focus();
   }
   function closeBook(){ $('bookOverlay').hidden = true; }
   $('bookBtn').addEventListener('click', function(){
-    if (booked){ toast('neutral', null, 'Already booked — the sales team has this plan.'); return; }
+    if (booked){ toast('neutral', null, 'Already booked. The sales team has this plan.'); return; }
     var checks = checksFor(1).concat(checksFor(2), checksFor(3));
     var sig = checkSig(checks);
     var blocked = checks.some(function(c){ return c.level === 'block'; });
@@ -2691,7 +2691,7 @@
     booked = true;
     closeBook();
     $('bookedBanner').hidden = false;
-    $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds — the plan is locked for editing until then.';
+    $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds. The plan is locked for editing until then.';
     $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
     $('bookBtn').disabled = true;
     renderChecks();
@@ -2702,7 +2702,7 @@
 
   /* ═══ Functional stripe + Preview tab actions ═══ */
   function actPdf(){ window.print(); }
-  function actXls(){ toast('neutral', null, 'Excel export is stubbed in this prototype — the real build streams the plan tables.'); }
+  function actXls(){ toast('neutral', null, 'Excel export is stubbed in this prototype. The real build streams the plan tables.'); }
   function actSave(){
     persistPlan();
     savedToastAt = Date.now();
@@ -2762,15 +2762,15 @@
     var fmts = onFormats();
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
     var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
-      : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') : '—';
+      : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') : '–';
     host.innerHTML =
       '<span class="c-stat-label">Plan preview</span>' +
       '<div style="margin-top:var(--spacing-8); font-weight:800; font-size:var(--text-h5-size);">' +
         (($('b-name').value || '').trim() || 'Untitled campaign') + '</div>' +
-      '<div class="p-stat-foot">' + (($('b-brand').value || '').trim() || '—') + ' · ' + $('sumFlightLabel').textContent + '</div>' +
+      '<div class="p-stat-foot">' + (($('b-brand').value || '').trim() || '–') + ' · ' + $('sumFlightLabel').textContent + '</div>' +
       '<div class="p-stat-sep" style="margin-top:var(--spacing-12);"></div>' +
       '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
-      '<div class="p-kv"><span class="k">Objective</span><span class="v">' + ($('b-obj').value || '—') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Objective</span><span class="v">' + ($('b-obj').value || '–') + '</span></div>' +
       '<div class="p-kv"><span class="k">Audience</span><span class="v">' + audTxt + '</span></div>' +
       '<div class="p-kv"><span class="k">Net reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
       '<div class="p-kv"><span class="k">Impressions</span><span class="v">' + fmt(fc.imps) + '</span></div>' +
@@ -3073,7 +3073,7 @@
     if (mode === 'mass') return 'You are on mass targeting: the whole Malaysia footprint, ' +
       fmt(audienceReach()) + ' after refiners. Switch to personas and I can suggest a pick.';
     return selected.length
-      ? 'Current pick: ' + selected.map(function(id){ return byId(id).name; }).join(', ') + ' — ' +
+      ? 'Current pick: ' + selected.map(function(id){ return byId(id).name; }).join(', ') + ', worth ' +
         fmt(reach().uniq) + ' unique reach. Say "suggest personas" for my pick, or "clear personas" to start over.'
       : 'No personas picked yet. Say "suggest personas" and I will start you off from the brief.';
   }
@@ -3715,7 +3715,7 @@
       if (f && f._set){ f._set(param('obj'), true); got = true; }
     }
     if (got){
-      toast('neutral', 'Carried in from Build a new plan', 'Check the ask, then walk the steps — everything is editable.');
+      toast('neutral', 'Carried in from Build a new plan', 'Check the ask, then walk the steps. Everything is editable.');
       return;
     }
     var m = /[?&]brief=([^&]*)/.exec(window.location.search);
@@ -3723,7 +3723,7 @@
     var text = decodeURIComponent(m[1].replace(/\+/g, ' ')).trim();
     if (!text) return;
     applyBriefLine(parseBriefLine(text), null, true);
-    toast('neutral', 'Drafted from your one-liner', 'Check the ask, then walk the steps — everything is editable.');
+    toast('neutral', 'Drafted from your one-liner', 'Check the ask, then walk the steps. Everything is editable.');
   })();
 
   renderLangs();
@@ -3782,7 +3782,7 @@
     if (st.booked){
       booked = true;
       $('bookedBanner').hidden = false;
-      $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds — the plan is locked for editing until then.';
+      $('bookedText').textContent = 'Order raised. The sales team has this plan and will confirm the holds. The plan is locked for editing until then.';
       $('bookBtn').innerHTML = '<i class="ph-fill ph-seal-check"></i> Booked';
       $('bookBtn').disabled = true;
     }

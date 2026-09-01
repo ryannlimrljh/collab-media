@@ -51,16 +51,18 @@
     /* Listing view: saved plans first, then the seeded sample. */
     merged: function (seed) {
       var hidden = hiddenSeeds();
+      /* Older records stored an em dash as the empty marker. */
+      var dash = function (v) { return (!v || v === '—') ? '–' : v; };
       var mine = read().map(function (p) {
         return {
           id: p.id,
           name: p.name || 'Untitled plan',
-          brand: p.brand || '—',
+          brand: dash(p.brand),
           status: p.status || 'draft',
           ai: !!p.ai,
-          industry: p.industry || '—',
+          industry: dash(p.industry),
           budget: p.budget || 0,
-          duration: p.duration || '—',
+          duration: dash(p.duration),
           updated: p.updated || '',
           href: 'planner.html?plan=' + encodeURIComponent(p.id),
           saved: true

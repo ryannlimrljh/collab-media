@@ -13,7 +13,7 @@ window.CAMPAIGNS = [
    industry:'Tech & devices', budget:125000, duration:'8 weeks', updated:'4 Aug 2026'},
   {name:'Switch new product launch', brand:'Apple products', status:'draft', ai:false,
    industry:'Tech & devices', budget:90000, duration:'9 weeks', updated:'23 Jul 2026'},
-  {name:'New route launch — Malaysia to Hangzhou', brand:'AirAsia X', status:'draft', ai:false,
+  {name:'New route launch: Malaysia to Hangzhou', brand:'AirAsia X', status:'draft', ai:false,
    industry:'Tourism', budget:125000, duration:'4 weeks', updated:'29 Jun 2026'},
   {name:'Mazda 6 facelift launch', brand:'Mazda 6', status:'draft', ai:true,
    industry:'Automotive', budget:200000, duration:'8 weeks', updated:'24 Mar 2026'},

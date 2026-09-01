@@ -682,7 +682,7 @@
 <script src="../shared/shell.js?v=0.9.46"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
-<script src="../shared/plan-store.js?v=2"></script>
+<script src="../shared/plan-store.js?v=3"></script>
 <script>
 (function () {
   'use strict';
@@ -749,7 +749,7 @@
     var imgs = document.querySelectorAll('#latestRows .ld-logo img');
     latest.forEach(function(c, i){
       if (!imgs[i]) return;
-      var b = collabBrand.pick(c.brand === '\u2014' ? '' : c.brand, c.name);
+      var b = collabBrand.pick(/^[\u2013\u2014-]$/.test(c.brand || '') ? '' : c.brand, c.name);
       collabBrand.attach(imgs[i], b);
     });
   })();
