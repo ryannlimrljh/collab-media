@@ -704,25 +704,72 @@
 (function () {
   'use strict';
 
-  /* Typewriter header. The greeting follows the clock, the name follows
-     the account row, the draft count follows the data, and the loop
-     types, holds, deletes, and moves on. Reduced motion gets the static
-     greeting. */
+  /* Typewriter header. After the greeting it reads out what actually
+     wants attention, each line computed from the plan store rather than
+     written down: where to pick up, how much money is still unbooked,
+     what the AI drafted and nobody has checked, and what has gone cold.
+     A line is only pushed when its data supports it, so the header can
+     never announce "0 drafts" on an empty workspace. */
   (function () {
     var h = new Date().getHours();
     var g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
     var who = document.querySelector('.c-sidebar-account .c-search-input-title');
     var first = who ? who.textContent.trim().split(/\s+/)[0] : '';
-    var drafts = (window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS)
-      .filter(function (c) { return c.status === 'draft'; }).length;
-    var msgs = [
-      first ? g + ', ' + first : g,
-      'Ready to build your next plan?',
-      drafts + ' drafts are waiting on you.',
-      'Astro 30 is one step from done.'
-    ];
+    var rm = function (n) { return 'RM ' + Math.round(n).toLocaleString('en-MY'); };
+
+    var plans = (window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS);
+    var open = plans.filter(function (c) { return c.status !== 'booked'; });
+
+    /* "27 Aug 2026" is the stored shape; Date's own parse of it is not
+       guaranteed, so read the three parts rather than trust the string. */
+    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function updatedAt(s) {
+      var m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec((s || '').trim());
+      if (!m) return 0;
+      var mi = MONTHS.indexOf(m[2].slice(0, 1).toUpperCase() + m[2].slice(1, 3).toLowerCase());
+      return mi < 0 ? 0 : new Date(+m[3], mi, +m[1]).getTime();
+    }
+
+    var msgs = [first ? g + ', ' + first : g];
+
+    /* Where to pick up — the same unfinished plan the resume card leads
+       with, so the header and the card never point different ways. */
+    var mine = window.collabPlans
+      ? collabPlans.list().filter(function (p) { return p.status !== 'booked'; })
+      : [];
+    if (mine.length) {
+      var p0 = mine[0];
+      var at = Math.min(4, Math.max(1, (p0.state && (p0.state.maxVisited || p0.state.step)) || 1));
+      msgs.push('Pick up ' + (p0.name || 'your draft') + ' at ' +
+        ['Brief', 'Audience', 'Media mix', 'Summary'][at - 1] + ', ' +
+        [15, 40, 60, 85][at - 1] + '% done.');
+    } else {
+      msgs.push('Pick up Astro 30 anniversary at Media mix, 60% done.');
+    }
+
+    var unbooked = open.reduce(function (s, c) { return s + (c.budget || 0); }, 0);
+    if (open.length && unbooked) {
+      msgs.push(rm(unbooked) + ' is still sitting in ' + open.length +
+        (open.length === 1 ? ' unbooked draft.' : ' unbooked drafts.'));
+    }
+
+    var aiOpen = open.filter(function (c) { return c.ai; }).length;
+    if (aiOpen) {
+      msgs.push(aiOpen + (aiOpen === 1 ? ' AI-drafted plan is' : ' AI-drafted plans are') +
+        ' waiting on your review.');
+    }
+
+    /* Cold plans, oldest first, and only once genuinely stale. */
+    var STALE_DAYS = 60;
+    var cold = open.filter(function (c) { return updatedAt(c.updated); })
+      .filter(function (c) { return Date.now() - updatedAt(c.updated) > STALE_DAYS * 864e5; })
+      .sort(function (a, b) { return updatedAt(a.updated) - updatedAt(b.updated); })[0];
+    if (cold) msgs.push(cold.name + ' has not moved since ' + cold.updated + '.');
+
     var target = document.getElementById('typeTarget');
-    document.getElementById('greetSr').textContent = msgs[0];
+    /* The typed span is aria-hidden, so without this the advisories
+       would exist only for people who can watch them cycle. */
+    document.getElementById('greetSr').textContent = msgs.join('. ').replace(/\.\./g, '.');
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       target.textContent = msgs[0];
       return;
