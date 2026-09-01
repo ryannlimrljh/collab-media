@@ -2578,21 +2578,35 @@
     var redraftBtn = $('redraft');
     if (redraftBtn) redraftBtn.hidden = mixSource === 'ai';
     var el = $('railUnalloc');
-    el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
-    el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
     var foot = $('railUnallocFoot');
-    if (foot){
-      foot.textContent = Math.abs(diff) < 1
-        ? (mixSource === 'ai' && !splitTouched
-            ? 'The draft split spends the full budget'
-            : 'Every ringgit is placed in the split')
-        : diff > 0 ? 'Not yet placed in the format split'
-        : 'The dials ask for more than the budget';
-    }
     var fill = $('railAllocFill');
-    var pct = budget() ? Math.min(100, fc.alloc / budget() * 100) : 0;
-    fill.style.width = pct + '%';
-    fill.className = 'c-progress-fill ' + (Math.abs(diff) < 1 ? 'tone-success' : diff < 0 ? 'tone-error' : '');
+    /* Until the media mix is on the table (step 3 reached or the split
+       hand-shaped), nothing is truly placed: the whole budget reads as
+       unallocated, no matter what the background draft would spend. */
+    var splitLive = splitTouched || mixSource === 'user' || maxVisited >= 3;
+    if (!splitLive){
+      el.textContent = rm(budget());
+      el.className = 'p-stat-value-sm';
+      if (foot) foot.textContent = budget() > 0
+        ? 'Nothing placed yet — the media mix lands in step 3'
+        : 'Set a budget to start placing money';
+      fill.style.width = '0%';
+      fill.className = 'c-progress-fill';
+    } else {
+      el.textContent = rm(Math.abs(diff)) + (diff < 0 ? ' over' : '');
+      el.className = 'p-stat-value-sm ' + (Math.abs(diff) < 1 ? 'p-ok' : diff < 0 ? 'p-over' : '');
+      if (foot){
+        foot.textContent = Math.abs(diff) < 1
+          ? (mixSource === 'ai' && !splitTouched
+              ? 'The AI split spends the full budget'
+              : 'Every ringgit is placed in the split')
+          : diff > 0 ? 'Not yet placed in the format split'
+          : 'The dials ask for more than the budget';
+      }
+      var pct = budget() ? Math.min(100, fc.alloc / budget() * 100) : 0;
+      fill.style.width = pct + '%';
+      fill.className = 'c-progress-fill ' + (Math.abs(diff) < 1 ? 'tone-success' : diff < 0 ? 'tone-error' : '');
+    }
     $('fcImps').textContent = fmt(fc.imps) + ' imps';
     $('fcFoot').textContent = fmt(fc.reach) + ' reach · ' + fc.freq + ' freq · ' +
       (fc.blended ? rm(fc.blended) + ' blended' : 'no formats on');
