@@ -594,13 +594,20 @@
   .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
   .p-ask{position:relative;}
   /* The AI assist is an invitation, not a gate: chip and pill share
-     one quiet row above the form, with an explicit "optional" note
-     below, so the form still reads as the primary path. */
-  .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);}
+     one row inside a slim pastel banner, with an explicit "optional"
+     note below, so the form still reads as the primary path. The
+     banner needs overflow visible (the reply floats over the form)
+     and a radius that follows the pill's curve. */
+  .p-ai-invite{flex-direction:column; align-items:stretch; gap:var(--spacing-8);
+    overflow:visible; border-radius:28px; padding:var(--spacing-16);
+    z-index:30; position:relative;}
+  .p-ai-invite::before, .p-ai-invite::after{border-radius:inherit;}
+  .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);
+    position:relative; z-index:1;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
-  .p-ai-invite-note{margin:var(--spacing-8) 0 0; font-size:var(--text-caption-size);
-    color:var(--color-neutral-5);}
+  .p-ai-invite-note{margin:0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-6, var(--color-neutral-5)); position:relative; z-index:1;}
   /* Try an example rides inside the pill as a suggestion chip; it
      steps aside once there is text, and never travels to the dock. */
   .p-try-chip{flex:none; display:inline-flex; align-items:center; gap:var(--spacing-4);
@@ -780,7 +787,7 @@
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
-        <div class="p-ai-invite p-banner-gap" id="aiInvite">
+        <div class="c-banner c-banner-ai p-ai-invite p-banner-gap" id="aiInvite">
           <div class="p-ai-invite-row">
           <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
             <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
