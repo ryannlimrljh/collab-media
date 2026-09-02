@@ -615,7 +615,9 @@
     position:relative; z-index:1;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
-  .p-ai-invite-note{margin:0; font-size:var(--text-caption-size);
+  /* Tucked right under the pill row, left edge on the chip's "Draft"
+     (12px chip padding + 14px icon + 6px gap). */
+  .p-ai-invite-note{margin:-4px 0 0 32px; font-size:var(--text-caption-size);
     color:var(--color-neutral-6, var(--color-neutral-5)); position:relative; z-index:1;}
   /* Try it rides inside the pill as a suggestion chip; it stays put
      while typing and only steps aside in the dock. */
@@ -823,7 +825,7 @@
           </div>
           </div>
           </div>
-          <p class="p-ai-invite-note">or fill in manually.</p>
+          <p class="p-ai-invite-note">or fill up manually.</p>
         </div>
 
         <div class="p-stack">
