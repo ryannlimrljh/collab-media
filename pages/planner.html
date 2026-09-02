@@ -176,8 +176,12 @@
   .p-ask.is-docked .p-ask-ghost, .p-ask-ghost.is-on{display:flex;}
   .p-ask-pill.has-text .p-ask-ghost, .p-ask-pill:focus-within .p-ask-ghost{display:none !important;}
   /* A seeded example keeps running as ghost text until the field is
-     focused; the real value hides under it so the two never overlap. */
+     focused; the real value hides under it so the two never overlap.
+     The selection-blue wash marks it as dealt text, ready to replace. */
   .p-ask-pill.is-ghosting .p-ask-ghost{display:flex !important;}
+  .p-ask-pill.is-ghosting .p-ask-ghost-t{background:rgba(20,115,230,.18);
+    border-radius:2px; box-shadow:0 0 0 2px rgba(20,115,230,.18);
+    color:var(--color-neutral-9);}
   .p-ask-pill.is-ghosting input{color:transparent;}
 
   .p-ask-ghost-t{display:inline-block; white-space:nowrap;}
@@ -609,8 +613,6 @@
   .p-ai-invite::before, .p-ai-invite::after{border-radius:inherit;}
   .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
-  .p-ai-invite-left{display:flex; flex-direction:column; align-items:flex-start;
-    gap:var(--spacing-4); flex:none;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
   .p-ai-invite-note{margin:0; font-size:var(--text-caption-size);
@@ -795,12 +797,9 @@
       <section id="view1">
         <div class="c-banner c-banner-ai p-ai-invite p-banner-gap" id="aiInvite">
           <div class="p-ai-invite-row">
-          <div class="p-ai-invite-left">
-            <p class="p-ai-invite-note">Optional:</p>
-            <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
-              <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
-            </button>
-          </div>
+          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button" style="flex:none;">
+            <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
+          </button>
           <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
@@ -824,6 +823,7 @@
           </div>
           </div>
           </div>
+          <p class="p-ai-invite-note">or fill in manually.</p>
         </div>
 
         <div class="p-stack">
@@ -3557,12 +3557,18 @@
   });
   /* Clicking into the field turns a running seed into editable text.
      Pointerdown covers embedded browsers where focus never fires. */
-  function unghost(){
+  function unghost(e){
     var pill = document.querySelector('.p-ask-pill');
-    if (pill.classList.contains('is-ghosting')){
-      pill.classList.remove('is-ghosting');
-      $('askGhostT').textContent = ASK_HINTS[1];
-      setTimeout(updateGhostMarquee, 30);
+    if (!pill.classList.contains('is-ghosting')) return;
+    pill.classList.remove('is-ghosting');
+    $('askGhostT').textContent = ASK_HINTS[1];
+    setTimeout(updateGhostMarquee, 30);
+    /* Hand over as a real selection so typing replaces the seed. */
+    if (e && e.type !== 'input'){
+      if (e.type === 'pointerdown') e.preventDefault();
+      var i = $('askInput');
+      i.focus();
+      try { i.select(); } catch (err) {}
     }
   }
   $('askInput').addEventListener('focus', unghost);
