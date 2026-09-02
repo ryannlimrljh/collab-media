@@ -773,10 +773,6 @@
               <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeDel" type="button" aria-label="Delete plan"><i class="ph ph-trash"></i></button>
               <span class="c-tooltip-bubble" role="tooltip" id="stripeDelTip">Delete plan</span>
             </span>
-            <span class="c-tooltip-wrap">
-              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="tourReplay" type="button" aria-label="Show me around"><i class="ph-fill ph-compass"></i></button>
-              <span class="c-tooltip-bubble" role="tooltip">Show me around</span>
-            </span>
           </div>
         </div>
       </header>
@@ -1330,6 +1326,7 @@
 
 <div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
   <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <button class="c-account-menu-item" type="button" role="menuitem" id="tourReplay"><i class="ph-fill ph-compass"></i><span>Show me around</span></button>
   <a class="c-account-menu-item" href="campaigns.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
 </div>
 
@@ -4131,8 +4128,8 @@ var STEPS = [
       'Unallocated is money not yet placed in the media mix.'},
   {sel: ['.p-actions'],
    t: 'Exports and housekeeping',
-   b: 'PDF and Excel exports, save and delete live up here, next to this tour. From step 2 ' +
-      'the Collab AI pill parks bottom right and keeps the whole conversation for this plan.'}
+   b: 'PDF and Excel exports, save and delete live up here. To walk this tour again, open ' +
+      'the account menu at the bottom of the sidebar and pick Show me around.'}
 ];
 
 var idx = -1, blocker = null, veil = null, hole = null, card = null;
@@ -4294,9 +4291,10 @@ function setSwingVars(box) {
   card.style.setProperty('--tw-sy', sy.toFixed(4));
   card.style.setProperty('--tw-dir', (box.l + box.w / 2) < window.innerWidth / 2 ? '1' : '-1');
 }
-/* A dismissed tour folds into the header button that replays it. */
+/* A dismissed tour folds into the account button, because that is the
+   menu that holds "Show me around": the exit says where to find it. */
 function closeAnchor() {
-  var sels = ['#tourReplay', '.p-actions', '.c-sidebar-header'];
+  var sels = ['#accountMenuTrigger', '.c-sidebar-footer', '.c-sidebar-header'];
   for (var i = 0; i < sels.length; i++) {
     var e = document.querySelector(sels[i]);
     if (!e) continue;
@@ -4480,14 +4478,12 @@ function start() {
 var replay = document.getElementById('tourReplay');
 if (replay) replay.addEventListener('click', function () { setTimeout(start, 60); });
 
-/* First fresh visit only: a reopened plan, a hand-off or a deep link is
-   someone already working, not someone arriving. The tour waits for
-   step 1 to finish folding open before it steps in front. */
+/* Every load, like the mothership landing; nothing is remembered
+   between visits. Only a reopened plan, a hand-off or a deep link
+   stays quiet, since that is someone already working. The tour waits
+   for step 1 to finish folding open before it steps in front. */
 (function auto() {
-  var seen = false;
-  try { seen = !!localStorage.getItem('collab-tour-seen'); } catch (e) {}
-  if (seen || /[?&](plan|brief|step)=/.test(window.location.search)) return;
-  try { localStorage.setItem('collab-tour-seen', '1'); } catch (e) {}
+  if (/[?&](plan|brief|step)=/.test(window.location.search)) return;
   var s1 = document.getElementById('step1'), t0 = Date.now();
   (function wait() {
     if ((s1 && s1.classList.contains('is-settled')) || Date.now() - t0 > 6000) {
