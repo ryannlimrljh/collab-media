@@ -1,0 +1,157 @@
+# Collab:Media — handover
+
+A build-free prototype of Collabrium's media-planning product. Static HTML,
+CSS and JavaScript: no framework, no build step, no server code. Open a page
+in a browser and it runs.
+
+- **Live:** <https://collab-media.vercel.app>
+- **Repo:** `github.com/ryannlimrljh/collab-media` (114 commits)
+- **Design system:** Collabrium DLS, vendored at `collabrium-dls/`
+
+---
+
+## Run it
+
+```bash
+python3 -m http.server 8794
+```
+
+Then open <http://localhost:8794/pages/campaigns.html>. Any static file server
+works; the pages use relative paths only.
+
+There is nothing to install and nothing to compile. The only build-ish step in
+the whole project is the `?v=` query string on the shared CSS and JS links —
+see [Gotchas](#gotchas).
+
+---
+
+## What is in here
+
+### Pages (`pages/`)
+
+| File | Route | What it is |
+|---|---|---|
+| `campaigns.html` | Home | Landing: rolling advisory header, "Where you left off" resume card, four At-a-glance stat tiles, recent plans, and the AI assistant dock |
+| `campaign-list.html` | My media plans | Full listing: search, facet filters, sortable columns, A-Z rail, row actions |
+| `planner.html` | Media planner | The four-step wizard — Brief, Audience, Media mix, Summary — with a persistent right rail and a per-plan Collab AI thread |
+
+`vercel.json` redirects `/` to `pages/campaigns.html`.
+
+### Shared modules (`shared/`)
+
+| File | Responsibility |
+|---|---|
+| `shell.js` | App shell behaviour: sidebar collapse (with the landing's auto-minimise), account menu, department switcher, brand-logo resolution |
+| `shell.css` | Page-local shell rules the DLS does not ship (pinned footer, account row, narrow-screen nav, Beta pill) |
+| `plan-store.js` | Saved plans. `localStorage`, capped at 50, newest first. Merges saved plans over the seeded sample |
+| `threads.js` | One conversation store behind every assistant surface. Same schema as the mothership landing's, plus a `source` naming the plan a thread came from |
+| `campaigns-data.js` | The seeded sample plans, plus `campaignBadge()` and `rmFmt()` |
+
+### Design system (`collabrium-dls/`)
+
+A vendored copy of the Collabrium DLS — `tokens.css`, `components.css`,
+`DESIGN-SYSTEM.md`, `SVG/`, `logo-lockups/`, `fonts/`, `preview.html`.
+**Treat it as read-only here.** It is a copy, not the source of truth; changes
+belong upstream and should be synced down, or the next sync overwrites them.
+
+Open `collabrium-dls/preview.html` for the live component gallery.
+
+---
+
+## State: everything is in the browser
+
+There is no backend. All persistence is `localStorage`, so it is per-browser
+and per-machine — clearing site data resets the product to its seeded sample.
+
+| Key | Holds |
+|---|---|
+| `collab-plans` | Saved plans (the mini database) |
+| `collab-hidden-seeds` | Seeded sample rows the user deleted |
+| `collab.chats` | Assistant threads, shared across Home and the planner |
+| `collab-nav-collapsed` | Sidebar collapsed state, carried between pages |
+| `collab-logo-cache` | Resolved brand-logo URLs |
+
+---
+
+## Deployment
+
+GitHub → Vercel, connected. **Pushing to `main` deploys.** No build command,
+no output directory; it is served as static files.
+
+For a manual release without a commit:
+
+```bash
+vercel deploy --prod
+```
+
+The Vercel project is `collab-media` under `ryannlimrljhs-projects`.
+
+### Links to the mothership
+
+The two products point at each other, both through the department switcher:
+
+- Mothership landing → Collab:Media, via a `data-href` on its Media option
+- Collab:Media → mothership landing, via a `data-href` on its Collabrium option
+
+If either URL changes, both ends need updating. The mothership half lives in
+`mothership/pages/landing-v3.html`.
+
+---
+
+## Gotchas
+
+**Cache-busting is manual.** Shared CSS and JS are linked with `?v=0.9.52`.
+Edit `shared/shell.js` or `shell.css` without bumping that number and browsers
+keep serving the old copy — the change simply will not appear, with no error.
+Bump it in all three pages together:
+
+```bash
+sed -i '' 's/shell\.css?v=[0-9.]*/shell.css?v=0.9.53/g; s/shell\.js?v=[0-9.]*/shell.js?v=0.9.53/g' pages/*.html
+```
+
+**`ChartsGraphs/` is unreferenced.** 21 MB of vendored Chart.js source that no
+page loads. It is in the repo but excluded from the handover zip. Safe to
+delete once someone confirms nothing external depends on it.
+
+**Brand-logo 404s in the console are expected.** Unknown brands fall through
+to a lookup that is *designed* to 404 so an `onerror` can hide the mark. They
+are not a fault.
+
+---
+
+## Known stubs
+
+These look real and are not. Anything below needs a backend before it ships.
+
+- **The AI assistant.** Replies are canned strings. The thread store, rail,
+  grouping and persistence are all real; only the answers are fake.
+- **Draft persistence** is `localStorage`, not a server.
+- **Excel export** is not implemented. **PDF export** is `window.print()` with
+  a print stylesheet.
+- **Booking** locks the plan in the UI only; nothing is sent anywhere.
+- **Sample data** is a cleaned snapshot of the live KULT engine's plans, not a
+  feed.
+
+---
+
+## Where the design decisions are written down
+
+`docs/superpowers/specs/2026-08-27-collabsales-planner-design.md` — the design
+spec, including the audit of the live KULT Planning Engine that this
+restructure answers (why four steps, why one persistent rail, why the
+validation moved).
+
+Commit messages carry the reasoning for individual decisions; `git log` is
+worth reading before changing behaviour that looks arbitrary.
+
+---
+
+## Not included in the zip
+
+Excluded deliberately, not forgotten:
+
+- `.git/` (29 MB) — history is on GitHub
+- `.env.local` — contains a live `VERCEL_OIDC_TOKEN`. Never commit or share it
+- `.vercel/` — local project link (project and org IDs)
+- `ChartsGraphs/` (21 MB) — unreferenced, see Gotchas
+- `.DS_Store`
