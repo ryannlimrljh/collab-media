@@ -593,18 +593,20 @@
      nests inside the AI banner, one panel. */
   .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
   .p-ask{position:relative;}
-  /* The tips panel wraps its pill on a generous radius — the curve
-     follows the pill's own, plus the panel's padding. */
-  .p-ai-panel{flex-direction:column; align-items:stretch; gap:var(--spacing-12);
-    overflow:visible; border-radius:28px; padding-bottom:var(--spacing-16);
-    z-index:30;} /* the reply must float over the form below */
-  .p-ai-panel-row{display:flex; align-items:center; gap:var(--spacing-12);
-    position:relative; z-index:1;}
-  .p-ai-panel .p-ai-slot{margin-bottom:0; z-index:1;}
-  /* In the banner, the reply stretches to the panel's outer edge so the
-     heading lines behind it cannot peek out beside the box. */
-  .p-ai-panel .p-ask-reply{left:calc(-1 * var(--spacing-16) - 1px);
-    right:calc(-1 * var(--spacing-16) - 1px);}
+  /* The AI assist is an invitation, not a gate: a quiet chip row with
+     an explicit "optional" note; the pill lives behind a fold that only
+     opens when asked for, so the form reads as the primary path. */
+  .p-ai-invite{display:flex; align-items:center; gap:var(--spacing-12); flex-wrap:wrap;}
+  .p-ai-invite-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .p-ai-fold{display:grid; grid-template-rows:0fr;
+    transition:grid-template-rows .45s var(--ease-standard);}
+  .p-ai-fold.is-open{grid-template-rows:1fr;}
+  .p-ai-fold-clip{overflow:hidden; min-height:0;}
+  .p-ai-fold.is-settled .p-ai-fold-clip{overflow:visible;}
+  .p-ai-fold-row{display:flex; gap:var(--spacing-12); align-items:center;
+    padding:var(--spacing-12) 0 var(--spacing-4);}
+  .p-ai-fold-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
+  @media (prefers-reduced-motion:reduce){ .p-ai-fold{transition:none;} }
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -771,14 +773,15 @@
 
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
-        <div class="c-banner c-banner-ai p-ai-panel p-banner-gap">
-          <div class="p-ai-panel-row">
-            <i class="ph-fill ph-sparkle icon"></i>
-            <div class="body"><p class="message">Start anywhere. Fill the ask by hand, or describe the campaign in one line to Collab AI below and it drafts the brief for you.</p></div>
-            <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
-              <i class="ph ph-sparkle"></i> Try it
-            </button>
-          </div>
+        <div class="p-ai-invite p-banner-gap" id="aiInvite">
+          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button" aria-expanded="false" aria-controls="aiFold">
+            <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
+          </button>
+          <span class="p-ai-invite-note">Optional. Describe the campaign in one line and it fills the brief; the form below works on its own.</span>
+        </div>
+        <div class="p-ai-fold" id="aiFold">
+          <div class="p-ai-fold-clip">
+          <div class="p-ai-fold-row">
           <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
@@ -798,6 +801,11 @@
               <div class="p-ask-reply-text" id="askReplyText"></div>
               <div class="p-ask-reply-actions" id="askReplyActions" hidden></div>
             </div>
+          </div>
+          </div>
+          <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
+            <i class="ph ph-sparkle"></i> Try an example
+          </button>
           </div>
           </div>
         </div>
@@ -2929,6 +2937,7 @@
   };
   var typeTimer = null, askAwayTimer = null;
   function askShow(text, actions){
+    if (!$('askBox').classList.contains('is-docked')) openAiFold();
     threadPush('ai', text);
     if ($('threadOverlay') && $('threadOverlay').classList.contains('is-open')) renderThread();
     var txt = $('askReplyText'), act = $('askReplyActions');
@@ -3498,6 +3507,33 @@
   /* Try it seeds the pill with a random example line; only Send performs
      the fill, so the user stays the one pulling the trigger. */
   var tryPendingBrief = null, tryPendingLine = '', lastTryIdx = -1;
+  /* The assist fold: closed by default so the form is the obvious
+     path; opening is explicit, or automatic when a reply is landing
+     while the pill is still parked in step 1. */
+  var aiFoldSettle = null;
+  function openAiFold(focus){
+    var fold = $('aiFold');
+    if (!fold || fold.classList.contains('is-open')) return;
+    fold.classList.add('is-open');
+    $('aiInviteBtn').setAttribute('aria-expanded', 'true');
+    clearTimeout(aiFoldSettle);
+    aiFoldSettle = setTimeout(function(){ fold.classList.add('is-settled'); },
+      document.hidden ? 0 : 470);
+    if (focus) setTimeout(function(){ $('askInput').focus(); }, document.hidden ? 0 : 300);
+  }
+  function closeAiFold(){
+    var fold = $('aiFold');
+    if (!fold || !fold.classList.contains('is-open')) return;
+    clearTimeout(aiFoldSettle);
+    fold.classList.remove('is-settled');
+    fold.classList.remove('is-open');
+    $('aiInviteBtn').setAttribute('aria-expanded', 'false');
+  }
+  $('aiInviteBtn').addEventListener('click', function(){
+    if ($('aiFold').classList.contains('is-open')) closeAiFold();
+    else openAiFold(true);
+  });
+
   $('briefAiTry').addEventListener('click', function(){
     var idx;
     do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
@@ -3568,6 +3604,7 @@
     /* AI CTAs open replies of their own — never let the same click
        dismiss what it just opened. */
     if (e.target.closest('#askBox') || e.target.closest('#briefAiTry') ||
+        e.target.closest('#aiInvite') ||
         e.target.closest('.p-ai-btn')) return;
     askHide();
   });
