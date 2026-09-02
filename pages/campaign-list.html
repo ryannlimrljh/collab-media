@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
-<link rel="stylesheet" href="../shared/shell.css?v=0.9.51" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
 <style>
   /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
   /* The divider sits tight under the page header, same as Home. */
@@ -45,6 +45,11 @@
     .cl-arriving .cl-pagination, .cl-arriving tbody tr{animation:none;}
   }
   .c-filter-tray{margin-bottom:var(--spacing-16);}
+  /* Facets sit out on the bar, one labelled trigger each, the influence
+     roster's move: what you can filter by is readable without opening
+     anything, and each panel is the DS Compact filter unchanged. */
+  .cl-pillbar{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  .cl-pill{position:relative;}
   .cl-name{font-weight:700; color:var(--color-neutral-9);}
   .cl-sub{display:block; font-size:var(--text-caption-size);
     color:var(--color-neutral-5); font-weight:400; margin-top:2px;}
@@ -198,21 +203,7 @@
             <button class="c-filter-search-clear" id="clSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
           </div>
           <span class="c-filter-search-divider" aria-hidden="true"></span>
-          <div style="position:relative;">
-            <button class="c-filter-trigger" id="clFilterTrigger" type="button" aria-haspopup="true" aria-expanded="false">
-              <i class="ph ph-funnel leading"></i> Filter
-              <span class="count" id="clFilterCount" hidden></span>
-              <i class="ph ph-caret-down chev"></i>
-            </button>
-            <div class="c-filter-panel" id="clFilterPanel">
-              <p class="c-filter-panel-title">Status</p>
-              <div id="clFilterOptions"></div>
-              <div class="c-filter-footer">
-                <button class="c-btn c-btn-ghost c-btn-sm" id="clFilterClear" type="button">Clear</button>
-                <button class="c-btn c-btn-primary c-btn-sm" id="clFilterDone" type="button">Done</button>
-              </div>
-            </div>
-          </div>
+          <div class="cl-pillbar" id="clPillbar"></div>
           <button class="c-btn c-btn-ghost c-btn-sm c-filter-clear-bar" id="clClearAll" type="button" hidden>Clear all</button>
         </div>
       </div>
@@ -288,36 +279,49 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.51"></script>
+<script src="../shared/shell.js?v=0.9.52"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=3"></script>
 <script>
 (function () {
   'use strict';
 
-  var FILTER_OPTS = [
-    {v:'draft', label:'Draft'},
-    {v:'booked', label:'Booked'},
-    {v:'completed', label:'Completed'},
-    {v:'ai', label:'AI drafted'}
+  /* ── Facets, read off the data rather than hardcoded, so a new
+     industry or status shows up on its own. Each returns display-ready
+     values, which is also what the applied list stores: no separate
+     value/label mapping to keep in step. ── */
+  function titleCase(s){ return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
+  var FACETS = [
+    {key:'status', label:'Status', of:function(c){ return c.status ? [titleCase(c.status)] : []; }},
+    {key:'industry', label:'Industry', of:function(c){ return c.industry ? [c.industry] : []; }},
+    {key:'source', label:'Drafted by', of:function(c){ return [c.ai ? 'AI drafted' : 'Built by you']; }}
   ];
-  var applied = [];      /* committed filters — drive the table */
-  var pending = [];      /* checkbox state while the panel is open */
+  /* Selections apply the moment they are made, so there is no pending
+     copy to reconcile: `applied` is the only filter state. */
+  var applied = {};
+  FACETS.forEach(function(f){ applied[f.key] = []; });
   var query = '';
 
   var rowsEl = document.getElementById('clRows');
   var emptyEl = document.getElementById('clEmpty');
   var countEl = document.getElementById('clCount');
-  var trigger = document.getElementById('clFilterTrigger');
-  var panel = document.getElementById('clFilterPanel');
+  /* Facet values reach markup as attributes and labels, so escape before
+     they get there rather than trusting the data. */
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
 
   function matches(c){
-    if (applied.length){
-      var ok = applied.some(function(f){
-        if (f === 'ai') return c.ai;
-        return c.status === f;
-      });
-      if (!ok) return false;
+    /* Across facets is AND, within a facet is OR: picking two industries
+       widens, adding a status narrows. */
+    for (var i = 0; i < FACETS.length; i++){
+      var f = FACETS[i], want = applied[f.key];
+      if (!want.length) continue;
+      var have = f.of(c);
+      var hit = want.some(function(v){ return have.indexOf(v) > -1; });
+      if (!hit) return false;
     }
     if (query){
       var q = query.toLowerCase();
@@ -437,77 +441,138 @@
       : 'Showing 1\u2013' + hits.length + ' of ' + hits.length;
     renderRail(hits);
 
-    /* Trigger count + applied pills + Clear all — never visually silent */
-    var countBadge = document.getElementById('clFilterCount');
-    countBadge.hidden = !applied.length;
-    countBadge.textContent = applied.length;
-    trigger.classList.toggle('active', !!applied.length);
+    /* Applied pills + Clear all — never visually silent. Each chip names
+       its facet as well as its value, since "Beauty" and "Booked" mean
+       nothing on their own once three facets can contribute. */
+    var chips = [];
+    FACETS.forEach(function(f){
+      applied[f.key].forEach(function(v){
+        chips.push('<span class="c-chip c-chip-input">' + f.label + ': ' + esc(v) +
+          '<button class="c-chip-remove" type="button" data-facet="' + f.key + '" data-remove="' + esc(v) +
+          '" aria-label="Remove ' + esc(f.label + ' ' + v) + '"><i class="ph ph-x"></i></button></span>');
+      });
+    });
     var tray = document.getElementById('clTray');
-    tray.hidden = !applied.length;
-    tray.innerHTML = applied.map(function(f){
-      var label = FILTER_OPTS.filter(function(o){ return o.v === f; })[0].label;
-      return '<span class="c-chip c-chip-input">' + label +
-        '<button class="c-chip-remove" type="button" data-remove="' + f + '" aria-label="Remove ' + label + '"><i class="ph ph-x"></i></button></span>';
-    }).join('');
-    document.getElementById('clClearAll').hidden = !applied.length;
+    tray.hidden = !chips.length;
+    tray.innerHTML = chips.join('');
+    document.getElementById('clClearAll').hidden = !chips.length;
   }
 
-  /* Panel — DS Compact filter: checkbox option rows, Clear/Done footer,
-     applied on Done (never destructively per keystroke). */
-  function renderOptions(){
-    document.getElementById('clFilterOptions').innerHTML = FILTER_OPTS.map(function(o){
-      var on = pending.indexOf(o.v) > -1;
-      return '<label class="c-filter-option" data-v="' + o.v + '">' +
+  /* ── Panels — one DS Compact filter per facet. Every toggle applies
+     immediately, so there is no Done button and no staged copy; the
+     panel stays open while the table re-renders underneath. ── */
+  var pillbar = document.getElementById('clPillbar');
+  var openFacet = null;
+  function facetByKey(k){
+    return FACETS.filter(function(f){ return f.key === k; })[0];
+  }
+  /* Options and their counts come off the plans currently in the store,
+     so an option that can return nothing is never offered. */
+  function facetOptions(f){
+    var all = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
+    var counts = {};
+    all.forEach(function(c){
+      f.of(c).forEach(function(v){ counts[v] = (counts[v] || 0) + 1; });
+    });
+    return Object.keys(counts).sort(function(a, b){ return counts[b] - counts[a]; })
+      .map(function(v){ return {v: v, n: counts[v]}; });
+  }
+  function optionRows(f){
+    return facetOptions(f).map(function(o){
+      var on = applied[f.key].indexOf(o.v) > -1;
+      return '<label class="c-filter-option" data-facet="' + f.key + '" data-v="' + esc(o.v) + '">' +
         '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-        '<span class="label">' + o.label + '</span></label>';
+        '<span class="label">' + esc(o.v) + ' <span style="color:var(--color-neutral-4)">' + o.n + '</span></span></label>';
     }).join('');
   }
-  function openPanel(){
-    pending = applied.slice();
-    renderOptions();
-    panel.classList.add('is-open');
-    trigger.classList.add('is-open');
-    trigger.setAttribute('aria-expanded', 'true');
+  function renderPillbar(){
+    openFacet = null;
+    pillbar.innerHTML = FACETS.map(function(f){
+      var n = applied[f.key].length;
+      return '<div class="cl-pill" data-facet="' + f.key + '">' +
+        '<button class="c-filter-trigger' + (n ? ' active' : '') + '" type="button" data-facet="' + f.key + '" aria-haspopup="true" aria-expanded="false">' +
+          f.label + (n ? '<span class="count">' + n + '</span>' : '') +
+          '<i class="ph ph-caret-down chev"></i></button>' +
+        '<div class="c-filter-panel" data-panel="' + f.key + '">' +
+          '<div data-options="' + f.key + '"></div>' +
+          '<div class="c-filter-footer">' +
+            '<button class="c-btn c-btn-ghost c-btn-sm" data-clear="' + f.key + '" type="button">Clear</button>' +
+          '</div></div></div>';
+    }).join('');
   }
   function closePanel(){
-    panel.classList.remove('is-open');
-    trigger.classList.remove('is-open');
-    trigger.setAttribute('aria-expanded', 'false');
+    openFacet = null;
+    pillbar.querySelectorAll('.c-filter-panel.is-open').forEach(function(p){ p.classList.remove('is-open'); });
+    pillbar.querySelectorAll('.c-filter-trigger.is-open').forEach(function(tr){
+      tr.classList.remove('is-open');
+      tr.setAttribute('aria-expanded', 'false');
+    });
   }
-  trigger.addEventListener('click', function(e){
+  /* The count badge is patched in place: rebuilding the pillbar would
+     tear down the panel the user is still picking in. */
+  function updateTrigger(k){
+    var trig = pillbar.querySelector('.c-filter-trigger[data-facet="' + k + '"]');
+    if (!trig) return;
+    var n = applied[k].length;
+    trig.classList.toggle('active', !!n);
+    trig.innerHTML = facetByKey(k).label +
+      (n ? '<span class="count">' + n + '</span>' : '') +
+      '<i class="ph ph-caret-down chev"></i>';
+    trig.setAttribute('aria-expanded', openFacet === k ? 'true' : 'false');
+    if (openFacet === k) trig.classList.add('is-open');
+  }
+  pillbar.addEventListener('click', function(e){
     e.stopPropagation();
-    if (panel.classList.contains('is-open')) closePanel(); else openPanel();
-  });
-  panel.addEventListener('click', function(e){
-    e.stopPropagation();
+    var trig = e.target.closest('.c-filter-trigger');
+    if (trig){
+      var k = trig.dataset.facet, was = openFacet === k;
+      closePanel();
+      if (!was){
+        openFacet = k;
+        pillbar.querySelector('[data-options="' + k + '"]').innerHTML = optionRows(facetByKey(k));
+        pillbar.querySelector('[data-panel="' + k + '"]').classList.add('is-open');
+        trig.classList.add('is-open');
+        trig.setAttribute('aria-expanded', 'true');
+      }
+      return;
+    }
     var opt = e.target.closest('.c-filter-option');
-    if (!opt) return;
-    var v = opt.dataset.v;
-    var i = pending.indexOf(v);
-    if (i > -1) pending.splice(i, 1); else pending.push(v);
-    renderOptions();
-  });
-  document.getElementById('clFilterClear').addEventListener('click', function(e){
-    e.stopPropagation(); pending = []; renderOptions();
-  });
-  document.getElementById('clFilterDone').addEventListener('click', function(e){
-    e.stopPropagation(); applied = pending.slice(); closePanel(); render();
+    if (opt){
+      var ok = opt.dataset.facet, v = opt.dataset.v;
+      var i = applied[ok].indexOf(v);
+      if (i > -1) applied[ok].splice(i, 1); else applied[ok].push(v);
+      pillbar.querySelector('[data-options="' + ok + '"]').innerHTML = optionRows(facetByKey(ok));
+      updateTrigger(ok);
+      render();
+      return;
+    }
+    var clr = e.target.closest('[data-clear]');
+    if (clr){
+      var ck = clr.dataset.clear;
+      applied[ck] = [];
+      pillbar.querySelector('[data-options="' + ck + '"]').innerHTML = optionRows(facetByKey(ck));
+      updateTrigger(ck);
+      render();
+    }
   });
   document.getElementById('clClearAll').addEventListener('click', function(){
-    applied = []; render();
+    FACETS.forEach(function(f){ applied[f.key] = []; });
+    renderPillbar(); render();
   });
   document.getElementById('clTray').addEventListener('click', function(e){
     var b = e.target.closest('[data-remove]');
     if (!b) return;
-    applied = applied.filter(function(f){ return f !== b.dataset.remove; });
-    render();
+    var k = b.dataset.facet;
+    applied[k] = applied[k].filter(function(v){ return v !== b.dataset.remove; });
+    renderPillbar(); render();
   });
   document.addEventListener('click', function(e){
-    if (!panel.classList.contains('is-open')) return;
-    if (e.target.closest('#clFilterPanel') || e.target.closest('#clFilterTrigger')) return;
+    if (openFacet === null) return;
+    if (e.target.closest('#clPillbar')) return;
     closePanel();
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePanel(); });
+  renderPillbar();
 
   var search = document.getElementById('clSearch');
   var clear = document.getElementById('clSearchClear');
