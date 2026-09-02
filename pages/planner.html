@@ -613,12 +613,14 @@
   .p-ai-invite::before, .p-ai-invite::after{border-radius:inherit;}
   .p-ai-invite-row{display:flex; align-items:flex-start; gap:var(--spacing-12);
     position:relative; z-index:1;}
+  .p-ai-invite-left{display:flex; flex-direction:column; align-items:flex-start;
+    gap:2px; flex:none;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
   /* Tucked right under the pill row, left edge on the chip's "Draft"
      (12px chip padding + 14px icon + 6px gap). */
-  .p-ai-invite-note{margin:-6px 0 0 32px; font-size:var(--text-caption-size);
-    color:var(--color-neutral-6, var(--color-neutral-5)); position:relative; z-index:1;}
+  .p-ai-invite-note{margin:0 0 0 32px; font-size:var(--text-caption-size);
+    color:var(--color-neutral-6, var(--color-neutral-5));}
   .p-ai-invite-note i{font-size:10px; vertical-align:-1px;}
   /* Try it rides inside the pill as a suggestion chip; it stays put
      while typing and only steps aside in the dock. */
@@ -800,9 +802,12 @@
       <section id="view1">
         <div class="c-banner c-banner-ai p-ai-invite p-banner-gap" id="aiInvite">
           <div class="p-ai-invite-row">
-          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button" style="flex:none;">
-            <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
-          </button>
+          <div class="p-ai-invite-left">
+            <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
+              <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
+            </button>
+            <p class="p-ai-invite-note">or fill up manually <i class="ph ph-arrow-down" aria-hidden="true"></i></p>
+          </div>
           <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
@@ -826,7 +831,6 @@
           </div>
           </div>
           </div>
-          <p class="p-ai-invite-note">or fill up manually <i class="ph ph-arrow-down" aria-hidden="true"></i></p>
         </div>
 
         <div class="p-stack">
