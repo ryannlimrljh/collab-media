@@ -773,6 +773,10 @@
               <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="stripeDel" type="button" aria-label="Delete plan"><i class="ph ph-trash"></i></button>
               <span class="c-tooltip-bubble" role="tooltip" id="stripeDelTip">Delete plan</span>
             </span>
+            <span class="c-tooltip-wrap">
+              <button class="c-btn c-btn-ghost c-btn-sm c-btn-icon" id="tourReplay" type="button" aria-label="Show me around"><i class="ph-fill ph-compass"></i></button>
+              <span class="c-tooltip-bubble" role="tooltip">Show me around</span>
+            </span>
           </div>
         </div>
       </header>
@@ -4035,6 +4039,465 @@
       setTimeout(function(){ s1.classList.remove('is-loading'); }, 950);
     }, 2200);
   })();
+})();
+</script>
+
+<!-- ══ First-run tour ═══════════════════════════════════════════════════
+     Ported from the mothership landing: this style block and the script
+     below it, plus the "Show me around" header button, are the whole
+     feature. Runs once per browser (localStorage) on a fresh plan;
+     the header button replays it any time. -->
+<style>
+  .tw-blocker{position:fixed; inset:0; z-index:120; background:transparent;}
+  .tw-veil{position:fixed; inset:0; z-index:121; overflow:hidden; pointer-events:none;}
+  .tw-hole{position:absolute; pointer-events:none;
+    border:1px solid var(--color-neutral-4); border-radius:14px;
+    box-shadow:0 0 0 9999px color-mix(in srgb, var(--color-canvas-warm) 90%, transparent),
+               0 8px 24px rgba(189,189,189,.4);}
+  .tw-hole.tw-bare{border-color:transparent;}
+  .tw-hole{transition:opacity .32s var(--ease-standard);}
+  .tw-card{position:fixed; z-index:122; width:min(340px, calc(100vw - 24px));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
+    padding:var(--spacing-16); font-family:var(--font-primary);
+    color:var(--color-neutral-9);
+    transform-origin:top left;
+    transition:opacity .18s var(--ease-standard);}
+  .tw-card.tw-out{opacity:0;}
+  .tw-card:focus{outline:none;}
+  .tw-card.is-opening{animation:tw-swing-open .6s cubic-bezier(.25,.9,.35,1) both;}
+  .tw-card.is-closing{animation:tw-swing-close .45s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes tw-swing-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--tw-dx, 0px) * .5), calc(var(--tw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--tw-dir, 1))) rotateZ(calc(-6deg * var(--tw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--tw-dx, 0px), var(--tw-dy, 0px)) scale(var(--tw-sx, 1), var(--tw-sy, 1)); opacity:.15;}
+  }
+  @keyframes tw-swing-open{
+    0%{transform:translate(var(--tw-dx, 0px), var(--tw-dy, 0px)) scale(var(--tw-sx, 1), var(--tw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--tw-dx, 0px) * .5), calc(var(--tw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--tw-dir, 1))) rotateZ(calc(-7deg * var(--tw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--tw-dir, 1))) rotateZ(calc(1deg * var(--tw-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
+  .tw-k{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5);}
+  .tw-t{margin:6px 0 0; font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);
+    line-height:1.25; padding-right:28px;}
+  .tw-b{margin:8px 0 0; font-size:var(--text-body2-size); line-height:1.5;}
+  .tw-act{display:flex; align-items:center; justify-content:flex-end;
+    gap:var(--spacing-8); margin-top:var(--spacing-16);}
+  .tw-x{position:absolute; top:10px; right:10px;}
+  @media (max-width:640px){
+    .tw-card{left:12px !important; right:12px; top:auto !important;
+      bottom:calc(12px + env(safe-area-inset-bottom, 0px)); width:auto;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .tw-card{transition:none;}
+    .tw-card.is-opening, .tw-card.is-closing{animation:none;}
+    .tw-hole{transition:none;}
+  }
+</style>
+<script>
+(function () {
+'use strict';
+
+var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+/* Selectors are lists: the first visible match wins. */
+var STEPS = [
+  {sel: null,
+   t: 'Welcome to the media planner',
+   b: 'One page takes a campaign from brief to booking. The next six stops show how it ' +
+      'works, and the walk takes about a minute.'},
+  {sel: ['#pageTitle'],
+   t: 'Name it like a document',
+   b: 'The title edits in place, and the plan autosaves as you work. Every draft shows up ' +
+      'under All media plans, ready to reopen where you left it.'},
+  {sel: ['#aiInvite'],
+   t: 'Collab AI is optional',
+   b: 'Describe the campaign in one line and it drafts the whole brief; Try it deals a ' +
+      'ready example. Or ignore this box entirely and fill the form yourself.'},
+  {sel: ['#askCard'],
+   t: 'The ask',
+   b: 'These few fields are enough for a directional plan. Everything after only sharpens ' +
+      'it, and the checker tells you if anything essential is missing.'},
+  {sel: ['#step2 .p-step-head', '.p-journey'],
+   t: 'Four steps, one page',
+   b: 'Audience, media mix and summary unfold in place as you go. Next runs a quick system ' +
+      'check between steps, and any step you have visited reopens with a click.'},
+  {sel: ['.p-railbox'],
+   t: 'The live summary',
+   b: 'Plan strength, budget, reach and forecast update with every change you make. ' +
+      'Unallocated is money not yet placed in the media mix.'},
+  {sel: ['.p-actions'],
+   t: 'Exports and housekeeping',
+   b: 'PDF and Excel exports, save and delete live up here, next to this tour. From step 2 ' +
+      'the Collab AI pill parks bottom right and keeps the whole conversation for this plan.'}
+];
+
+var idx = -1, blocker = null, veil = null, hole = null, card = null;
+var run = 0;
+var gliding = false;
+var keepTrue = null;
+
+function visible(e) {
+  if (!e) return false;
+  var r = e.getBoundingClientRect();
+  return r.width > 4 && r.height > 4 && getComputedStyle(e).visibility !== 'hidden';
+}
+function targetOf(step) {
+  if (!step.sel) return null;
+  for (var i = 0; i < step.sel.length; i++) {
+    var e = document.querySelector(step.sel[i]);
+    if (visible(e)) return e;
+  }
+  return null;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+  });
+}
+function scroller() { return document.querySelector('.c-shell-content'); }
+function holeBox() {
+  return {l: parseFloat(hole.style.left) || 0, t: parseFloat(hole.style.top) || 0,
+          w: parseFloat(hole.style.width) || 0, h: parseFloat(hole.style.height) || 0};
+}
+function applyHole(b) {
+  hole.style.left = b.l + 'px';
+  hole.style.top = b.t + 'px';
+  hole.style.width = b.w + 'px';
+  hole.style.height = b.h + 'px';
+}
+function padBox(r) { return {l: r.left - 8, t: r.top - 8, w: r.width + 16, h: r.height + 16}; }
+function pointBox() {
+  return {l: window.innerWidth / 2, t: window.innerHeight / 2, w: 0, h: 0};
+}
+function sheetMode() { return matchMedia('(max-width:640px)').matches; }
+
+/* The flight plan: the band the viewport offers, and the hole-plus-card
+   stack centred inside it. The card's height is real, not guessed. */
+function plan(target, sc) {
+  var vh = window.innerHeight;
+  var r = target.getBoundingClientRect();
+  var holeH = r.height + 16;
+  var ch = card.offsetHeight;
+
+  var bandTop = 12;
+  var bandBot = vh - (sheetMode() ? 232 : 12);
+
+  var stackH = sheetMode() ? holeH : holeH + 12 + ch;
+  var room = bandBot - bandTop;
+  var holeTop = stackH <= room ? bandTop + (room - stackH) / 2 : bandTop;
+
+  var to = null;
+  if (sc && sc.contains(target)) {
+    to = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight,
+      sc.scrollTop + (r.top - 8) - holeTop));
+    var dy = to - sc.scrollTop;
+    return {to: to, hole: {l: r.left - 8, t: r.top - 8 - dy, w: r.width + 16, h: holeH}};
+  }
+  return {to: null, hole: padBox(r)};
+}
+
+function cardSlot(hb, cw, ch) {
+  var vw = window.innerWidth, vh = window.innerHeight, left, top;
+  if (hb.w === 0) {
+    left = (vw - cw) / 2;
+    top = (vh - ch) / 2;
+  } else {
+    left = hb.l + hb.w / 2 - cw / 2;
+    top = hb.t + hb.h + 12;
+    if (top + ch > vh - 12) top = hb.t - ch - 12;
+    if (top < 12) top = vh - ch - 12;
+  }
+  return {l: Math.min(Math.max(12, left), Math.max(12, vw - cw - 12)),
+          t: Math.min(Math.max(12, top), Math.max(12, vh - ch - 12))};
+}
+function placeCard() {
+  var s = cardSlot(holeBox(), card.offsetWidth, card.offsetHeight);
+  card.style.left = s.l + 'px';
+  card.style.top = s.t + 'px';
+}
+
+function settleSnap(target) {
+  applyHole(target ? padBox(target.getBoundingClientRect()) : pointBox());
+  placeCard();
+}
+
+function ensureVisible(target, token) {
+  var sc = scroller();
+  if (!target || !sc || !sc.contains(target)) { settleSnap(target); return; }
+  var p = plan(target, sc);
+  if (p.to === null || Math.abs(p.to - sc.scrollTop) <= 8) { settleSnap(target); return; }
+  glide(token, sc, p.to, holeBox(), p.hole, null, null, function () {
+    if (token !== run) return;
+    settleSnap(target);
+  });
+}
+
+/* One animation tick: rAF when the browser grants frames, a timeout
+   watchdog when it withholds them. */
+function frame(fn) {
+  var fired = false;
+  var t = setTimeout(function () { if (!fired) { fired = true; fn(); } }, 34);
+  if (window.requestAnimationFrame) requestAnimationFrame(function () {
+    if (!fired) { fired = true; clearTimeout(t); fn(); }
+  });
+}
+
+/* THE tween: one eased loop drives the scroll and the hole together. */
+var glideGen = 0;
+function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
+  var g = ++glideGen;
+  var from = sc ? sc.scrollTop : 0, d = sc ? (to - from) : 0;
+  var dist = Math.max(Math.abs(d), Math.abs(hTo.t - hFrom.t), Math.abs(hTo.l - hFrom.l));
+  var ms = REDUCED ? 0 : Math.min(900, Math.max(380, dist * 0.55));
+  var iris = dist > 220;
+  var t0 = Date.now(), prev = sc ? sc.style.scrollBehavior : '';
+  if (sc) sc.style.scrollBehavior = 'auto';
+  gliding = true;
+  (function step() {
+    if (g !== glideGen) return;
+    if (token !== run) { gliding = false; if (sc) sc.style.scrollBehavior = prev; return; }
+    var p = ms ? Math.min(1, (Date.now() - t0) / ms) : 1;
+    var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    if (sc) sc.scrollTop = from + d * e;
+    var cx = (hFrom.l + hFrom.w / 2) + ((hTo.l + hTo.w / 2) - (hFrom.l + hFrom.w / 2)) * e;
+    var cy = (hFrom.t + hFrom.h / 2) + ((hTo.t + hTo.h / 2) - (hFrom.t + hFrom.h / 2)) * e;
+    var w = hFrom.w + (hTo.w - hFrom.w) * e;
+    var h = hFrom.h + (hTo.h - hFrom.h) * e;
+    if (iris) {
+      var f = Math.pow(Math.sin(Math.PI * e), 1.5);
+      w = w * (1 - f) + 56 * f;
+      h = h * (1 - f) + 56 * f;
+    }
+    applyHole({l: cx - w / 2, t: cy - h / 2, w: w, h: h});
+    if (cFrom) {
+      card.style.left = (cFrom.l + (cTo.l - cFrom.l) * e) + 'px';
+      card.style.top = (cFrom.t + (cTo.t - cFrom.t) * e) + 'px';
+    }
+    if (p < 1) { frame(step); return; }
+    if (sc) sc.style.scrollBehavior = prev;
+    gliding = false;
+    done();
+  })();
+}
+
+function setSwingVars(box) {
+  var to = card.getBoundingClientRect();
+  var sx = Math.max(0.1, (box.w || 24) / to.width);
+  var sy = Math.max(0.1, (box.h || 24) / to.height);
+  card.style.setProperty('--tw-dx', (box.l - to.left).toFixed(1) + 'px');
+  card.style.setProperty('--tw-dy', (box.t - to.top).toFixed(1) + 'px');
+  card.style.setProperty('--tw-sx', sx.toFixed(4));
+  card.style.setProperty('--tw-sy', sy.toFixed(4));
+  card.style.setProperty('--tw-dir', (box.l + box.w / 2) < window.innerWidth / 2 ? '1' : '-1');
+}
+/* A dismissed tour folds into the header button that replays it. */
+function closeAnchor() {
+  var sels = ['#tourReplay', '.p-actions', '.c-sidebar-header'];
+  for (var i = 0; i < sels.length; i++) {
+    var e = document.querySelector(sels[i]);
+    if (!e) continue;
+    var r = e.getBoundingClientRect();
+    if (r.width > 4 && r.height > 4 && r.bottom > 0 && r.top < window.innerHeight &&
+        r.right > 0 && r.left < window.innerWidth) {
+      return {l: r.left, t: r.top, w: r.width, h: r.height};
+    }
+  }
+  var hb = holeBox();
+  return {l: hb.l, t: hb.t, w: hb.w || 24, h: hb.h || 24};
+}
+function swingCard() {
+  card.classList.remove('is-opening');
+  if (REDUCED || document.hidden) return;
+  void card.offsetWidth;
+  setSwingVars(holeBox());
+  card.classList.add('is-opening');
+}
+
+function renderCard(i) {
+  var s = STEPS[i], last = i === STEPS.length - 1;
+  card.setAttribute('aria-label', s.t);
+  card.innerHTML =
+    '<button class="c-icon-btn tw-x" type="button" data-tw="end" aria-label="Close the tour">' +
+      '<i class="ph ph-x" aria-hidden="true"></i></button>' +
+    '<div class="tw-k">' + (i + 1) + ' of ' + STEPS.length + '</div>' +
+    '<h3 class="tw-t">' + esc(s.t) + '</h3>' +
+    '<p class="tw-b">' + esc(s.b) + '</p>' +
+    '<div class="tw-act">' +
+      (i === 0
+        ? '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-tw="end">Skip the tour</button>'
+        : '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-tw="back">Back</button>') +
+      '<button class="c-btn c-btn-primary c-btn-sm" type="button" data-tw="next">' +
+        (i === 0 ? 'Show me' : (last ? 'Done' : 'Next')) + '</button>' +
+    '</div>';
+}
+
+function build() {
+  blocker = document.createElement('div');
+  blocker.className = 'tw-blocker';
+  veil = document.createElement('div');
+  veil.className = 'tw-veil';
+  hole = document.createElement('div');
+  hole.className = 'tw-hole tw-bare';
+  veil.appendChild(hole);
+  card = document.createElement('div');
+  card.className = 'tw-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.tabIndex = -1;
+  document.body.appendChild(blocker);
+  document.body.appendChild(veil);
+  document.body.appendChild(card);
+  applyHole(pointBox());
+}
+function removeParts(parts) {
+  parts.forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
+}
+function teardown() {
+  clearInterval(keepTrue); keepTrue = null;
+  removeParts([blocker, veil, card]);
+  blocker = veil = hole = card = null;
+  idx = -1; run++;
+  document.removeEventListener('keydown', onKeys, true);
+}
+function endTour() {
+  if (!card || idx < 0) return;
+  idx = -1; run++;
+  if (REDUCED || document.hidden || !card.innerHTML) { teardown(); return; }
+  card.classList.remove('is-opening');
+  void card.offsetWidth;
+  setSwingVars(closeAnchor());
+  card.classList.add('is-closing');
+  card.style.pointerEvents = 'none';
+  hole.style.opacity = '0';
+  clearInterval(keepTrue); keepTrue = null;
+  document.removeEventListener('keydown', onKeys, true);
+  var mine = [blocker, veil, card];
+  blocker = veil = hole = card = null;
+  setTimeout(function () { removeParts(mine); }, 470);
+}
+
+function show(i, dir) {
+  if (!card) return;
+  while (i >= 0 && i < STEPS.length && STEPS[i].sel && !targetOf(STEPS[i])) i += (dir || 1);
+  if (i < 0 || i >= STEPS.length) { endTour(); return; }
+  idx = i;
+  var token = ++run;
+
+  var target0 = targetOf(STEPS[i]);
+  var sc0 = scroller();
+  var prevL = parseFloat(card.style.left), prevT = parseFloat(card.style.top);
+
+  if (card.innerHTML !== '' && isFinite(prevL)) {
+    hole.classList.toggle('tw-bare', !target0);
+    card.classList.remove('is-opening');
+    renderCard(i);
+    var p0 = target0 ? plan(target0, sc0) : {to: null, hole: pointBox()};
+    var slot = cardSlot(p0.hole, card.offsetWidth, card.offsetHeight);
+    glide(token, p0.to === null ? null : sc0, p0.to || 0, holeBox(), p0.hole,
+      {l: prevL, t: prevT}, slot, function () {
+        if (token !== run) return;
+        settleSnap(target0);
+        card.focus({preventScroll: true});
+      });
+    return;
+  }
+
+  var fade = card.innerHTML !== '' && !REDUCED && !document.hidden;
+  if (fade) card.classList.add('tw-out');
+
+  setTimeout(function () {
+    if (token !== run) return;
+    var target = targetOf(STEPS[i]);
+    var sc = scroller();
+    hole.classList.toggle('tw-bare', !target);
+    card.classList.add('tw-out');
+    renderCard(i);
+    var hFrom = holeBox();
+    var p = target ? plan(target, sc) : {to: null, hole: pointBox()};
+    glide(token, p.to === null ? null : sc, p.to || 0, hFrom, p.hole, null, null, function () {
+      if (token !== run) return;
+      settleSnap(target);
+      card.classList.remove('tw-out');
+      swingCard();
+      card.focus({preventScroll: true});
+    });
+  }, fade ? 170 : 0);
+}
+
+function onKeys(e) {
+  if (idx < 0) return;
+  if (e.key === 'Escape') { e.stopPropagation(); endTour(); return; }
+  if (e.key === 'ArrowRight') { e.preventDefault(); show(idx + 1, 1); return; }
+  if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); show(idx - 1, -1); return; }
+  if (e.key === 'Tab') {
+    var f = card.querySelectorAll('button');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+}
+
+function start() {
+  if (idx >= 0) return;
+  build();
+  document.addEventListener('keydown', onKeys, true);
+  card.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tw]');
+    if (!b) return;
+    var act = b.getAttribute('data-tw');
+    if (act === 'end') endTour();
+    else if (act === 'back') show(idx - 1, -1);
+    else if (act === 'next') { if (idx === STEPS.length - 1) endTour(); else show(idx + 1, 1); }
+  });
+  function holdTrue() {
+    if (idx < 0 || gliding) return;
+    var t = targetOf(STEPS[idx]);
+    if (!t) return;
+    var r = t.getBoundingClientRect();
+    if (r.top < -8 || r.bottom > window.innerHeight + 8) { ensureVisible(t, run); return; }
+    var want = padBox(r), have = holeBox();
+    if (Math.abs(want.l - have.l) > 2 || Math.abs(want.t - have.t) > 2 ||
+        Math.abs(want.w - have.w) > 2 || Math.abs(want.h - have.h) > 2) {
+      settleSnap(t);
+    }
+  }
+  window.addEventListener('resize', holdTrue);
+  keepTrue = setInterval(holdTrue, 500);
+  var sc0 = scroller(), st0 = null;
+  if (sc0) sc0.addEventListener('scroll', function () {
+    if (idx < 0 || gliding) return;
+    clearTimeout(st0);
+    st0 = setTimeout(holdTrue, 90);
+  }, {passive: true});
+  show(0, 1);
+}
+
+var replay = document.getElementById('tourReplay');
+if (replay) replay.addEventListener('click', function () { setTimeout(start, 60); });
+
+/* First fresh visit only: a reopened plan, a hand-off or a deep link is
+   someone already working, not someone arriving. The tour waits for
+   step 1 to finish folding open before it steps in front. */
+(function auto() {
+  var seen = false;
+  try { seen = !!localStorage.getItem('collab-tour-seen'); } catch (e) {}
+  if (seen || /[?&](plan|brief|step)=/.test(window.location.search)) return;
+  try { localStorage.setItem('collab-tour-seen', '1'); } catch (e) {}
+  var s1 = document.getElementById('step1'), t0 = Date.now();
+  (function wait() {
+    if ((s1 && s1.classList.contains('is-settled')) || Date.now() - t0 > 6000) {
+      setTimeout(start, 900);
+      return;
+    }
+    setTimeout(wait, 250);
+  })();
+})();
+
 })();
 </script>
 </body>
