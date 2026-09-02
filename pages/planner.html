@@ -173,8 +173,13 @@
     white-space:nowrap; font-size:var(--text-body1-size); color:var(--color-neutral-5);
     -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
             mask-image:linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);}
-  .p-ask.is-docked .p-ask-ghost{display:flex;}
+  .p-ask.is-docked .p-ask-ghost, .p-ask-ghost.is-on{display:flex;}
   .p-ask-pill.has-text .p-ask-ghost, .p-ask-pill:focus-within .p-ask-ghost{display:none !important;}
+  /* A seeded example keeps running as ghost text until the field is
+     focused; the real value hides under it so the two never overlap. */
+  .p-ask-pill.is-ghosting .p-ask-ghost{display:flex !important;}
+  .p-ask-pill.is-ghosting input{color:transparent;}
+
   .p-ask-ghost-t{display:inline-block; white-space:nowrap;}
   .p-ask-ghost.is-running .p-ask-ghost-t{
     animation:p-ask-marquee var(--ask-dur, 9s) var(--ease-standard) infinite;}
@@ -604,6 +609,8 @@
   .p-ai-invite::before, .p-ai-invite::after{border-radius:inherit;}
   .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);
     position:relative; z-index:1;}
+  .p-ai-invite-left{display:flex; flex-direction:column; align-items:flex-start;
+    gap:var(--spacing-4); flex:none;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
   .p-ai-invite-note{margin:0; font-size:var(--text-caption-size);
@@ -787,11 +794,13 @@
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
         <div class="c-banner c-banner-ai p-ai-invite p-banner-gap" id="aiInvite">
-          <p class="p-ai-invite-note">Optional. Describe the campaign in one line and it fills the brief; the form below works on its own.</p>
           <div class="p-ai-invite-row">
-          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
-            <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
-          </button>
+          <div class="p-ai-invite-left">
+            <p class="p-ai-invite-note">Optional:</p>
+            <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
+              <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
+            </button>
+          </div>
           <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
@@ -1808,11 +1817,21 @@
     setTimeout(finish, 900);
   }
 
-  /* Docked ghost line — slides only when the message overflows the
-     pill; re-measured whenever the dock or viewport changes. */
+  /* Ghost line — runs wherever the ghost shows (the dock's hold
+     message, step 1's hint, a seeded example) and only when the text
+     overflows; re-measured whenever the dock or viewport changes. On
+     step 1 the Try chip narrows the field, so the line starts after
+     it rather than at the mark. */
   function updateGhostMarquee(){
     var box = $('askBox'), ghost = $('askGhost'), ghostT = $('askGhostT');
-    if (!box || !box.classList.contains('is-docked')){ return; }
+    if (!box) return;
+    var chip = $('briefAiTry');
+    if (!box.classList.contains('is-docked') && chip && chip.offsetWidth){
+      ghost.style.left = (chip.offsetLeft + chip.offsetWidth + 8) + 'px';
+    } else {
+      ghost.style.left = '';
+    }
+    if (!ghost.offsetWidth) return;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var overflow = ghost.clientWidth - ghostT.scrollWidth;
     if (overflow < -8 && !reduced){
@@ -1860,10 +1879,13 @@
     if (railcell) railcell.classList.toggle('has-dock', n !== 1);
     if (n !== 1) placeDock();
     var input = $('askInput'), ghost = $('askGhost'), ghostT = $('askGhostT');
+    document.querySelector('.p-ask-pill').classList.remove('is-ghosting');
     if (n === 1){
-      input.placeholder = ASK_HINTS[1];
+      input.placeholder = '';
       input.readOnly = false;
-      ghost.classList.remove('is-running');
+      ghost.classList.add('is-on');
+      ghostT.textContent = ASK_HINTS[1];
+      setTimeout(updateGhostMarquee, 60);
     } else {
       input.placeholder = '';
       input.readOnly = true;
@@ -3528,16 +3550,36 @@
     tryPendingLine = tryLine(b);
     var i = $('askInput');
     i.value = tryPendingLine;
-    document.querySelector('.p-ask-pill').classList.add('has-text');
-    i.focus();
-    i.select();
+    var pill = document.querySelector('.p-ask-pill');
+    pill.classList.add('has-text', 'is-ghosting');
+    $('askGhostT').textContent = tryPendingLine;
+    setTimeout(updateGhostMarquee, 30);
   });
+  /* Clicking into the field turns a running seed into editable text.
+     Pointerdown covers embedded browsers where focus never fires. */
+  function unghost(){
+    var pill = document.querySelector('.p-ask-pill');
+    if (pill.classList.contains('is-ghosting')){
+      pill.classList.remove('is-ghosting');
+      $('askGhostT').textContent = ASK_HINTS[1];
+      setTimeout(updateGhostMarquee, 30);
+    }
+  }
+  $('askInput').addEventListener('focus', unghost);
+  $('askInput').addEventListener('pointerdown', unghost);
+  $('askInput').addEventListener('input', unghost);
 
   function askSubmit(){
     if ($('askBox').classList.contains('is-docked')){ openThread(); return; }
     var v = $('askInput').value;
     $('askInput').value = '';
-    document.querySelector('.p-ask-pill').classList.remove('has-text');
+    var pill = document.querySelector('.p-ask-pill');
+    pill.classList.remove('has-text');
+    pill.classList.remove('is-ghosting');
+    if (!$('askBox').classList.contains('is-docked')){
+      $('askGhostT').textContent = ASK_HINTS[1];
+      setTimeout(updateGhostMarquee, 30);
+    }
     if (v.trim()) threadPush('user', v.trim());
     /* Push the page up to the assistant first, so the reply and the
        auto-fill washes land in view. */
@@ -3885,7 +3927,10 @@
   renderChips();
   resetSplit();
   renderAll();
-  $('askInput').placeholder = ASK_HINTS[step];
+  $('askInput').placeholder = '';
+  $('askGhost').classList.add('is-on');
+  $('askGhostT').textContent = ASK_HINTS[step];
+  setTimeout(updateGhostMarquee, 120);
 
   /* Reopening a saved plan: rebuild the whole state from its snapshot,
      skip the arrival theatrics, land on the step it was left at. */
