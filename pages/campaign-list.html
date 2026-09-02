@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Collab:Media · All media plans</title>
+<title>Collab:Media · My media plans</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!-- Water is Collab:Media's element, so the drop is the tab mark. The DLS
      asset is used directly rather than a re-drawn copy. -->
@@ -14,14 +14,9 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
-<link rel="stylesheet" href="../shared/shell.css?v=0.9.44" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.48" />
 <style>
   /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
-  /* Back sits in the header row itself, the planner's own move: the
-     arrow hangs half out of the grid so the title stays on the margin. */
-  .cl-headrow{display:flex; align-items:flex-start; gap:var(--spacing-8); min-width:0;}
-  .cl-crumb{flex:none; text-decoration:none;
-    margin-left:calc(var(--spacing-12) * -1); margin-top:4px;}
   /* The divider sits tight under the page header, same as Home. */
   .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
   .cl-divider{border:none; border-top:1px solid var(--color-neutral-3);
@@ -110,9 +105,10 @@
         <span class="c-badge c-badge-neutral c-sidebar-beta">Beta</span>
         <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/water.svg" alt="Collab:Media" />
       </div>
-      <a class="c-sidebar-item active" href="campaigns.html" aria-current="page"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
+      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
       <div class="c-sidebar-section">Workspace</div>
       <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">Media planner</span><span class="c-sidebar-hover-text">Media planner</span></a>
+      <a class="c-sidebar-item active" href="campaign-list.html" aria-current="page"><i class="ph-fill ph-rows"></i><span class="label">My media plans</span><span class="c-sidebar-hover-text">My media plans</span></a>
       <div class="c-sidebar-section">System</div>
       <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
@@ -140,14 +136,9 @@
 
       <header class="c-pageheader">
         <div class="c-pageheader-row">
-          <div class="cl-headrow">
-            <a class="c-btn c-btn-ghost c-btn-sm c-btn-icon cl-crumb" href="campaigns.html" aria-label="Back to Home" title="Back to Home">
-              <i class="ph ph-arrow-left"></i>
-            </a>
-            <div class="c-pageheader-text">
-              <h1>All media plans</h1>
-              <p class="sub">Every plan you have open, and what stage it reached.</p>
-            </div>
+          <div class="c-pageheader-text">
+            <h1>My media plans</h1>
+            <p class="sub">Every plan you have open, and what stage it reached.</p>
           </div>
           <div class="c-pageheader-actions">
             <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none;">
@@ -256,7 +247,7 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.47"></script>
+<script src="../shared/shell.js?v=0.9.48"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=3"></script>
 <script>
