@@ -593,20 +593,27 @@
      nests inside the AI banner, one panel. */
   .p-ai-slot{position:relative; margin-bottom:var(--spacing-16);}
   .p-ask{position:relative;}
-  /* The AI assist is an invitation, not a gate: a quiet chip row with
-     an explicit "optional" note; the pill lives behind a fold that only
-     opens when asked for, so the form reads as the primary path. */
-  .p-ai-invite{display:flex; align-items:center; gap:var(--spacing-12); flex-wrap:wrap;}
-  .p-ai-invite-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .p-ai-fold{display:grid; grid-template-rows:0fr;
-    transition:grid-template-rows .45s var(--ease-standard);}
-  .p-ai-fold.is-open{grid-template-rows:1fr;}
-  .p-ai-fold-clip{overflow:hidden; min-height:0;}
-  .p-ai-fold.is-settled .p-ai-fold-clip{overflow:visible;}
-  .p-ai-fold-row{display:flex; gap:var(--spacing-12); align-items:center;
-    padding:var(--spacing-12) 0 var(--spacing-4);}
-  .p-ai-fold-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
-  @media (prefers-reduced-motion:reduce){ .p-ai-fold{transition:none;} }
+  /* The AI assist is an invitation, not a gate: chip and pill share
+     one quiet row above the form, with an explicit "optional" note
+     below, so the form still reads as the primary path. */
+  .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);}
+  .p-ai-invite-row .p-ai-btn{flex:none;}
+  .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
+  .p-ai-invite-note{margin:var(--spacing-8) 0 0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5);}
+  /* Try an example rides inside the pill as a suggestion chip; it
+     steps aside once there is text, and never travels to the dock. */
+  .p-try-chip{flex:none; display:inline-flex; align-items:center; gap:var(--spacing-4);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    color:var(--color-neutral-9); border-radius:var(--radius-pill);
+    padding:6px var(--spacing-12); font-family:inherit;
+    font-size:var(--text-caption-size); font-weight:700; cursor:pointer;
+    box-shadow:var(--shadow-1);
+    transition:background var(--duration-fast) var(--ease-standard);}
+  .p-try-chip:hover{background:var(--color-neutral-2);}
+  .p-try-chip i{font-size:var(--icon-micro);}
+  .p-ask-pill.has-text .p-try-chip{display:none;}
+  #askBox.is-docked .p-try-chip{display:none;}
   .p-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:var(--radius-pill);
     background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd);
     background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:plus-lighter;
@@ -774,20 +781,17 @@
       <!-- ══ STEP 1 · BRIEF ═══════════════════════════════════════════ -->
       <section id="view1">
         <div class="p-ai-invite p-banner-gap" id="aiInvite">
-          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button" aria-expanded="false" aria-controls="aiFold">
+          <div class="p-ai-invite-row">
+          <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="aiInviteBtn" type="button">
             <i class="ph-fill ph-sparkle"></i> Draft it with Collab AI
           </button>
-          <span class="p-ai-invite-note">Optional. Describe the campaign in one line and it fills the brief; the form below works on its own.</span>
-        </div>
-        <div class="p-ai-fold" id="aiFold">
-          <div class="p-ai-fold-clip">
-          <div class="p-ai-fold-row">
           <div class="p-ai-slot" data-slot="1">
           <div class="p-ask" id="askBox">
             <div class="p-ask-glow-outer" aria-hidden="true"></div>
             <div class="p-ask-glow-inner" aria-hidden="true"></div>
             <div class="p-ask-pill">
               <span class="p-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+              <button class="p-try-chip" id="briefAiTry" type="button"><i class="ph ph-sparkle"></i> Try an example</button>
               <input type="text" id="askInput" aria-label="Ask Collab AI about this plan" placeholder="Ask Collab AI about this plan" autocomplete="off" />
               <span class="p-ask-ghost" id="askGhost" aria-hidden="true"><span class="p-ask-ghost-t" id="askGhostT"></span></span>
               <button class="p-ask-send" type="button" id="askSend" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
@@ -803,11 +807,8 @@
             </div>
           </div>
           </div>
-          <button class="c-btn c-btn-secondary c-btn-sm" id="briefAiTry" type="button" style="flex:none;">
-            <i class="ph ph-sparkle"></i> Try an example
-          </button>
           </div>
-          </div>
+          <p class="p-ai-invite-note">Optional. Describe the campaign in one line and it fills the brief; the form below works on its own.</p>
         </div>
 
         <div class="p-stack">
@@ -2937,7 +2938,6 @@
   };
   var typeTimer = null, askAwayTimer = null;
   function askShow(text, actions){
-    if (!$('askBox').classList.contains('is-docked')) openAiFold();
     threadPush('ai', text);
     if ($('threadOverlay') && $('threadOverlay').classList.contains('is-open')) renderThread();
     var txt = $('askReplyText'), act = $('askReplyActions');
@@ -3507,31 +3507,10 @@
   /* Try it seeds the pill with a random example line; only Send performs
      the fill, so the user stays the one pulling the trigger. */
   var tryPendingBrief = null, tryPendingLine = '', lastTryIdx = -1;
-  /* The assist fold: closed by default so the form is the obvious
-     path; opening is explicit, or automatic when a reply is landing
-     while the pill is still parked in step 1. */
-  var aiFoldSettle = null;
-  function openAiFold(focus){
-    var fold = $('aiFold');
-    if (!fold || fold.classList.contains('is-open')) return;
-    fold.classList.add('is-open');
-    $('aiInviteBtn').setAttribute('aria-expanded', 'true');
-    clearTimeout(aiFoldSettle);
-    aiFoldSettle = setTimeout(function(){ fold.classList.add('is-settled'); },
-      document.hidden ? 0 : 470);
-    if (focus) setTimeout(function(){ $('askInput').focus(); }, document.hidden ? 0 : 300);
-  }
-  function closeAiFold(){
-    var fold = $('aiFold');
-    if (!fold || !fold.classList.contains('is-open')) return;
-    clearTimeout(aiFoldSettle);
-    fold.classList.remove('is-settled');
-    fold.classList.remove('is-open');
-    $('aiInviteBtn').setAttribute('aria-expanded', 'false');
-  }
+  /* The invite chip is a label with a hand: it points the cursor at
+     the pill beside it. */
   $('aiInviteBtn').addEventListener('click', function(){
-    if ($('aiFold').classList.contains('is-open')) closeAiFold();
-    else openAiFold(true);
+    $('askInput').focus();
   });
 
   $('briefAiTry').addEventListener('click', function(){
@@ -3543,6 +3522,7 @@
     tryPendingLine = tryLine(b);
     var i = $('askInput');
     i.value = tryPendingLine;
+    document.querySelector('.p-ask-pill').classList.add('has-text');
     i.focus();
     i.select();
   });
@@ -3551,6 +3531,7 @@
     if ($('askBox').classList.contains('is-docked')){ openThread(); return; }
     var v = $('askInput').value;
     $('askInput').value = '';
+    document.querySelector('.p-ask-pill').classList.remove('has-text');
     if (v.trim()) threadPush('user', v.trim());
     /* Push the page up to the assistant first, so the reply and the
        auto-fill washes land in view. */
