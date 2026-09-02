@@ -611,14 +611,15 @@
     overflow:visible; border-radius:28px; padding:var(--spacing-16);
     z-index:30; position:relative;}
   .p-ai-invite::before, .p-ai-invite::after{border-radius:inherit;}
-  .p-ai-invite-row{display:flex; align-items:center; gap:var(--spacing-12);
+  .p-ai-invite-row{display:flex; align-items:flex-start; gap:var(--spacing-12);
     position:relative; z-index:1;}
   .p-ai-invite-row .p-ai-btn{flex:none;}
   .p-ai-invite-row .p-ai-slot{flex:1; min-width:0; margin-bottom:0;}
   /* Tucked right under the pill row, left edge on the chip's "Draft"
      (12px chip padding + 14px icon + 6px gap). */
-  .p-ai-invite-note{margin:-4px 0 0 32px; font-size:var(--text-caption-size);
+  .p-ai-invite-note{margin:-6px 0 0 32px; font-size:var(--text-caption-size);
     color:var(--color-neutral-6, var(--color-neutral-5)); position:relative; z-index:1;}
+  .p-ai-invite-note i{font-size:10px; vertical-align:-1px;}
   /* Try it rides inside the pill as a suggestion chip; it stays put
      while typing and only steps aside in the dock. */
   .p-try-chip{flex:none; display:inline-flex; align-items:center; gap:var(--spacing-4);
@@ -825,7 +826,7 @@
           </div>
           </div>
           </div>
-          <p class="p-ai-invite-note">or fill up manually.</p>
+          <p class="p-ai-invite-note">or fill up manually <i class="ph ph-arrow-down" aria-hidden="true"></i></p>
         </div>
 
         <div class="p-stack">
