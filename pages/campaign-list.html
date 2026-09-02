@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
-<link rel="stylesheet" href="../shared/shell.css?v=0.9.48" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.51" />
 <style>
   /* Page-local. Composes tokens only — no new colors, radii, or spacing. */
   /* The divider sits tight under the page header, same as Home. */
@@ -78,6 +78,46 @@
   #clRows tr.is-leaving{opacity:0; transition:opacity .2s ease;}
   .cl-industry{white-space:nowrap;}
   .cl-pagination{margin-top:var(--spacing-16);}
+
+  /* ── A-Z rail, the influence roster's own: small grey letters, the
+     current one in ink, letters with nothing to jump to faded near out.
+     Functional weight, whisper visual weight. The content gains a right
+     gutter rather than the rail sitting over the action column. */
+  .cl-rail{position:fixed; right:6px; top:50%; transform:translateY(-50%);
+    width:24px; z-index:20;
+    display:flex; flex-direction:column; align-items:center; gap:7px;}
+  .cl-rail-row{display:flex; align-items:center; justify-content:center;
+    border:0; background:none; padding:0; cursor:pointer;
+    font-family:inherit; line-height:1;}
+  .cl-rail-letter{width:22px; text-align:center; font-size:12px;
+    font-weight:600; color:var(--color-neutral-4);
+    transition:color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-settle);}
+  .cl-rail-row:hover .cl-rail-letter{color:var(--color-neutral-9);
+    transform:translateX(-2px) scale(1.15);}
+  .cl-rail-row.is-active .cl-rail-letter{color:var(--color-neutral-9); font-weight:800;}
+  .cl-rail-row.is-empty{cursor:default; pointer-events:none;}
+  .cl-rail-row.is-empty .cl-rail-letter{color:var(--color-neutral-3);}
+  .cl-rail-row:focus-visible{outline:2px solid var(--color-obsidian);
+    outline-offset:1px; border-radius:var(--radius-sm);}
+  .c-shell .c-shell-content{padding-right:calc(var(--page-gutter) + 22px);}
+  /* 27 letters have to fit one screen, so the pitch is the constraint. */
+  @media (max-height:760px){ .cl-rail{gap:4px;} .cl-rail-letter{font-size:11px;} }
+  @media (max-height:620px){ .cl-rail{gap:2px;} .cl-rail-letter{font-size:10px;} }
+  @media (max-width:760px){
+    .cl-rail{display:none;}
+    .c-shell .c-shell-content{padding-right:var(--page-gutter);}
+  }
+  /* Sortable headers. */
+  th.c-table-sort-th[data-sort]{cursor:pointer; user-select:none; white-space:nowrap;}
+  .cl-sorticon{font-size:var(--icon-micro); color:var(--color-neutral-4);
+    vertical-align:middle;}
+  .cl-sorticon.is-on{color:var(--color-neutral-9);}
+  /* Descending flips the glyph, so the two states are not identical at a
+     glance even though the icon family stays the same. */
+  .cl-sorticon.is-desc{transform:scaleY(-1);}
+  th[data-sort]:hover .cl-sorticon{color:var(--color-neutral-9);}
+  th[data-sort]:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
   @media (max-width:900px){
     .cl-hide-narrow{display:none;}
   }
@@ -186,12 +226,12 @@
         <table class="c-table c-table-standalone">
           <thead>
             <tr>
-              <th>Campaign</th>
-              <th>Status</th>
-              <th class="cl-hide-narrow">Industry</th>
-              <th class="num">Budget</th>
-              <th class="cl-hide-narrow">Duration</th>
-              <th class="cl-hide-narrow">Updated</th>
+              <th class="c-table-sort-th" data-sort="name" role="button" tabindex="0" aria-label="Sort by campaign">Campaign <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
+              <th class="c-table-sort-th" data-sort="status" role="button" tabindex="0" aria-label="Sort by status">Status <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
+              <th class="c-table-sort-th cl-hide-narrow" data-sort="industry" role="button" tabindex="0" aria-label="Sort by industry">Industry <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
+              <th class="c-table-sort-th num" data-sort="budget" role="button" tabindex="0" aria-label="Sort by budget">Budget <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
+              <th class="c-table-sort-th cl-hide-narrow" data-sort="duration" role="button" tabindex="0" aria-label="Sort by duration">Duration <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
+              <th class="c-table-sort-th cl-hide-narrow" data-sort="updated" role="button" tabindex="0" aria-label="Sort by updated">Updated <i class="ph ph-arrows-down-up cl-sorticon"></i></th>
               <th class="no-sort c-table-action-col"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
@@ -200,6 +240,7 @@
         <div id="clEmpty" hidden></div>
       </div>
 
+      <nav class="cl-rail" id="clRail" aria-label="Jump to letter"></nav>
       <div class="c-pagination cl-pagination">
         <span class="count" id="clCount"></span>
         <div class="c-page-controls">
@@ -247,7 +288,7 @@
   </div>
 </div>
 
-<script src="../shared/shell.js?v=0.9.48"></script>
+<script src="../shared/shell.js?v=0.9.51"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=3"></script>
 <script>
@@ -285,14 +326,72 @@
     return true;
   }
 
+  /* ── Sorting. Default is campaign name ascending so the A-Z rail beside
+     the table means something the moment the page opens; every other key
+     falls back to name as the tie-break, so equal statuses or industries
+     stay alphabetical rather than shuffling. ── */
+  var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  var sortKey = 'name', sortDir = 1;
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function letterOf(name){
+    var c = (name || '').trim().charAt(0).toUpperCase();
+    return /[A-Z]/.test(c) ? c : '#';
+  }
+  /* "27 Aug 2026" is the stored shape and Date's parse of it is not
+     guaranteed, so read the three parts instead of trusting the string. */
+  function updatedAt(s){
+    var m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec((s || '').trim());
+    if (!m) return 0;
+    var mi = MONTHS.indexOf(m[2].charAt(0).toUpperCase() + m[2].slice(1, 3).toLowerCase());
+    return mi < 0 ? 0 : new Date(+m[3], mi, +m[1]).getTime();
+  }
+  function weeksOf(s){ var m = /(\d+)/.exec(s || ''); return m ? +m[1] : 0; }
+  function sortRows(rows){
+    return rows.slice().sort(function(a, b){
+      var c = 0;
+      if (sortKey === 'budget') c = (a.budget || 0) - (b.budget || 0);
+      else if (sortKey === 'updated') c = updatedAt(a.updated) - updatedAt(b.updated);
+      else if (sortKey === 'duration') c = weeksOf(a.duration) - weeksOf(b.duration);
+      else if (sortKey === 'name') {
+        var la = LETTERS.indexOf(letterOf(a.name)), lb = LETTERS.indexOf(letterOf(b.name));
+        c = la !== lb ? la - lb : String(a.name).localeCompare(String(b.name));
+      } else c = String(a[sortKey] || '').localeCompare(String(b[sortKey] || ''));
+      /* Name breaks every tie, so a re-sort is stable to the eye. */
+      if (!c && sortKey !== 'name') return String(a.name).localeCompare(String(b.name));
+      return c * sortDir;
+    });
+  }
+  function toggleSort(key){
+    if (sortKey === key) sortDir = -sortDir;
+    /* Money, time and dates read newest/largest first on the way in;
+       words read A-Z. */
+    else { sortKey = key; sortDir = (key === 'budget' || key === 'updated' || key === 'duration') ? -1 : 1; }
+    render();
+  }
+  function paintSortIcons(){
+    document.querySelectorAll('th[data-sort]').forEach(function(th){
+      var on = th.dataset.sort === sortKey;
+      var i = th.querySelector('.cl-sorticon');
+      /* Every column keeps the same up-and-down glyph, sorted or not, so
+         the header row reads as one control rather than one odd cell out.
+         The sorted column is told apart by ink and weight, and its
+         direction by aria-sort, which is what a screen reader reads
+         anyway. */
+      i.className = 'ph ph-arrows-down-up cl-sorticon' +
+        (on ? ' is-on' + (sortDir === 1 ? ' is-asc' : ' is-desc') : '');
+      th.setAttribute('aria-sort', on ? (sortDir === 1 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
   function render(){
     var ALLPLANS = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
-    var hits = ALLPLANS.filter(matches);
+    var hits = sortRows(ALLPLANS.filter(matches));
     lastHits = hits;
+    paintSortIcons();
     rowsEl.innerHTML = hits.map(function(c, i){
       var action = c.status === 'booked' ? 'View' : 'Continue';
       var href = c.href || 'planner.html';
-      return '<tr class="is-interactive is-clickable" data-href="' + href + '">' +
+      return '<tr class="is-interactive is-clickable" data-letter="' + letterOf(c.name) + '" data-href="' + href + '">' +
         '<td><span class="cl-cell">' +
           '<span class="cl-logo"><img alt="" /></span>' +
           '<span class="cl-txt"><span class="cl-name">' + c.name + '</span>' +
@@ -336,6 +435,7 @@
     }
     countEl.textContent = none ? 'Showing 0 of ' + ALLPLANS.length
       : 'Showing 1\u2013' + hits.length + ' of ' + hits.length;
+    renderRail(hits);
 
     /* Trigger count + applied pills + Clear all — never visually silent */
     var countBadge = document.getElementById('clFilterCount');
@@ -457,6 +557,111 @@
   });
   document.addEventListener('click', function(e){
     if (!e.target.closest('.cl-more')) closeMenus();
+  });
+
+  /* ── A-Z rail — letters only; the count rides the accessible label and
+     the tooltip rather than taking any visual weight. Letters with no
+     plan behind them are dimmed and taken out of the tab order, so the
+     rail never offers a jump that goes nowhere. ── */
+  var railEl = document.getElementById('clRail');
+  var scroller = document.querySelector('.c-shell-content');
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function renderRail(hits){
+    var counts = {};
+    LETTERS.forEach(function(L){ counts[L] = 0; });
+    hits.forEach(function(c){ counts[letterOf(c.name)] += 1; });
+    railEl.innerHTML = LETTERS.map(function(L){
+      var n = counts[L] || 0;
+      var label = L === '#' ? 'symbols' : L;
+      return '<button class="cl-rail-row' + (n ? '' : ' is-empty') + '" type="button" data-letter="' + L + '"' +
+        (n ? ' title="' + n + '" aria-label="Jump to ' + label + ', ' + n +
+             (n === 1 ? ' plan"' : ' plans"')
+           : ' tabindex="-1" aria-hidden="true"') + '>' +
+        '<span class="cl-rail-letter">' + L + '</span></button>';
+    }).join('');
+    spy();
+  }
+
+  /* A glide rather than a jump, and a chasing one: it re-measures the
+     live distance each frame and closes a fraction of it, so it eases
+     out and still lands true if the layout settles mid-flight. */
+  var glideRAF = 0, glideStop = null;
+  function cancelGlide(){
+    if (glideRAF) { cancelAnimationFrame(glideRAF); glideRAF = 0; }
+    if (glideStop) { clearTimeout(glideStop); glideStop = null; }
+  }
+  function glideTo(target, offset){
+    cancelGlide();
+    function deltaNow(){
+      return target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - offset;
+    }
+    if (REDUCED) { scroller.scrollTop += deltaNow(); spy(); return; }
+    var started = Date.now(), MAX_MS = 1100;
+    function step(){
+      var d = deltaNow();
+      if (Math.abs(d) < 1 || Date.now() - started > MAX_MS) {
+        scroller.scrollTop += d; cancelGlide(); spy(); return;
+      }
+      var stepPx = d * 0.16;
+      if (Math.abs(stepPx) < 1) stepPx = d > 0 ? 1 : -1;
+      scroller.scrollTop += stepPx;
+      glideRAF = requestAnimationFrame(step);
+    }
+    glideRAF = requestAnimationFrame(step);
+    /* rAF stalls when the tab is painted but not compositing, which
+       would strand the glide; this lands it regardless. */
+    glideStop = setTimeout(function(){
+      if (glideRAF) { scroller.scrollTop += deltaNow(); cancelGlide(); spy(); }
+    }, MAX_MS + 150);
+    scroller.addEventListener('wheel', cancelGlide, {once: true, passive: true});
+    scroller.addEventListener('touchstart', cancelGlide, {once: true, passive: true});
+  }
+
+  railEl.addEventListener('click', function(e){
+    var row = e.target.closest('.cl-rail-row');
+    if (!row || row.classList.contains('is-empty')) return;
+    var target = rowsEl.querySelector('tr[data-letter="' + row.dataset.letter + '"]');
+    if (target) glideTo(target, 56);
+  });
+
+  /* Scroll-spy — the letter whose first row owns the current top edge.
+     The glide calls this itself on landing rather than waiting for a
+     scroll event: a programmatic scrollTop does not always deliver one
+     (a tab that is not compositing never fires it), which would leave
+     the rail pointing at the letter you just jumped away from. */
+  var spyTick = false;
+  function spy(){
+    var rows = rowsEl.querySelectorAll('tr[data-letter]');
+    var topEdge = scroller.getBoundingClientRect().top + 90;
+    var current = null;
+    rows.forEach(function(r){
+      if (r.getBoundingClientRect().top <= topEdge) current = r.dataset.letter;
+    });
+    if (!current && rows.length) current = rows[0].dataset.letter;
+    railEl.querySelectorAll('.cl-rail-row').forEach(function(r){
+      r.classList.toggle('is-active', r.dataset.letter === current);
+    });
+  }
+  scroller.addEventListener('scroll', function(){
+    if (spyTick) return;
+    spyTick = true;
+    setTimeout(function(){ spyTick = false; spy(); }, 80);
+  }, {passive: true});
+
+  /* Header sorting, pointer and keyboard. The th is role="button", so
+     Enter and Space both have to act like one. */
+  var theadEl = document.querySelector('thead');
+  theadEl.addEventListener('click', function(e){
+    var th = e.target.closest('th[data-sort]');
+    if (th) toggleSort(th.dataset.sort);
+  });
+  theadEl.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    e.preventDefault();
+    toggleSort(th.dataset.sort);
   });
 
   render();
