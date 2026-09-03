@@ -90,7 +90,14 @@
      gutter rather than the rail sitting over the action column. */
   .cl-rail{position:fixed; right:6px; top:50%; transform:translateY(-50%);
     width:24px; z-index:20;
-    display:flex; flex-direction:column; align-items:center; gap:7px;}
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    transition:opacity var(--duration-base) var(--ease-standard),
+      visibility 0s linear 0s;}
+  /* The rail speaks alphabetical order, so under any other sort it
+     steps aside rather than pointing at rows that no longer follow it. */
+  .cl-rail.is-off{opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-standard),
+      visibility 0s linear var(--duration-base);}
   .cl-rail-row{display:flex; align-items:center; justify-content:center;
     border:0; background:none; padding:0; cursor:pointer;
     font-family:inherit; line-height:1;}
@@ -281,7 +288,7 @@
 
 <script src="../shared/shell.js?v=0.9.52"></script>
 <script src="../shared/campaigns-data.js"></script>
-<script src="../shared/plan-store.js?v=3"></script>
+<script src="../shared/plan-store.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -330,12 +337,14 @@
     return true;
   }
 
-  /* ── Sorting. Default is campaign name ascending so the A-Z rail beside
-     the table means something the moment the page opens; every other key
-     falls back to name as the tie-break, so equal statuses or industries
-     stay alphabetical rather than shuffling. ── */
+  /* ── Sorting. Default is last-updated, newest first — the plan someone
+     comes here for is almost always the one touched most recently. The
+     A-Z rail only speaks alphabetical order, so it shows itself only
+     while the table is name-sorted; every other key falls back to name
+     as the tie-break, so equal statuses or industries stay alphabetical
+     rather than shuffling. ── */
   var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
-  var sortKey = 'name', sortDir = 1;
+  var sortKey = 'updated', sortDir = -1;
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function letterOf(name){
     var c = (name || '').trim().charAt(0).toUpperCase();
@@ -349,12 +358,16 @@
     var mi = MONTHS.indexOf(m[2].charAt(0).toUpperCase() + m[2].slice(1, 3).toLowerCase());
     return mi < 0 ? 0 : new Date(+m[3], mi, +m[1]).getTime();
   }
+  /* Saved records carry the real save moment; seeded rows only their
+     display date. The timestamp wins where it exists, so two plans
+     touched the same day still order by the actual moment. */
+  function tsOf(c){ return c.updatedAt || updatedAt(c.updated); }
   function weeksOf(s){ var m = /(\d+)/.exec(s || ''); return m ? +m[1] : 0; }
   function sortRows(rows){
     return rows.slice().sort(function(a, b){
       var c = 0;
       if (sortKey === 'budget') c = (a.budget || 0) - (b.budget || 0);
-      else if (sortKey === 'updated') c = updatedAt(a.updated) - updatedAt(b.updated);
+      else if (sortKey === 'updated') c = tsOf(a) - tsOf(b);
       else if (sortKey === 'duration') c = weeksOf(a.duration) - weeksOf(b.duration);
       else if (sortKey === 'name') {
         var la = LETTERS.indexOf(letterOf(a.name)), lb = LETTERS.indexOf(letterOf(b.name));
@@ -633,6 +646,9 @@
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function renderRail(hits){
+    var off = sortKey !== 'name';
+    railEl.classList.toggle('is-off', off);
+    railEl.setAttribute('aria-hidden', off ? 'true' : 'false');
     var counts = {};
     LETTERS.forEach(function(L){ counts[L] = 0; });
     hits.forEach(function(c){ counts[letterOf(c.name)] += 1; });

@@ -64,6 +64,9 @@
           budget: p.budget || 0,
           duration: dash(p.duration),
           updated: p.updated || '',
+          /* The real save moment rides along so listings can order
+             same-day plans by more than their display date. */
+          updatedAt: p.updatedAt || 0,
           href: 'planner.html?plan=' + encodeURIComponent(p.id),
           saved: true
         };

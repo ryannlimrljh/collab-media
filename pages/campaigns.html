@@ -710,10 +710,23 @@
 <script src="../shared/shell.js?v=0.9.52"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
-<script src="../shared/plan-store.js?v=3"></script>
+<script src="../shared/plan-store.js?v=4"></script>
 <script>
 (function () {
   'use strict';
+
+  /* "27 Aug 2026" is the stored shape; Date's own parse of it is not
+     guaranteed, so read the three parts rather than trust the string.
+     Saved records also carry a real timestamp, which wins where it
+     exists — two plans touched the same day still order by the moment. */
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function updatedAt(s) {
+    var m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec((s || '').trim());
+    if (!m) return 0;
+    var mi = MONTHS.indexOf(m[2].slice(0, 1).toUpperCase() + m[2].slice(1, 3).toLowerCase());
+    return mi < 0 ? 0 : new Date(+m[3], mi, +m[1]).getTime();
+  }
+  function tsOf(c) { return c.updatedAt || updatedAt(c.updated); }
 
   /* Typewriter header. After the greeting it reads out what actually
      wants attention, each line computed from the plan store rather than
@@ -730,16 +743,6 @@
 
     var plans = (window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS);
     var open = plans.filter(function (c) { return c.status !== 'booked'; });
-
-    /* "27 Aug 2026" is the stored shape; Date's own parse of it is not
-       guaranteed, so read the three parts rather than trust the string. */
-    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    function updatedAt(s) {
-      var m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec((s || '').trim());
-      if (!m) return 0;
-      var mi = MONTHS.indexOf(m[2].slice(0, 1).toUpperCase() + m[2].slice(1, 3).toLowerCase());
-      return mi < 0 ? 0 : new Date(+m[3], mi, +m[1]).getTime();
-    }
 
     var msgs = [first ? g + ', ' + first : g];
 
@@ -843,9 +846,10 @@
     window.addEventListener('resize', function () { shift(over(), 0); });
   })();
 
-  /* Latest campaigns — the six most recent; the whole row opens the plan. */
+  /* Latest campaigns — the six most recently updated, sorted rather than
+     trusting the store's saved-first order; the whole row opens the plan. */
   var ALLPLANS = window.collabPlans ? collabPlans.merged(CAMPAIGNS) : CAMPAIGNS;
-  var latest = ALLPLANS.slice(0, 6);
+  var latest = ALLPLANS.slice().sort(function (a, b) { return tsOf(b) - tsOf(a); }).slice(0, 6);
   document.getElementById('latestRows').innerHTML = latest.map(function (c) {
     return '<button class="ld-row" type="button" data-href="' + (c.href || 'planner.html') + '">' +
       '<span class="ld-logo"><img alt="" /></span>' +
