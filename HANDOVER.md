@@ -34,6 +34,7 @@ see [Gotchas](#gotchas).
 | `campaigns.html` | Home | Landing: rolling advisory header, "Where you left off" resume card, four At-a-glance stat tiles, recent plans, and the AI assistant dock |
 | `campaign-list.html` | My media plans | Full listing: search, facet filters, sortable columns, A-Z rail, row actions |
 | `planner.html` | Media planner | The four-step wizard — Brief, Audience, Media mix, Summary — with a persistent right rail and a per-plan Collab AI thread |
+| `formats.html` | Formats (General) | The ad-format catalogue: 49 KULT units with a live sample on every card, objective/family/size/device filters, gallery and table views, a spec drawer, and a compare tray of up to four. Design note: `docs/superpowers/specs/2026-09-07-formats-catalogue-design.md` |
 
 `vercel.json` redirects `/` to `pages/campaigns.html`.
 
@@ -46,6 +47,8 @@ see [Gotchas](#gotchas).
 | `plan-store.js` | Saved plans. `localStorage`, capped at 50, newest first. Merges saved plans over the seeded sample |
 | `threads.js` | One conversation store behind every assistant surface. Same schema as the mothership landing's, plus a `source` naming the plan a thread came from |
 | `campaigns-data.js` | The seeded sample plans, plus `campaignBadge()` and `rmFmt()` |
+| `formats-data.js` | The format catalogue: specs transcribed from kult.my/gallery (2026-09-07) merged with the rate card's `bestFor` / `cpm` / `inventory`. The nine standard display units are catalogue defaults, flagged `source: "catalogue"` |
+| `format-previews.css` / `format-previews.js` | The live samples. `FormatPreviews.mount(el, format)` draws the miniature, `FormatPreviews.live(el, on)` plays it. Independent of the page so the planner can reuse it |
 
 ### Design system (`collabrium-dls/`)
 

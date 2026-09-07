@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collab:Media · Formats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Water is Collab:Media's element, so the drop is the tab mark. -->
+<link rel="icon" type="image/svg+xml" href="../collabrium-dls/SVG/water.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
+<link rel="stylesheet" href="../shared/format-previews.css?v=2" />
+<style>
+  /* Page-local. Composes tokens only — no new colours, radii or spacing.
+
+     The catalogue is a gallery first and a spec sheet second: every
+     card carries a live miniature of its unit, and the details arrive
+     over the sample rather than beside it, so a planner can read forty
+     formats by moving the mouse across them. The table view is the
+     same list for people who want to scan sizes and CPMs in columns. */
+  .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
+  .fm-divider{border:none; border-top:1px solid var(--color-neutral-3); margin:0 0 var(--spacing-24);}
+  .fm-sub-hint{display:inline-flex; align-items:center; gap:6px;}
+  .fm-sub-hint i{font-size:var(--icon-sm);}
+
+  /* ── Arrival — the same family as My media plans: header, then the
+     showcase, then the controls, then the cards cascade. ── */
+  @keyframes fm-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  .fm-arriving .fm-show{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .fm-arriving .fm-controls,.fm-arriving .fm-count{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
+  .fm-arriving .fm-card{animation:fm-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
+  /* The wall's cards own their transform (tilt, lift), so they arrive
+     by opacity alone rather than the rise the rest of the page uses. */
+  @keyframes fm-fade{from{opacity:0;} to{opacity:1;}}
+  .fm-arriving .fm-showcard{animation:fm-fade 420ms var(--ease-settle) both; animation-delay:calc(120ms + var(--k, 0) * 60ms);}
+
+  /* ── Skeleton first paint — bones in the shape of the wall, the filter
+     line and the cards, swapped for the real thing after a short beat so
+     the page lands in place instead of popping. ── */
+  .fm-sk{display:inline-block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2); vertical-align:middle;}
+  .fm-sk-pill{height:32px; border-radius:var(--radius-pill); flex:none;}
+  .fm-sk-stage{aspect-ratio:16/10; background:var(--color-neutral-2);}
+  .fm-sk-ava{width:36px; height:36px; border-radius:var(--radius-sm); background:var(--color-neutral-3); flex:none;}
+  .fm-sk-card{pointer-events:none; cursor:default;}
+  .fm-sk-card .fm-body{gap:6px;}
+  .fm-sk-card .fm-foot{gap:var(--spacing-16);}
+  .fm-table .fm-sk{display:block;}
+  @media (prefers-reduced-motion:no-preference){
+    .fm-sk,.fm-sk-stage,.fm-sk-ava{animation:fm-sk-pulse 1.4s var(--ease-standard) infinite;}
+    @keyframes fm-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
+
+  /* ── Showcase — what KULT recently ran, brand by brand. ── */
+  .fm-show{margin-bottom:var(--spacing-32);}
+  .fm-eyebrow{display:flex; align-items:baseline; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
+  .fm-eyebrow h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
+  .fm-eyebrow span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  /* The wall: cards are placed, not flowed, the way the feedback board
+     places its notes. Each tucks under the one before it and carries
+     its own tilt; the one under the pointer squares up, lifts and comes
+     to the front. Absolute children do not size their parent, so the
+     height is written to --fm-h by the layout pass. */
+  .fm-wall{position:relative; min-height:var(--fm-h, 240px); transition:min-height var(--duration-slow) var(--ease-standard);}
+  .fm-showcard{position:absolute; left:0; top:0; width:var(--fm-w, 250px); --rot:var(--tilt, 0deg);
+    display:flex; flex-direction:column; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-2); overflow:hidden;
+    cursor:pointer; text-align:left; padding:0; font:inherit; color:inherit;
+    transform:translate3d(0, var(--lift, 0px), 0) rotate(var(--rot)) scale(var(--scale, 1));
+    transition:transform var(--duration-base) var(--ease-settle), box-shadow var(--duration-fast) var(--ease-standard),
+      left var(--duration-slow) var(--ease-standard), top var(--duration-slow) var(--ease-standard);}
+  .fm-showcard.is-peeked,.fm-showcard:focus-visible{--rot:0deg; --lift:-8px; --scale:1.04; box-shadow:var(--shadow-4); z-index:20 !important;}
+  .fm-showcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:3px;}
+  .fm-showcard .fp-stage{aspect-ratio:16/10; font-size:9px; transition:background-color var(--duration-slow) var(--ease-flow);}
+  .fm-showcard.is-peeked .fp-stage{background:var(--fp-tint);}
+  .fm-showbody{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16);}
+  .fm-brandmark{width:36px; height:36px; border-radius:var(--radius-sm); background:var(--color-neutral-2); flex:none;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:800; font-size:12px; color:var(--color-neutral-5);}
+  .fm-brandmark img{width:100%; height:100%; object-fit:contain; display:none;}
+  .fm-brandmark.has-logo img{display:block;} .fm-brandmark.has-logo span{display:none;}
+  .fm-showtext{min-width:0;}
+  .fm-showtext b{display:block; font-size:var(--text-body2-size); font-weight:800;}
+  .fm-showtext span{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  /* ── Controls ── */
+  .fm-controls{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
+  /* One line of pills. It scrolls sideways instead of wrapping, with the
+     tab strip's edge fades saying there is more either side. */
+  .fm-linewrap{position:relative; flex:1; min-width:0;}
+  .fm-linewrap::before,.fm-linewrap::after{content:''; position:absolute; top:0; bottom:0; width:40px; pointer-events:none; opacity:0; z-index:2;
+    transition:opacity var(--duration-fast) var(--ease-standard);}
+  .fm-linewrap::before{left:0; background:linear-gradient(to right, var(--color-canvas-warm), transparent);}
+  .fm-linewrap::after{right:0; background:linear-gradient(to left, var(--color-canvas-warm), transparent);}
+  .fm-linewrap.show-left::before{opacity:1;} .fm-linewrap.show-right::after{opacity:1;}
+  .fm-line{display:flex; flex-wrap:nowrap; align-items:center; gap:var(--spacing-8); overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; padding:2px;}
+  .fm-line::-webkit-scrollbar{display:none;}
+  .fm-line > *{flex:none;}
+  .fm-chips{display:flex; flex-wrap:nowrap; gap:var(--spacing-8);}
+  .fm-line .c-chip-filter{white-space:nowrap;}
+  .fm-right{margin-left:auto; display:flex; align-items:center; gap:var(--spacing-8); flex:none;}
+  .fm-select{height:32px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); background:var(--color-neutral-1);
+    font-family:inherit; font-size:var(--text-label2-size); font-weight:700; padding:0 var(--spacing-12); color:var(--color-neutral-9); cursor:pointer;}
+  .fm-select:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fm-pill{position:relative;}
+  /* The DS compact filter's own panel, only fixed and placed by JS: the
+     line clips its overflow, so a panel anchored inside it would be cut
+     off at the first scroll edge. Options, footer and the applied tray
+     are the same pieces the roster and the plan list use. */
+  .fm-pill .c-filter-panel{position:fixed; top:0; left:0; z-index:30;}
+  .fm-pill .c-filter-option .label{display:flex; align-items:center; gap:6px; flex:1;}
+  .fm-pill .c-filter-option .label .n{margin-left:auto; color:var(--color-neutral-4); font-variant-numeric:tabular-nums;}
+  .fm-pill .c-filter-footer{justify-content:flex-end;}
+  #fmTray{margin-top:0; margin-bottom:var(--spacing-12);}
+  .fm-count{margin:0 0 var(--spacing-16); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-count b{color:var(--color-neutral-9); font-weight:700;}
+
+  /* ── Gallery ── */
+  .fm-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:var(--spacing-16);}
+  .fm-card{position:relative; display:flex; flex-direction:column; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; cursor:pointer;
+    transition:box-shadow var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle), border-color var(--duration-base) var(--ease-settle);}
+  .fm-card:hover,.fm-card.is-live{box-shadow:var(--shadow-2); transform:translateY(-2px);}
+  /* Pointer tilt, the roster card's: JS writes the rotateX/rotateY inline
+     and this shorter transition makes the card chase the pointer; dropping
+     the class hands the return trip back to the settle curve above. */
+  .fm-card.is-tilting{transition:transform .16s ease-out, box-shadow var(--duration-base) var(--ease-settle); z-index:5; will-change:transform;}
+  @media (prefers-reduced-motion:reduce){.fm-card:hover{transform:none;}}
+  .fm-card:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fm-card.is-compared{border-color:var(--color-obsidian); box-shadow:var(--shadow-2), 0 0 0 1px var(--color-obsidian);}
+  .fm-stagewrap{position:relative; overflow:hidden; border-bottom:1px solid var(--color-neutral-2);}
+  /* Nothing covers the sample: it is the reason the card exists. While it
+     plays, the stage takes the family's tint and the details come up in
+     the body below, where the tagline and chips were. */
+  .fm-card .fp-stage{transition:background-color var(--duration-slow) var(--ease-flow);}
+  .fm-card.is-live .fp-stage{background:var(--fp-tint);}
+  .fm-live{position:absolute; top:var(--spacing-12); right:var(--spacing-12); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
+    border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
+    opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
+  .fm-live i{width:6px; height:6px; border-radius:50%; background:var(--color-green); animation:fm-blink 1.1s ease-in-out infinite;}
+  .fm-card.is-live .fm-live{opacity:1;}
+  @keyframes fm-blink{50%{opacity:.25}}
+  .fm-touchhint{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:none; align-items:center; gap:6px; height:28px; padding:0 12px;
+    border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:12px; font-weight:800; box-shadow:var(--shadow-2); pointer-events:none;}
+  @media (hover:none){ .fm-touchhint{display:inline-flex;} .fm-card.is-live .fm-touchhint{display:none;} }
+  /* Top-left and always there, like the roster card's select box: a
+     control you cannot see is a control nobody knows exists. */
+  .fm-ctl{position:absolute; top:var(--spacing-12); left:var(--spacing-12); display:flex; gap:6px; z-index:3;}
+  .fm-ctl button{width:28px; height:28px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:rgba(255,255,255,.96);
+    color:var(--color-neutral-9); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-1); font-size:14px; font-family:inherit;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .fm-ctl button:hover{background:var(--color-neutral-2);}
+  .fm-ctl button.is-on{background:var(--color-obsidian); color:var(--color-neutral-1); border-color:var(--color-obsidian);}
+  .fm-ctl button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fm-body{padding:var(--spacing-12) var(--spacing-16) var(--spacing-12); display:flex; flex-direction:column; gap:var(--spacing-8); flex:1;}
+  .fm-titlerow{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-8);}
+  .fm-titlerow h4{margin:0; font-size:var(--text-h5-size); font-weight:800; line-height:20px;}
+  .fm-tagline{margin:0; font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-5);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .fm-swap{position:relative; height:74px;}
+  .fm-swap > div{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-8);
+    transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle);}
+  .fm-swap .spec{opacity:0; transform:translateY(8px); pointer-events:none; justify-content:center; gap:6px;}
+  .fm-card.is-live .fm-swap .rest{opacity:0; transform:translateY(-8px);}
+  .fm-card.is-live .fm-swap .spec{opacity:1; transform:none;}
+  /* One fact a line, the label beside its value: three lines breathe
+     where four cells in two columns did not. */
+  .fm-spec-cell{display:flex; align-items:baseline; gap:var(--spacing-12); min-width:0;}
+  .fm-spec-cell b{flex:0 0 72px; font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; white-space:nowrap;}
+  .fm-spec-cell span{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:18px; font-weight:700; color:var(--color-neutral-9);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fm-meta{display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; padding-top:var(--spacing-4);}
+  .fm-meta .c-chip{height:22px; padding:0 8px; font-size:11px; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .fm-tag-neutral{background:var(--color-neutral-2); color:var(--color-neutral-5);}
+  .c-tag{white-space:nowrap; flex:none;}
+  .fm-foot{display:flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-8) var(--spacing-12); border-top:1px solid var(--color-neutral-2);}
+  .fm-foot .spacer{flex:1;}
+  .fm-foot .c-btn{text-decoration:none;}
+  .fm-foot .c-btn i{font-size:var(--icon-sm);}
+  /* Live demo is switched off for now: present, so nobody wonders where
+     it went, but quiet and inert. The ghost recipe's disabled state. */
+  .fm-demo-off{background:transparent !important; color:var(--color-neutral-4) !important; border-color:transparent !important; cursor:not-allowed !important; box-shadow:none !important;}
+
+  /* ── Table ── */
+  .fm-tablewrap{overflow-x:auto; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1);}
+  .fm-table{width:100%; border-collapse:collapse; font-size:var(--text-body2-size); min-width:900px;}
+  .fm-table th{text-align:left; font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700;
+    padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-3); white-space:nowrap; background:var(--color-neutral-1); position:sticky; top:0; z-index:1;}
+  .fm-table td{padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-2); vertical-align:top; color:var(--color-neutral-9);}
+  .fm-table tr:last-child td{border-bottom:0;}
+  .fm-table tbody tr{cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .fm-table tbody tr:hover td,.fm-table tbody tr.is-peeking td{background:var(--color-neutral-2);}
+  .fm-table .name{font-weight:800; white-space:nowrap;}
+  .fm-table .name small{display:block; font-weight:400; color:var(--color-neutral-5); font-size:var(--text-caption-size); white-space:normal; max-width:280px;}
+  .fm-table .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .fm-table .muted{color:var(--color-neutral-4);}
+  .fm-table .sizes{font-variant-numeric:tabular-nums; color:var(--color-neutral-5); white-space:nowrap;}
+  .fm-table .act{white-space:nowrap; text-align:right;}
+  .fm-table .act .c-btn{text-decoration:none;}
+  .fm-table .fm-funnel{display:flex; flex-wrap:wrap; gap:3px;}
+  .fm-table .fm-funnel span{font-size:11px; padding:1px 6px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5); white-space:nowrap;}
+  /* Hovering a row floats its sample beside the table, so the list
+     view keeps the gallery's one promise: you never have to imagine
+     the unit. */
+  /* It glides rather than jumps: top and left transition on the flow
+     curve, so moving down the list slides the sample along with the
+     pointer, and the sample inside cross-fades when the format changes. */
+  .fm-rowpeek{position:fixed; width:300px; z-index:40; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4); overflow:hidden; opacity:0; pointer-events:none; transform:translateY(6px) scale(.98);
+    transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-slow) var(--ease-settle),
+      top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
+  .fm-rowpeek.is-visible{opacity:1; transform:none;}
+  .fm-rowpeek.is-jumping{transition-property:opacity, transform;} /* first show: land in place, no slide from the last spot */
+  .fm-rowpeek .fp-stage,.fm-rowpeek .lbl{transition:opacity var(--duration-base) var(--ease-standard);}
+  .fm-rowpeek.is-switching .fp-stage,.fm-rowpeek.is-switching .lbl{opacity:0; transition-duration:var(--duration-instant);}
+  .fm-rowpeek .lbl{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size); font-weight:700; border-top:1px solid var(--color-neutral-2);}
+
+  .fm-view{display:none;} .fm-view.is-on{display:block;}
+  .fm-empty{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);}
+  .fm-empty[hidden]{display:none;} /* the DS empty state is display:flex, which outranks the hidden attribute */
+
+  /* ── Detail modal — the roster's card swing, ported: warm-canvas
+     backdrop at .88 rather than a black veil, and the panel swings open
+     FROM the clicked card's own rect via the parameterised FLIP
+     keyframes (--sw-dx/-dy/-sx/-sy/-dir set from JS at open and close). */
+  .fm-cardmodal{position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; perspective:1200px;}
+  .fm-cardmodal.is-open{display:flex;}
+  .fm-cardmodal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .32s var(--ease-standard);}
+  .fm-cardmodal.is-shown .fm-cardmodal-backdrop{opacity:.88; transition-duration:.5s;}
+  .fm-drawer{position:relative; display:flex; flex-direction:column; overflow:hidden;
+    width:min(600px, calc(100vw - var(--spacing-32))); max-height:min(800px, calc(100dvh - var(--spacing-60)));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left; opacity:0; transition:opacity .3s var(--ease-standard);}
+  .fm-cardmodal.is-shown .fm-drawer{opacity:1;}
+  .fm-drawer.is-swinging-open{animation:fm-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .fm-drawer.is-swinging-closed{animation:fm-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes fm-swing-open{
+    0%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--sw-dir, 1))) rotateZ(calc(-7deg * var(--sw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--sw-dir, 1))) rotateZ(calc(1deg * var(--sw-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes fm-swing-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--sw-dir, 1))) rotateZ(calc(-6deg * var(--sw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.35;}
+  }
+  @media (prefers-reduced-motion:reduce){ .fm-drawer.is-swinging-open,.fm-drawer.is-swinging-closed{animation:none;} }
+  .fm-dhead{display:flex; align-items:center; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-3);}
+  .fm-dhead .crumbs{flex:1; font-size:var(--text-caption-size); color:var(--color-neutral-5); display:flex; align-items:center; gap:6px; min-width:0;}
+  .fm-dhead .crumbs b{color:var(--color-neutral-9); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fm-dbody{flex:1; overflow-y:auto; padding:var(--spacing-16) var(--spacing-24) var(--spacing-24);}
+  .fm-dstage{border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16); position:relative;}
+  .fm-dstage .fp-stage{font-size:14px;}
+  .fm-replay{position:absolute; right:var(--spacing-12); bottom:var(--spacing-12); height:28px; padding:0 10px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3);
+    background:rgba(255,255,255,.96); font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:var(--shadow-1);}
+  .fm-replay:hover{background:var(--color-neutral-2);}
+  .fm-dtitle{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
+  .fm-dtitle h2{margin:0; font-size:var(--text-h3-size); line-height:var(--text-h3-lh); font-weight:800;}
+  .fm-dtag{font-size:var(--text-body1-size); line-height:var(--text-body1-lh); color:var(--color-neutral-5); margin:0 0 var(--spacing-8);}
+  .fm-ddesc{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-9); margin:0 0 var(--spacing-20);}
+  .fm-specs{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12) var(--spacing-16); margin-bottom:var(--spacing-20);
+    padding:var(--spacing-16); background:var(--color-canvas-warm-card); border-radius:var(--radius-md);}
+  .fm-spec b{display:block; font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); margin-bottom:3px; font-weight:700;}
+  .fm-spec span{font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9);}
+  .fm-spec span.na{font-weight:400; color:var(--color-neutral-4);}
+  .fm-section{margin-bottom:var(--spacing-20);}
+  .fm-section h5{margin:0 0 var(--spacing-8); font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700;}
+  /* Sizes drawn to scale against each other, so 970×250 and 300×600
+     read as the shapes they are, not as two strings of digits. */
+  .fm-sizes{display:flex; flex-wrap:wrap; gap:var(--spacing-16); align-items:flex-end;}
+  .fm-size{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+  .fm-size i{display:block; background:var(--color-water-bg-strong); border:1px solid var(--color-navy); border-radius:2px; min-width:6px; min-height:6px;}
+  .fm-size.text i{display:none;} .fm-size.text{padding:4px 8px; border:1px dashed var(--color-neutral-3); border-radius:var(--radius-sm);}
+  .fm-chipset{display:flex; flex-wrap:wrap; gap:4px;}
+  .fm-chipset .c-chip{height:24px; padding:0 8px; font-size:12px; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
+  .fm-bench{display:flex; align-items:center; gap:var(--spacing-12); font-size:var(--text-body2-size); font-weight:700;}
+  .fm-benchbar{flex:1; height:6px; border-radius:3px; background:var(--color-neutral-2); overflow:hidden;}
+  .fm-benchbar i{display:block; height:100%; background:var(--color-green); width:0; transition:width var(--duration-reveal) var(--ease-flow) .15s;}
+  .fm-bench small{font-weight:400; color:var(--color-neutral-5);}
+  .fm-related{display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--spacing-8);}
+  .fm-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left;
+    transition:box-shadow var(--duration-fast) var(--ease-standard);}
+  .fm-relcard:hover{box-shadow:var(--shadow-2);} .fm-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fm-relcard .fp-stage{font-size:6px; aspect-ratio:16/10;}
+  .fm-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fm-dfoot{display:flex; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-3); flex-wrap:wrap; align-items:center;}
+  .fm-dfoot .c-btn{text-decoration:none;}
+  .fm-dfoot .spacer{flex:1;}
+
+  /* ── Compare tray and sheet ── */
+  .fm-cbar{position:fixed; left:50%; bottom:var(--spacing-24); z-index:65; display:flex; align-items:center; gap:var(--spacing-12);
+    padding:var(--spacing-8) var(--spacing-8) var(--spacing-8) var(--spacing-16); background:var(--color-obsidian); color:var(--color-neutral-1);
+    border-radius:var(--radius-pill); box-shadow:var(--shadow-4); transform:translate(-50%, 140%); transition:transform var(--duration-morph) var(--ease-settle); max-width:calc(100vw - 32px);}
+  .fm-cbar.is-open{transform:translate(-50%, 0);}
+  .fm-cbar .lbl{font-size:var(--text-caption-size); font-weight:700; opacity:.7; white-space:nowrap;}
+  .fm-cbar .names{display:flex; gap:6px; flex-wrap:wrap;}
+  .fm-cbar .names span{display:inline-flex; align-items:center; gap:4px; padding:2px 6px 2px 10px; border-radius:var(--radius-pill); background:rgba(255,255,255,.14); font-size:13px; font-weight:700; white-space:nowrap;}
+  .fm-cbar .names button{border:0; background:transparent; color:inherit; cursor:pointer; padding:2px; display:flex; border-radius:50%; font-size:12px;}
+  .fm-cbar .names button:hover{background:rgba(255,255,255,.18);}
+  .fm-cbar .c-btn-primary{background:var(--color-neutral-1); color:var(--color-neutral-9);}
+  .fm-cbar .c-btn-primary:hover{background:var(--color-neutral-2);}
+  .fm-cbar .c-btn-ghost{color:var(--color-neutral-1);} .fm-cbar .c-btn-ghost:hover{background:rgba(255,255,255,.12);}
+  /* The compare sheet arrives the same way the detail panel does: it
+     swings out of the button that opened it and folds back into it. */
+  .fm-cmodal{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:var(--spacing-24); perspective:1200px;}
+  .fm-cmodal.is-open{display:flex;}
+  .fm-cmodal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .32s var(--ease-standard);}
+  .fm-cmodal.is-shown .fm-cmodal-backdrop{opacity:.88; transition-duration:.5s;}
+  .fm-cbox{position:relative; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25); width:min(1120px, 100%); max-height:100%; display:flex; flex-direction:column; overflow:hidden;
+    transform-origin:top left; opacity:0; transition:opacity .3s var(--ease-standard);}
+  .fm-cmodal.is-shown .fm-cbox{opacity:1;}
+  .fm-cbox.is-swinging-open{animation:fm-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .fm-cbox.is-swinging-closed{animation:fm-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @media (prefers-reduced-motion:reduce){ .fm-cbox.is-swinging-open,.fm-cbox.is-swinging-closed{animation:none;} }
+  .fm-cbox .c-modal-head{border-bottom:1px solid var(--color-neutral-3);}
+  .fm-cscroll{overflow:auto; flex:1;}
+  .fm-ctable{width:100%; border-collapse:collapse; font-size:var(--text-body2-size);}
+  .fm-ctable th{width:150px; min-width:120px; text-align:left; vertical-align:top; padding:var(--spacing-12) var(--spacing-16); color:var(--color-neutral-5);
+    font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; font-weight:700; border-bottom:1px solid var(--color-neutral-2); background:var(--color-canvas-warm-card);}
+  .fm-ctable td{padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-2); border-left:1px solid var(--color-neutral-2); vertical-align:top; min-width:200px;}
+  .fm-ctable td.stage{padding:0;} .fm-ctable td.stage .fp-stage{font-size:9px;}
+  .fm-ctable td.head{font-weight:800; font-size:var(--text-body1-size);}
+  .fm-ctable td.head small{display:block; font-weight:400; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-ctable td .na{color:var(--color-neutral-4);}
+  .fm-ctable td.best{background:var(--color-earth-bg);}
+
+  .fm-kbd{display:inline-block; padding:0 5px; border:1px solid var(--color-neutral-3); border-bottom-width:2px; border-radius:4px; font-size:11px; font-weight:700; line-height:16px; background:var(--color-neutral-1);}
+
+  @media (max-width:900px){
+    .fm-specs{grid-template-columns:1fr 1fr;}
+    .fm-related{grid-template-columns:repeat(2, 1fr);}
+  }
+  @media (max-width:640px){
+    .c-shell .c-pageheader{padding-top:var(--spacing-24);}
+    /* Two actions beside the title crush it to a word a line on a phone;
+       the row stacks and the buttons share the width instead. */
+    .c-shell .c-pageheader-row{flex-direction:column; align-items:stretch; gap:var(--spacing-16);}
+    .c-shell .c-pageheader-actions{flex-wrap:wrap;}
+    .c-shell .c-pageheader-actions .c-btn{flex:1; justify-content:center;}
+    .fm-controls{flex-wrap:wrap;}
+    .fm-linewrap{flex:1 1 100%;}
+    .fm-right{margin-left:0; width:100%;}
+    .fm-cardmodal{padding:var(--spacing-8);}
+    .fm-drawer{width:100%; max-height:calc(100dvh - var(--spacing-16));}
+    .fm-specs{grid-template-columns:1fr;}
+    .fm-cbar{bottom:var(--spacing-12);}
+    .fm-cbar .names{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department, Media" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="Media" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <span class="c-badge c-badge-neutral c-sidebar-beta">Beta</span>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/water.svg" alt="Collab:Media" />
+      </div>
+      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
+      <div class="c-sidebar-section">Workspace</div>
+      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">New media plan</span><span class="c-sidebar-hover-text">New media plan</span></a>
+      <a class="c-sidebar-item" href="campaign-list.html"><i class="ph-fill ph-rows"></i><span class="label">My media plans</span><span class="c-sidebar-hover-text">My media plans</span></a>
+      <div class="c-sidebar-section">General</div>
+      <a class="c-sidebar-item active" href="formats.html" aria-current="page"><i class="ph-fill ph-frame-corners"></i><span class="label">Formats</span><span class="c-sidebar-hover-text">Formats</span></a>
+      <div class="c-sidebar-section">System</div>
+      <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">ST</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Sarah Tan</span>
+            <span class="c-search-input-subtitle">Sales Planner</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content fm-arriving" id="fmContent">
+
+      <header class="c-pageheader">
+        <div class="c-pageheader-row">
+          <div class="c-pageheader-text">
+            <h1>Formats</h1>
+            <p class="sub">Every unit KULT can run, with a live sample of how each one behaves. <span class="fm-sub-hint" id="fmHint"><i class="ph ph-cursor"></i>Hover any sample to play it.</span></p>
+          </div>
+          <div class="c-pageheader-actions">
+            <button class="c-btn c-btn-secondary c-btn-md" type="button" id="fmSpecBtn">
+              <i class="ph ph-download-simple"></i> Spec sheet
+            </button>
+            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none;">
+              <i class="ph ph-compass-tool"></i> Plan with these
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <hr class="fm-divider" />
+
+      <section class="fm-show" aria-label="Recently live">
+        <div class="fm-eyebrow"><h2>Recently live</h2><span>Campaigns KULT ran on these units — pick one to jump to its format.</span></div>
+        <div class="fm-wall" id="fmShowrow"></div>
+      </section>
+
+      <div class="fm-controls">
+        <div class="fm-linewrap" id="fmLineWrap">
+          <div class="fm-line" id="fmLine">
+            <div class="c-filter-search">
+              <i class="ph ph-magnifying-glass icon-leading"></i>
+              <input type="text" id="fmSearch" placeholder="Search formats, objectives, industries" aria-label="Search formats" />
+              <button class="c-filter-search-clear" id="fmSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+            </div>
+            <span class="c-filter-search-divider" aria-hidden="true"></span>
+            <div class="fm-chips" id="fmChips" role="group" aria-label="Filter by objective"></div>
+            <span class="c-filter-search-divider" aria-hidden="true"></span>
+            <div class="fm-chips" id="fmPills"></div>
+            <button class="c-btn c-btn-ghost c-btn-sm c-filter-clear-bar" id="fmClearAll" type="button" hidden>Clear all</button>
+          </div>
+        </div>
+        <div class="fm-right">
+          <select class="fm-select" id="fmSort" aria-label="Sort formats">
+            <option value="family">Sort: Family</option>
+            <option value="az">Sort: A–Z</option>
+            <option value="bench">Sort: Benchmark CTR</option>
+            <option value="cpm">Sort: CPM on file</option>
+          </select>
+          <div class="c-segctl c-segctl-compact" role="radiogroup" aria-label="View">
+            <button class="c-seg" type="button" role="radio" aria-checked="true" data-view="gallery" title="Gallery view"><i class="ph ph-squares-four"></i></button>
+            <button class="c-seg" type="button" role="radio" aria-checked="false" data-view="table" title="Table view"><i class="ph ph-list-bullets"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="c-filter-tray" id="fmTray" hidden></div>
+      <p class="fm-count" id="fmCount"></p>
+
+      <div class="fm-view is-on" id="fmGalleryView">
+        <div class="fm-grid" id="fmGrid"></div>
+      </div>
+
+      <div class="fm-view" id="fmTableView">
+        <div class="fm-tablewrap">
+          <table class="fm-table">
+            <thead>
+              <tr>
+                <th>Format</th><th>Family</th><th>Objective</th><th>Funnel</th><th>Sizes</th><th>Devices</th>
+                <th class="num">Benchmark</th><th class="num">CPM (MYR)</th><th class="num">Inventory (M)</th><th><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="fmRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="c-empty is-section fm-empty" id="fmEmpty" hidden>
+        <i class="ph ph-frame-corners"></i>
+        <h4>Nothing matched</h4>
+        <p>Try another word, or clear the objective and family filters.</p>
+        <div class="c-empty-actions"><button class="c-btn c-btn-secondary c-btn-sm" type="button" id="fmEmptyClear">Clear filters</button></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></button>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg" data-href="https://app-shell-intro.vercel.app/pages/landing-v3.html">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg" aria-disabled="true" title="No workspace deployed yet">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg" data-href="https://collab-sales-ui.vercel.app">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influence" data-dept="influence" data-name="Influence" data-logo="../collabrium-dls/logo-lockups/collabInfluence.svg" data-element-icon="../collabrium-dls/SVG/earth.svg" data-href="https://collab-influence.vercel.app/pages/influencers-v2.html">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluence.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg" aria-disabled="true" title="No workspace deployed yet">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<!-- Table view: the sample that floats beside the hovered row -->
+<div class="fm-rowpeek" id="fmRowpeek" aria-hidden="true"><div class="fp-stage" id="fmRowpeekStage"></div><div class="lbl" id="fmRowpeekLbl"></div></div>
+
+<!-- Detail modal: swings out of the card you clicked -->
+<div class="fm-cardmodal" id="fmModal">
+<div class="fm-cardmodal-backdrop" id="fmScrim"></div>
+<aside class="fm-drawer" id="fmDrawer" role="dialog" aria-modal="true" aria-labelledby="fmDrawerTitle">
+  <div class="fm-dhead">
+    <div class="crumbs"><span>Formats</span><i class="ph ph-caret-right"></i><b id="fmDrawerCrumb"></b></div>
+    <button class="c-icon-btn" type="button" id="fmPrev" aria-label="Previous format" title="Previous (←)"><i class="ph ph-arrow-left"></i></button>
+    <button class="c-icon-btn" type="button" id="fmNext" aria-label="Next format" title="Next (→)"><i class="ph ph-arrow-right"></i></button>
+    <button class="c-icon-btn" type="button" id="fmDrawerClose" aria-label="Close"><i class="ph ph-x"></i></button>
+  </div>
+  <div class="fm-dbody" id="fmDrawerBody"></div>
+  <div class="fm-dfoot" id="fmDrawerFoot"></div>
+</aside>
+</div>
+
+<!-- Compare tray -->
+<div class="fm-cbar" id="fmCbar" role="region" aria-label="Formats to compare">
+  <span class="lbl" id="fmCbarLbl">Comparing</span>
+  <div class="names" id="fmCbarNames"></div>
+  <button class="c-btn c-btn-ghost c-btn-sm" type="button" id="fmCbarClear">Clear</button>
+  <button class="c-btn c-btn-primary c-btn-sm" type="button" id="fmCbarOpen"><i class="ph ph-columns"></i> Compare</button>
+</div>
+
+<!-- Compare sheet -->
+<div class="fm-cmodal" id="fmCmodal">
+  <div class="fm-cmodal-backdrop" id="fmCmodalBackdrop"></div>
+  <div class="fm-cbox" id="fmCbox" role="dialog" aria-modal="true" aria-labelledby="fmCmodalTitle">
+    <div class="c-modal-head"><h4 id="fmCmodalTitle">Compare formats</h4>
+      <button class="c-icon-btn" type="button" id="fmCmodalClose" aria-label="Close"><i class="ph ph-x"></i></button></div>
+    <div class="fm-cscroll"><table class="fm-ctable" id="fmCtable"></table></div>
+    <div class="c-modal-foot" style="justify-content:flex-start;">
+      <button class="c-btn c-btn-secondary c-btn-md" type="button" data-export="PDF"><i class="ph ph-file-pdf"></i> Export PDF</button>
+      <button class="c-btn c-btn-secondary c-btn-md" type="button" data-export="Excel"><i class="ph ph-file-xls"></i> Export Excel</button>
+      <span style="flex:1"></span>
+      <a class="c-btn c-btn-primary c-btn-md" id="fmCmodalPlan" href="planner.html" style="text-decoration:none;"><i class="ph ph-compass-tool"></i> Send to a media plan</a>
+    </div>
+  </div>
+</div>
+
+<div class="c-toast-host" id="fmToasts"></div>
+
+<script src="../shared/shell.js?v=0.9.52"></script>
+<script src="../shared/formats-data.js?v=1"></script>
+<script src="../shared/format-previews.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  var F = window.FORMATS, P = window.FormatPreviews;
+  var E = function (id) { return document.getElementById(id); };
+  var TOUCH = window.matchMedia('(hover:none)').matches;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  var byId = {}; F.forEach(function (f) { byId[f.id] = f; });
+  var FAMILY_TAG = { 'Interactive': 'c-tag-water', 'Gamification': 'c-tag-fire', 'Video': 'c-tag-wood', 'Social': 'c-tag-earth', 'High impact': 'c-tag-gold', 'Display': 'fm-tag-neutral' };
+  var FUNNEL_LABEL = {}; window.FORMAT_FUNNEL.forEach(function (x) { FUNNEL_LABEL[x.key] = x.label; });
+  function ctr(f) { var m = /CTR\s*>?\s*([\d.]+)%/i.exec(f.benchmark || ''); return m ? parseFloat(m[1]) : null; }
+  function tag(f) { return '<span class="c-tag ' + FAMILY_TAG[f.family] + '"><i class="dot"></i>' + esc(f.family) + '</span>'; }
+  function funnelChips(f, max) {
+    var keys = f.funnel.slice(0, max || 99);
+    var out = keys.map(function (k) { return '<span class="c-chip">' + esc(FUNNEL_LABEL[k] || k) + '</span>'; }).join('');
+    if (f.funnel.length > keys.length) out += '<span class="c-chip">+' + (f.funnel.length - keys.length) + '</span>';
+    return out;
+  }
+  function deviceKeys(f) {
+    var d = (f.devices || '').toLowerCase(), out = [];
+    if (d.indexOf('desktop') > -1) out.push('Desktop');
+    if (d.indexOf('mobile') > -1) out.push('Mobile');
+    if (d.indexOf('tiktok') > -1) out.push('TikTok');
+    return out;
+  }
+  if (TOUCH) E('fmHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap any card to play its sample.';
+
+  /* ── State ──────────────────────────────────────────────────────── */
+  var state = { q: '', funnel: '', family: [], size: [], device: [], sort: 'family', view: 'gallery' };
+  var FACETS = [
+    { key: 'family', label: 'Family', of: function (f) { return [f.family]; }, order: window.FORMAT_FAMILIES },
+    /* Only real W×H sizes are offered; "16:9 in-content" is a shape, not a slot. */
+    { key: 'size',   label: 'Size',   of: function (f) { return f.sizes.filter(function (s) { return /^\d+\s*[×x]\s*\d+$/.test(s.trim()); }).map(function (s) { return s.replace(/\s+/g, ' '); }); } },
+    { key: 'device', label: 'Device', of: function (f) { return deviceKeys(f); }, order: ['Desktop', 'Mobile', 'TikTok'] }
+  ];
+  function facetOptions(fc) {
+    var counts = {};
+    F.forEach(function (f) { fc.of(f).forEach(function (v) { counts[v] = (counts[v] || 0) + 1; }); });
+    var keys = Object.keys(counts);
+    if (fc.order) keys.sort(function (a, b) { var ia = fc.order.indexOf(a), ib = fc.order.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+    else keys.sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
+    return keys.map(function (k) { return { v: k, n: counts[k] }; });
+  }
+
+  function filtered() {
+    var q = state.q.trim().toLowerCase();
+    var rows = F.filter(function (f) {
+      if (state.funnel && f.funnel.indexOf(state.funnel) < 0) return false;
+      if (state.family.length && state.family.indexOf(f.family) < 0) return false;
+      if (state.size.length && !f.sizes.some(function (s) { return state.size.indexOf(s.replace(/\s+/g, ' ')) > -1; })) return false;
+      if (state.device.length && !deviceKeys(f).some(function (d) { return state.device.indexOf(d) > -1; })) return false;
+      if (!q) return true;
+      var hay = [f.name, f.family, f.objective, f.tagline, f.desc, f.bestFor, f.industries.join(' '), f.funnel.map(function (k) { return FUNNEL_LABEL[k]; }).join(' '), f.sizes.join(' ')].join(' ').toLowerCase();
+      return hay.indexOf(q) > -1;
+    });
+    var famOrder = window.FORMAT_FAMILIES;
+    rows.sort(function (a, b) {
+      if (state.sort === 'az') return a.name.localeCompare(b.name);
+      if (state.sort === 'bench') { var ca = ctr(a), cb = ctr(b); if (ca == null && cb == null) return a.name.localeCompare(b.name); if (ca == null) return 1; if (cb == null) return -1; return cb - ca || a.name.localeCompare(b.name); }
+      if (state.sort === 'cpm') { if (a.cpm == null && b.cpm == null) return a.name.localeCompare(b.name); if (a.cpm == null) return 1; if (b.cpm == null) return -1; return b.cpm - a.cpm || a.name.localeCompare(b.name); }
+      return famOrder.indexOf(a.family) - famOrder.indexOf(b.family) || a.name.localeCompare(b.name);
+    });
+    return rows;
+  }
+  var current = [];
+
+  /* ── Controls ───────────────────────────────────────────────────── */
+  function renderChips() {
+    var counts = {}; F.forEach(function (f) { f.funnel.forEach(function (k) { counts[k] = (counts[k] || 0) + 1; }); });
+    E('fmChips').innerHTML = '<button type="button" class="c-chip c-chip-filter' + (!state.funnel ? ' is-active' : '') + '" data-funnel="">All <span class="count">' + F.length + '</span></button>' +
+      window.FORMAT_FUNNEL.map(function (x) {
+        return '<button type="button" class="c-chip c-chip-filter' + (state.funnel === x.key ? ' is-active' : '') + '" data-funnel="' + x.key + '">' + esc(x.label) + ' <span class="count">' + (counts[x.key] || 0) + '</span></button>';
+      }).join('');
+    fades();
+  }
+  E('fmChips').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-funnel]'); if (!b) return;
+    state.funnel = b.dataset.funnel; renderChips(); render();
+  });
+  var openFacet = null;
+  function renderPills() {
+    E('fmPills').innerHTML = FACETS.map(function (fc) {
+      var n = state[fc.key].length;
+      return '<div class="fm-pill" data-facet="' + fc.key + '">' +
+        '<button class="c-filter-trigger' + (n ? ' active' : '') + (openFacet === fc.key ? ' is-open' : '') + '" type="button" data-facet="' + fc.key + '" aria-haspopup="true" aria-expanded="' + (openFacet === fc.key) + '">' +
+          esc(fc.label) + (n ? ' <span class="count">' + n + '</span>' : '') + ' <i class="ph ph-caret-down chev"></i></button>' +
+        '<div class="c-filter-panel' + (openFacet === fc.key ? ' is-open' : '') + '">' +
+          facetOptions(fc).map(function (o) {
+            var on = state[fc.key].indexOf(o.v) > -1;
+            return '<label class="c-filter-option" data-facet="' + fc.key + '" data-v="' + esc(o.v) + '">' +
+              '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+              '<span class="label">' + esc(o.v) + '<span class="n">' + o.n + '</span></span></label>';
+          }).join('') +
+          '<div class="c-filter-footer"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear="' + fc.key + '">Clear</button></div>' +
+        '</div></div>';
+    }).join('');
+    placePanel(); fades();
+  }
+  function placePanel() {
+    var t = E('fmPills').querySelector('.c-filter-trigger.is-open'); if (!t) return;
+    var p = t.parentNode.querySelector('.c-filter-panel'), r = t.getBoundingClientRect();
+    p.style.left = Math.max(8, Math.min(r.left, window.innerWidth - p.offsetWidth - 8)) + 'px';
+    /* Below the pill, unless that would run off the bottom of the screen. */
+    var below = r.bottom + 6 + p.offsetHeight <= window.innerHeight - 8;
+    p.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - 6 - p.offsetHeight)) + 'px';
+  }
+  var line = E('fmLine'), lineWrap = E('fmLineWrap');
+  function fades() {
+    lineWrap.classList.toggle('show-left', line.scrollLeft > 2);
+    lineWrap.classList.toggle('show-right', line.scrollLeft + line.clientWidth < line.scrollWidth - 2);
+  }
+  line.addEventListener('scroll', function () { fades(); if (openFacet) { openFacet = null; renderPills(); } });
+  E('fmPills').addEventListener('click', function (e) {
+    var t = e.target.closest('.c-filter-trigger');
+    if (t) { openFacet = openFacet === t.dataset.facet ? null : t.dataset.facet; renderPills(); return; }
+    var o = e.target.closest('.c-filter-option');
+    if (o) {
+      e.preventDefault();
+      var arr = state[o.dataset.facet], i = arr.indexOf(o.dataset.v);
+      if (i > -1) arr.splice(i, 1); else arr.push(o.dataset.v);
+      renderPills(); render(); return;
+    }
+    var c = e.target.closest('[data-clear]');
+    if (c) { state[c.dataset.clear] = []; renderPills(); render(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (openFacet && !e.target.closest('.fm-pill')) { openFacet = null; renderPills(); }
+  });
+  /* Applied pills plus Clear all, never visually silent. Each chip names
+     its facet as well as its value, since "Mobile" and "Video" mean
+     nothing on their own once three facets can contribute. */
+  function renderTray() {
+    var chips = [];
+    FACETS.forEach(function (fc) {
+      state[fc.key].forEach(function (v) {
+        chips.push('<span class="c-chip c-chip-input">' + esc(fc.label) + ': ' + esc(v) +
+          '<button class="c-chip-remove" type="button" data-facet="' + fc.key + '" data-v="' + esc(v) + '" aria-label="Remove ' + esc(fc.label + ' ' + v) + '"><i class="ph ph-x"></i></button></span>');
+      });
+    });
+    var tray = E('fmTray');
+    tray.innerHTML = chips.join('');
+    tray.hidden = !chips.length;
+    E('fmClearAll').hidden = !chips.length;
+  }
+  E('fmTray').addEventListener('click', function (e) {
+    var r = e.target.closest('.c-chip-remove');
+    if (r) { var arr = state[r.dataset.facet]; arr.splice(arr.indexOf(r.dataset.v), 1); renderPills(); render(); }
+  });
+  E('fmClearAll').addEventListener('click', function () {
+    FACETS.forEach(function (fc) { state[fc.key] = []; });
+    renderPills(); render();
+  });
+  function clearAll() {
+    state.q = ''; state.funnel = ''; state.family = []; state.size = []; state.device = [];
+    E('fmSearch').value = ''; E('fmSearchClear').hidden = true;
+    renderChips(); renderPills(); render();
+  }
+  E('fmEmptyClear').addEventListener('click', clearAll);
+  E('fmSearch').addEventListener('input', function () {
+    state.q = this.value; E('fmSearchClear').hidden = !this.value; render();
+  });
+  E('fmSearchClear').addEventListener('click', function () { E('fmSearch').value = ''; state.q = ''; this.hidden = true; render(); E('fmSearch').focus(); });
+  E('fmSort').addEventListener('change', function () { state.sort = this.value; render(); });
+  document.querySelectorAll('.c-seg[data-view]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.view = b.dataset.view;
+      document.querySelectorAll('.c-seg[data-view]').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
+      E('fmGalleryView').classList.toggle('is-on', state.view === 'gallery');
+      E('fmTableView').classList.toggle('is-on', state.view === 'table');
+      hideRowpeek(true);
+      staggerIn(visibleItems());
+      try { sessionStorage.setItem('collab-formats-view', state.view); } catch (e) {}
+    });
+  });
+  try { var sv = sessionStorage.getItem('collab-formats-view'); if (sv === 'table') document.querySelector('.c-seg[data-view="table"]').click(); } catch (e) {}
+
+  /* ── Gallery ────────────────────────────────────────────────────── */
+  function cardHtml(f, i) {
+    var inCmp = compare.indexOf(f.id) > -1;
+    return '<article class="fm-card' + (inCmp ? ' is-compared' : '') + '" data-id="' + f.id + '" tabindex="0" role="button" aria-label="' + esc(f.name) + ', ' + esc(f.family) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
+      '<div class="fm-stagewrap"><div class="fp-stage" data-stage></div>' +
+        '<span class="fm-live"><i></i>Live sample</span>' +
+        '<span class="fm-touchhint"><i class="ph ph-play"></i>Tap to play</span>' +
+        '<div class="fm-ctl">' +
+          '<button type="button" class="fm-cmp' + (inCmp ? ' is-on' : '') + '" data-cmp="' + f.id + '" aria-label="' + (inCmp ? 'Remove from compare' : 'Add to compare') + '" title="' + (inCmp ? 'Remove from compare' : 'Add to compare') + '"><i class="ph ' + (inCmp ? 'ph-check' : 'ph-plus') + '"></i></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fm-body">' +
+        '<div class="fm-titlerow"><h4>' + esc(f.name) + '</h4>' + tag(f) + '</div>' +
+        '<div class="fm-swap">' +
+          '<div class="rest"><p class="fm-tagline">' + esc(f.tagline) + '</p><div class="fm-meta">' + funnelChips(f, 3) + '</div></div>' +
+          '<div class="spec">' +
+            '<div class="fm-spec-cell"><b>Objective</b><span>' + esc(f.objective) + '</span></div>' +
+            '<div class="fm-spec-cell"><b>Sizes</b><span>' + esc(f.sizes.join(' · ') || '—') + '</span></div>' +
+            '<div class="fm-spec-cell"><b>Benchmark</b><span>' + (f.benchmark ? esc(f.benchmark) : 'Not published') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="fm-foot">' +
+        '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-open="' + f.id + '"><i class="ph ph-info"></i> Details</button>' +
+        (f.demo ? '<button class="c-btn c-btn-ghost c-btn-sm fm-demo-off" type="button" disabled title="Live demos are switched off in this build" data-demo><i class="ph ph-arrow-square-out"></i> Live demo</button>' : '') +
+        '<span class="spacer"></span>' +
+        (f.cpm != null ? '<span class="u-caption" style="font-size:12px; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;">CPM RM ' + f.cpm.toFixed(2) + '</span>' : '') +
+      '</div>' +
+    '</article>';
+  }
+  /* Every re-sort and re-filter is a move, not a rebuild: rects are
+     snapshotted before innerHTML, and playMove() puts each survivor
+     back where it was with a transform and lets it travel to zero,
+     staggered by reading order. A card arriving from a filter fades in
+     instead, since it has nowhere to travel from. Both passes bail out
+     the moment they measure past the viewport, so a keystroke costs a
+     couple of dozen rect reads rather than a hundred. */
+  var FLIP_PAD = 240;
+  function visibleItems() {
+    return document.querySelectorAll(state.view === 'table' ? '#fmRows tr[data-id]' : '#fmGrid .fm-card[data-id]');
+  }
+  function snapshotRects() {
+    if (REDUCED || document.hidden) return null;
+    var map = {}, vh = window.innerHeight, els = visibleItems();
+    for (var i = 0; i < els.length; i++) {
+      var rc = els[i].getBoundingClientRect();
+      if (rc.top > vh + FLIP_PAD) break;
+      if (rc.bottom < -FLIP_PAD) continue;
+      map[els[i].dataset.id] = rc;
+    }
+    return map;
+  }
+  function playMove(before) {
+    if (!before) return;
+    var hadAny = false; for (var k in before) { hadAny = true; break; }
+    if (!hadAny) return; /* first real paint: the arrival CSS owns it */
+    var moved = 0, appeared = 0, vh = window.innerHeight, els = visibleItems();
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], now = el.getBoundingClientRect();
+      if (now.top > vh + FLIP_PAD) break;
+      if (now.bottom < -FLIP_PAD) continue;
+      var was = before[el.dataset.id];
+      if (!was) {
+        el.animate([{ opacity: 0, transform: 'translateY(10px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+          { duration: 300, delay: Math.min(appeared * 14, 180), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+        appeared++; continue;
+      }
+      var dx = was.left - now.left, dy = was.top - now.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      el.animate([{ transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)' }, { transform: 'translate(0,0)' }],
+        { duration: 520, delay: Math.min(moved * 22, 220), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+      moved++;
+    }
+  }
+  /* Switching gallery and table cannot morph a card into a row, so the
+     incoming view cascades in instead. */
+  function staggerIn(els) {
+    if (REDUCED || document.hidden) return;
+    var vh = window.innerHeight, n = 0;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.top > vh + FLIP_PAD) break;
+      els[i].animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 320, delay: Math.min(n * 24, 260), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+      n++;
+    }
+  }
+  function render(opts) {
+    var before = (opts && opts.flip === false) ? null : snapshotRects();
+    current = filtered();
+    var grid = E('fmGrid');
+    grid.querySelectorAll('[data-stage]').forEach(function (s) { P.live(s, false); });
+    grid.innerHTML = current.map(cardHtml).join('');
+    grid.querySelectorAll('.fm-card').forEach(function (card) {
+      P.mount(card.querySelector('[data-stage]'), byId[card.dataset.id]);
+    });
+    E('fmRows').innerHTML = current.map(rowHtml).join('');
+    var demos = current.filter(function (f) { return f.demo; }).length;
+    E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats · ' + demos + ' with a live demo on kult.my' +
+      (state.sort === 'bench' ? ' · sorted by published CTR benchmark, highest first' : state.sort === 'cpm' ? ' · sorted by rate on file' : '');
+    E('fmEmpty').hidden = current.length > 0;
+    E('fmGalleryView').style.display = current.length ? '' : 'none';
+    E('fmTableView').style.display = current.length ? '' : 'none';
+    renderTray();
+    playMove(before);
+  }
+  function setLive(card, on) {
+    if (!card) return;
+    card.classList.toggle('is-live', on);
+    P.live(card.querySelector('[data-stage]'), on);
+  }
+  var grid = E('fmGrid');
+  grid.addEventListener('mouseover', function (e) {
+    var card = e.target.closest('.fm-card'); if (!card || card.contains(e.relatedTarget)) return;
+    if (!TOUCH) setLive(card, true);
+  });
+  grid.addEventListener('mouseout', function (e) {
+    var card = e.target.closest('.fm-card'); if (!card || card.contains(e.relatedTarget)) return;
+    if (!TOUCH) setLive(card, false);
+  });
+  /* Hover tilt, the roster card's: one transform write per frame, the
+     entry rect cached at pointerover because measuring a card mid-tilt
+     returns its rotated box and feeds the angle back into itself. */
+  var TILT_MAX = 4, tiltCard = null, tiltRect = null, tiltRAF = 0, tiltX = 0, tiltY = 0;
+  function untilt() {
+    if (tiltRAF) { cancelAnimationFrame(tiltRAF); tiltRAF = 0; }
+    if (!tiltCard) return;
+    tiltCard.classList.remove('is-tilting'); tiltCard.style.transform = '';
+    tiltCard = null; tiltRect = null;
+  }
+  function tiltFrame() {
+    tiltRAF = 0; if (!tiltCard) return;
+    var px = (tiltX - tiltRect.left) / tiltRect.width, py = (tiltY - tiltRect.top) / tiltRect.height;
+    tiltCard.style.transform = 'perspective(700px) translateY(-2px) scale(1.015)' +
+      ' rotateX(' + (-(py - 0.5) * 2 * TILT_MAX).toFixed(2) + 'deg) rotateY(' + ((px - 0.5) * 2 * TILT_MAX).toFixed(2) + 'deg)';
+  }
+  grid.addEventListener('pointerover', function (e) {
+    if (REDUCED || e.pointerType !== 'mouse') return;
+    var card = e.target.closest('.fm-card'); if (!card || card === tiltCard) return;
+    untilt(); tiltCard = card; tiltRect = card.getBoundingClientRect(); card.classList.add('is-tilting');
+  });
+  grid.addEventListener('pointermove', function (e) {
+    if (!tiltCard) return;
+    tiltX = e.clientX; tiltY = e.clientY;
+    if (!tiltRAF) tiltRAF = requestAnimationFrame(tiltFrame);
+  });
+  grid.addEventListener('pointerout', function (e) {
+    if (tiltCard && !tiltCard.contains(e.relatedTarget)) untilt();
+  });
+  grid.addEventListener('focusin', function (e) { var card = e.target.closest('.fm-card'); if (card && e.target === card) setLive(card, true); });
+  grid.addEventListener('focusout', function (e) { var card = e.target.closest('.fm-card'); if (card && !card.contains(e.relatedTarget)) setLive(card, false); });
+  grid.addEventListener('click', function (e) {
+    var cmp = e.target.closest('[data-cmp]');
+    if (cmp) { e.stopPropagation(); toggleCompare(cmp.dataset.cmp); return; }
+    if (e.target.closest('[data-demo]')) { e.stopPropagation(); return; }
+    var open = e.target.closest('[data-open]');
+    if (open) { e.stopPropagation(); openDrawer(open.dataset.open, false, open.closest('.fm-card')); return; }
+    var card = e.target.closest('.fm-card'); if (!card) return;
+    /* On touch the first tap plays the sample; the second opens it. */
+    if (TOUCH && !card.classList.contains('is-live')) {
+      grid.querySelectorAll('.fm-card.is-live').forEach(function (c) { setLive(c, false); });
+      setLive(card, true); return;
+    }
+    openDrawer(card.dataset.id, false, card);
+  });
+  grid.addEventListener('keydown', function (e) {
+    var card = e.target.closest('.fm-card'); if (!card || e.target !== card) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(card.dataset.id, false, card); }
+    if (e.key === 'c' || e.key === 'C') { toggleCompare(card.dataset.id); }
+  });
+
+  /* ── Table ──────────────────────────────────────────────────────── */
+  function rowHtml(f) {
+    return '<tr data-id="' + f.id + '">' +
+      '<td class="name">' + esc(f.name) + '<small>' + esc(f.tagline) + '</small></td>' +
+      '<td>' + tag(f) + '</td>' +
+      '<td>' + esc(f.objective) + '</td>' +
+      '<td><div class="fm-funnel">' + f.funnel.map(function (k) { return '<span>' + esc(FUNNEL_LABEL[k] || k) + '</span>'; }).join('') + '</div></td>' +
+      '<td class="sizes">' + (f.sizes.length ? f.sizes.map(esc).join('<br>') : '<span class="muted">—</span>') + '</td>' +
+      '<td>' + esc(f.devices) + '</td>' +
+      '<td class="num">' + (f.benchmark ? esc(f.benchmark) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + (f.cpm != null ? f.cpm.toFixed(2) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + (f.inventory != null ? f.inventory : '<span class="muted">—</span>') + '</td>' +
+      '<td class="act"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-cmp="' + f.id + '" title="Add to compare"><i class="ph ' + (compare.indexOf(f.id) > -1 ? 'ph-check' : 'ph-plus') + '"></i></button>' +
+        (f.demo ? '<button class="c-btn c-btn-ghost c-btn-sm fm-demo-off" type="button" disabled data-demo title="Live demos are switched off in this build"><i class="ph ph-arrow-square-out"></i></button>' : '') + '</td>' +
+    '</tr>';
+  }
+  var rows = E('fmRows'), peek = E('fmRowpeek'), peekStage = E('fmRowpeekStage'), peekId = null, peekHideTimer = null, peekSwapTimer = null;
+  function showRowpeek(tr) {
+    var f = byId[tr.dataset.id]; if (!f) return;
+    clearTimeout(peekHideTimer);
+    var wasVisible = peek.classList.contains('is-visible');
+    if (peekId !== f.id) {
+      /* Cross-fade the sample: out on the instant curve, the new one in
+         on the base curve, so the swap reads as a change and not a flash. */
+      clearTimeout(peekSwapTimer);
+      peek.classList.add('is-switching');
+      peekId = f.id;
+      peekSwapTimer = setTimeout(function () {
+        P.mount(peekStage, f); E('fmRowpeekLbl').textContent = f.name + ' · ' + f.family;
+        peek.classList.remove('is-switching');
+        if (peek.classList.contains('is-visible')) P.live(peekStage, true);
+      }, wasVisible ? 90 : 0);
+    } else if (!wasVisible) {
+      P.live(peekStage, true);
+    }
+    var r = tr.getBoundingClientRect(), w = 300, h = 232;
+    var left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w - 24));
+    var top = r.top + r.height / 2 - h / 2;
+    top = Math.max(12, Math.min(window.innerHeight - h - 12, top));
+    /* A fresh appearance lands where it is; only a sample already on
+       screen slides to the next row. */
+    peek.classList.toggle('is-jumping', !wasVisible);
+    peek.style.left = left + 'px'; peek.style.top = top + 'px';
+    peek.classList.add('is-visible');
+    rows.querySelectorAll('tr.is-peeking').forEach(function (x) { if (x !== tr) x.classList.remove('is-peeking'); });
+    tr.classList.add('is-peeking');
+  }
+  function hideRowpeek(now) {
+    clearTimeout(peekHideTimer);
+    var go = function () {
+      peek.classList.remove('is-visible'); P.live(peekStage, false);
+      rows.querySelectorAll('tr.is-peeking').forEach(function (x) { x.classList.remove('is-peeking'); });
+    };
+    /* A short grace so crossing a row border, or the gap to the sample
+       itself, does not blink it out and back in. */
+    if (now) go(); else peekHideTimer = setTimeout(go, 140);
+  }
+  rows.addEventListener('mouseover', function (e) { var tr = e.target.closest('tr'); if (tr && !tr.contains(e.relatedTarget) && !TOUCH) showRowpeek(tr); });
+  rows.addEventListener('mouseout', function (e) { var tr = e.target.closest('tr'); if (tr && !tr.contains(e.relatedTarget)) hideRowpeek(); });
+  rows.addEventListener('click', function (e) {
+    var cmp = e.target.closest('[data-cmp]'); if (cmp) { toggleCompare(cmp.dataset.cmp); return; }
+    if (e.target.closest('[data-demo]')) return;
+    var tr = e.target.closest('tr'); if (tr) { hideRowpeek(true); openDrawer(tr.dataset.id, false, tr); }
+  });
+  E('fmTableView').querySelector('.fm-tablewrap').addEventListener('scroll', function () { hideRowpeek(true); });
+  E('fmContent').addEventListener('scroll', function () { if (peek.classList.contains('is-visible')) hideRowpeek(true); }, { passive: true });
+
+  /* ── Drawer ─────────────────────────────────────────────────────── */
+  var modal = E('fmModal'), drawer = E('fmDrawer'), scrim = E('fmScrim'), drawerId = null, drawerStage = null, returnTo = null;
+  var swingSrcEl = null, swingSrcRect = null, hideTimer = null;
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* The panel flies out of the clicked card's rect and folds back into
+     it on close; the rect is frozen at open time in case a re-render
+     swaps the card out from under the modal. */
+  /* Shared by every swing panel (details, compare) so they all fly by
+     the same math and read as one behaviour. */
+  function swingVarsFor(panel, srcEl, srcRect) {
+    panel.classList.remove('is-swinging-open', 'is-swinging-closed');
+    void panel.offsetWidth;
+    var from = (srcEl && srcEl.isConnected) ? srcEl.getBoundingClientRect() : srcRect;
+    if (!from || !from.width) return false;
+    var to = panel.getBoundingClientRect();
+    panel.style.setProperty('--sw-dx', (from.left - to.left).toFixed(1) + 'px');
+    panel.style.setProperty('--sw-dy', (from.top - to.top).toFixed(1) + 'px');
+    panel.style.setProperty('--sw-sx', (from.width / to.width).toFixed(4));
+    panel.style.setProperty('--sw-sy', (from.height / to.height).toFixed(4));
+    panel.style.setProperty('--sw-dir', (from.left + from.width / 2) <= window.innerWidth / 2 ? '1' : '-1');
+    return true;
+  }
+  function setSwingVars() { return swingVarsFor(drawer, swingSrcEl, swingSrcRect); }
+  /* A table row is wide and short, so the panel grows out of the row's
+     first cell rather than the whole row; cards match the panel's
+     proportions and fly as they are. */
+  function swingAnchor(el) {
+    if (!el) return null;
+    if (el.tagName === 'TR') return el.querySelector('td') || el;
+    return el;
+  }
+  function sizeSwatches(f) {
+    var dims = f.sizes.map(function (s) { return { s: s, d: P.parseSize(s) }; });
+    var maxW = 0; dims.forEach(function (x) { if (x.d) maxW = Math.max(maxW, x.d.w); });
+    var scale = maxW ? Math.min(160 / maxW, 0.5) : 0;
+    return '<div class="fm-sizes">' + dims.map(function (x) {
+      if (!x.d) return '<div class="fm-size text"><i></i>' + esc(x.s) + '</div>';
+      return '<div class="fm-size"><i style="width:' + Math.max(6, Math.round(x.d.w * scale)) + 'px; height:' + Math.max(6, Math.round(x.d.h * scale)) + 'px"></i>' + esc(x.s) + '</div>';
+    }).join('') + '</div>';
+  }
+  function benchBar(f) {
+    var c = ctr(f);
+    if (!f.benchmark) return '<p class="fm-ddesc" style="margin:0; color:var(--color-neutral-5);">KULT has not published a benchmark for this unit. Ask Sales for the last three campaigns\' numbers before quoting one.</p>';
+    return '<div class="fm-bench"><span>' + esc(f.benchmark) + '</span>' +
+      (c != null ? '<div class="fm-benchbar"><i data-w="' + Math.min(100, Math.round(c / 1.0 * 100)) + '"></i></div><small>of a 1.00% ceiling</small>' : '') + '</div>';
+  }
+  function related(f) {
+    var same = F.filter(function (x) { return x.id !== f.id && x.family === f.family; });
+    var shared = F.filter(function (x) { return x.id !== f.id && x.family !== f.family && x.funnel.some(function (k) { return f.funnel.indexOf(k) > -1; }); });
+    return same.concat(shared).slice(0, 3);
+  }
+  function renderDrawer(f) {
+    E('fmDrawerCrumb').textContent = f.name;
+    var rel = related(f);
+    E('fmDrawerBody').innerHTML =
+      '<div class="fm-dstage"><div class="fp-stage" id="fmDrawerStage"></div><button class="fm-replay" type="button" id="fmReplay"><i class="ph ph-arrow-counter-clockwise"></i> Replay</button></div>' +
+      '<div class="fm-dtitle"><h2 id="fmDrawerTitle">' + esc(f.name) + '</h2>' + tag(f) + '</div>' +
+      '<p class="fm-dtag">' + esc(f.tagline) + '</p>' +
+      (f.desc ? '<p class="fm-ddesc">' + esc(f.desc) + '</p>' : '') +
+      '<div class="fm-specs">' +
+        '<div class="fm-spec"><b>Objective</b><span>' + esc(f.objective) + '</span></div>' +
+        '<div class="fm-spec"><b>Runs on</b><span>' + esc(f.devices) + '</span></div>' +
+        '<div class="fm-spec"><b>Best for</b><span>' + esc(f.bestFor || '—') + '</span></div>' +
+        '<div class="fm-spec"><b>Funnel</b><span>' + f.funnel.map(function (k) { return esc(FUNNEL_LABEL[k] || k); }).join(' · ') + '</span></div>' +
+        '<div class="fm-spec"><b>CPM on file</b>' + (f.cpm != null ? '<span>RM ' + f.cpm.toFixed(2) + '</span>' : '<span class="na">Not on file — ask Sales</span>') + '</div>' +
+        '<div class="fm-spec"><b>Monthly inventory</b>' + (f.inventory != null ? '<span>' + f.inventory + 'M impressions</span>' : '<span class="na">Not on file</span>') + '</div>' +
+      '</div>' +
+      '<div class="fm-section"><h5>Supported sizes</h5>' + (f.sizes.length ? sizeSwatches(f) : '<p class="fm-ddesc" style="margin:0; color:var(--color-neutral-5);">No fixed size — this unit is built to the placement.</p>') + '</div>' +
+      '<div class="fm-section"><h5>Benchmark</h5>' + benchBar(f) + '</div>' +
+      (f.industries.length ? '<div class="fm-section"><h5>Industries it has run for</h5><div class="fm-chipset">' + f.industries.map(function (i) { return '<span class="c-chip">' + esc(i) + '</span>'; }).join('') + '</div></div>' : '') +
+      (f.source === 'catalogue' ? '<div class="fm-section"><p class="fm-ddesc" style="margin:0; color:var(--color-neutral-5);"><i class="ph ph-info" style="vertical-align:-2px;"></i> Standard display unit. Copy and sizes here are catalogue defaults, not a KULT gallery page — verify before quoting.</p></div>' : '') +
+      (rel.length ? '<div class="fm-section"><h5>Also consider</h5><div class="fm-related">' + rel.map(function (r) {
+        return '<button class="fm-relcard" type="button" data-rel="' + r.id + '"><div class="fp-stage" data-relstage="' + r.id + '"></div><span>' + esc(r.name) + '</span></button>';
+      }).join('') + '</div></div>' : '');
+    var inCmp = compare.indexOf(f.id) > -1;
+    E('fmDrawerFoot').innerHTML =
+      '<a class="c-btn c-btn-primary c-btn-md" href="planner.html?format=' + encodeURIComponent(f.id) + '"><i class="ph ph-compass-tool"></i> Use in a media plan</a>' +
+      (f.demo ? '<button class="c-btn c-btn-secondary c-btn-md fm-demo-off" type="button" disabled title="Live demos are switched off in this build"><i class="ph ph-arrow-square-out"></i> Live demo</button>' : '') +
+      '<span class="spacer"></span>' +
+      '<button class="c-btn c-btn-ghost c-btn-md" type="button" id="fmDrawerCmp"><i class="ph ' + (inCmp ? 'ph-check' : 'ph-plus') + '"></i> ' + (inCmp ? 'In compare' : 'Compare') + '</button>';
+    drawerStage = E('fmDrawerStage');
+    P.mount(drawerStage, f);
+    E('fmDrawerBody').querySelectorAll('[data-relstage]').forEach(function (s) { P.mount(s, byId[s.dataset.relstage]); });
+    E('fmDrawerBody').scrollTop = 0;
+    setTimeout(function () {
+      P.live(drawerStage, true);
+      var bar = E('fmDrawerBody').querySelector('.fm-benchbar i'); if (bar) bar.style.width = bar.dataset.w + '%';
+    }, 30);
+  }
+  function openDrawer(id, fromNav, sourceEl) {
+    var f = byId[id]; if (!f) return;
+    untilt(); /* the swing math needs the card's untransformed rect */
+    clearTimeout(hideTimer);
+    var already = modal.classList.contains('is-open');
+    if (!fromNav) returnTo = document.activeElement;
+    drawerId = id; renderDrawer(f);
+    /* Whatever the panel came out of, it folds back into the card of the
+       format it is showing now, if that card is on the page. */
+    var home = grid.querySelector('.fm-card[data-id="' + id + '"]');
+    swingSrcEl = swingAnchor(sourceEl) || (already ? swingSrcEl : null) || home;
+    swingSrcRect = swingSrcEl ? swingSrcEl.getBoundingClientRect() : null;
+    if (!already) {
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      if (!REDUCED && setSwingVars()) drawer.classList.add('is-swinging-open');
+      setTimeout(function () { modal.classList.add('is-shown'); }, 20);
+    }
+    try { history.replaceState(null, '', '?f=' + encodeURIComponent(id)); } catch (e) {}
+    E('fmDrawerClose').focus();
+  }
+  function closeDrawer() {
+    if (!modal.classList.contains('is-open')) return;
+    var home = drawerId && grid.querySelector('.fm-card[data-id="' + drawerId + '"]');
+    if (home) { swingSrcEl = home; swingSrcRect = home.getBoundingClientRect(); }
+    var swung = !REDUCED && setSwingVars();
+    if (swung) drawer.classList.add('is-swinging-closed');
+    modal.classList.remove('is-shown');
+    document.body.style.overflow = '';
+    P.live(drawerStage, false); drawerId = null;
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () {
+      modal.classList.remove('is-open');
+      drawer.classList.remove('is-swinging-open', 'is-swinging-closed');
+    }, swung ? 560 : 320);
+    if (returnTo && returnTo.focus) returnTo.focus();
+  }
+  function stepDrawer(dir) {
+    if (!drawerId) return;
+    var ids = current.map(function (f) { return f.id; });
+    var i = ids.indexOf(drawerId); if (i < 0) return;
+    var n = ids[(i + dir + ids.length) % ids.length];
+    openDrawer(n, true);
+  }
+  E('fmDrawerClose').addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  E('fmPrev').addEventListener('click', function () { stepDrawer(-1); });
+  E('fmNext').addEventListener('click', function () { stepDrawer(1); });
+  drawer.addEventListener('click', function (e) {
+    if (e.target.closest('#fmReplay')) { P.live(drawerStage, false); setTimeout(function () { P.live(drawerStage, true); }, 30); return; }
+    if (e.target.closest('#fmDrawerCmp')) { toggleCompare(drawerId); renderDrawer(byId[drawerId]); return; }
+    var rel = e.target.closest('[data-rel]'); if (rel) { openDrawer(rel.dataset.rel, true); }
+  });
+  drawer.addEventListener('mouseover', function (e) { var s = e.target.closest('[data-relstage]'); if (s && !s.contains(e.relatedTarget)) P.live(s, true); });
+  drawer.addEventListener('mouseout', function (e) { var s = e.target.closest('[data-relstage]'); if (s && !s.contains(e.relatedTarget)) P.live(s, false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (E('fmCmodal').classList.contains('is-open')) { closeCompare(); return; }
+      if (modal.classList.contains('is-open')) { closeDrawer(); return; }
+      if (openFacet) { openFacet = null; renderPills(); }
+    }
+    if (modal.classList.contains('is-open') && !e.target.matches('input, textarea')) {
+      if (e.key === 'ArrowRight') stepDrawer(1);
+      if (e.key === 'ArrowLeft') stepDrawer(-1);
+    }
+  });
+
+  /* ── Compare — up to four, kept for the tab. ────────────────────── */
+  var compare = [];
+  try { compare = JSON.parse(sessionStorage.getItem('collab-formats-compare')) || []; } catch (e) { compare = []; }
+  compare = compare.filter(function (id) { return byId[id]; });
+  function saveCompare() { try { sessionStorage.setItem('collab-formats-compare', JSON.stringify(compare)); } catch (e) {} }
+  function toggleCompare(id) {
+    var i = compare.indexOf(id);
+    if (i > -1) compare.splice(i, 1);
+    else if (compare.length >= 4) { toast('Compare holds four', 'Remove one to add ' + byId[id].name + '.'); return; }
+    else compare.push(id);
+    saveCompare(); syncCompareUI();
+  }
+  function syncCompareUI() {
+    document.querySelectorAll('.fm-card').forEach(function (card) {
+      var on = compare.indexOf(card.dataset.id) > -1;
+      card.classList.toggle('is-compared', on);
+      var b = card.querySelector('.fm-cmp'); if (b) { b.classList.toggle('is-on', on); b.innerHTML = '<i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i>'; var lbl = on ? 'Remove from compare' : 'Add to compare'; b.title = lbl; b.setAttribute('aria-label', lbl); }
+    });
+    E('fmRows').querySelectorAll('[data-cmp]').forEach(function (b) { b.innerHTML = '<i class="ph ' + (compare.indexOf(b.dataset.cmp) > -1 ? 'ph-check' : 'ph-plus') + '"></i>'; });
+    E('fmCbarNames').innerHTML = compare.map(function (id) {
+      return '<span>' + esc(byId[id].name) + '<button type="button" data-uncmp="' + id + '" aria-label="Remove ' + esc(byId[id].name) + '"><i class="ph ph-x"></i></button></span>';
+    }).join('');
+    E('fmCbarLbl').textContent = compare.length + ' of 4';
+    E('fmCbarOpen').disabled = compare.length < 2;
+    E('fmCbarOpen').style.opacity = compare.length < 2 ? '.6' : '';
+    E('fmCbar').classList.toggle('is-open', compare.length > 0);
+  }
+  E('fmCbarNames').addEventListener('click', function (e) { var b = e.target.closest('[data-uncmp]'); if (b) toggleCompare(b.dataset.uncmp); });
+  E('fmCbarClear').addEventListener('click', function () { compare = []; saveCompare(); syncCompareUI(); });
+  E('fmCbarOpen').addEventListener('click', function () { openCompare(this); });
+  E('fmSpecBtn').addEventListener('click', function () {
+    if (compare.length) openCompare(this);
+    else toast('Pick formats first', 'Use the + on any card to build a spec sheet of up to four formats.');
+  });
+  var ROWS = [
+    ['Objective', function (f) { return esc(f.objective); }],
+    ['Funnel', function (f) { return f.funnel.map(function (k) { return esc(FUNNEL_LABEL[k] || k); }).join(', '); }],
+    ['Sizes', function (f) { return f.sizes.length ? f.sizes.map(esc).join('<br>') : '<span class="na">—</span>'; }],
+    ['Runs on', function (f) { return esc(f.devices); }],
+    ['Benchmark', function (f) { return f.benchmark ? esc(f.benchmark) : '<span class="na">Not published</span>'; }],
+    ['CPM (MYR)', function (f) { return f.cpm != null ? 'RM ' + f.cpm.toFixed(2) : '<span class="na">Not on file</span>'; }],
+    ['Inventory', function (f) { return f.inventory != null ? f.inventory + 'M / month' : '<span class="na">Not on file</span>'; }],
+    ['Best for', function (f) { return esc(f.bestFor || '—'); }],
+    ['Industries', function (f) { return f.industries.length ? f.industries.map(esc).join(', ') : '<span class="na">—</span>'; }]
+  ];
+  var cmodal = E('fmCmodal'), cbox = E('fmCbox'), cmpSrcEl = null, cmpSrcRect = null, cmpHideTimer = null;
+  function openCompare(sourceEl) {
+    var list = compare.map(function (id) { return byId[id]; });
+    clearTimeout(cmpHideTimer);
+    cmpSrcEl = sourceEl || cmpSrcEl; cmpSrcRect = cmpSrcEl ? cmpSrcEl.getBoundingClientRect() : null;
+    var bestCtr = Math.max.apply(null, list.map(function (f) { return ctr(f) || 0; }));
+    var t = E('fmCtable');
+    t.innerHTML =
+      '<tr><th></th>' + list.map(function (f) { return '<td class="stage"><div class="fp-stage" data-cstage="' + f.id + '"></div></td>'; }).join('') + '</tr>' +
+      '<tr><th>Format</th>' + list.map(function (f) { return '<td class="head">' + esc(f.name) + '<small>' + esc(f.family) + '</small></td>'; }).join('') + '</tr>' +
+      ROWS.map(function (r) {
+        return '<tr><th>' + r[0] + '</th>' + list.map(function (f) {
+          var best = r[0] === 'Benchmark' && bestCtr > 0 && ctr(f) === bestCtr && list.length > 1;
+          return '<td' + (best ? ' class="best"' : '') + '>' + r[1](f) + (best ? ' <span style="font-size:11px; color:var(--color-green); font-weight:700;">highest</span>' : '') + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+    t.querySelectorAll('[data-cstage]').forEach(function (s) { P.mount(s, byId[s.dataset.cstage]); });
+    E('fmCmodalPlan').href = 'planner.html?formats=' + compare.map(encodeURIComponent).join(',');
+    cmodal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    if (!REDUCED && swingVarsFor(cbox, cmpSrcEl, cmpSrcRect)) cbox.classList.add('is-swinging-open');
+    setTimeout(function () {
+      cmodal.classList.add('is-shown');
+      t.querySelectorAll('[data-cstage]').forEach(function (s) { P.live(s, true); });
+    }, 30);
+    E('fmCmodalClose').focus();
+  }
+  function closeCompare() {
+    if (!cmodal.classList.contains('is-open')) return;
+    var swung = !REDUCED && swingVarsFor(cbox, cmpSrcEl, cmpSrcRect);
+    if (swung) cbox.classList.add('is-swinging-closed');
+    cmodal.classList.remove('is-shown');
+    E('fmCtable').querySelectorAll('[data-cstage]').forEach(function (s) { P.live(s, false); });
+    if (!modal.classList.contains('is-open')) document.body.style.overflow = '';
+    clearTimeout(cmpHideTimer);
+    cmpHideTimer = setTimeout(function () {
+      cmodal.classList.remove('is-open');
+      cbox.classList.remove('is-swinging-open', 'is-swinging-closed');
+    }, swung ? 560 : 320);
+  }
+  E('fmCmodalClose').addEventListener('click', closeCompare);
+  E('fmCmodal').addEventListener('click', function (e) {
+    if (e.target === cmodal || e.target === E('fmCmodalBackdrop')) { closeCompare(); return; }
+    var x = e.target.closest('[data-export]');
+    if (x) toast(x.dataset.export + ' export is next', 'This build shows the comparison on screen. The export lands with the spec-sheet template.');
+  });
+
+  /* ── Showcase ───────────────────────────────────────────────────── */
+  function initials(s) { return s.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase(); }
+  function renderShowcase() {
+  E('fmShowrow').innerHTML = window.FORMAT_SHOWCASES.map(function (s) {
+    var f = byId[s.formats[0]];
+    return '<button class="fm-showcard" type="button" data-show="' + s.formats[0] + '" aria-label="' + esc(s.brand) + ': ' + esc(s.label) + '">' +
+      '<div class="fp-stage" data-showstage="' + f.id + '"></div>' +
+      '<div class="fm-showbody"><span class="fm-brandmark"><img alt="" data-brand="' + esc(s.brand) + '" data-domain="' + esc(s.domain) + '" /><span>' + initials(s.brand) + '</span></span>' +
+      '<div class="fm-showtext"><b>' + esc(s.brand) + '</b><span>' + esc(s.label) + ' · ' + s.formats.map(function (id) { return esc(byId[id].name); }).join(' + ') + '</span></div></div>' +
+    '</button>';
+  }).join('');
+  E('fmShowrow').querySelectorAll('[data-showstage]').forEach(function (s) { P.mount(s, byId[s.dataset.showstage]); });
+  E('fmShowrow').querySelectorAll('img[data-brand]').forEach(function (img) {
+    /* One lookup, against the brand's real domain. A 16px result is the
+       service's "unknown domain" globe, not a mark, and a failed lookup
+       leaves the initials — a wrong logo is worse than none. */
+    img.onload = function () { if (img.naturalWidth > 16) img.parentNode.classList.add('has-logo'); };
+    img.src = 'https://www.google.com/s2/favicons?domain=' + img.dataset.domain + '&sz=128';
+  });
+  layoutWall();
+  }
+  /* Placement. Cards run left to right, each tucked under the one before
+     it by OVER pixels and set down at its own height, so the row reads as
+     a handful of cards dropped on a desk rather than a strip. Below two
+     cards wide there is nothing to scatter into: one column, still tilted. */
+  var TILT = [-2.4, 1.8, -1.4, 2.6, -1.8], DROP = [0, 14, 4, 18, 8], OVER = 34;
+  function layoutWall() {
+    var wall = E('fmShowrow'), cards = wall.querySelectorAll('.fm-showcard'); if (!cards.length) return;
+    var W = wall.clientWidth || 900, n = cards.length, narrow = W < 560;
+    var w = narrow ? Math.min(W, 320) : Math.max(200, Math.min(260, Math.floor((W + OVER * (n - 1)) / n)));
+    wall.style.setProperty('--fm-w', w + 'px');
+    var bottom = 0, y = 0;
+    cards.forEach(function (c, i) {
+      var h = c.offsetHeight;
+      var left = narrow ? 0 : i * (w - OVER);
+      var top = narrow ? y : DROP[i % DROP.length];
+      y += h + 12;
+      c.style.left = left + 'px'; c.style.top = top + 'px'; c.style.zIndex = i + 1;
+      c.style.setProperty('--tilt', (narrow ? TILT[i % TILT.length] / 2 : TILT[i % TILT.length]) + 'deg');
+      c.style.setProperty('--k', i);
+      bottom = Math.max(bottom, top + h);
+    });
+    wall.style.setProperty('--fm-h', (bottom + 12) + 'px');
+  }
+  window.addEventListener('load', layoutWall);
+  /* The rail folds itself shortly after load and hands the canvas its
+     width without a window resize, so the wall watches its own box. */
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { layoutWall(); fades(); } });
+  if (window.ResizeObserver) {
+    var wallTimer = null;
+    new ResizeObserver(function () { clearTimeout(wallTimer); wallTimer = setTimeout(layoutWall, 60); }).observe(E('fmShowrow'));
+  }
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { layoutWall(); fades(); if (openFacet) placePanel(); }, 80);
+  });
+  function peekCard(card, on) {
+    card.classList.toggle('is-peeked', on);
+    P.live(card.querySelector('.fp-stage'), on);
+  }
+  E('fmShowrow').addEventListener('mouseover', function (e) { var s = e.target.closest('.fm-showcard'); if (s && !s.contains(e.relatedTarget)) peekCard(s, true); });
+  E('fmShowrow').addEventListener('mouseout', function (e) { var s = e.target.closest('.fm-showcard'); if (s && !s.contains(e.relatedTarget)) peekCard(s, false); });
+  E('fmShowrow').addEventListener('focusin', function (e) { var s = e.target.closest('.fm-showcard'); if (s) peekCard(s, true); });
+  E('fmShowrow').addEventListener('focusout', function (e) { var s = e.target.closest('.fm-showcard'); if (s) peekCard(s, false); });
+  E('fmShowrow').addEventListener('click', function (e) { var s = e.target.closest('[data-show]'); if (s) openDrawer(s.dataset.show, false, s); });
+
+  /* ── Toast — the DS recipe, same as the other pages. ────────────── */
+  function toast(title, msg) {
+    var host = E('fmToasts');
+    var el = document.createElement('div');
+    el.className = 'c-toast is-entering';
+    el.innerHTML = '<i class="ph-fill ph-info tone tone-neutral"></i><div class="body"><div class="title">' + esc(title) + '</div>' + (msg ? '<div class="message">' + esc(msg) + '</div>' : '') + '</div>';
+    host.appendChild(el);
+    requestAnimationFrame(function () { el.classList.remove('is-entering'); });
+    setTimeout(function () { el.classList.add('is-exiting'); setTimeout(function () { el.remove(); }, 260); }, 3200);
+  }
+
+  /* ── Boot: bones first, then the real page cascades in. ─────────── */
+  function skeleton() {
+    var sk = function (w, h, extra) { return '<span class="fm-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
+    E('fmShowrow').innerHTML = [0, 1, 2, 3, 4].map(function () {
+      return '<div class="fm-showcard fm-sk-card" aria-hidden="true"><div class="fm-sk-stage"></div>' +
+        '<div class="fm-showbody"><span class="fm-sk-ava"></span><div class="fm-showtext">' + sk(90, 12) + sk(140, 9, 'margin-top:6px') + '</div></div></div>';
+    }).join('');
+    layoutWall();
+    E('fmChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
+    E('fmPills').innerHTML = [82, 68, 80].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
+    E('fmCount').textContent = 'Loading formats…';
+    E('fmGrid').innerHTML = [0, 1, 2, 3, 4, 5].map(function (i) {
+      return '<article class="fm-card fm-sk-card" style="--i:' + i + '" aria-hidden="true">' +
+        '<div class="fm-stagewrap"><div class="fm-sk-stage"></div></div>' +
+        '<div class="fm-body"><div class="fm-titlerow">' + sk(120, 16) + '<span class="fm-sk fm-sk-pill" style="width:74px; height:22px"></span></div>' +
+          sk(0, 9, 'width:92%') + sk(0, 9, 'width:64%') +
+          '<div class="fm-meta"><span class="fm-sk fm-sk-pill" style="width:68px; height:22px"></span><span class="fm-sk fm-sk-pill" style="width:88px; height:22px"></span></div></div>' +
+        '<div class="fm-foot">' + sk(62, 10) + sk(80, 10) + '</div></article>';
+    }).join('');
+    E('fmRows').innerHTML = [0, 1, 2, 3, 4].map(function () {
+      var cells = '';
+      for (var c = 0; c < 9; c++) cells += '<td>' + sk(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
+      return '<tr aria-hidden="true">' + cells + '<td></td></tr>';
+    }).join('');
+  }
+  skeleton();
+  syncCompareUI();
+  setTimeout(function () {
+    if (document.hidden) E('fmContent').classList.remove('fm-arriving');
+    renderShowcase();
+    renderChips(); renderPills(); render({ flip: false }); syncCompareUI();
+    setTimeout(function () { E('fmContent').classList.remove('fm-arriving'); }, 1100);
+    var deep = /[?&]f=([^&]+)/.exec(location.search);
+    if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 400);
+  /* The data is inline, so this beat is staged rather than real: the same
+     1000ms the roster and campaigns pages hold, long enough for the bones
+     to register as a considered loading state instead of a flicker. */
+  }, REDUCED ? 0 : 1000);
+})();
+</script>
+</body>
+</html>
