@@ -285,3 +285,18 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   clock and takes as many steps as the frame owes. And "settled" was a
   mean over all discs, so one disc rolling on its own could be frozen
   mid-roll; it is now the fastest disc.
+- 2026-09-08, eleventh pass, the Segments tab: the kult.my photographs
+  are gone from the page (the files stay in `assets/audiences/` until
+  someone says to remove them). Each segment is drawn instead — a
+  line-art doodle built from parts and picked by hash, so the same
+  segment always has the same face: six haircuts, glasses or not, four
+  tops, and one prop for its group (a cap for sports, headphones for
+  entertainment, shades for trendsetters, a collar and tie for business,
+  a bag for shopping, a coin for income, a heart for life stage). The
+  card follows the ad-format card: a stage on the lens tint holding the
+  doodle and the media consumption as five bars that grow when the card
+  goes live, a body whose block swaps from description and size to three
+  fact lines (audience, lives on, reads) on hover, and no pills over the
+  stage. The row preview, the drawer, the related cards and the reach
+  sheet use the same drawing and bars. `AudienceMarks.doodle(seg)` and
+  `AudienceMarks.bars(el, seg)` live in the marks module.

@@ -101,6 +101,79 @@
     return { items: placed, R: R, w: maxX - minX, h: maxY - minY };
   }
 
+  /* ── The doodle ──────────────────────────────────────────────────
+     A line-drawn person for each segment, built from a few parts and
+     picked by hash so the same segment always gets the same face:
+     hair in six cuts, glasses or not, a top in four patterns, and one
+     prop for the group — a cap for sports, headphones for
+     entertainment, shades for trendsetters, a collar and tie for
+     business, a bag for shopping intent. Ink only, on the card's own
+     tint. Returns an SVG string.                                     */
+  function doodle(seg) {
+    var h = Math.floor(hash(seg.id) * 100000), hair = h % 6, glasses = Math.floor(h / 7) % 3 === 0, pat = Math.floor(h / 13) % 4, flip = Math.floor(h / 29) % 2;
+    var ink = 'var(--color-neutral-9)', pid = 'dp-' + seg.id;
+    var defs = '<defs>' +
+      '<pattern id="' + pid + '-dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="' + ink + '"/></pattern>' +
+      '<pattern id="' + pid + '-stripes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><rect width="7" height="2.4" fill="' + ink + '"/></pattern>' +
+      '<pattern id="' + pid + '-check" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="4.5" height="4.5" fill="' + ink + '" opacity=".85"/><rect x="4.5" y="4.5" width="4.5" height="4.5" fill="' + ink + '" opacity=".85"/></pattern>' +
+      '</defs>';
+    var topFill = ['#fff', 'url(#' + pid + '-dots)', 'url(#' + pid + '-stripes)', 'url(#' + pid + '-check)'][pat];
+    var top = '<path d="M14 122 C16 96 34 84 48 82 L60 92 L72 82 C86 84 104 96 106 122 Z" fill="#fff" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>' +
+      (pat ? '<path d="M14 122 C16 96 34 84 48 82 L60 92 L72 82 C86 84 104 96 106 122 Z" fill="' + topFill + '" stroke="none"/>' : '');
+    var neck = '<path d="M52 68 L52 84 Q60 92 68 84 L68 68" fill="#fff" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>';
+    var head = '<ellipse cx="60" cy="48" rx="23" ry="26" fill="#fff" stroke="' + ink + '" stroke-width="2.4"/>' +
+      '<path d="M37 50 q-5 -2 -4 4 q1 5 5 4" fill="#fff" stroke="' + ink + '" stroke-width="2"/><path d="M83 50 q5 -2 4 4 q-1 5 -5 4" fill="#fff" stroke="' + ink + '" stroke-width="2"/>';
+    var hairs = [
+      '<path d="M37 46 C36 24 50 18 60 18 C72 18 84 24 83 46 C80 36 72 30 60 30 C48 30 41 36 37 46 Z" fill="' + ink + '"/>',
+      '<path d="M36 52 C34 22 52 16 60 16 C70 16 86 22 84 52 L84 70 L76 70 L76 46 C72 34 66 30 60 30 C54 30 46 34 44 46 L44 70 L36 70 Z" fill="' + ink + '"/>',
+      '<g fill="' + ink + '"><circle cx="42" cy="30" r="9"/><circle cx="52" cy="22" r="10"/><circle cx="64" cy="19" r="10"/><circle cx="76" cy="25" r="9"/><circle cx="82" cy="36" r="8"/><circle cx="38" cy="40" r="7"/><path d="M38 44 C40 30 50 26 60 26 C70 26 80 30 82 44 Z"/></g>',
+      '<path d="M38 44 C40 26 50 20 60 20 C70 20 80 26 82 44 C78 36 70 32 60 32 C50 32 44 36 38 44 Z" fill="' + ink + '"/><circle cx="60" cy="14" r="8" fill="' + ink + '"/>',
+      '<path d="M36 50 C34 22 52 14 60 14 C70 14 86 22 84 50 L88 92 L78 92 L76 48 C72 36 66 32 60 32 C54 32 46 36 44 48 L42 92 L32 92 Z" fill="' + ink + '"/>',
+      '<path d="M38 46 C38 26 48 20 60 20 C74 20 84 26 82 40 L70 34 C58 32 48 38 38 46 Z" fill="' + ink + '"/>'
+    ];
+    var eyes = glasses
+      ? '<circle cx="51" cy="50" r="6.5" fill="none" stroke="' + ink + '" stroke-width="2.2"/><circle cx="69" cy="50" r="6.5" fill="none" stroke="' + ink + '" stroke-width="2.2"/><path d="M57.5 50 L62.5 50" stroke="' + ink + '" stroke-width="2.2"/><circle cx="51" cy="50" r="2" fill="' + ink + '"/><circle cx="69" cy="50" r="2" fill="' + ink + '"/>'
+      : '<circle cx="51" cy="50" r="2.3" fill="' + ink + '"/><circle cx="69" cy="50" r="2.3" fill="' + ink + '"/>';
+    var mouth = '<path d="M53 60 Q60 66 67 60" fill="none" stroke="' + ink + '" stroke-width="2.2" stroke-linecap="round"/>';
+    var prop = '';
+    switch (seg.group) {
+      case 'sports': prop = '<path d="M34 40 C36 20 50 14 60 14 C72 14 84 20 86 40 Z" fill="' + ink + '"/><path d="M60 40 L96 44 L96 38 L60 34 Z" fill="' + ink + '"/><path d="M34 40 L86 40" stroke="#fff" stroke-width="2"/>'; break;
+      case 'entertainment': prop = '<path d="M34 46 C34 18 86 18 86 46" fill="none" stroke="' + ink + '" stroke-width="3.2"/><rect x="29" y="42" width="10" height="16" rx="4" fill="' + ink + '"/><rect x="81" y="42" width="10" height="16" rx="4" fill="' + ink + '"/>'; break;
+      case 'trendsetter': prop = '<rect x="43" y="44" width="16" height="11" rx="4" fill="' + ink + '"/><rect x="61" y="44" width="16" height="11" rx="4" fill="' + ink + '"/><path d="M59 49 L61 49" stroke="' + ink + '" stroke-width="2.2"/>'; break;
+      case 'business': prop = '<path d="M50 84 L60 98 L70 84" fill="#fff" stroke="' + ink + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M57 92 L60 122 L63 92 Z" fill="' + ink + '"/>'; break;
+      case 'shopping': prop = '<rect x="86" y="94" width="24" height="26" rx="3" fill="#fff" stroke="' + ink + '" stroke-width="2.2"/><path d="M92 94 C92 84 104 84 104 94" fill="none" stroke="' + ink + '" stroke-width="2.2"/>'; break;
+      case 'income': prop = '<circle cx="96" cy="104" r="11" fill="#fff" stroke="' + ink + '" stroke-width="2.2"/><path d="M96 98 L96 110 M92 101 L100 101 M92 107 L100 107" stroke="' + ink + '" stroke-width="2"/>'; break;
+      case 'life-stage': prop = '<path d="M26 108 C22 100 32 96 34 104 C36 96 46 100 42 108 L34 116 Z" fill="' + ink + '"/>'; break;
+      default: prop = '';
+    }
+    var body = defs + top + neck + head + hairs[hair] + eyes + mouth + prop;
+    return '<svg viewBox="0 0 120 122" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name) + '"' + (flip ? ' style="transform:scaleX(-1)"' : '') + '>' + body + '</svg>';
+  }
+
+  /* ── The bars ────────────────────────────────────────────────────
+     Media consumption as five small bars with their values, in the
+     lens colour, the strongest channel at full strength. Bars grow
+     from the baseline when an ancestor gains .is-live.                */
+  function bars(el, seg, opts) {
+    opts = opts || {};
+    var chans = CHANNELS.filter(function (c) { return seg.consumption[c.key] != null; }).slice(0, 5);
+    var SHORT = { video: 'Video', audio: 'Audio', tv: 'TV', podcast: 'Podcast', social: 'Social', games: 'Games', communities: 'Forums' };
+    var W = 160, H = 96, base = 76, maxH = 54, n = chans.length, gap = 8, bw = (W - 16 - gap * (n - 1)) / n;
+    var best = Math.max.apply(null, chans.map(function (c) { return seg.consumption[c.key]; }));
+    var out = chans.map(function (c, i) {
+      var v = seg.consumption[c.key], bh = maxH * v / 100, x = 8 + i * (bw + gap);
+      return '<g class="am-bar" style="--am-i:' + i + '">' +
+        '<rect class="am-bar-fill' + (v === best ? ' is-best' : '') + '" x="' + x.toFixed(1) + '" y="' + (base - bh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="3" style="transform-origin:0 ' + base + 'px"/>' +
+        '<text class="am-bar-val" x="' + (x + bw / 2).toFixed(1) + '" y="' + (base - bh - 5).toFixed(1) + '" text-anchor="middle">' + v + '%</text>' +
+        '<text class="am-bar-lbl" x="' + (x + bw / 2).toFixed(1) + '" y="' + (base + 13) + '" text-anchor="middle">' + SHORT[c.key] + '</text></g>';
+    }).join('');
+    el.classList.add('am-bars');
+    if (opts.still) el.classList.add('is-still');
+    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc('Media consumption: ' + chans.map(function (c) { return channelLabel(c.key) + ' ' + seg.consumption[c.key] + '%'; }).join(', ')) + '">' +
+      '<line class="am-bar-base" x1="8" y1="' + base + '" x2="' + (W - 8) + '" y2="' + base + '"/>' + out + '</svg>';
+    return el;
+  }
+
   /* ── The jar ─────────────────────────────────────────────────────
      The universe is a jar of discs. AudienceMarks.jar.build() sizes one
      disc per segment so together they fill the stage, and lines them
@@ -294,5 +367,5 @@
     }
   };
 
-  window.AudienceMarks = { arc: arc, pack: pack, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
+  window.AudienceMarks = { arc: arc, bars: bars, doodle: doodle, pack: pack, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
 })();
