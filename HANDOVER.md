@@ -51,13 +51,16 @@ see [Gotchas](#gotchas).
 | `formats-data.js` | The format catalogue: specs transcribed from kult.my/gallery (2026-09-07) merged with the rate card's `bestFor` / `cpm` / `inventory`. The nine standard display units are catalogue defaults, flagged `source: "catalogue"` |
 | `format-previews.css` / `format-previews.js` | The live samples. `FormatPreviews.mount(el, format)` draws the miniature, `FormatPreviews.live(el, on)` plays it. Independent of the page so the planner can reuse it |
 | `audiences-data.js` | The audience catalogue: 51 segments read from kult.my/audience (2026-09-08) with size, portrait, properties, consumption and topics; Karen's addressable counts and fit notes on the ten that map by name; her refine dimensions and overlap rule |
-| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.doodle(segment)` draws the scene (its house rules are written at the head of that section), `AudienceMarks.arc(el, segment)` the consumption rings, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`, `resize(J, stage)`, `setActive(J, ids)`, `setLens(J, lens)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
+| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.arc(el, segment)` draws the consumption rings, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`, `resize(J, stage)`, `setActive(J, ids)`, `setLens(J, lens)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
 
 ### Assets (`assets/audiences/`)
 
-The 51 segment portraits from kult.my, resized to 720px on the long edge
-(6.8 MB). No page references them any more (the Segments tab draws each
-segment instead); they are kept only until someone decides to delete them.
+`stills/` holds the drawn illustration masters, one per segment at 2400px
+(149 MB, kept out of git); `stills-web/` holds the 700px JPEGs the page
+loads (2.3 MB), regenerated with
+`for f in assets/stills/*.png; do sips -Z 700 -s format jpeg -s formatOptions 88 "$f" --out "assets/stills-web/$(basename "$f" .png).jpg"; done`.
+`audiences/` holds the 51 kult.my photographs, which nothing references
+any more and which are kept until someone decides to delete them.
 
 ### Design system (`collabrium-dls/`)
 

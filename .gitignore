@@ -1,2 +1,6 @@
 .vercel
 .env*
+
+# Source illustrations: 2400px masters, ~149 MB. The web copies the
+# page actually loads live in assets/stills-web and are committed.
+assets/stills/

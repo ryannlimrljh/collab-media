@@ -573,7 +573,7 @@
 </div>
 
 <!-- Table view: the portrait that floats beside the hovered row -->
-<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><div class="au-doodle" id="auRowpeekDoodle"></div><div class="au-arcwrap"><div id="auRowpeekArc"></div></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
+<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><img class="au-doodle" id="auRowpeekArt" alt="" /><div class="au-arcwrap"><div id="auRowpeekArc"></div></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
 
 <!-- Detail modal: swings out of the card you clicked -->
 <div class="au-cardmodal" id="auModal">
@@ -792,6 +792,9 @@
     var on = tray.indexOf(s.id) > -1, lbl = on ? 'Remove from reach tray' : 'Add to reach tray';
     return '<button type="button" class="' + cls + (on ? ' is-on' : '') + '" data-add="' + s.id + '" aria-pressed="' + on + '" aria-label="' + lbl + '" title="' + lbl + '"><i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i></button>';
   }
+  /* The illustration for a segment. Drawn art, one per segment, sized
+     for the web from the originals in assets/stills. */
+  function art(s) { return '<img class="au-doodle" src="../assets/stills-web/' + s.id + '.jpg" alt="" loading="lazy" />'; }
   function propsLine(s, n) {
     var ks = s.properties.map(function (p) { return PROP_SHORT[p.key]; });
     return ks.slice(0, n).join(' · ') + (ks.length > n ? ' +' + (ks.length - n) : '');
@@ -799,7 +802,7 @@
   function cardHtml(s, i) {
     var inTray = tray.indexOf(s.id) > -1, top = topChannels(s, 1)[0];
     return '<article class="au-card ' + lensClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
-      '<div class="au-stage"><div class="au-doodle" data-doodle></div><div class="au-arcwrap"><div data-arc></div></div>' +
+      '<div class="au-stage">' + art(s) + '<div class="au-arcwrap"><div data-arc></div></div>' +
         '<span class="au-touchhint"><i class="ph ph-play"></i>Tap to see</span>' +
         '<div class="au-ctl">' + addBtn(s, 'au-add') + '</div>' +
       '</div>' +
@@ -870,9 +873,7 @@
     var grid = E('auGrid');
     grid.innerHTML = current.map(cardHtml).join('');
     grid.querySelectorAll('.au-card').forEach(function (card) {
-      var sg = byId[card.dataset.id];
-      card.querySelector('[data-doodle]').innerHTML = M.doodle(sg);
-      M.arc(card.querySelector('[data-arc]'), sg);
+      M.arc(card.querySelector('[data-arc]'), byId[card.dataset.id]);
     });
     E('auRows').innerHTML = current.map(rowHtml).join('');
     var mapped = current.filter(function (s) { return s.addressable != null; }).length;
@@ -914,7 +915,7 @@
     var top = topChannels(s, 1)[0];
     return '<tr data-id="' + s.id + '" class="' + lensClass(s) + '">' +
       '<td class="sel">' + addBtn(s, 'au-rowadd') + '</td>' +
-      '<td><div class="who"><div class="au-doodle">' + M.doodle(s) + '</div><div><b>' + esc(s.name) + '</b><small>' + esc(lensOf[s.lens].label) + '</small></div></div></td>' +
+      '<td><div class="who">' + art(s) + '<div><b>' + esc(s.name) + '</b><small>' + esc(lensOf[s.lens].label) + '</small></div></div></td>' +
       '<td>' + groupTag(s) + '</td>' +
       '<td class="num">' + fmtM(s.size) + '</td>' +
       '<td class="num">' + (s.addressable != null ? fmtK(s.addressable) : '<span class="muted">—</span>') + '</td>' +
@@ -934,7 +935,7 @@
       peekId = s.id;
       peekSwapTimer = setTimeout(function () {
         peek.className = 'au-rowpeek is-visible is-switching ' + lensClass(s) + (wasVisible ? '' : ' is-jumping');
-        E('auRowpeekDoodle').innerHTML = M.doodle(s);
+        E('auRowpeekArt').src = '../assets/stills-web/' + s.id + '.jpg';
         M.arc(E('auRowpeekArc'), s, { still: true });
         E('auRowpeekLbl').textContent = s.name + ' · ' + fmtM(s.size);
         peek.classList.remove('is-switching');
@@ -1226,7 +1227,7 @@
     E('auDrawerBody').className = 'au-dbody ' + lensClass(s);
     E('auDrawerBody').innerHTML =
       '<div class="au-dside">' +
-        '<div class="au-dpic"><div class="au-doodle">' + M.doodle(s) + '</div></div>' +
+        '<div class="au-dpic">' + art(s) + '</div>' +
         '<div><div class="au-dsize"><b>' + fmtM(s.size) + '</b><span>Audience size · published by KULT</span></div>' +
         (s.addressable != null ? '<div class="au-dsize addr"><b>' + fmtK(s.addressable) + '</b><span>Addressable on KULT digital · planner count</span><p>' + esc(s.fit) + '</p></div>' : '') + '</div>' +
       '</div>' +
@@ -1241,7 +1242,7 @@
         }).join('') + '</div></div>' +
         '<div class="au-section"><h5>What they read about</h5><div class="au-chipset">' + s.topics.map(function (t) { return '<span class="c-chip">' + esc(t) + '</span>'; }).join('') + '</div></div>' +
         (rel.length ? '<div class="au-section"><h5>Also see</h5><div class="au-related">' + rel.map(function (x) {
-          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic"><div class="au-doodle">' + M.doodle(x) + '</div></div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(groupOf[x.group].label) + '</small></span></button>';
+          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic">' + art(x) + '</div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(groupOf[x.group].label) + '</small></span></button>';
         }).join('') + '</div></div>' : '') +
       '</div>';
     var inTray = tray.indexOf(s.id) > -1;
@@ -1387,7 +1388,7 @@
     var sameGroup = Object.keys(groupsIn).filter(function (k) { return groupsIn[k] > 1; }).map(function (k) { return groupOf[k].label; });
     E('auSheet').innerHTML =
       '<div class="au-sheetcols" style="--n:' + list.length + '">' + list.map(function (s) {
-        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live"><div class="au-doodle">' + M.doodle(s) + '</div><div class="au-arcwrap"><div data-sheetarc="' + s.id + '"></div></div></div>' +
+        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live">' + art(s) + '<div class="au-arcwrap"><div data-sheetarc="' + s.id + '"></div></div></div>' +
           '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span></div></div>';
       }).join('') + '</div>' +
       '<div class="au-sheetgrid">' +

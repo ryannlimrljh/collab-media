@@ -363,3 +363,13 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   and a pusher three-quarter) and by the seed otherwise, and a profile
   shows one eye with the mouth beneath it. Legs grew to nearly half the
   figure, and sitting now folds the knees up with the body on the ground.
+- 2026-09-08, seventeenth pass: the user supplied drawn artwork, one
+  illustration per segment, in the style the last several passes had been
+  chasing. It replaces the generated doodles everywhere a segment is
+  pictured — card, table row, row preview, drawer, related cards, reach
+  sheet. The 2400px masters live in `assets/stills/` and are kept out of
+  git (149 MB); the page loads 700px JPEGs from `assets/stills-web/`,
+  2.3 MB for all 51, generated with `sips -Z 700 -s formatOptions 88`.
+  Both sets are named by segment id, and the art is 4:3 like every box
+  that holds it. The doodle generator came out of the marks module with
+  them, which leaves it at 261 lines: the consumption arc and the jar.

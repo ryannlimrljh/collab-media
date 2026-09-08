@@ -22,5 +22,9 @@
   .is-live .am-arc .am-val{animation:none;}
 }
 
-/* .au-doodle host: the drawing fills whatever box it is given. */
-.au-doodle{display:block;} .au-doodle svg{display:block; width:100%; height:100%;}
+/* .au-doodle  the segment's illustration, filling whatever box it is
+                given. The art is 4:3, as every box that holds it is.
+                Width and height are spelled out because an absolutely
+                positioned replaced element keeps its intrinsic size
+                however its offsets are set. */
+.au-doodle{display:block; width:100%; height:100%; object-fit:cover;}
