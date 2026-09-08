@@ -549,3 +549,7 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   instead, which the `inside` flag already allowed for. 87px of clearance
   with the tray open or shut, 143px under a lens, and the discs are about
   a tenth smaller for it.
+- 2026-09-09, and smaller with it: the weight was carrying the emphasis,
+  so the figure came down from clamp(52-96px) to clamp(34-58px) and kept
+  Mulish 900. The block is 72px tall rather than 103, which the measured
+  ceiling passes straight back to the discs.
