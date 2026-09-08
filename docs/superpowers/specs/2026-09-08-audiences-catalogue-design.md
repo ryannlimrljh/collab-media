@@ -207,3 +207,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   clocks and ease away from the pointer, small ones further than large,
   written by one animation-frame loop; reduced motion stops it. The
   picture is fitted between the chips above and the reach tray below.
+- 2026-09-08, fourth pass, on the user's notes and a glass-blob reference:
+  the universe left SVG for HTML. Every bubble is a button of frosted
+  glass — three washes of the lens's DLS colours (Earth: green and
+  turquoise; Water: navy and purple; Fire: orange, salmon and amber) that
+  wander slowly inside it, a white highlight, a backdrop blur, a hairline
+  of white — over three ambient washes that drift behind the field. The
+  layout fills the whole canvas: one scale so the bubbles cover about
+  seventy percent of it, overlapping a little, groups spread across the
+  space and relaxed apart, every bubble labelled with its name and size.
+  Each group has a depth and each bubble a depth within it: nearer
+  bubbles draw larger and on top, shift more with the pointer, and the
+  whole plane tilts a few degrees toward it. The hover flicker is gone
+  because the hit box no longer moves: the box holds its place while the
+  glass inside drifts, swells and gives way, the hovered bubble is never
+  pushed, and leaving waits a beat before the field relaxes. The
+  Properties arrangement was dropped; Groups and Size remain.
