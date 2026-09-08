@@ -234,3 +234,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   set down together, not a target, and a final firm pass guarantees the
   gap. The drift and the give-way to the pointer stay, at a fraction of
   their former reach.
+- 2026-09-08, sixth pass, on the user's notes: the universe became a jar.
+  There are no group rooms any more; the discs pour in from the top in
+  lens-and-group order and settle under gravity, filling the space the
+  way marbles fill a jar. `AudienceMarks.jar` is the physics — build,
+  step, settle — position-based so the pile goes still; it runs every
+  frame on the page, and settles at once for reduced motion or a hidden
+  page. The pointer is a hand: moving through the jar stirs it (discs
+  give way and drift with it), resting on a disc hovers it, and the disc
+  under the pointer is found by distance rather than by the browser so a
+  disc drifting under a still pointer still lights. Labels are smaller
+  and white on every disc, so the colour ramp now starts at half strength
+  to carry them; the lightest steps sit below the AA contrast line for
+  small text, which the hover card and the Segments tab cover. The
+  filters collapsed to one row: the lens chips and a single "Lives on"
+  pill that opens the nine properties. The Arrange chips and the group
+  captions are gone, since the jar has no arrangements to choose.

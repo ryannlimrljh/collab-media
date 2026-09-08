@@ -74,66 +74,49 @@
   .au-world{position:absolute; inset:0; transform-origin:0 0; transition:transform 560ms var(--ease-flow);}
   .au-space.is-direct .au-world{transition:none;}
 
-  /* A bubble is a button: the outer box is its hit area and its place
-     on the world; the inner group carries the drift the motion loop
-     writes; the disc inside scales on hover. The box under the pointer
-     never moves while the disc does — that is what keeps hover steady. */
+  /* A disc is a button. Its place is written every frame by the jar,
+     so there is no transition on position; only the fill and the lift
+     on hover ease. */
   .au-bub{position:absolute; left:0; top:0; width:var(--d); height:var(--d); margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
     transform:translate3d(var(--x), var(--y), 0); border:0; padding:0; background:transparent; font:inherit; color:inherit; cursor:pointer; border-radius:50%; outline:none;
-    transition:transform 760ms var(--ease-settle), width 760ms var(--ease-settle), height 760ms var(--ease-settle), margin 760ms var(--ease-settle), opacity 420ms var(--ease-standard);}
+    transition:opacity 420ms var(--ease-standard); will-change:transform;}
   .au-bub.is-out{opacity:0; pointer-events:none;}
   .au-bub.is-hot{z-index:5;}
-  .au-bub-in{position:absolute; inset:0; will-change:transform;}
   /* One flat colour per lens, deeper with size: --t is 0 for the
      smallest audience and 1 for the largest, and the fill mixes the
-     element colour into white by it. Ink stays dark on every step. */
+     element colour into white by it. Ink is white throughout. */
   .au-bub-vis{position:absolute; inset:0; border-radius:50%;
-    background:color-mix(in srgb, var(--au-color) calc(18% + var(--t, .5) * 82%), #fff);
-    transition:transform 380ms var(--ease-settle), box-shadow 380ms var(--ease-standard), background-color var(--duration-base) var(--ease-standard);}
-  .au-bub-txt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 11%; pointer-events:none;}
-  .au-bub-txt b{font-size:var(--fs, 12px); line-height:1.08; font-weight:700; color:var(--color-neutral-9); letter-spacing:-.01em;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .au-bub-txt small{font-size:calc(var(--fs, 12px) * .8); line-height:1.1; font-weight:600; color:var(--color-neutral-9); opacity:.7; margin-top:3px; font-variant-numeric:tabular-nums;}
-  .au-bub.is-deep .au-bub-txt b,.au-bub.is-deep .au-bub-txt small{color:var(--color-neutral-1); opacity:1;}
-  .au-bub.is-deep .au-bub-txt small{opacity:.85;}
+    background:color-mix(in srgb, var(--au-color) calc(52% + var(--t, .5) * 48%), #fff);
+    transition:transform 380ms var(--ease-settle), box-shadow 380ms var(--ease-standard);}
+  .au-bub-txt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 12%; pointer-events:none;}
+  .au-bub-txt b{font-size:var(--fs, 11px); line-height:1.1; font-weight:700; color:var(--color-neutral-1); letter-spacing:0;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 2px rgba(43,43,44,.22);}
+  .au-bub-txt small{font-size:calc(var(--fs, 11px) * .82); line-height:1.1; font-weight:600; color:var(--color-neutral-1); opacity:.85; margin-top:2px; font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(43,43,44,.22);}
   .au-bub.is-small .au-bub-txt small{display:none;}
-  /* Hover: the disc lifts a little and the rest of the field recedes. */
-  .au-bub.is-hot .au-bub-vis{transform:scale(1.06); box-shadow:0 14px 30px -14px rgba(43,43,44,.35);}
+  .au-bub.is-tiny .au-bub-txt{display:none;}
+  .au-bub.is-hot .au-bub-vis{transform:scale(1.06); box-shadow:0 14px 30px -14px rgba(43,43,44,.4);}
   .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.34;}
   .au-bub:focus-visible .au-bub-vis{box-shadow:0 0 0 2px var(--color-neutral-1), 0 0 0 4px var(--color-obsidian);}
-  /* A group's name sits above its cluster. */
-  .au-gcap{position:absolute; left:0; top:0; transform:translate(-50%, -100%); padding:0 0 4px; pointer-events:none; z-index:1; white-space:nowrap;
-    font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:800; color:var(--color-neutral-5);
-    transition:transform 760ms var(--ease-settle), opacity 420ms var(--ease-standard);}
-  .au-gcap.is-out{opacity:0;}
-  .au-space.has-hot .au-gcap:not(.is-kin){opacity:.35;}
-  .au-space.has-hot .au-gcap.is-kin{color:var(--au-color);}
   .au-sk-bub{position:absolute; border-radius:50%; background:var(--color-neutral-2); transform:translate(-50%, -50%);}
-  @media (prefers-reduced-motion:reduce){
-    .au-bub,.au-bub-vis,.au-world,.au-gcap{transition:none;}
-  }
+  @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
 
   /* Overlays: the corners of the canvas. */
   .au-ovl{position:absolute; z-index:4; display:flex; gap:var(--spacing-8); align-items:center; flex-wrap:wrap; max-width:calc(100% - 32px);}
-  .au-ovl-tl{left:var(--spacing-20); top:var(--spacing-16); flex-direction:column; align-items:flex-start; gap:var(--spacing-8);}
+  .au-ovl-tl{left:var(--spacing-20); top:var(--spacing-16);}
   .au-ovl-br{right:var(--spacing-20); bottom:var(--spacing-16);}
   .au-ovl-tr{right:var(--spacing-20); top:var(--spacing-16); justify-content:flex-end;}
-  .au-arrange{display:flex; align-items:center; gap:var(--spacing-8);}
-  .au-lens,.au-styles{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
-  .au-lens .c-chip-filter,.au-styles .c-chip-filter{white-space:nowrap; background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
-  .au-lens .c-chip-filter.is-active,.au-styles .c-chip-filter.is-active{background:var(--color-obsidian);}
+  .au-lens{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
+  .au-lens .c-chip-filter{white-space:nowrap; background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
+  .au-lens .c-chip-filter.is-active{background:var(--color-obsidian);}
   .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px;}
   .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
-  .au-styles .c-chip-filter i{font-size:14px; margin-right:6px;}
-  .au-ovl-lbl{font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-right:var(--spacing-4); white-space:nowrap;}
-  .au-props{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
-  .au-prop{height:26px; padding:0 9px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); font:inherit; font-size:11px; font-weight:700;
-    color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:var(--shadow-1);
-    transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
-  .au-prop .n{color:var(--color-neutral-5); font-weight:600; font-variant-numeric:tabular-nums;}
-  .au-prop:hover,.au-prop:focus-visible,.au-prop.is-on{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
-  .au-prop:hover .n,.au-prop:focus-visible .n,.au-prop.is-on .n{color:var(--color-neutral-3);}
-  .au-prop:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  /* Lives on: one pill that opens the nine properties. Hovering one
+     lights its segments; a click pins it. */
+  .au-livepill .c-filter-trigger{background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
+  .au-livepill .c-filter-option .label{display:flex; align-items:center; gap:6px; flex:1;}
+  .au-livepill .c-filter-option .label .n{margin-left:auto; color:var(--color-neutral-4); font-variant-numeric:tabular-nums;}
+  .au-livepill .c-filter-option.is-pinned .label{font-weight:800;}
+  .au-livepill .c-filter-footer{justify-content:flex-end;}
   .au-zoom{display:inline-flex; align-items:center; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); box-shadow:var(--shadow-1); padding:3px;}
   .au-zoom button{width:30px; height:30px; border-radius:50%; border:0; background:transparent; font:inherit; color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px;
     transition:background-color var(--duration-fast) var(--ease-standard);}
@@ -163,7 +146,6 @@
     .au-ovl-tr{display:none;}
   }
   @media (max-width:640px){
-    .au-props,.au-arrange .au-ovl-lbl{display:none;}
     .au-ovl-tl{gap:var(--spacing-4);}
   }
 
@@ -488,10 +470,12 @@
         <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
         <div class="au-ovl au-ovl-tl">
           <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
-          <div class="au-props" id="auProps"></div>
-          <div class="au-arrange"><span class="au-ovl-lbl">Arrange</span><div class="au-styles" id="auStyles" role="radiogroup" aria-label="Arrangement"></div></div>
+          <div class="au-pill au-livepill" id="auLivePill">
+            <button class="c-filter-trigger" type="button" id="auLiveBtn" aria-haspopup="true" aria-expanded="false">Lives on <i class="ph ph-caret-down chev"></i></button>
+            <div class="c-filter-panel" id="auLivePanel"></div>
+          </div>
         </div>
-        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Drag to move · scroll to zoom · double-click a bubble</span>
+        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-hand"></i>Move through the jar to stir it · scroll to zoom</span>
           <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span></div>
         <div class="au-ovl au-ovl-br">
           <div class="au-zoom" role="group" aria-label="Zoom">
@@ -692,8 +676,7 @@
   function hasProp(s, key) { return s.properties.some(function (p) { return p.key === key; }); }
 
   /* ── State ──────────────────────────────────────────────────────── */
-  var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all', style: 'rings', tab: 'universe' };
-  try { var ss = sessionStorage.getItem('collab-audiences-style'); if (ss) state.style = ss; } catch (e) {}
+  var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all', tab: 'universe' };
   function filtered() {
     var q = state.q.trim().toLowerCase();
     var rows = A.filter(function (s) {
@@ -991,24 +974,17 @@
     });
     E('auPanelUniverse').hidden = tab !== 'universe';
     E('auPanelCards').hidden = tab !== 'cards';
-    if (tab === 'universe') { hotNode(null); renderUniverse({ keepView: !!layout }); }
+    if (tab === 'universe') { hotNode(null); motion.last = 0; renderUniverse({ keepView: !!layout }); }
     else { stopMotion(); hideRowpeek(true); staggerIn(visibleItems()); }
     if (!silent) try { history.replaceState(null, '', tab === 'cards' ? '?tab=cards' : location.pathname); } catch (e) {}
   }
   document.querySelector('.au-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 
-  /* ── The universe ───────────────────────────────────────────────── */
+  /* ── The universe: a jar ────────────────────────────────────────── */
   var space = E('auSpace'), world = E('auWorld'), stageLbl = E('auStageLbl');
-  var bubs = {}, caps = {}, layout = null, layoutById = {}, hotId = null, pinnedProp = null, hotProp = null;
+  var bubs = {}, J = null, ballById = {}, layout = null, hotId = null, pinnedProp = null, hotProp = null;
   var view = { k: 1, tx: 0, ty: 0 }, ZMIN = 0.5, ZMAX = 4;
-  var STYLES = [
-    { key: 'groups', label: 'Groups', icon: 'ph-circles-three', hint: 'Each group gathers its own segments' },
-    { key: 'size',   label: 'Size',   icon: 'ph-circles-four',  hint: 'Every segment in one field, largest in the middle' }
-  ];
-  if (state.style !== 'size') state.style = 'groups';
   function sizeCanvas() {
-    /* The canvas takes whatever the viewport has left under the tabs,
-       so the corner controls always sit on screen. */
     var uni = E('auPanelUniverse'), top = uni.getBoundingClientRect().top;
     uni.style.setProperty('--au-h', Math.max(480, Math.round(window.innerHeight - top - 28)) + 'px');
   }
@@ -1020,104 +996,90 @@
         return '<button type="button" role="radio" class="c-chip c-chip-filter lens-' + l.key + (state.lens === l.key ? ' is-active' : '') + '" data-lens="' + l.key + '" aria-checked="' + (state.lens === l.key) + '"><i class="dot"></i>' + esc(l.label) + ' <span class="count">' + n + '</span></button>';
       }).join('');
   }
-  function renderStyleChips() {
-    E('auStyles').innerHTML = STYLES.map(function (st) {
-      return '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.style === st.key ? ' is-active' : '') + '" data-style="' + st.key + '" aria-checked="' + (state.style === st.key) + '" title="' + esc(st.hint) + '"><i class="ph ' + st.icon + '"></i>' + esc(st.label) + '</button>';
-    }).join('');
-  }
   E('auLens').addEventListener('click', function (e) {
     var b = e.target.closest('[data-lens]'); if (!b) return;
     hotNode(null); state.lens = b.dataset.lens; renderLensChips(); renderUniverse();
   });
-  E('auStyles').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-style]'); if (!b) return;
-    hotNode(null); state.style = b.dataset.style; renderStyleChips(); renderUniverse();
-    try { sessionStorage.setItem('collab-audiences-style', state.style); } catch (x) {}
-  });
   function buildUniverse() {
-    world.innerHTML = ''; bubs = {}; caps = {};
-    GROUPS.forEach(function (g) {
-      var c = document.createElement('span'); c.className = 'au-gcap is-out lens-' + g.lens; c.textContent = g.label; c.setAttribute('aria-hidden', 'true');
-      world.appendChild(c); caps[g.key] = c;
-    });
+    world.innerHTML = ''; bubs = {};
     A.forEach(function (s) {
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'au-bub is-out lens-' + s.lens; b.dataset.id = s.id;
       b.setAttribute('aria-label', s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details');
-      b.innerHTML = '<span class="au-bub-in"><span class="au-bub-vis"></span>' +
-        '<span class="au-bub-txt"><b>' + esc(s.name) + '</b><small>' + fmtM(s.size) + '</small></span></span>';
+      b.innerHTML = '<span class="au-bub-vis"></span><span class="au-bub-txt"><b>' + esc(s.name) + '</b><small>' + fmtM(s.size) + '</small></span>';
       world.appendChild(b); bubs[s.id] = b;
     });
+  }
+  function draw() {
+    if (!J) return;
+    J.balls.forEach(function (b) {
+      bubs[b.id].style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0)';
+    });
+    if (hotId) placeLabel();
   }
   function renderUniverse(opts) {
     if (E('auPanelUniverse').hidden) return;
     sizeCanvas();
     var sz = stageSize();
-    /* The chips float over the top of the canvas and the reach tray
-       over the bottom, so the field is laid out between them. */
-    var ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 90) + 28;
-    layout = M.layoutSpace(A, state.lens, { w: sz.w, h: sz.h, padTop: padTop, padBottom: tray.length ? 84 : 20 }, state.style);
-    layout.w = sz.w; layout.h = sz.h;
-    layoutById = {}; layout.nodes.forEach(function (n) { layoutById[n.id] = n; });
+    /* The chips float over the top of the jar and the reach tray over
+       the bottom, so the jar is the space between. */
+    var ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 40) + 24;
+    J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: padTop, padBottom: tray.length ? 84 : 16 });
+    layout = { w: sz.w, h: sz.h };
+    ballById = {}; J.balls.forEach(function (b) { ballById[b.id] = b; });
     A.forEach(function (s) {
-      var b = bubs[s.id], n = layoutById[s.id];
-      if (!n) { b.classList.add('is-out'); return; }
-      var d = n.r * 2, fs = Math.max(10, Math.min(17, n.r * 0.3));
-      b.style.setProperty('--x', n.x.toFixed(1) + 'px'); b.style.setProperty('--y', n.y.toFixed(1) + 'px');
-      b.style.setProperty('--d', d.toFixed(1) + 'px'); b.style.setProperty('--t', n.t.toFixed(3));
-      b.style.setProperty('--fs', fs.toFixed(1) + 'px');
-      b.classList.toggle('is-small', n.r < 30);
-      /* White ink only where the fill is deep enough to carry it. */
-      b.classList.toggle('is-deep', n.t >= 0.82 && s.lens === 'love');
-      b.classList.remove('is-out');
+      var el = bubs[s.id], b = ballById[s.id];
+      if (!b) { el.classList.add('is-out'); return; }
+      var fs = Math.max(9, Math.min(12, b.r * 0.24));
+      el.style.setProperty('--d', (b.r * 2).toFixed(1) + 'px'); el.style.setProperty('--t', b.t.toFixed(3));
+      el.style.setProperty('--fs', fs.toFixed(1) + 'px');
+      el.classList.toggle('is-small', b.r < 34); el.classList.toggle('is-tiny', b.r < 17);
+      el.classList.remove('is-out');
     });
-    var seen = {};
-    layout.groups.forEach(function (g) {
-      var c = caps[g.key]; if (!c) return; seen[g.key] = true;
-      c.style.transform = 'translate(' + g.x.toFixed(1) + 'px,' + (g.top - 8).toFixed(1) + 'px) translate(-50%, -100%)';
-      c.classList.remove('is-out');
-    });
-    GROUPS.forEach(function (g) { if (!seen[g.key]) caps[g.key].classList.add('is-out'); });
+    /* Reduced motion, or a page nobody can see, gets the settled jar at
+       once; otherwise the discs pour in from the top. */
+    if (REDUCED || document.hidden) M.jar.settle(J, 700);
+    draw();
     if (!(opts && opts.keepView)) setView(1, 0, 0, false);
     startMotion();
     if (pinnedProp) hotProperty(pinnedProp);
-    if (hotId) placeLabel();
   }
 
-  /* ── Motion: the field breathes and gives way, quietly. Each bubble
-     drifts a pixel or two on its own slow clock, and the pointer eases
-     bubbles aside, small ones a little further than large, never the
-     one under it. One transform write per bubble per frame. ── */
-  var motion = { raf: 0, px: 0, py: 0, has: false, items: [] };
-  function startMotion() {
-    motion.items = layout.nodes.map(function (n) {
-      var h = n.id.split('').reduce(function (t, ch) { return (t * 31 + ch.charCodeAt(0)) % 997; }, 0);
-      return { n: n, el: bubs[n.id].firstChild, ph: h / 997 * Math.PI * 2, sp: 0.7 + (h % 40) / 100, amp: Math.min(2.2, 0.8 + 24 / (n.r + 12)), cx: 0, cy: 0 };
-    });
-    if (!REDUCED && !motion.raf) motion.raf = requestAnimationFrame(motionFrame);
-  }
+  /* ── Motion: the jar runs every frame. The pointer is a hand: while
+     it moves through the jar it stirs — discs give way and drift with
+     it — and when it rests, the disc under it is simply hovered. The
+     disc under the pointer is found by distance, not by the browser,
+     so a disc drifting under a still pointer still lights. ── */
+  var motion = { raf: 0, px: 0, py: 0, has: false, last: 0, hx: 0, hy: 0, hvx: 0, hvy: 0, stirring: false, stillSince: 0 };
+  function startMotion() { if (!REDUCED && !motion.raf) motion.raf = requestAnimationFrame(motionFrame); }
   function stopMotion() { if (motion.raf) { cancelAnimationFrame(motion.raf); motion.raf = 0; } }
   function motionFrame(t) {
     motion.raf = 0;
-    if (E('auPanelUniverse').hidden || document.hidden) return;
-    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k, R = 170 / Math.sqrt(view.k);
-    motion.items.forEach(function (it) {
-      var n = it.n, tx = Math.sin(t * 0.00042 * it.sp + it.ph) * it.amp, ty = Math.cos(t * 0.00035 * it.sp + it.ph * 1.3) * it.amp;
-      if (motion.has && !drag && n.id !== hotId) {
-        var dx = n.x - wx, dy = n.y - wy, d = Math.sqrt(dx * dx + dy * dy) || 1;
-        if (d < R) {
-          var f = Math.pow(1 - d / R, 2) * 10 * Math.max(0.4, Math.min(1.3, 30 / (n.r + 14)));
-          tx += dx / d * f; ty += dy / d * f;
-        }
-      }
-      it.cx += (tx - it.cx) * 0.08; it.cy += (ty - it.cy) * 0.08;
-      it.el.style.transform = 'translate3d(' + it.cx.toFixed(2) + 'px,' + it.cy.toFixed(2) + 'px,0)';
-    });
+    if (E('auPanelUniverse').hidden || document.hidden || !J) return;
+    var dt = motion.last ? Math.min(0.05, (t - motion.last) / 1000) : 1 / 60; motion.last = t;
+    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k;
+    /* The hand's speed, smoothed; it stirs above a walking pace. */
+    var hvx = (wx - motion.hx) / Math.max(dt, 1 / 120), hvy = (wy - motion.hy) / Math.max(dt, 1 / 120);
+    motion.hvx += (hvx - motion.hvx) * 0.35; motion.hvy += (hvy - motion.hvy) * 0.35;
+    motion.hx = wx; motion.hy = wy;
+    var speed = Math.sqrt(motion.hvx * motion.hvx + motion.hvy * motion.hvy);
+    var stir = motion.has && !drag && speed > 90;
+    if (stir) { motion.stillSince = t; if (hotId) hotNode(null); }
+    motion.stirring = stir || (t - motion.stillSince < 220);
+    var hand = stir ? { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 58 / Math.sqrt(view.k), on: true } : null;
+    var settled = J.energy != null && J.energy < 0.5 && J.time > J.balls.length * 0.028 + 1.5;
+    if (!settled || hand) { M.jar.step(J, dt, hand); draw(); }
+    /* At rest, the disc under the pointer is the hot one. */
+    if (motion.has && !drag && !motion.stirring) {
+      var under = null;
+      J.balls.forEach(function (b) { var dx = b.x - wx, dy = b.y - wy; if (dx * dx + dy * dy <= b.r * b.r) under = b.id; });
+      if (under !== hotId && !(TOUCH && !under)) hotNode(under);
+    }
     motion.raf = requestAnimationFrame(motionFrame);
   }
-  space.addEventListener('pointermove', function (e) { var p = stageXY(e); motion.px = p.x; motion.py = p.y; motion.has = e.pointerType !== 'touch'; });
-  space.addEventListener('pointerleave', function () { motion.has = false; });
-  document.addEventListener('visibilitychange', function () { if (!document.hidden && layout && !E('auPanelUniverse').hidden) startMotion(); });
+  space.addEventListener('pointermove', function (e) { var p = stageXY(e); motion.px = p.x; motion.py = p.y; motion.has = e.pointerType !== 'touch'; startMotion(); });
+  space.addEventListener('pointerleave', function () { motion.has = false; if (hotId) hotNode(null); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && J && !E('auPanelUniverse').hidden) { motion.last = 0; startMotion(); } });
 
   /* ── Pan and zoom ── */
   function setView(k, tx, ty, direct) {
@@ -1133,7 +1095,7 @@
   }
   function stageXY(e) { var r = space.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
   function focusNode(id) {
-    var n = layoutById[id]; if (!n) return;
+    var n = ballById[id]; if (!n) return;
     var sz = stageSize(), k = Math.min(2.4, Math.max(1.5, 130 / Math.max(20, n.r)));
     setView(k, sz.w / 2 - n.x * k, sz.h / 2 - n.y * k, false);
   }
@@ -1176,32 +1138,22 @@
   /* ── Hover, focus, click ── */
   function worldToStage(x, y) { return { x: x * view.k + view.tx, y: y * view.k + view.ty }; }
   function placeLabel() {
-    var n = layoutById[hotId]; if (!n) return;
+    var n = ballById[hotId]; if (!n) return;
     var p = worldToStage(n.x, n.y - n.r * 1.06);
     stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
   }
-  function kinOf(id) {
-    var n = layoutById[id], out = {};
-    if (!n) return out;
-    A.forEach(function (s) { if (s.group === n.seg.group && s.id !== id) out[s.id] = true; });
-    return out;
-  }
   function hotNode(id) {
-    if (!layout) return;
+    if (!J) return;
     hotId = id;
     space.classList.toggle('has-hot', !!id || !!hotProp);
-    var kin = id ? kinOf(id) : {};
-    if (!id && hotProp) A.forEach(function (s) { if (hasProp(s, hotProp)) kin[s.id] = true; });
-    var kinGroups = {};
+    var n = id ? ballById[id] : null;
     A.forEach(function (s) {
-      var b = bubs[s.id], k = !!kin[s.id];
+      var b = bubs[s.id], kin = n ? (s.group === n.group && s.id !== id) : (hotProp ? hasProp(s, hotProp) : false);
       b.classList.toggle('is-hot', s.id === id);
-      b.classList.toggle('is-kin', k && s.id !== id);
-      if (k || s.id === id) kinGroups[s.group] = true;
+      b.classList.toggle('is-kin', kin);
     });
-    GROUPS.forEach(function (g) { caps[g.key].classList.toggle('is-kin', !!kinGroups[g.key]); });
-    if (!id) { stageLbl.classList.remove('is-on'); return; }
-    var s = layoutById[id].seg, top = topChannels(s, 1)[0];
+    if (!n) { stageLbl.classList.remove('is-on'); return; }
+    var s = n.seg, top = topChannels(s, 1)[0];
     stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
     stageLbl.innerHTML = '<div class="arc"><div data-lblarc></div></div><div><b>' + esc(s.name) + '</b><span><i></i>' + esc(groupOf[s.group].label) + '</span>' +
       '<span><em>' + fmtM(s.size) + '</em> audience' + (top ? ' · ' + top.v + '% ' + CH_SHORT[top.k] : '') + '</span><span class="kbd">Click to open · double-click to zoom</span></div>';
@@ -1209,31 +1161,14 @@
     placeLabel();
   }
   function hotProperty(key) {
-    if (!layout) return;
+    if (!J) return;
     hotProp = key;
-    E('auProps').querySelectorAll('.au-prop').forEach(function (b) { b.classList.toggle('is-on', b.dataset.prop === key); });
     hotNode(null);
   }
-  /* Hover has a short memory: leaving a bubble waits a beat before the
-     field relaxes, so crossing the gap between two bubbles, or the
-     glass swelling under the pointer, never flickers it. */
-  var outTimer = null;
-  world.addEventListener('mouseover', function (e) {
-    var b = e.target.closest('.au-bub'); if (!b || TOUCH || drag) return;
-    clearTimeout(outTimer);
-    if (hotId !== b.dataset.id) hotNode(b.dataset.id);
-  });
-  world.addEventListener('mouseout', function (e) {
-    var b = e.target.closest('.au-bub'); if (!b || b.contains(e.relatedTarget)) return;
-    var id = b.dataset.id;
-    clearTimeout(outTimer);
-    outTimer = setTimeout(function () { if (hotId === id) hotNode(null); }, 160);
-  });
-  world.addEventListener('focusin', function (e) { var b = e.target.closest('.au-bub'); if (b) { clearTimeout(outTimer); hotNode(b.dataset.id); } });
+  world.addEventListener('focusin', function (e) { var b = e.target.closest('.au-bub'); if (b) hotNode(b.dataset.id); });
   world.addEventListener('focusout', function (e) { var b = e.target.closest('.au-bub'); if (b && hotId === b.dataset.id) hotNode(null); });
-  space.addEventListener('mouseleave', function () { clearTimeout(outTimer); if (hotId) hotNode(null); });
   world.addEventListener('click', function (e) {
-    var b = e.target.closest('.au-bub'); if (!b || space.dataset.justPanned) return;
+    var b = e.target.closest('.au-bub'); if (!b || space.dataset.justPanned || motion.stirring) return;
     if (TOUCH && hotId !== b.dataset.id) { hotNode(b.dataset.id); return; }
     openDrawer(b.dataset.id, false, b);
   });
@@ -1248,23 +1183,40 @@
     if (e.key === '-' || e.key === '_') zoomAt(view.k / 1.3, sz.w / 2, sz.h / 2, false);
     if (e.key === '0') setView(1, 0, 0, false);
   });
-  function renderProps() {
+
+  /* ── Lives on: the property pill ── */
+  var liveOpen = false;
+  function renderLive() {
     var counts = {}; A.forEach(function (s) { s.properties.forEach(function (p) { counts[p.key] = (counts[p.key] || 0) + 1; }); });
-    E('auProps').innerHTML = '<span class="au-ovl-lbl">Lives on</span>' + PROPS.slice().sort(function (a, b) { return (counts[b.key] || 0) - (counts[a.key] || 0); }).map(function (p) {
-      return '<button type="button" class="au-prop" data-prop="' + p.key + '" aria-pressed="false" aria-label="' + esc(p.label) + ', ' + (counts[p.key] || 0) + ' segments">' + esc(p.label) + ' <span class="n">' + (counts[p.key] || 0) + '</span></button>';
-    }).join('');
+    var btn = E('auLiveBtn'), panel = E('auLivePanel');
+    btn.className = 'c-filter-trigger' + (pinnedProp ? ' active' : '') + (liveOpen ? ' is-open' : '');
+    btn.setAttribute('aria-expanded', liveOpen);
+    btn.innerHTML = 'Lives on' + (pinnedProp ? ': ' + esc(propOf[pinnedProp].label) : '') + ' <i class="ph ph-caret-down chev"></i>';
+    panel.className = 'c-filter-panel' + (liveOpen ? ' is-open' : '');
+    panel.innerHTML = PROPS.slice().sort(function (a, b) { return (counts[b.key] || 0) - (counts[a.key] || 0); }).map(function (p) {
+      var on = pinnedProp === p.key;
+      return '<label class="c-filter-option' + (on ? ' is-pinned' : '') + '" data-prop="' + p.key + '">' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="label">' + esc(p.label) + '<span class="n">' + (counts[p.key] || 0) + '</span></span></label>';
+    }).join('') + '<div class="c-filter-footer"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear="1">Clear</button></div>';
+    if (liveOpen) {
+      var r = btn.getBoundingClientRect();
+      panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
+      panel.style.top = (r.bottom + 6) + 'px';
+    }
   }
-  E('auProps').addEventListener('mouseover', function (e) { var b = e.target.closest('.au-prop'); if (b && !TOUCH && !pinnedProp) hotProperty(b.dataset.prop); });
-  E('auProps').addEventListener('mouseout', function (e) { var b = e.target.closest('.au-prop'); if (b && !b.contains(e.relatedTarget) && !TOUCH && !pinnedProp) hotProperty(null); });
-  E('auProps').addEventListener('focusin', function (e) { var b = e.target.closest('.au-prop'); if (b && !pinnedProp) hotProperty(b.dataset.prop); });
-  E('auProps').addEventListener('focusout', function (e) { var b = e.target.closest('.au-prop'); if (b && !pinnedProp) hotProperty(null); });
-  E('auProps').addEventListener('click', function (e) {
-    /* A click pins the property so the lit bubbles stay lit while you
-       move the pointer; a second click lets go. */
-    var b = e.target.closest('.au-prop'); if (!b) return;
-    pinnedProp = pinnedProp === b.dataset.prop ? null : b.dataset.prop;
-    E('auProps').querySelectorAll('.au-prop').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.prop === pinnedProp); });
-    hotProperty(pinnedProp);
+  E('auLiveBtn').addEventListener('click', function () { liveOpen = !liveOpen; renderLive(); });
+  E('auLivePanel').addEventListener('mouseover', function (e) { var o = e.target.closest('[data-prop]'); if (o && !TOUCH) hotProperty(o.dataset.prop); });
+  E('auLivePanel').addEventListener('mouseout', function (e) { var o = e.target.closest('[data-prop]'); if (o && !o.contains(e.relatedTarget) && !TOUCH) hotProperty(pinnedProp); });
+  E('auLivePanel').addEventListener('click', function (e) {
+    if (e.target.closest('[data-clear]')) { pinnedProp = null; hotProperty(null); renderLive(); return; }
+    var o = e.target.closest('[data-prop]'); if (!o) return;
+    e.preventDefault();
+    pinnedProp = pinnedProp === o.dataset.prop ? null : o.dataset.prop;
+    hotProperty(pinnedProp); renderLive();
+  });
+  document.addEventListener('click', function (e) {
+    if (liveOpen && !e.target.closest('#auLivePill')) { liveOpen = false; renderLive(); }
   });
 
   /* ── Drawer ─────────────────────────────────────────────────────── */
@@ -1386,6 +1338,7 @@
       if (E('auCmodal').classList.contains('is-open')) { closeSheet(); return; }
       if (modal.classList.contains('is-open')) { closeDrawer(); return; }
       if (openFacet) { openFacet = null; renderPills(); }
+      if (liveOpen) { liveOpen = false; renderLive(); }
     }
     if (modal.classList.contains('is-open') && !e.target.matches('input, textarea, select')) {
       if (e.key === 'ArrowRight') stepDrawer(1);
@@ -1564,8 +1517,6 @@
     });
     world.innerHTML = dots;
     E('auLens').innerHTML = [70, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
-    E('auProps').innerHTML = [90, 80, 70, 70, 100, 64, 110, 70, 76].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px; height:26px"></span>'; }).join('');
-    E('auStyles').innerHTML = [84, 66].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106, 120].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auPills').innerHTML = '<span class="au-sk au-sk-pill" style="width:92px"></span>';
     E('auCount').textContent = 'Loading audiences…';
@@ -1584,7 +1535,7 @@
   syncTrayUI();
   setTimeout(function () {
     if (document.hidden) E('auContent').classList.remove('au-arriving');
-    buildUniverse(); renderLensChips(); renderStyleChips(); renderProps();
+    buildUniverse(); renderLensChips(); renderLive();
     renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
     var tabDeep = /[?&]tab=cards/.test(location.search);
     setTab(tabDeep ? 'cards' : 'universe', true);

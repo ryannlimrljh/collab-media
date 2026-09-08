@@ -13,11 +13,11 @@
      order given, each at the first spot on a spiral from the centre
      where it touches nothing. Pure — no DOM, no randomness.
 
-   AudienceMarks.layoutSpace(segments, lens, stage, style)
-     The universe: every segment a bubble sized by audience, filling
-     the stage by group ('groups') or by size alone ('size'), close but
-     never overlapping, each with t in 0..1 for its size on the colour
-     ramp. Returns plain numbers; the page draws them.                  */
+   AudienceMarks.jar
+     The universe as a jar of discs: build() sizes and lines them up
+     to pour, step() advances the physics a frame (gravity, walls,
+     contact, and the pointer as a stirring hand), settle() runs the
+     pour to rest. All pure; the page draws.                            */
 (function () {
   'use strict';
 
@@ -101,115 +101,113 @@
     return { items: placed, R: R, w: maxX - minX, h: maxY - minY };
   }
 
-  /* ── The universe ────────────────────────────────────────────────
-     One layout, pure: it takes the segments, a lens, a stage {w, h,
-     padTop, padBottom} in pixels and an arrangement ('groups' or
-     'size'), and returns {nodes, groups}. A node is {id, x, y, r, t,
-     lens, group, seg}; a group is {key, label, lens, x, y, top}. The
-     circles fill the whole stage, close together and never touching,
-     in a settled, loosely random order. Nothing here touches the DOM. */
+  /* ── The jar ─────────────────────────────────────────────────────
+     The universe is a jar of discs. AudienceMarks.jar.build() sizes one
+     disc per segment so together they fill the stage, and lines them
+     up above it in lens-and-group order, ready to pour. jar.step()
+     advances the physics one frame: gravity, walls, disc-on-disc
+     contact, and a hand — the pointer — that stirs whatever it moves
+     through. jar.settle() runs the pour to rest without drawing, for
+     reduced motion and for tests. All pure; the page draws.           */
   var MAX_SIZE = 17000000;
   /* Size to radius, in layout units. A power curve above one spreads
      the top of the range so 9M and 17M read apart; a floor keeps the
      smallest fan bases big enough to carry their name. Monotonic. */
-  function unitR(s) { return 52 + 88 * Math.pow(Math.min(1, s.size / MAX_SIZE), 1.3); }
+  function unitR(s) { return 40 + 100 * Math.pow(Math.min(1, s.size / MAX_SIZE), 1.3); }
   function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 9973; return h / 9973; }
 
-  function layoutSpace(segments, lens, stage, style) {
-    var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0;
-    var groupsDef = window.AUDIENCE_GROUPS || [];
-    var list = segments.filter(function (s) { return lens === 'all' || s.lens === lens; });
-    if (!list.length) return { nodes: [], groups: [] };
-    var groups;
-    if (style === 'size') {
-      groups = [{ key: 'all', label: '', lens: 'all', members: list.slice().sort(function (a, b) { return b.size - a.size; }) }];
-    } else {
-      groups = groupsDef.filter(function (g) { return lens === 'all' || g.lens === lens; }).map(function (g) {
-        return { key: g.key, label: g.label, lens: g.lens, members: list.filter(function (s) { return s.group === g.key; }).sort(function (a, b) { return b.size - a.size; }) };
-      }).filter(function (g) { return g.members.length; });
-    }
-    /* One scale for every bubble: the bubbles together cover a set
-       share of the stage, overlaps included, capped so the largest
-       never dominates a small canvas. */
-    var area = W * (H - top - bottom), sum = 0;
-    list.forEach(function (s) { var r = unitR(s); sum += Math.PI * r * r; });
-    var scale = Math.sqrt(area * (style === 'size' ? 0.44 : 0.52) / sum);
-    var maxR = Math.min(W, H - top - bottom) * 0.23;
-    scale = Math.min(scale, maxR / unitR({ size: MAX_SIZE }));
-    /* Group centres: a grid across the stage in lens order, then
-       relaxed apart so each group has room for its own area. */
-    var n = groups.length, cols = Math.max(1, Math.round(Math.sqrt(n * W / Math.max(1, H - top - bottom)))), rows = Math.ceil(n / cols);
-    groups.forEach(function (g, i) {
-      var c = i % cols, r = Math.floor(i / cols), rowCount = (r === rows - 1) ? (n - r * cols) : cols;
-      g.x = W * (c + 0.5) / rowCount; g.y = top + (H - top - bottom) * (r + 0.5) / rows;
-      var a = 0; g.members.forEach(function (s) { var rr = unitR(s) * scale; a += Math.PI * rr * rr; });
-      g.R = Math.sqrt(a / Math.PI) * 1.12;
-      g.z = n === 1 ? 0 : Math.sin(i * 2.1 + 0.7) * 0.85;
-    });
-    for (var it = 0; it < 80; it++) {
-      groups.forEach(function (a) {
-        groups.forEach(function (b) {
-          if (a === b) return;
-          var dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, min = (a.R + b.R) * 0.92;
-          if (d < min) { var f = (min - d) / d * 0.5; a.x -= dx * f * 0.5; a.y -= dy * f * 0.5; b.x += dx * f * 0.5; b.y += dy * f * 0.5; }
-        });
-        a.x = Math.max(a.R * 0.6, Math.min(W - a.R * 0.6, a.x));
-        a.y = Math.max(top + a.R * 0.6, Math.min(H - bottom - a.R * 0.6, a.y));
+  var jar = {
+    build: function (segments, lens, stage) {
+      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0;
+      var groups = window.AUDIENCE_GROUPS || [], lensOrder = ['who', 'love', 'buying'];
+      var list = segments.filter(function (s) { return lens === 'all' || s.lens === lens; });
+      /* Pour order: lens by lens, group by group, so like sits near
+         like without anyone being given a room of their own. Within a
+         group the order is shuffled by hash. */
+      var gIndex = {}; groups.forEach(function (g, i) { gIndex[g.key] = i; });
+      list.sort(function (a, b) {
+        return lensOrder.indexOf(a.lens) - lensOrder.indexOf(b.lens) || gIndex[a.group] - gIndex[b.group] || hash(a.id) - hash(b.id);
       });
-    }
-    /* Bubbles: each group packs around its centre, then everything
-       relaxes together — pushed apart where the overlap is more than
-       glass can carry, kept inside the stage, drawn gently home. */
-    var nodes = [];
-    groups.forEach(function (g) {
-      /* Packed in a shuffled order, not by size, so each cluster reads
-         as a handful of circles set down together rather than a target;
-         the shuffle is by hash, so it is the same every visit. */
-      var items = g.members.map(function (s) { return { id: s.id, r: unitR(s) * scale, seg: s, h: hash(s.id + g.key) }; })
-        .sort(function (a, b) { return a.h - b.h; });
-      var p = pack(items, 6);
-      p.items.forEach(function (m, k) {
-        var s = m.ref.seg;
-        nodes.push({ id: m.id, x: g.x + m.x, y: g.y + m.y, r: m.r, lens: s.lens, group: g.key, gref: g, seg: s,
-          t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9) });
+      /* One scale for every disc: together they cover most of the jar,
+         the way poured marbles do, capped so the largest never dwarfs
+         a small canvas. */
+      var area = W * (H - top - bottom), sum = 0;
+      list.forEach(function (s) { var r = unitR(s); sum += Math.PI * r * r; });
+      /* Fewer, larger discs pack less tightly, so a lens view fills a
+         little less of the jar than the whole catalogue does. */
+      var fill = 0.4 + 0.15 * Math.min(1, list.length / 51);
+      var scale = Math.sqrt(area * fill / sum);
+      scale = Math.min(scale, Math.min(W, H - top - bottom) * 0.19 / unitR({ size: MAX_SIZE }));
+      var balls = list.map(function (s, i) {
+        var r = unitR(s) * scale, h = hash(s.id + ':' + lens);
+        return { id: s.id, seg: s, lens: s.lens, group: s.group, r: r, t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9),
+          x: r + 8 + h * (W - 2 * r - 16), y: top - r - 10 - i * 22, vx: 0, vy: 0, release: i * 0.028, inside: false };
       });
-    });
-    for (var iter = 0; iter < 200; iter++) {
-      var t = 1 - iter / 200;
-      for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
-        var a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-        var min = a.r + b.r + (a.group === b.group ? 5 : 9);
-        if (d < min) { var f = (min - d) / d * 0.9 * (0.4 + 0.6 * t); a.x -= dx * f * 0.5; a.y -= dy * f * 0.5; b.x += dx * f * 0.5; b.y += dy * f * 0.5; }
+      return { balls: balls, W: W, H: H, top: top, bottom: bottom, time: 0, scale: scale };
+    },
+    /* One frame. hand: {x, y, vx, vy, r, on} in world units, or null.
+       Position-based: each disc steps by its last displacement plus
+       gravity (Verlet), then contacts, walls and the hand are resolved
+       by moving discs directly, a few passes each substep. Velocity is
+       whatever the positions imply, which is what makes a pile of this
+       kind go still instead of humming. */
+    step: function (J, dt, hand) {
+      dt = Math.min(dt || 1 / 60, 1 / 30);
+      J.time += dt;
+      var balls = J.balls, W = J.W, floor = J.H - J.bottom, ceil = J.top, G = 1400, sub = 2, h = dt / sub, DAMP = 0.975;
+      for (var st = 0; st < sub; st++) {
+        for (var i = 0; i < balls.length; i++) {
+          var b = balls[i];
+          if (J.time < b.release) { b.px = b.x; b.py = b.y; continue; }
+          if (b.px == null) { b.px = b.x; b.py = b.y; }
+          var vx = (b.x - b.px) * DAMP, vy = (b.y - b.py) * DAMP + G * h * h;
+          /* A disc that has all but stopped is stopped: no creep. */
+          if (vx * vx + vy * vy < 0.02 && b.inside) { vx = 0; vy = G * h * h; }
+          b.px = b.x; b.py = b.y; b.x += vx; b.y += vy;
+          if (!b.inside && b.y > ceil + b.r) b.inside = true;
+        }
+        for (var pass = 0; pass < 3; pass++) {
+          for (var i = 0; i < balls.length; i++) for (var j = i + 1; j < balls.length; j++) {
+            var a = balls[i], c = balls[j];
+            if (J.time < a.release || J.time < c.release) continue;
+            var dx = c.x - a.x, dy = c.y - a.y, min = a.r + c.r + 2, d2 = dx * dx + dy * dy;
+            if (d2 >= min * min) continue;
+            var d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d, over = (min - d) * 0.55;
+            var ma = a.r * a.r, mc = c.r * c.r, tot = ma + mc;
+            a.x -= nx * over * (mc / tot); a.y -= ny * over * (mc / tot);
+            c.x += nx * over * (ma / tot); c.y += ny * over * (ma / tot);
+          }
+          if (hand && hand.on) {
+            for (var i = 0; i < balls.length; i++) {
+              var b = balls[i]; if (J.time < b.release) continue;
+              var dx = b.x - hand.x, dy = b.y - hand.y, min = hand.r + b.r, d2 = dx * dx + dy * dy;
+              if (d2 >= min * min) continue;
+              var d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d, over = min - d;
+              /* Out of the hand's way, and carried a little with it — a
+                 stir, not a shove. Lighter discs give more. */
+              var w = Math.min(1.5, 55 / b.r);
+              b.x += (nx * over * 0.5 + hand.vx * h * 0.45) * w; b.y += (ny * over * 0.5 + hand.vy * h * 0.45) * w;
+            }
+          }
+          for (var i = 0; i < balls.length; i++) {
+            var b = balls[i]; if (J.time < b.release) continue;
+            if (b.x < b.r) b.x = b.r;
+            if (b.x > W - b.r) b.x = W - b.r;
+            if (b.y > floor - b.r) b.y = floor - b.r;
+            if (b.inside && b.y < ceil + b.r) b.y = ceil + b.r;
+          }
+        }
       }
-      nodes.forEach(function (nd) {
-        nd.x += (nd.gref.x - nd.x) * 0.006; nd.y += (nd.gref.y - nd.y) * 0.006;
-        nd.x = Math.max(nd.r + 6, Math.min(W - nd.r - 6, nd.x));
-        nd.y = Math.max(top + nd.r + 6, Math.min(H - bottom - nd.r - 6, nd.y));
-      });
+      var energy = 0;
+      balls.forEach(function (b) { var vx = (b.x - b.px) / h, vy = (b.y - b.py) / h; energy += vx * vx + vy * vy; });
+      J.energy = energy / Math.max(1, balls.length);
+      return J;
+    },
+    settle: function (J, steps) {
+      for (var i = 0; i < (steps || 700); i++) jar.step(J, 1 / 60, null);
+      return J;
     }
-    /* A last, firm pass: any two still touching are pushed fully apart,
-       so the field never overlaps whatever the walls did above. */
-    for (var hard = 0; hard < 120; hard++) {
-      var moved = false;
-      for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
-        var a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, min = a.r + b.r + 4;
-        if (d < min) { var f = (min - d) / d * 0.5; a.x -= dx * f; a.y -= dy * f; b.x += dx * f; b.y += dy * f; moved = true; }
-      }
-      nodes.forEach(function (nd) {
-        nd.x = Math.max(nd.r + 4, Math.min(W - nd.r - 4, nd.x));
-        nd.y = Math.max(top + nd.r + 4, Math.min(H - bottom - nd.r - 4, nd.y));
-      });
-      if (!moved) break;
-    }
-    var out = groups.map(function (g) {
-      var mine = nodes.filter(function (nd) { return nd.group === g.key; }), sx = 0, sy = 0, topY = Infinity;
-      mine.forEach(function (nd) { sx += nd.x; sy += nd.y; topY = Math.min(topY, nd.y - nd.r); });
-      return { key: g.key, label: g.label, lens: g.lens, x: sx / mine.length, y: sy / mine.length, top: topY, z: g.z, count: mine.length,
-        total: mine.reduce(function (t, nd) { return t + nd.seg.size; }, 0) };
-    });
-    nodes.forEach(function (nd) { delete nd.gref; });
-    return { nodes: nodes, groups: out, scale: scale };
-  }
+  };
 
-  window.AudienceMarks = { arc: arc, pack: pack, layoutSpace: layoutSpace, CHANNELS: CHANNELS, channelLabel: channelLabel };
+  window.AudienceMarks = { arc: arc, pack: pack, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
 })();
