@@ -428,3 +428,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   is — and the reach tray's thumbnails play their clips like everything
   else, stopping when the sheet closes. The drawer's "Also see"
   thumbnails play as the pointer crosses them.
+- 2026-09-08, twenty-first pass: three faults in the jar. The hover card
+  styled every `span` and `i` beneath it, and the bar chart is built from
+  exactly those two tags, so a bar's track collapsed into a 7px dot and
+  its label went full width; the card's type rules are now scoped to its
+  own children (`> div > b`, `> div > span`, `> div > span > i`), and the
+  chart draws inside it as it does on a card — five tracks 76px wide,
+  filled to the channel's share in the category's colour. The lens toggle
+  stuttered because the growth rewrote each disc's width, height and
+  margin on every frame, laying out 51 elements 60 times a second; the
+  box is now sized once, when the lens sets a new target radius, and the
+  frames in between write only a transform, the growth riding on
+  `scale(r/rt)`. And a disc outside the lens no longer keeps a pale
+  version of its category colour — it goes neutral grey, so colour in the
+  jar always means the category and never the lens. The lens chips lost
+  their dots for the same reason: green, navy and orange are now spoken
+  for by Ethnicity, Business and Shopping.

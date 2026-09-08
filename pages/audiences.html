@@ -32,9 +32,6 @@
     background:var(--color-obsidian); color:var(--color-neutral-1); font-size:11px; font-weight:800; margin-left:2px;}
   .au-badge-n[hidden]{display:none;}
 
-  /* ── Lens colours. Each lens owns one element: who → Earth, what they
-     love → Water, what they're buying → Fire. Everything coloured on the
-     page reads these three variables. ── */
   /* Each category carries the colour its illustrations are drawn in —
      sampled from the artwork itself, and every one of the eight landed
      on a DLS colour. The tints below are the DLS rule for an elemental
@@ -55,9 +52,6 @@
   .c-tag.au-cattag{background:color-mix(in srgb, var(--au-color) 12%, #fff);
     color:color-mix(in srgb, var(--au-color) 78%, var(--color-neutral-9));}
   .c-tag.au-cattag .dot{background:var(--au-color);}
-  .lens-who{--au-color:var(--color-green); --au-bg:var(--color-earth-bg); --au-strong:var(--color-earth-bg-strong); --au-pastel:var(--color-earth-pastel);}
-  .lens-love{--au-color:var(--color-navy); --au-bg:var(--color-water-bg); --au-strong:var(--color-water-bg-strong); --au-pastel:var(--color-water-pastel);}
-  .lens-buying{--au-color:var(--color-orange); --au-bg:var(--color-fire-bg); --au-strong:var(--color-fire-bg-strong); --au-pastel:var(--color-fire-pastel);}
 
   /* ── Arrival — the same family as the formats page: header, then the
      universe, then the strip, then the controls, then the cards. ── */
@@ -107,8 +101,12 @@
     transition:opacity 420ms var(--ease-standard); will-change:transform;}
   .au-bub.is-out{opacity:0; pointer-events:none;}
   .au-bub.is-hot{z-index:5;}
-  .au-bub.is-dim{opacity:.38;}
-  .au-space.has-hot .au-bub.is-dim{opacity:.28;}
+  /* Out of the lens: grey as well as small, so a shrunken disc is never
+     mistaken for a chosen one of a paler category. */
+  .au-bub.is-dim{opacity:.7;}
+  .au-bub.is-dim .au-bub-vis{background:var(--color-neutral-3);}
+  .au-bub.is-dim .au-bub-txt{opacity:.5;}
+  .au-space.has-hot .au-bub.is-dim{opacity:.35;}
   /* One flat colour per lens, deeper with size: --t is 0 for the
      smallest audience and 1 for the largest, and the fill mixes the
      element colour into white by it. Ink is white throughout. */
@@ -131,8 +129,6 @@
 
   .au-lens{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
   .au-lens .c-chip-filter{white-space:nowrap;}
-  .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px;}
-  .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
   /* The ramp legend: five steps, lighter to deeper. */
   .au-legend{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .au-legend i{display:inline-block; width:10px; height:10px; border-radius:50%; background:color-mix(in srgb, var(--color-neutral-5) var(--m), #fff);}
@@ -142,10 +138,10 @@
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
     display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
   .au-stagelbl.is-on{opacity:1; transition-delay:120ms;}
-  .au-stagelbl b{display:block; font-weight:800; font-size:13px; line-height:16px;}
-  .au-stagelbl span{display:block; font-size:11px; line-height:14px; color:var(--color-neutral-5);}
-  .au-stagelbl span em{font-style:normal; font-weight:800; color:var(--color-neutral-9); font-size:15px; font-variant-numeric:tabular-nums;}
-  .au-stagelbl i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
+  .au-stagelbl > div > b{display:block; font-weight:800; font-size:13px; line-height:16px;}
+  .au-stagelbl > div > span{display:block; font-size:11px; line-height:14px; color:var(--color-neutral-5);}
+  .au-stagelbl > div > span em{font-style:normal; font-weight:800; color:var(--color-neutral-9); font-size:15px; font-variant-numeric:tabular-nums;}
+  .au-stagelbl > div > span > i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
   .au-stagelbl .kbd{margin-top:4px; font-size:10px; color:var(--color-neutral-4);}
   @media (max-width:900px){
     .au-jar{min-height:400px;}
@@ -259,7 +255,7 @@
      sheet's columns, where they stand complete rather than growing. */
   .au-peekbars{padding:0 var(--spacing-12) var(--spacing-12);}
   .au-sheetcol .au-minibars{margin-top:8px;}
-  .au-stagelbl .au-minibars{margin-top:6px; min-width:150px;}
+  .au-stagelbl .au-minibars{margin-top:8px; width:168px;}
   .au-sizeline{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-sizeline b{color:var(--color-neutral-9); font-weight:800; font-variant-numeric:tabular-nums; font-size:var(--text-body2-size);}
 
@@ -1123,7 +1119,7 @@
     E('auLens').innerHTML = '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.lens === 'all' ? ' is-active' : '') + '" data-lens="all" aria-checked="' + (state.lens === 'all') + '">All <span class="count">' + A.length + '</span></button>' +
       LENSES.map(function (l) {
         var n = A.filter(function (s) { return s.lens === l.key; }).length;
-        return '<button type="button" role="radio" class="c-chip c-chip-filter lens-' + l.key + (state.lens === l.key ? ' is-active' : '') + '" data-lens="' + l.key + '" aria-checked="' + (state.lens === l.key) + '"><i class="dot"></i>' + esc(l.label) + ' <span class="count">' + n + '</span></button>';
+        return '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.lens === l.key ? ' is-active' : '') + '" data-lens="' + l.key + '" aria-checked="' + (state.lens === l.key) + '">' + esc(l.label) + ' <span class="count">' + n + '</span></button>';
       }).join('');
   }
   E('auLens').addEventListener('click', function (e) {
@@ -1146,17 +1142,19 @@
     });
   }
   function sizeBubble(el, b) {
-    var fs = Math.max(9, Math.min(12, b.r * 0.24));
-    el.style.setProperty('--d', (b.r * 2).toFixed(1) + 'px'); el.style.setProperty('--fs', fs.toFixed(1) + 'px');
-    el.classList.toggle('is-small', b.r < 34); el.classList.toggle('is-tiny', b.r < 17);
-    b.rd = b.r;
+    var rt = b.rt || b.r, fs = Math.max(9, Math.min(12, rt * 0.24));
+    el.style.setProperty('--d', (rt * 2).toFixed(1) + 'px'); el.style.setProperty('--fs', fs.toFixed(1) + 'px');
+    el.classList.toggle('is-small', rt < 34); el.classList.toggle('is-tiny', rt < 17);
+    b.rd = rt;
   }
   function draw() {
     if (!J) return;
     J.balls.forEach(function (b) {
-      var el = bubs[b.id];
-      if (b.rd == null || Math.abs(b.rd - b.r) > 0.3) sizeBubble(el, b);
-      el.style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0)';
+      var el = bubs[b.id], rt = b.rt || b.r;
+      if (b.rd !== rt) sizeBubble(el, b);
+      var k = rt ? b.r / rt : 1;
+      el.style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0)' +
+        (Math.abs(k - 1) > 0.004 ? ' scale(' + k.toFixed(3) + ')' : '');
     });
     if (hotId) placeLabel();
   }
