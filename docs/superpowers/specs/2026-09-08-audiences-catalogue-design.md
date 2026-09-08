@@ -483,3 +483,12 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   a scatter across the canvas to a pile resting on the floor the real
   discs settle on, in neutral-3 rather than neutral-2, which was
   invisible against the warm canvas.
+- 2026-09-09, and after: the second the page waited before showing itself
+  is gone. Nothing on this page is fetched — the segments arrive with the
+  document — so the wait was staging, not loading, and the page now
+  builds in the same tick it parses in (DOMContentLoaded at 117ms, 51
+  cards and 51 discs already real). The arrival stagger stays; it is the
+  content coming in, not a delay. One consequence to note: with nothing
+  asynchronous left to wait for, `skeleton()` runs and is replaced before
+  the browser can paint, so the bones can no longer be seen. The call is
+  left in place against the day the data comes from somewhere else.

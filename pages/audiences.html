@@ -1708,22 +1708,24 @@
   }
   skeleton();
   syncTrayUI();
-  setTimeout(function () {
-    if (document.hidden) E('auContent').classList.remove('au-arriving');
-    E('auLens').classList.remove('au-bones');
-    E('auChips').classList.remove('au-bones');
-    E('auPills').classList.remove('au-bones');
-    buildUniverse(); renderLensChips();
-    renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
-    var tabDeep = /[?&]tab=cards/.test(location.search);
-    setTab(tabDeep ? 'cards' : 'universe', true);
-    /* The circles grow from nothing: r starts at 0 and transitions in. */
-    renderUniverse();
-    setTimeout(relayoutIfStale, 800); setTimeout(relayoutIfStale, 2000);
-    setTimeout(function () { E('auContent').classList.remove('au-arriving'); }, 1200);
-    var deep = /[?&]a=([^&]+)/.exec(location.search);
-    if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 500);
-  }, REDUCED ? 0 : 1000);
+  /* Nothing here is fetched: the segments arrive with the page, so the
+     real thing is built in this same tick and the bones above never
+     reach a paint. The stagger below is the arrival, not a wait. */
+  if (document.hidden) E('auContent').classList.remove('au-arriving');
+  E('auLens').classList.remove('au-bones');
+  E('auChips').classList.remove('au-bones');
+  E('auPills').classList.remove('au-bones');
+  buildUniverse(); renderLensChips();
+  renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
+  var tabDeep = /[?&]tab=cards/.test(location.search);
+  setTab(tabDeep ? 'cards' : 'universe', true);
+  /* The circles grow from nothing: r starts at 0 and transitions in. */
+  renderUniverse();
+  setTimeout(relayoutIfStale, 800); setTimeout(relayoutIfStale, 2000);
+  setTimeout(function () { E('auContent').classList.remove('au-arriving'); }, 1200);
+  var deep = /[?&]a=([^&]+)/.exec(location.search);
+  if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 500);
+
 })();
 </script>
 </body>
