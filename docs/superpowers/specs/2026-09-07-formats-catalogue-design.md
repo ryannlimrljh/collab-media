@@ -1,6 +1,6 @@
-# Formats catalogue — design
+# Ad formats catalogue — design
 
-**Date:** 2026-09-07 · **Surface:** Collab:Media · **Route:** `pages/formats.html` (nav: General › Formats)
+**Date:** 2026-09-07 · **Surface:** Collab:Media · **Route:** `pages/formats.html` (nav: General › Ad formats)
 
 ## What it is
 
@@ -12,7 +12,7 @@ Reference points: Karen's `planner-wizard-collabrium_270826.html` (the catalogue
 
 Asked for:
 
-- A new nav section **General › Formats** on every Collab:Media page.
+- A new nav section **General › Ad formats** on every Collab:Media page.
 - A catalogue of formats with examples, use cases, dimensions.
 - Hovering a format plays an interactive sample with a micro-animation, and shows its details.
 
