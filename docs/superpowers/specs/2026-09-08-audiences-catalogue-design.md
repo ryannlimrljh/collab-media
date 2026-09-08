@@ -36,8 +36,7 @@ counts).
    | What they're buying | Shopping intent | 7 | Fire |
 
    The intent lens is the "groups by intent" view: a planner switching to it
-   sees the seven in-market segments alone, and the fans-to-buyers strip
-   shows how each one relates to its interest twin.
+   sees the seven in-market segments alone.
 3. **No geographic map.** Neither source has per-segment geography. Karen's
    regional split applies uniformly to every segment, so it lives as a refine
    filter in the reach tray, not as a view.
@@ -76,7 +75,6 @@ Per segment:
 | `topics[]` | kult "Top Content Consumption" | six strings |
 | `portrait` | kult | local path |
 | `addressable`, `fit` | Karen | only on mapped segments, else `null` |
-| `pair` | curation | the fans-to-buyers twin, on ten segments |
 
 Karen-to-kult mapping, kept to the unambiguous names: Comedy Fans ↔ Comedy
 lover, Animation Fans ↔ Animation, Action & Adventure Fans ↔ Action &
@@ -86,10 +84,6 @@ Active lifestyle seekers, Adventure Seekers ↔ Adventure enthusiasts, Foodies �
 Food & dining, Home Buyers ↔ Home & living. K-drama, Football followers,
 Finance & investing and Business & professional have no clean twin and are
 not mapped.
-
-Fans-to-buyers pairs: Automotive Fans → Automotive Buyers, Luxury Seekers →
-Luxury Buyers, Gadget Gurus → Tech & Gadget Buyers, Wellness Explorers →
-Health & Wellness Buyers, Adventure Seekers → Travel & Experience Seekers.
 
 Properties vocabulary (nine): Astro Awani, Gempak, XUAN, SYOK, Stadium Astro,
 Rasa, Media Hiburan, sooka, Ulagam.
@@ -116,8 +110,7 @@ to fill the width. Motion is `transform` and `opacity` only, one FLIP pass,
 `--ease-settle`, 420ms; reduced motion snaps.
 
 Hover or focus a circle: it lifts, its name and size appear in a floating
-label, its fans-to-buyers twin and the rest of its group brighten, and the
-rest dim. (Sharing a property was the first idea; Awani and Gempak sit on
+label, the rest of its group brightens, and the rest dim. (Sharing a property was the first idea; Awani and Gempak sit on
 almost every segment, so that lit the whole stage. Properties light the
 stage from their own chips instead.) Click opens the drawer. Below the stage, a row of nine property
 chips ("Where they live"): hovering Gempak lights every segment that lives on
@@ -125,12 +118,6 @@ Gempak, with a count. This absorbs the matrix idea without a second view.
 
 The universe is decorative-first but never the only way in: it hides on
 touch widths under 720px, where the cards carry the page.
-
-**Fans to buyers strip.** Five pairs as one card each: two portraits side by
-side with an arrow, the two sizes, and a "Compare the two" affordance that
-opens the drawer on the buyer with the fan pinned as "Also see". It plays the
-role the formats page's Recently live wall plays, and arrives with the same
-stagger.
 
 **Controls.** Search (name, group, topic, property), group chips (the eight
 kult groups, multi-select), property pills (nine), sort (size high to low,
@@ -156,7 +143,7 @@ group and lens tags, size with "published by KULT" under it and, where
 mapped, "addressable on KULT digital" with Karen's count and her fit note.
 Description. "Where they live": the properties with what they consume there.
 "What they read": the six topics. Consumption as five labelled bars. "Also
-see": the pair twin if there is one, then two more from the same group.
+see": the three largest others in the same group.
 Previous / next with arrow keys, deep link, Add to reach tray, and Send to a
 media plan.
 
@@ -171,8 +158,7 @@ scales unique reach and says what percentage is kept. Footer: Send to a
 media plan (`planner.html?audiences=a,b,c`), Export as placeholder toast.
 The planner does not read the parameter yet.
 
-**States.** Skeleton first paint in the shape of the universe, the strip and
-four cards. Empty state when filters match nothing. Toasts for tray full
+**States.** Skeleton first paint in the shape of the universe and four cards. Empty state when filters match nothing. Toasts for tray full
 and export.
 
 **Access and motion.** Every circle, card and row is focusable; Enter opens,
@@ -187,3 +173,10 @@ never the only carrier: lens tags carry text, arcs carry percentages.
 - Platform (Digital / Astro Go) filter, pending per-segment data.
 - Per-segment geography; the regional split stays a uniform refine multiplier.
 - Karen's four unmapped personas are not on the page.
+
+## Changed after build
+
+- 2026-09-08: the fans-to-buyers strip and the `pair` field were removed at
+  the user's request. The pairing was a curation, not a kult.my fact; the
+  page now carries only what the site publishes, plus Karen's clearly
+  labelled planner counts.

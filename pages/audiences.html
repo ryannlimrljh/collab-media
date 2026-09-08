@@ -42,10 +42,8 @@
      universe, then the strip, then the controls, then the cards. ── */
   @keyframes au-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
   .au-arriving .au-universe{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
-  .au-arriving .au-pairs{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:140ms;}
-  .au-arriving .au-controls,.au-arriving .au-count{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
-  .au-arriving .au-card{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(300ms + var(--i, 0) * 40ms);}
-  .au-arriving .au-pair{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(180ms + var(--k, 0) * 60ms);}
+  .au-arriving .au-controls,.au-arriving .au-count{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
+  .au-arriving .au-card{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
 
   /* ── Skeleton first paint ── */
   .au-sk{display:inline-block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2); vertical-align:middle;}
@@ -109,29 +107,6 @@
   .au-prop:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .au-uhint{margin-left:auto; font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px;}
   @media (hover:none) and (max-width:720px){ .au-universe{display:none;} }
-
-  /* ── Fans to buyers ── */
-  .au-pairs{margin-bottom:var(--spacing-32);}
-  .au-eyebrow{display:flex; align-items:baseline; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
-  .au-eyebrow h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
-  .au-eyebrow span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .au-pairrow{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:var(--spacing-16);}
-  @media (min-width:1360px){ .au-pairrow{grid-template-columns:repeat(5, 1fr);} }
-  .au-pair{display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch; gap:var(--spacing-8); padding:var(--spacing-12); background:var(--color-neutral-1);
-    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); cursor:pointer; text-align:left; font:inherit; color:inherit;
-    transition:box-shadow var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle);}
-  .au-pair:hover,.au-pair:focus-visible{box-shadow:var(--shadow-2); transform:translateY(-2px);}
-  .au-pair:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-half{display:flex; flex-direction:column; gap:6px; min-width:0;}
-  .au-half .pic{aspect-ratio:4/3; border-radius:var(--radius-sm); overflow:hidden; background:var(--au-bg); position:relative;}
-  .au-half .pic img{width:100%; height:100%; object-fit:cover; object-position:50% 20%; display:block;}
-  .au-half .pic::after{content:''; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--au-color);}
-  .au-half b{font-size:var(--text-body2-size); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .au-half span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .au-half span em{font-style:normal; font-weight:700; color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
-  .au-pairarrow{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--color-neutral-4); font-size:18px; padding-top:20px;}
-  .au-pairarrow small{font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; font-weight:700; color:var(--color-neutral-5);}
-  .au-pair:hover .au-pairarrow{color:var(--color-neutral-9);}
 
   /* ── Controls (the formats page's line, verbatim in behaviour) ── */
   .au-controls{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
@@ -458,11 +433,6 @@
           <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
         </div>
         <div class="au-props" id="auProps"></div>
-      </section>
-
-      <section class="au-pairs" aria-label="Fans to buyers">
-        <div class="au-eyebrow"><h2>Fans to buyers</h2><span>Five interests and the in-market segment each one feeds. Pick a pair to see the buyer, with the fan alongside.</span></div>
-        <div class="au-pairrow" id="auPairs"></div>
       </section>
 
       <div class="au-controls">
@@ -1034,8 +1004,8 @@
     A.forEach(function (s) {
       var g = nodes[s.id];
       g.classList.toggle('is-hot', s.id === id);
-      /* Kin: the fans-to-buyers twin, and the rest of the group. */
-      var kin = id && s.id !== id && ((byId[id].pair && byId[id].pair.id === s.id) || s.group === byId[id].group);
+      /* Kin: the rest of the group. */
+      var kin = id && s.id !== id && s.group === byId[id].group;
       g.classList.toggle('is-kin', !!kin);
     });
     if (!id) { stageLbl.classList.remove('is-on'); return; }
@@ -1043,7 +1013,7 @@
     if (!c) return;
     var s = byId[id], p = stagePoint(c.x, c.y - Math.max(4, c.r));
     stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
-    stageLbl.innerHTML = '<b><i></i>' + esc(s.name) + '</b><span>' + fmtM(s.size) + ' · ' + esc(groupOf[s.group].label) + (s.pair ? ' · ' + (s.pair.role === 'fan' ? 'feeds ' : 'fed by ') + esc(byId[s.pair.id].name) : '') + '</span>';
+    stageLbl.innerHTML = '<b><i></i>' + esc(s.name) + '</b><span>' + fmtM(s.size) + ' · ' + esc(groupOf[s.group].label) + '</span>';
     stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
   }
   function hotProperty(key) {
@@ -1092,24 +1062,6 @@
     if (TOUCH) hotProperty(hotProp === b.dataset.prop ? null : b.dataset.prop);
   });
 
-  /* ── Fans to buyers ─────────────────────────────────────────────── */
-  function renderPairs() {
-    var fans = A.filter(function (s) { return s.pair && s.pair.role === 'fan'; });
-    E('auPairs').innerHTML = fans.map(function (f, i) {
-      var b = byId[f.pair.id];
-      var half = function (s, role) {
-        return '<div class="au-half ' + lensClass(s) + '"><div class="pic"><img src="' + s.portrait + '" alt="" loading="lazy" /></div>' +
-          '<b>' + esc(s.name) + '</b><span><em>' + fmtM(s.size) + '</em> · ' + role + '</span></div>';
-      };
-      return '<button class="au-pair" type="button" data-pair="' + b.id + '" data-fan="' + f.id + '" style="--k:' + i + '" aria-label="' + esc(f.name) + ' to ' + esc(b.name) + '">' +
-        half(f, 'interest') + '<div class="au-pairarrow"><i class="ph ph-arrow-right"></i><small>' + (b.size === f.size ? 'same' : (b.size > f.size ? '+' : '−') + fmtM(Math.abs(b.size - f.size))) + '</small></div>' + half(b, 'in market') +
-      '</button>';
-    }).join('');
-  }
-  E('auPairs').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-pair]'); if (b) openDrawer(b.dataset.pair, false, b, b.dataset.fan);
-  });
-
   /* ── Drawer ─────────────────────────────────────────────────────── */
   var modal = E('auModal'), drawer = E('auDrawer'), scrim = E('auScrim'), drawerId = null, returnTo = null;
   var swingSrcEl = null, swingSrcRect = null, hideTimer = null;
@@ -1132,21 +1084,14 @@
     if (el.tagName === 'TR') return el.querySelector('td') || el;
     return el;
   }
-  function related(s, pinned) {
-    var out = [];
-    if (pinned && byId[pinned] && pinned !== s.id) out.push(byId[pinned]);
-    if (s.pair && out.indexOf(byId[s.pair.id]) < 0) out.push(byId[s.pair.id]);
-    A.filter(function (x) { return x.id !== s.id && x.group === s.group && out.indexOf(x) < 0; })
-      .sort(function (a, b) { return b.size - a.size; }).forEach(function (x) { if (out.length < 3) out.push(x); });
-    return out.slice(0, 3);
+  function related(s) {
+    /* The three largest others in the same group. */
+    return A.filter(function (x) { return x.id !== s.id && x.group === s.group; })
+      .sort(function (a, b) { return b.size - a.size; }).slice(0, 3);
   }
-  function relLabel(s, x) {
-    if (s.pair && s.pair.id === x.id) return s.pair.role === 'fan' ? 'The buyers these fans feed' : 'The fans who feed this';
-    return 'Same group';
-  }
-  function renderDrawer(s, pinned) {
+  function renderDrawer(s) {
     E('auDrawerCrumb').textContent = s.name;
-    var rel = related(s, pinned);
+    var rel = related(s);
     var chans = M.CHANNELS.filter(function (c) { return s.consumption[c.key] != null; });
     E('auDrawerBody').className = 'au-dbody ' + lensClass(s);
     E('auDrawerBody').innerHTML =
@@ -1166,7 +1111,7 @@
         }).join('') + '</div></div>' +
         '<div class="au-section"><h5>What they read about</h5><div class="au-chipset">' + s.topics.map(function (t) { return '<span class="c-chip">' + esc(t) + '</span>'; }).join('') + '</div></div>' +
         (rel.length ? '<div class="au-section"><h5>Also see</h5><div class="au-related">' + rel.map(function (x) {
-          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic"><img src="' + x.portrait + '" alt="" loading="lazy" /></div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(relLabel(s, x)) + '</small></span></button>';
+          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic"><img src="' + x.portrait + '" alt="" loading="lazy" /></div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(groupOf[x.group].label) + '</small></span></button>';
         }).join('') + '</div></div>' : '') +
       '</div>';
     var inTray = tray.indexOf(s.id) > -1;
@@ -1182,12 +1127,12 @@
       E('auDrawerBody').querySelectorAll('.au-bar b').forEach(function (b) { b.style.width = b.dataset.w + '%'; });
     }, 30);
   }
-  function openDrawer(id, fromNav, sourceEl, pinned) {
+  function openDrawer(id, fromNav, sourceEl) {
     var s = byId[id]; if (!s) return;
     clearTimeout(hideTimer);
     var already = modal.classList.contains('is-open');
     if (!fromNav) returnTo = document.activeElement;
-    drawerId = id; renderDrawer(s, pinned);
+    drawerId = id; renderDrawer(s);
     var home = grid.querySelector('.au-card[data-id="' + id + '"]');
     swingSrcEl = swingAnchor(sourceEl) || (already ? swingSrcEl : null) || home;
     swingSrcRect = swingSrcEl ? swingSrcEl.getBoundingClientRect() : null;
@@ -1399,9 +1344,6 @@
     stage.innerHTML = dots;
     E('auLens').innerHTML = [110, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auProps').innerHTML = '<span>Where they live</span>' + [90, 80, 70, 70, 100, 64, 110, 70, 76].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px; height:28px"></span>'; }).join('');
-    E('auPairs').innerHTML = [0, 1, 2, 3, 4].map(function (i) {
-      return '<div class="au-pair au-sk-card" style="--k:' + i + '" aria-hidden="true"><div class="au-half"><div class="au-sk-stage" style="border-radius:var(--radius-sm)"></div>' + sk(90, 12) + '</div><div class="au-pairarrow"></div><div class="au-half"><div class="au-sk-stage" style="border-radius:var(--radius-sm)"></div>' + sk(90, 12) + '</div></div>';
-    }).join('');
     E('auChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106, 120].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auPills').innerHTML = '<span class="au-sk au-sk-pill" style="width:92px"></span>';
     E('auCount').textContent = 'Loading audiences…';
@@ -1421,7 +1363,6 @@
   setTimeout(function () {
     if (document.hidden) E('auContent').classList.remove('au-arriving');
     buildUniverse(); renderLensChips(); renderProps();
-    renderPairs();
     renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
     /* The circles grow from nothing: r starts at 0 and transitions in. */
     requestAnimationFrame(function () { renderUniverse(); });

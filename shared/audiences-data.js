@@ -10,8 +10,7 @@
    users, a different and smaller basis, so never add the two together.
 
    lens         — who / love / buying: the three lenses over KULT's eight groups
-   consumption  — percentages per channel; a missing channel is unknown, not 0
-   pair         — the fans-to-buyers twin, on ten segments                  */
+   consumption  — percentages per channel; a missing channel is unknown, not 0 */
 window.AUDIENCE_LENSES = [
   {
     "key": "who",
@@ -179,7 +178,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/1.Malay_.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -233,7 +231,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/2.Chinese.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -283,7 +280,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/3.indian-683x1024.png",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -333,7 +329,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/4.T15.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -387,7 +382,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/5.T20.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -441,7 +435,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/6.M40.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -495,7 +488,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/7.B40.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -549,7 +541,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/8.GenZ_-683x1024.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -603,7 +594,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/9.-Millennials.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -653,7 +643,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/10.GenX_.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -707,7 +696,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/11.Boomers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -757,7 +745,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/12.-Young-Working-Adult.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -810,7 +797,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/13.Students-683x1024.png",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -864,7 +850,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/14.Soloist.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -914,7 +899,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/15.Dynamic-Duo-607x1024.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -960,7 +944,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/16.-Little-Steps-Advocates.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1006,7 +989,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/17.-Youth-Mom.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1052,7 +1034,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/18.-Family-Dynamic.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1106,7 +1087,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/19.-Mommy-Pros-688x1024.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1160,7 +1140,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/20.EPL-Super-Fans.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1210,7 +1189,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/21.MFL-Super-Fans.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1264,7 +1242,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/22.Golf-Fans.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1318,7 +1295,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/23.Badminton-Fans.jpg",
     "addressable": 798400,
     "fit": "Appointment viewing. Concentrated bursts, not always-on.",
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1368,7 +1344,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/24.-Sepak-Takraw.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1418,7 +1393,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/25.-Esports-Fans.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1468,10 +1442,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/26.Gadget-Gurus.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "tech-gadget-buyers",
-      "role": "fan"
-    },
     "lens": "love"
   },
   {
@@ -1517,10 +1487,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/27.Automative-Enthusiasts.jpg",
     "addressable": 481800,
     "fit": "Upper-funnel only. Do not confuse with in-market intent.",
-    "pair": {
-      "id": "automotive-buyers",
-      "role": "fan"
-    },
     "lens": "love"
   },
   {
@@ -1562,10 +1528,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/28.Active-Lifestyle-Seekers.jpg",
     "addressable": 2850000,
     "fit": "Largest reach pool. Broad enough to anchor a mass awareness plan.",
-    "pair": {
-      "id": "health-wellness-buyers",
-      "role": "fan"
-    },
     "lens": "love"
   },
   {
@@ -1611,10 +1573,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/29.-Adventure-Enthusiasts.jpg",
     "addressable": 258100,
     "fit": "Event and on-ground campaigns. Strong response to countdown formats.",
-    "pair": {
-      "id": "travel-experience-seekers",
-      "role": "fan"
-    },
     "lens": "love"
   },
   {
@@ -1660,7 +1618,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/30.Foodies-734x1024.jpeg",
     "addressable": 1940000,
     "fit": "Short consideration cycle. Pairs well with promo or footfall goals.",
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1710,7 +1667,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/31.-Eco-Enthusiasts.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1752,10 +1708,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/32.Luxury-Seekers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "luxury-buyers",
-      "role": "fan"
-    },
     "lens": "love"
   },
   {
@@ -1793,7 +1745,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/33.-Fashion-Icons.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -1843,7 +1794,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/34.-Corperate-Visionaries.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1893,7 +1843,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/35.SME_.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1943,7 +1892,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/36.-Emerging-Affluents.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -1993,7 +1941,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/37.-StartUps.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "who"
   },
   {
@@ -2043,7 +1990,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/38.-Comedy-Lovers.jpg",
     "addressable": 204600,
     "fit": "Strong organic amplification. Suits social video over premium OTT.",
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2093,7 +2039,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/39.-Romantic-Comedy-Lovers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2143,7 +2088,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/40.-Animation.jpg",
     "addressable": 22600,
     "fit": "Small but high-attention. Good for family or school-holiday timing.",
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2193,7 +2137,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/41.SciFi_.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2243,7 +2186,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/42.Horror.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2293,7 +2235,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/43.-Action-Adventure.jpg",
     "addressable": 169600,
     "fit": "Video-led awareness. Skews late-evening and weekend viewing.",
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2343,7 +2284,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/44.-Music-Concert-Goers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "love"
   },
   {
@@ -2397,7 +2337,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/45.-Online-Shoppers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": null,
     "lens": "buying"
   },
   {
@@ -2443,10 +2382,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/46.-Automative-Intent.jpg",
     "addressable": 34700,
     "fit": "Small, expensive, converts. Worth a disproportionate budget share.",
-    "pair": {
-      "id": "automotive-fans",
-      "role": "buyer"
-    },
     "lens": "buying"
   },
   {
@@ -2492,7 +2427,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/47.-Home-Buyers.jpg",
     "addressable": 889000,
     "fit": "Longer consideration. Needs sustained presence, not a burst.",
-    "pair": null,
     "lens": "buying"
   },
   {
@@ -2534,10 +2468,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/48.Luxury-Buyers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "luxury-seekers",
-      "role": "buyer"
-    },
     "lens": "buying"
   },
   {
@@ -2587,10 +2517,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/49.-TechGadget-Enthusiasts.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "gadget-gurus",
-      "role": "buyer"
-    },
     "lens": "buying"
   },
   {
@@ -2632,10 +2558,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/50.-HealthWellness-Shoppers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "wellness-explorers",
-      "role": "buyer"
-    },
     "lens": "buying"
   },
   {
@@ -2681,10 +2603,6 @@ window.AUDIENCES = [
     "image": "https://kult.my/wp-content/uploads/2025/12/51.-Travel-Experience-Seekers.jpg",
     "addressable": null,
     "fit": null,
-    "pair": {
-      "id": "adventure-seekers",
-      "role": "buyer"
-    },
     "lens": "buying"
   }
 ];
