@@ -504,3 +504,11 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   compose itself rather than appearing mid-thought — and the bones sized
   in the passes above are on screen again for it. Anyone who asked for
   less motion still skips straight to the page.
+- 2026-09-09, and again: a link into the segments spent its first second
+  watching the jar. The tab was only decided after the pause, so whatever
+  was asked for, the bones on screen were the universe's. `setTab` now
+  splits in two — `paintTab` says which panel is on show, `setTab` adds
+  what happens when it goes on show — and the skeleton calls the first of
+  those before laying a single bone. A `?tab=cards` load opens on eight
+  card bones with the jar hidden; everything else opens on the jar, which
+  only measures itself when it is the one on screen.

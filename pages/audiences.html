@@ -1097,7 +1097,10 @@
   E('auContent').addEventListener('scroll', function () { if (peek.classList.contains('is-visible')) hideRowpeek(true); }, { passive: true });
 
   /* ── Tabs ───────────────────────────────────────────────────────── */
-  function setTab(tab, silent) {
+  /* Which tab is on show, with none of what happens when it goes on
+     show: the skeleton needs this much and nothing more, so the bones
+     that appear are the bones of the tab being asked for. */
+  function paintTab(tab) {
     state.tab = tab;
     document.querySelectorAll('.au-tabs [data-tab]').forEach(function (b) {
       var on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on);
@@ -1105,6 +1108,10 @@
     E('auPanelUniverse').hidden = tab !== 'universe';
     E('auPanelCards').hidden = tab !== 'cards';
     document.body.classList.toggle('au-tab-universe', tab === 'universe');
+  }
+  function wantsCards() { return /[?&]tab=cards/.test(location.search); }
+  function setTab(tab, silent) {
+    paintTab(tab);
     if (tab === 'universe') { hotNode(null); motion.last = 0; if (J) { relayoutIfStale(); startMotion(); } else renderUniverse(); }
     else { stopMotion(); hideRowpeek(true); staggerIn(visibleItems()); }
     if (!silent) try { history.replaceState(null, '', tab === 'cards' ? '?tab=cards' : location.pathname); } catch (e) {}
@@ -1637,9 +1644,13 @@
 
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
+    /* Open on the tab that was asked for, so a link into the segments
+       does not spend its first second watching the jar fill. */
+    paintTab(wantsCards() ? 'cards' : 'universe');
     /* The jar takes its real height before the bones go in, so it does
-       not stand at the 560px default and then collapse on arrival. */
-    sizeCanvas();
+       not stand at the 560px default and then collapse on arrival. A
+       hidden jar has no top to measure from, so it waits its turn. */
+    if (!E('auPanelUniverse').hidden) sizeCanvas();
     var sk = function (w, h, extra) {
       return '<span class="au-sk" style="width:' + (typeof w === 'number' ? w + 'px' : w) + '; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>';
     };
@@ -1705,8 +1716,7 @@
     E('auTableView').classList.toggle('is-on', state.view === 'table');
     buildUniverse(); renderLensChips();
     renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
-    var tabDeep = /[?&]tab=cards/.test(location.search);
-    setTab(tabDeep ? 'cards' : 'universe', true);
+    setTab(wantsCards() ? 'cards' : 'universe', true);
     /* The circles grow from nothing: r starts at 0 and transitions in. */
     renderUniverse();
     setTimeout(relayoutIfStale, 800); setTimeout(relayoutIfStale, 2000);
