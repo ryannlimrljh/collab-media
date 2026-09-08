@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
-<link rel="stylesheet" href="../shared/audience-marks.css?v=2" />
+<link rel="stylesheet" href="../shared/audience-marks.css?v=3" />
 <style>
   /* Page-local. Composes tokens only — no new colours, radii or spacing.
 
@@ -71,6 +71,8 @@
      and the jar below it holds the discs. Nothing floats over the jar. */
   .au-lensrow{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12); flex-wrap:wrap;}
   .au-lensrow .au-legend{margin-left:auto;}
+  /* The size ramp only means anything in the jar. */
+  body:not(.au-tab-universe) .au-legend{display:none;}
   .au-jar{position:relative; margin:0 0 var(--spacing-24); height:var(--au-h, 560px); min-height:440px; overflow:hidden; background:var(--color-canvas-warm);}
   .au-space{position:absolute; inset:0; touch-action:none; user-select:none; overflow:hidden;}
   .au-space.is-stirring{cursor:grabbing;}
@@ -120,8 +122,6 @@
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
     display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
   .au-stagelbl.is-on{opacity:1; transition-delay:120ms;}
-  .au-stagelbl .arc{width:44px; height:44px; flex:none;}
-  .au-stagelbl .arc .am-arc{--am-color:var(--au-color);}
   .au-stagelbl b{display:block; font-weight:800; font-size:13px; line-height:16px;}
   .au-stagelbl span{display:block; font-size:11px; line-height:14px; color:var(--color-neutral-5);}
   .au-stagelbl span em{font-style:normal; font-weight:800; color:var(--color-neutral-9); font-size:15px; font-variant-numeric:tabular-nums;}
@@ -188,11 +188,6 @@
   .au-stage{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:1px solid var(--color-neutral-2);}
   .au-stage .au-doodle{position:absolute; inset:0; transition:transform var(--duration-slow) var(--ease-settle);}
   .au-card.is-live .au-stage .au-doodle{transform:translateY(-3px) scale(1.02);}
-  /* The rings sit over the drawing's corner, on a disc of their own so
-     they read against whatever the scene has put behind them. */
-  .au-arcwrap{position:absolute; top:var(--spacing-12); right:var(--spacing-12); width:62px; height:62px; border-radius:50%;
-    background:rgba(255,255,255,.9); box-shadow:var(--shadow-1); padding:5px; z-index:2;}
-  .au-arcwrap .am-arc{--am-color:var(--au-color); width:100%; height:100%;}
   .au-touchhint{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:none; align-items:center; gap:6px; height:28px; padding:0 12px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:12px; font-weight:800; box-shadow:var(--shadow-2); pointer-events:none;}
   @media (hover:none){ .au-touchhint{display:inline-flex;} .au-card.is-live .au-touchhint{display:none;} }
@@ -212,16 +207,39 @@
      and the size; while the card is live, three facts a line, the
      label beside its value — the ad-format card's own swap. */
   .au-tagline{margin:0; font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-5);
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .au-swap{position:relative; height:66px;}
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .au-swap{position:relative; height:96px;}
   .au-swap > div{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-8);
     transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle);}
   .au-swap .spec{opacity:0; transform:translateY(8px); pointer-events:none; justify-content:center; gap:6px;}
   .au-card.is-live .au-swap .rest{opacity:0; transform:translateY(-8px);}
   .au-card.is-live .au-swap .spec{opacity:1; transform:none;}
-  .au-spec-cell{display:flex; align-items:baseline; gap:var(--spacing-12); min-width:0;}
-  .au-spec-cell b{flex:0 0 72px; font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; white-space:nowrap;}
-  .au-spec-cell span{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:18px; font-weight:700; color:var(--color-neutral-9); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* The hover face of a card: how many people, and where they watch.
+     The bars carry the category pill's own colour, and grow from the
+     baseline one after another when the card comes alive. */
+  .au-hovertotal{display:flex; align-items:baseline; gap:6px;}
+  .au-hovertotal b{font-size:22px; line-height:24px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+  .au-hovertotal span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-minibars{display:flex; flex-direction:column; gap:2px;}
+  .au-mb{display:grid; grid-template-columns:46px 1fr 30px; align-items:center; gap:8px; font-size:10px; line-height:12px;}
+  .au-mb > span{color:var(--color-neutral-5); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .au-mb i{display:block; height:5px; border-radius:3px; background:var(--color-neutral-2); overflow:hidden;}
+  .au-mb i b{display:block; height:100%; width:0; border-radius:3px; background:var(--au-color);
+    transition:width var(--duration-reveal) var(--ease-flow); transition-delay:calc(var(--i, 0) * 55ms);}
+  .is-live .au-mb i b,.au-minibars.is-still .au-mb i b{width:var(--w);}
+  .au-minibars.is-still .au-mb i b{transition:none;}
+  .au-mb em{font-style:normal; text-align:right; font-weight:700; color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
+  @media (prefers-reduced-motion:reduce){ .au-mb i b{transition:none;} }
+  /* Pointer tilt, the ad-format card's: JS writes the rotateX/rotateY
+     inline and this shorter transition makes the card chase the
+     pointer; dropping the class hands the return trip back to the
+     settle curve above. */
+  .au-card.is-tilting{transition:transform .16s ease-out, box-shadow var(--duration-base) var(--ease-settle); z-index:5; will-change:transform;}
+  /* The same bars under the floating row preview and in the reach
+     sheet's columns, where they stand complete rather than growing. */
+  .au-peekbars{padding:0 var(--spacing-12) var(--spacing-12);}
+  .au-sheetcol .au-minibars{margin-top:8px;}
+  .au-stagelbl .au-minibars{margin-top:6px; min-width:150px;}
   .au-sizeline{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-sizeline b{color:var(--color-neutral-9); font-weight:800; font-variant-numeric:tabular-nums; font-size:var(--text-body2-size);}
 
@@ -253,7 +271,6 @@
   .au-rowpeek.is-jumping{transition-property:opacity, transform;}
   .au-rowpeek .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); transition:opacity var(--duration-base) var(--ease-standard);}
   .au-rowpeek .pic .au-doodle{position:absolute; inset:0;}
-  .au-rowpeek .au-arcwrap{width:52px; height:52px; top:8px; right:8px;}
   .au-rowpeek.is-switching .pic,.au-rowpeek.is-switching .lbl{opacity:0; transition-duration:var(--duration-instant);}
   .au-rowpeek .lbl{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size); font-weight:700; transition:opacity var(--duration-base) var(--ease-standard);}
 
@@ -361,7 +378,6 @@
   .au-sheetcol{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
   .au-sheetcol .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); border-bottom:3px solid var(--au-color);}
   .au-sheetcol .pic .au-doodle{position:absolute; inset:0;}
-  .au-sheetcol .pic .au-arcwrap{width:50px; height:50px; top:8px; right:8px;}
   .au-sheetcol .txt{padding:var(--spacing-12);}
   .au-sheetcol .txt b{display:block; font-weight:800; font-size:var(--text-body2-size);}
   .au-sheetcol .txt small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
@@ -504,11 +520,11 @@
         </div>
       </div>
       <div class="c-filter-tray" id="auFilterTray" hidden></div>
+      <div class="au-lensrow">
+        <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
+        <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span>
+      </div>
       <section class="au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
-        <div class="au-lensrow">
-          <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
-          <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span>
-        </div>
         <div class="au-jar" id="auJar">
           <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
           <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
@@ -584,7 +600,7 @@
 </div>
 
 <!-- Table view: the portrait that floats beside the hovered row -->
-<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><img class="au-doodle" id="auRowpeekArt" alt="" /><div class="au-arcwrap"><div id="auRowpeekArc"></div></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
+<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><img class="au-doodle" id="auRowpeekArt" alt="" /></div><div class="lbl" id="auRowpeekLbl"></div><div class="au-peekbars is-live" id="auRowpeekBars"></div></div>
 
 <!-- Detail modal: swings out of the card you clicked -->
 <div class="au-cardmodal" id="auModal">
@@ -629,8 +645,8 @@
 <div class="c-toast-host" id="auToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/audiences-data.js?v=2"></script>
-<script src="../shared/audience-marks.js?v=2"></script>
+<script src="../shared/audiences-data.js?v=3"></script>
+<script src="../shared/audience-marks.js?v=3"></script>
 <script>
 (function () {
   'use strict';
@@ -674,9 +690,13 @@
 
   /* ── State ──────────────────────────────────────────────────────── */
   var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all', tab: 'universe' };
-  function filtered() {
-    var q = state.q.trim().toLowerCase();
+  /* The one list both tabs are built from. The jar asks for it without
+     the lens applied, because there a lens shrinks discs rather than
+     removing them. */
+  function filtered(opts) {
+    var q = state.q.trim().toLowerCase(), keepAll = opts && opts.ignoreLens;
     var rows = A.filter(function (s) {
+      if (!keepAll && state.lens !== 'all' && s.lens !== state.lens) return false;
       if (state.groups.length && state.groups.indexOf(s.group) < 0) return false;
       if (state.props.length && !state.props.every(function (k) { return hasProp(s, k); })) return false;
       if (!q) return true;
@@ -731,11 +751,16 @@
       '</div></div>';
     placePanel(); fades();
   }
+  /* The viewport, measured off the document rather than the window:
+     the same number, minus any scrollbar, and defined in embedded
+     contexts where window.innerWidth is not. */
+  function vw() { return document.documentElement.clientWidth; }
+  function vh() { return document.documentElement.clientHeight; }
   function placePanel() {
     var t = E('auPills').querySelector('.c-filter-trigger.is-open'); if (!t) return;
     var p = t.parentNode.querySelector('.c-filter-panel'), r = t.getBoundingClientRect();
-    p.style.left = Math.max(8, Math.min(r.left, window.innerWidth - p.offsetWidth - 8)) + 'px';
-    var below = r.bottom + 6 + p.offsetHeight <= window.innerHeight - 8;
+    p.style.left = Math.max(8, Math.min(r.left, vw() - p.offsetWidth - 8)) + 'px';
+    var below = r.bottom + 6 + p.offsetHeight <= vh() - 8;
     p.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - 6 - p.offsetHeight)) + 'px';
   }
   var line = E('auLine'), lineWrap = E('auLineWrap');
@@ -832,14 +857,22 @@
     v.dataset.want = '1';
     startClip(v);
   }
-  function propsLine(s, n) {
-    var ks = s.properties.map(function (p) { return PROP_SHORT[p.key]; });
-    return ks.slice(0, n).join(' · ') + (ks.length > n ? ' +' + (ks.length - n) : '');
+  var CH_LABEL = { video: 'Video', audio: 'Audio', tv: 'TV', podcast: 'Podcast', social: 'Social', games: 'Games', communities: 'Forums' };
+  /* Media consumption as bars, in a fixed channel order so the same
+     channel sits on the same row wherever it appears. They grow when an
+     ancestor comes alive, or stand complete when asked to be still. */
+  function miniBars(s, still) {
+    return '<div class="au-minibars' + (still ? ' is-still' : '') + '">' +
+      M.CHANNELS.filter(function (c) { return s.consumption[c.key] != null; }).slice(0, 5).map(function (c, i) {
+        var v = s.consumption[c.key];
+        return '<div class="au-mb" style="--i:' + i + '"><span>' + CH_LABEL[c.key] + '</span>' +
+          '<i><b style="--w:' + v + '%"></b></i><em>' + v + '%</em></div>';
+      }).join('') + '</div>';
   }
   function cardHtml(s, i) {
     var inTray = tray.indexOf(s.id) > -1, top = topChannels(s, 1)[0];
     return '<article class="au-card ' + lensClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
-      '<div class="au-stage">' + art(s) + '<div class="au-arcwrap"><div data-arc></div></div>' +
+      '<div class="au-stage">' + art(s) +
         '<span class="au-touchhint"><i class="ph ph-play"></i>Tap to see</span>' +
         '<div class="au-ctl">' + addBtn(s, 'au-add') + '</div>' +
       '</div>' +
@@ -848,9 +881,8 @@
         '<div class="au-swap">' +
           '<div class="rest"><p class="au-tagline">' + esc(s.desc) + '</p><p class="au-sizeline"><b>' + fmtM(s.size) + '</b> audience' + (top ? ' · ' + top.v + '% ' + CH_SHORT[top.k] : '') + '</p></div>' +
           '<div class="spec">' +
-            '<div class="au-spec-cell"><b>Audience</b><span>' + fmtM(s.size) + (s.addressable != null ? ' · ' + fmtK(s.addressable) + ' addressable' : '') + '</span></div>' +
-            '<div class="au-spec-cell"><b>Lives on</b><span>' + esc(propsLine(s, 3)) + '</span></div>' +
-            '<div class="au-spec-cell"><b>Reads</b><span>' + esc(s.topics.slice(0, 2).join(' · ')) + '</span></div>' +
+            '<div class="au-hovertotal"><b>' + fmtM(s.size) + '</b><span>total audience</span></div>' +
+            miniBars(s) +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -909,9 +941,6 @@
     current = filtered();
     var grid = E('auGrid');
     grid.innerHTML = current.map(cardHtml).join('');
-    grid.querySelectorAll('.au-card').forEach(function (card) {
-      M.arc(card.querySelector('[data-arc]'), byId[card.dataset.id]);
-    });
     E('auRows').innerHTML = current.map(rowHtml).join('');
     var mapped = current.filter(function (s) { return s.addressable != null; }).length;
     var total = current.reduce(function (t, s) { return t + s.size; }, 0);
@@ -930,7 +959,37 @@
     card.classList.toggle('is-live', on);
     playClip(card.querySelector('.au-stage'), byId[card.dataset.id], on);
   }
+  /* Hover tilt, the ad-format card's: one transform write per frame,
+     the entry rect cached at pointerover because measuring a card
+     mid-tilt returns its rotated box and feeds the angle back into
+     itself. */
+  var TILT_MAX = 4, tiltCard = null, tiltRect = null, tiltRAF = 0, tiltX = 0, tiltY = 0;
+  function untilt() {
+    if (tiltRAF) { cancelAnimationFrame(tiltRAF); tiltRAF = 0; }
+    if (!tiltCard) return;
+    tiltCard.classList.remove('is-tilting'); tiltCard.style.transform = '';
+    tiltCard = null; tiltRect = null;
+  }
+  function tiltFrame() {
+    tiltRAF = 0; if (!tiltCard) return;
+    var px = (tiltX - tiltRect.left) / tiltRect.width, py = (tiltY - tiltRect.top) / tiltRect.height;
+    tiltCard.style.transform = 'perspective(700px) translateY(-2px) scale(1.015)' +
+      ' rotateX(' + (-(py - 0.5) * 2 * TILT_MAX).toFixed(2) + 'deg) rotateY(' + ((px - 0.5) * 2 * TILT_MAX).toFixed(2) + 'deg)';
+  }
   var grid = E('auGrid');
+  grid.addEventListener('pointerover', function (e) {
+    if (REDUCED || e.pointerType !== 'mouse') return;
+    var card = e.target.closest('.au-card'); if (!card || card === tiltCard) return;
+    untilt(); tiltCard = card; tiltRect = card.getBoundingClientRect(); card.classList.add('is-tilting');
+  });
+  grid.addEventListener('pointermove', function (e) {
+    if (!tiltCard) return;
+    tiltX = e.clientX; tiltY = e.clientY;
+    if (!tiltRAF) tiltRAF = requestAnimationFrame(tiltFrame);
+  });
+  grid.addEventListener('pointerout', function (e) {
+    if (tiltCard && !tiltCard.contains(e.relatedTarget)) untilt();
+  });
   grid.addEventListener('mouseover', function (e) { var c = e.target.closest('.au-card'); if (c && !c.contains(e.relatedTarget) && !TOUCH) setLive(c, true); });
   grid.addEventListener('mouseout', function (e) { var c = e.target.closest('.au-card'); if (c && !c.contains(e.relatedTarget) && !TOUCH) setLive(c, false); });
   grid.addEventListener('focusin', function (e) { var c = e.target.closest('.au-card'); if (c && e.target === c) setLive(c, true); });
@@ -979,14 +1038,16 @@
         E('auRowpeekArt').src = '../assets/stills-web/' + s.id + '.jpg';
         var old = peek.querySelector('.au-clip'); if (old) old.remove();
         playClip(peek.querySelector('.pic'), s, true);
-        M.arc(E('auRowpeekArc'), s, { still: true });
+        E('auRowpeekBars').innerHTML = miniBars(s, true);
         E('auRowpeekLbl').textContent = s.name + ' · ' + fmtM(s.size);
         peek.classList.remove('is-switching');
       }, wasVisible ? 90 : 0);
     }
-    var r = tr.getBoundingClientRect(), w = 220, h = 176;
-    var left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w - 24));
-    var top = Math.max(12, Math.min(window.innerHeight - h - 12, r.top + r.height / 2 - h / 2));
+    /* Picture, name and five bars: taller than it was, and the box is
+       kept on screen from its real height. */
+    var r = tr.getBoundingClientRect(), w = 220, h = peek.offsetHeight || 280;
+    var left = Math.min(vw() - w - 12, Math.max(12, r.right - w - 24));
+    var top = Math.max(12, Math.min(vh() - h - 12, r.top + r.height / 2 - h / 2));
     peek.classList.toggle('is-jumping', !wasVisible);
     peek.style.left = left + 'px'; peek.style.top = top + 'px';
     peek.classList.add('is-visible');
@@ -1046,13 +1107,11 @@
   E('auLens').addEventListener('click', function (e) {
     var b = e.target.closest('[data-lens]'); if (!b) return;
     hotNode(null); state.lens = b.dataset.lens; renderLensChips();
-    if (!J) { renderUniverse(); return; }
-    /* No pour: the discs that matter grow where they sit and shove the
-       rest aside; the rest shrink to marbles and fade. */
-    M.jar.setLens(J, state.lens);
-    J.balls.forEach(function (ball) { bubs[ball.id].classList.toggle('is-dim', ball.dim); });
-    if (REDUCED || document.hidden) { M.jar.settle(J, 400); }
-    draw(); startMotion();
+    /* The cards drop the segments that fall outside the lens; the jar
+       never pours again — the discs that matter grow where they sit and
+       shove the rest aside, and the rest shrink to marbles and fade. */
+    render();
+    if (!J) renderUniverse(); else draw();
   });
   function buildUniverse() {
     world.innerHTML = ''; bubs = {};
@@ -1088,7 +1147,11 @@
     J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: PADTOP, padBottom: tray.length ? 84 : 16, padX: PADX });
     layout = { w: sz.w, h: sz.h };
     ballById = {}; J.balls.forEach(function (b) { ballById[b.id] = b; });
-    M.jar.setActive(J, current.map(function (s) { return s.id; }));
+    /* The search and the chips decide which discs are in the jar at
+       all; the lens only decides which of them matter, and that is what
+       jar.build already applied. */
+    M.jar.setActive(J, filtered({ ignoreLens: true }).map(function (s) { return s.id; }));
+    M.jar.setLens(J, state.lens);
     A.forEach(function (s) {
       var el = bubs[s.id], b = ballById[s.id];
       if (!b || b.out) { el.classList.add('is-out'); return; }
@@ -1106,8 +1169,12 @@
   /* The filter line above both tabs decides who is in the jar. */
   function syncJar() {
     if (!J) return;
-    M.jar.setActive(J, current.map(function (s) { return s.id; }));
-    J.balls.forEach(function (b) { bubs[b.id].classList.toggle('is-out', !!b.out); });
+    M.jar.setActive(J, filtered({ ignoreLens: true }).map(function (s) { return s.id; }));
+    M.jar.setLens(J, state.lens);
+    J.balls.forEach(function (b) {
+      bubs[b.id].classList.toggle('is-out', !!b.out);
+      bubs[b.id].classList.toggle('is-dim', !!b.dim);
+    });
     if (REDUCED || document.hidden) { M.jar.settle(J, 500); draw(); }
     startMotion();
   }
@@ -1209,9 +1276,8 @@
     if (!n) { stageLbl.classList.remove('is-on'); return; }
     var s = n.seg, top = topChannels(s, 1)[0];
     stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
-    stageLbl.innerHTML = '<div class="arc"><div data-lblarc></div></div><div><b>' + esc(s.name) + '</b><span><i></i>' + esc(groupOf[s.group].label) + '</span>' +
-      '<span><em>' + fmtM(s.size) + '</em> audience' + (top ? ' · ' + top.v + '% ' + CH_SHORT[top.k] : '') + '</span><span class="kbd">Click to open · double-click to zoom</span></div>';
-    M.arc(stageLbl.querySelector('[data-lblarc]'), s, { still: true });
+    stageLbl.innerHTML = '<div><b>' + esc(s.name) + '</b><span><i></i>' + esc(groupOf[s.group].label) + '</span>' +
+      '<span><em>' + fmtM(s.size) + '</em> total audience</span>' + miniBars(s, true) + '</div>';
     placeLabel();
   }
   function hotProperty(key) {
@@ -1304,6 +1370,7 @@
   }
   function openDrawer(id, fromNav, sourceEl) {
     var s = byId[id]; if (!s) return;
+    untilt(); /* the swing math needs the card's untransformed rect */
     clearTimeout(hideTimer);
     var already = modal.classList.contains('is-open');
     if (!fromNav) returnTo = document.activeElement;
@@ -1435,8 +1502,8 @@
     var sameGroup = Object.keys(groupsIn).filter(function (k) { return groupsIn[k] > 1; }).map(function (k) { return groupOf[k].label; });
     E('auSheet').innerHTML =
       '<div class="au-sheetcols" style="--n:' + list.length + '">' + list.map(function (s) {
-        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live">' + art(s) + '<div class="au-arcwrap"><div data-sheetarc="' + s.id + '"></div></div></div>' +
-          '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span></div></div>';
+        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live">' + art(s) + '</div>' +
+          '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span>' + miniBars(s, true) + '</div></div>';
       }).join('') + '</div>' +
       '<div class="au-sheetgrid">' +
         '<div class="au-maths"><h5>How the reach is worked out</h5>' +
@@ -1453,7 +1520,6 @@
           }).join('') + '</select></div>';
         }).join('') + '</div><p>Narrows reach proportionally, with the planner\'s own population shares. Malaysia in full is ' + fmtM(OVERLAP.malaysia) + '.</p></div>' +
       '</div>';
-    E('auSheet').querySelectorAll('[data-sheetarc]').forEach(function (el) { M.arc(el, byId[el.dataset.sheetarc], { still: true }); });
     E('auCmodalPlan').href = 'planner.html?audiences=' + tray.map(encodeURIComponent).join(',');
   }
   function openSheet(sourceEl) {

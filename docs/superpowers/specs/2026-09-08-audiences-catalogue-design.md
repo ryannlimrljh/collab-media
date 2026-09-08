@@ -395,3 +395,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   fades in if the pointer is still on it. Cards, the row preview and the
   drawer all play; the drawer stops when it closes; reduced motion keeps
   the still.
+- 2026-09-08, nineteenth pass: the ring chart became a bar chart, shown
+  on hover. A card's face swaps from its description to the total
+  audience and five bars — one per channel the segment reports, in a
+  fixed order — which grow from the baseline one after another. The bars
+  take the card's own category pill colour, literally the same token, so
+  the two always agree. "Lives on" and "Reads" left the card; they are
+  still in the drawer and the table. The floating row preview, the reach
+  sheet's columns and the jar's hover card carry the same bars, standing
+  complete rather than growing. Cards also gained the ad-format card's
+  pointer tilt. The lens chips moved out of the universe panel to sit
+  with the search and the group chips above both tabs, so they filter the
+  cards as well: a lens hides cards but only shrinks discs, since in the
+  jar the field should keep its shape, so the jar asks for the filtered
+  list without the lens applied and lets `setLens` do the rest. The arc
+  and its stylesheet came out with the rings, leaving the marks module at
+  232 lines and its stylesheet at eight.

@@ -1,12 +1,10 @@
 /* Collab:Media — audience marks.
 
-   Two drawings the audience catalogue makes over and over, kept apart
-   from the page so the planner's audience step can draw them too:
+   What the audience catalogue needs that is not markup, kept apart from
+   the page so the planner's audience step can use it too:
 
-   AudienceMarks.arc(el, seg, opts)
-     The consumption arc: up to five concentric rings (video, audio, TV,
-     podcast, social), each drawn to its percentage. Rings draw in when
-     an ancestor carries .is-live, or at once when opts.still is true.
+   AudienceMarks.CHANNELS / .channelLabel
+     The media-consumption channels in the order every chart draws them.
 
    AudienceMarks.jar
      The universe as a jar of discs: build() sizes and lines them up
@@ -35,33 +33,6 @@
   function channelLabel(key) {
     for (var i = 0; i < CHANNELS.length; i++) if (CHANNELS[i].key === key) return CHANNELS[i].label;
     return key;
-  }
-
-  /* ── The consumption arc ─────────────────────────────────────────── */
-  function arc(el, seg, opts) {
-    opts = opts || {};
-    var cons = seg.consumption || {};
-    /* The five standard slots keep their ring so the same channel sits
-       on the same ring on every card; a segment that reports games or
-       communities instead of a standard channel takes the free slot. */
-    var keys = ARC_SLOTS.slice();
-    var extras = Object.keys(cons).filter(function (k) { return ARC_SLOTS.indexOf(k) < 0; });
-    keys = keys.map(function (k) { return cons[k] != null ? k : (extras.length ? extras.shift() : null); });
-    var rings = [], summary = [];
-    keys.forEach(function (k, i) {
-      if (!k || cons[k] == null) return;
-      var r = 44 - i * 8, c = 2 * Math.PI * r, pct = Math.max(0, Math.min(100, cons[k]));
-      summary.push(channelLabel(k) + ' ' + pct + '%');
-      rings.push(
-        '<circle class="am-track" cx="50" cy="50" r="' + r + '"></circle>' +
-        '<circle class="am-val" cx="50" cy="50" r="' + r + '" style="--am-i:' + i + '; --c:' + c.toFixed(2) + '; --o:' + (c * (1 - pct / 100)).toFixed(2) + '">' +
-          '<title>' + esc(channelLabel(k)) + ' ' + pct + '%</title></circle>'
-      );
-    });
-    el.classList.add('am-arc');
-    if (opts.still) el.classList.add('is-still');
-    el.innerHTML = '<svg viewBox="0 0 100 100" role="img" aria-label="' + esc('Media consumption: ' + summary.join(', ')) + '">' + rings.join('') + '</svg>';
-    return el;
   }
 
   /* ── The jar ─────────────────────────────────────────────────────
@@ -257,5 +228,5 @@
     }
   };
 
-  window.AudienceMarks = { arc: arc, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
+  window.AudienceMarks = { jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
 })();
