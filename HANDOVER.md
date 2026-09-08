@@ -35,7 +35,7 @@ see [Gotchas](#gotchas).
 | `campaign-list.html` | My media plans | Full listing: search, facet filters, sortable columns, A-Z rail, row actions |
 | `planner.html` | Media planner | The four-step wizard — Brief, Audience, Media mix, Summary — with a persistent right rail and a per-plan Collab AI thread |
 | `formats.html` | Ad formats (General) | The ad-format catalogue: 49 KULT units with a live sample on every card, objective/family/size/device filters, gallery and table views, a spec drawer, and a compare tray of up to four. Design note: `docs/superpowers/specs/2026-09-07-formats-catalogue-design.md` |
-| `audiences.html` | Audiences (General) | The audience catalogue in two tabs. Universe: 51 KULT segments on a pan-and-zoom canvas, arranged by group (hub and spokes), by Astro property (force graph) or by size, three lenses over eight groups. Segments: portrait cards with a consumption arc, a table, a drawer, and a reach tray of up to five with Karen's overlap rule and refine filters. Design note: `docs/superpowers/specs/2026-09-08-audiences-catalogue-design.md` |
+| `audiences.html` | Audiences (General) | The audience catalogue in two tabs. Universe: 51 KULT segments on a pan-and-zoom canvas, arranged by group (organic clusters), by Astro property (force graph) or by size, circles that drift and give way to the pointer, three lenses over eight groups. Segments: portrait cards with a consumption arc, a table, a drawer, and a reach tray of up to five with Karen's overlap rule and refine filters. Design note: `docs/superpowers/specs/2026-09-08-audiences-catalogue-design.md` |
 
 `vercel.json` redirects `/` to `pages/campaigns.html`.
 

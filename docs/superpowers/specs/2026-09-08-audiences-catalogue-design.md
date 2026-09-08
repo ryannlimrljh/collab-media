@@ -196,3 +196,14 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   Segments tab unchanged (`?tab=cards` deep-links to it). The lens chips
   and property chips now live on the canvas, and the cards-tab filters no
   longer reach into the universe.
+- 2026-09-08, third pass, on the user's notes: the spokes between circles
+  are gone, so are the tab underline and the "Hover any circle or card"
+  hint. Bubbles are drawn as soft spheres (a radial wash from white to the
+  element tint, a hairline stroke, a drop shadow) and their radius follows
+  a power curve above one (`12 + 118 · (size / 17M)^1.35` in layout units)
+  so 9M and 17M no longer look alike; the order stays honest. The Groups
+  arrangement packs each group organically around a soft hub disc with the
+  group name floating above the cluster. Circles drift on their own slow
+  clocks and ease away from the pointer, small ones further than large,
+  written by one animation-frame loop; reduced motion stops it. The
+  picture is fitted between the chips above and the reach tray below.

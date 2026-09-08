@@ -58,7 +58,7 @@
 
   /* ── Tabs: the universe and the segments are two ways in, not one
      page. The DS tab strip, with a count on the second. ── */
-  .au-tabs{margin-bottom:var(--spacing-20);}
+  .au-tabs{margin-bottom:var(--spacing-20); border-bottom:0;}
   .au-tabs .c-tab .n{margin-left:6px; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-4);}
   .au-tabs .c-tab.active .n{color:var(--color-neutral-5);}
   .au-panel[hidden]{display:none;}
@@ -76,46 +76,49 @@
      glide there; the wheel and a drag move it directly. */
   .au-world{transition:transform 560ms var(--ease-flow);}
   .au-stage.is-direct .au-world{transition:none;}
-  .au-links path{fill:none; stroke:var(--color-neutral-4); stroke-width:1; opacity:.28; transition:opacity var(--duration-base) var(--ease-standard), stroke var(--duration-base) var(--ease-standard);}
-  .au-links path.k-lives{opacity:.16;}
-  .au-links.is-fading path{opacity:0;}
-  .au-stage.has-hot .au-links path{opacity:.06;}
-  .au-stage.has-hot .au-links path.is-lit{opacity:.9; stroke:var(--au-color, var(--color-neutral-9)); stroke-width:1.5;}
-  /* A node: translate on the outer group, an idle drift on the middle
-     one, the hover scale on the inner one. Three groups so the three
-     motions never fight over one transform. */
+  /* A node: translate on the outer group, the drift and the cursor
+     response on the middle one (written by the motion loop), the hover
+     scale on the inner one. Three groups so the three motions never
+     fight over one transform. */
   .au-node{cursor:pointer; outline:none; transition:transform 620ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
   .au-node.is-out{opacity:0; pointer-events:none;}
   .au-node.is-off{opacity:.18;}
-  .au-float{animation:au-drift var(--fd, 6s) ease-in-out var(--fdl, 0s) infinite alternate;}
-  @keyframes au-drift{from{transform:translate(0, -2.5px);} to{transform:translate(0, 2.5px);}}
-  .au-body{transition:transform var(--duration-slow) var(--ease-settle);}
-  .au-node.is-hot .au-body{transform:scale(1.14);}
-  .au-node.is-kin .au-body{transform:scale(1.05);}
-  .au-node circle.dot{fill:var(--au-strong); stroke:var(--au-color); stroke-width:1.5;
-    transition:r 620ms var(--ease-settle), fill var(--duration-base) var(--ease-standard), stroke-width var(--duration-fast) var(--ease-standard);}
-  .au-node.is-hot circle.dot{fill:var(--au-pastel); stroke-width:2.5;}
-  .au-node.is-kin circle.dot{stroke-width:2.5;}
-  .au-stage.has-hot .au-node:not(.is-hot):not(.is-kin):not(.is-out){opacity:.3;}
+  .au-body{transition:transform var(--duration-slow) var(--ease-settle); filter:drop-shadow(0 2px 3px rgba(43,43,44,.10));}
+  .au-node.is-hot .au-body{transform:scale(1.12); filter:drop-shadow(0 8px 14px rgba(43,43,44,.18));}
+  .au-node.is-kin .au-body{transform:scale(1.04);}
+  /* The bubble: a radial wash from white at the top-left down to the
+     element's tint, so it reads as a soft sphere and not a flat disc.
+     The stroke is the element colour at half strength until hovered. */
+  .au-node circle.dot{fill:var(--au-grad); stroke:var(--au-color); stroke-opacity:.45; stroke-width:1;
+    transition:r 620ms var(--ease-settle), stroke-opacity var(--duration-base) var(--ease-standard), stroke-width var(--duration-fast) var(--ease-standard);}
+  .au-node.lens-who{--au-grad:url(#au-g-who); --au-grad-hot:url(#au-g-who-hot);}
+  .au-node.lens-love{--au-grad:url(#au-g-love); --au-grad-hot:url(#au-g-love-hot);}
+  .au-node.lens-buying{--au-grad:url(#au-g-buying); --au-grad-hot:url(#au-g-buying-hot);}
+  .au-node.is-hot circle.dot{fill:var(--au-grad-hot); stroke-opacity:1; stroke-width:1.5;}
+  .au-node.is-kin circle.dot{stroke-opacity:.9; stroke-width:1.5;}
+  .au-stage.has-hot .au-node:not(.is-hot):not(.is-kin):not(.is-out){opacity:.28;}
   .au-stage.has-hot .au-node.is-kin,.au-stage.has-hot .au-node.is-hot{opacity:1;}
   /* The halo: a soft ring that breathes behind the hovered node. */
   .au-node circle.halo{fill:var(--au-color); opacity:0; transform-origin:center; transition:opacity var(--duration-base) var(--ease-standard);}
-  .au-node.is-hot circle.halo{opacity:.16; animation:au-halo 1.6s var(--ease-flare) infinite;}
-  @keyframes au-halo{0%{transform:scale(1); opacity:.2;} 100%{transform:scale(1.55); opacity:0;}}
-  .au-node text{font-family:inherit; font-weight:800; fill:var(--color-neutral-9); text-anchor:middle; dominant-baseline:central; pointer-events:none;
-    paint-order:stroke; stroke:var(--au-strong); stroke-width:3px; stroke-linejoin:round; transition:opacity var(--duration-base) var(--ease-standard);}
-  /* Hubs and properties: solid discs with the name inside. */
-  .au-node.kind-hub circle.dot{fill:var(--au-color); stroke:var(--color-neutral-1); stroke-width:3;}
-  .au-node.kind-hub.is-hot circle.dot{fill:var(--au-color);}
-  .au-node.kind-hub text{fill:var(--color-neutral-9); stroke:var(--color-canvas-warm); stroke-width:4px; font-size:10px; letter-spacing:.06em; text-transform:uppercase; dominant-baseline:hanging;}
-  .au-node.kind-prop circle.dot{fill:var(--color-obsidian); stroke:var(--color-neutral-1); stroke-width:3;}
+  .au-node.is-hot circle.halo{opacity:.14; animation:au-halo 1.8s var(--ease-flare) infinite;}
+  @keyframes au-halo{0%{transform:scale(1); opacity:.18;} 100%{transform:scale(1.5); opacity:0;}}
+  .au-node text{font-family:inherit; font-weight:700; fill:var(--color-neutral-9); text-anchor:middle; dominant-baseline:central; pointer-events:none;
+    paint-order:stroke; stroke:rgba(255,255,255,.7); stroke-width:2.5px; stroke-linejoin:round; transition:opacity var(--duration-base) var(--ease-standard);}
+  /* A hub is a soft disc under its group's name; a property a dark one. */
+  .au-node.kind-hub circle.dot{fill:var(--au-bg); stroke:none; opacity:.9;}
+  .au-node.kind-hub.is-hot circle.dot{fill:var(--au-strong);}
+  .au-node.kind-hub .au-body{filter:none;}
+  .au-node.kind-hub text{fill:var(--color-neutral-5); stroke:var(--color-canvas-warm); stroke-width:4px; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;}
+  .au-node.kind-hub text.above{dominant-baseline:auto;}
+  .au-node.kind-hub text.below{dominant-baseline:hanging;}
+  .au-node.kind-hub.is-hot text,.au-node.kind-hub.is-kin text{fill:var(--au-color);}
+  .au-node.kind-prop circle.dot{fill:var(--color-obsidian); stroke:var(--color-neutral-1); stroke-opacity:1; stroke-width:2;}
   .au-node.kind-prop text{fill:var(--color-neutral-9); stroke:var(--color-canvas-warm); stroke-width:4px; font-size:10px; font-weight:800; dominant-baseline:hanging;}
   .au-node.kind-prop circle.halo{fill:var(--color-obsidian);}
-  .au-node:focus-visible circle.dot{stroke:var(--color-obsidian); stroke-width:3;}
+  .au-node:focus-visible circle.dot{stroke:var(--color-obsidian); stroke-opacity:1; stroke-width:2.5;}
   @media (prefers-reduced-motion:reduce){
     .au-node,.au-node circle.dot,.au-body,.au-world{transition:none;}
-    .au-float,.au-node.is-hot circle.halo{animation:none;}
-    .au-node.is-hot circle.halo{opacity:.16;}
+    .au-node.is-hot circle.halo{animation:none; opacity:.14;}
   }
 
   /* Overlays: the corners of the canvas. */
@@ -474,7 +477,7 @@
         <div class="c-pageheader-row">
           <div class="c-pageheader-text">
             <h1>Audiences</h1>
-            <p class="sub">Every segment Collabrium Digitals can reach, sized and grouped so you can see who sits next to whom. <span class="au-sub-hint" id="auHint"><i class="ph ph-cursor"></i>Hover any circle or card.</span></p>
+            <p class="sub">Every segment Collabrium Digitals can reach, sized and grouped so you can see who sits next to whom.</p>
           </div>
           <div class="c-pageheader-actions">
             <button class="c-btn c-btn-secondary c-btn-md" type="button" id="auTrayBtn">
@@ -493,13 +496,22 @@
       </div>
 
       <section class="au-universe au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
-        <svg class="au-stage" id="auStage" aria-label="Audience segments as circles"><g class="au-world" id="auWorld"><g class="au-links" id="auLinks"></g><g class="au-nodes" id="auNodes"></g></g></svg>
+        <svg class="au-stage" id="auStage" aria-label="Audience segments as circles">
+          <defs>
+            <radialGradient id="au-g-who" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-neutral-1)"/><stop offset=".55" style="stop-color:var(--color-earth-bg)"/><stop offset="1" style="stop-color:var(--color-earth-bg-strong)"/></radialGradient>
+            <radialGradient id="au-g-who-hot" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-earth-bg)"/><stop offset="1" style="stop-color:var(--color-earth-pastel)"/></radialGradient>
+            <radialGradient id="au-g-love" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-neutral-1)"/><stop offset=".55" style="stop-color:var(--color-water-bg)"/><stop offset="1" style="stop-color:var(--color-water-bg-strong)"/></radialGradient>
+            <radialGradient id="au-g-love-hot" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-water-bg)"/><stop offset="1" style="stop-color:var(--color-water-pastel)"/></radialGradient>
+            <radialGradient id="au-g-buying" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-neutral-1)"/><stop offset=".55" style="stop-color:var(--color-fire-bg)"/><stop offset="1" style="stop-color:var(--color-fire-bg-strong)"/></radialGradient>
+            <radialGradient id="au-g-buying-hot" cx="34%" cy="28%" r="78%"><stop offset="0" style="stop-color:var(--color-fire-bg)"/><stop offset="1" style="stop-color:var(--color-fire-pastel)"/></radialGradient>
+          </defs>
+          <g class="au-world" id="auWorld"><g class="au-nodes" id="auNodes"></g></g></svg>
         <div class="au-ovl au-ovl-tl">
           <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
           <div class="au-props" id="auProps"></div>
           <div class="au-arrange"><span class="au-ovl-lbl">Arrange</span><div class="au-styles" id="auStyles" role="radiogroup" aria-label="Arrangement"></div></div>
         </div>
-        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Hover a circle · drag to move · scroll to zoom</span></div>
+        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Drag to move · scroll to zoom · double-click a circle</span></div>
         <div class="au-ovl au-ovl-br">
           <div class="au-zoom" role="group" aria-label="Zoom">
             <button type="button" id="auZoomOut" aria-label="Zoom out" title="Zoom out (−)"><i class="ph ph-minus"></i></button>
@@ -697,7 +709,6 @@
       .sort(function (a, b) { return b.v - a.v; }).slice(0, n || 2);
   }
   function hasProp(s, key) { return s.properties.some(function (p) { return p.key === key; }); }
-  if (TOUCH) { E('auHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap a circle or card to see more; tap again to open it.'; }
 
   /* ── State ──────────────────────────────────────────────────────── */
   var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all', style: 'rings', tab: 'universe' };
@@ -1000,13 +1011,13 @@
     E('auPanelUniverse').hidden = tab !== 'universe';
     E('auPanelCards').hidden = tab !== 'cards';
     if (tab === 'universe') { hotNode(null); renderUniverse({ keepView: !!layout }); }
-    else { hideRowpeek(true); staggerIn(visibleItems()); }
+    else { stopMotion(); hideRowpeek(true); staggerIn(visibleItems()); }
     if (!silent) try { history.replaceState(null, '', tab === 'cards' ? '?tab=cards' : location.pathname); } catch (e) {}
   }
   document.querySelector('.au-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 
   /* ── The universe ───────────────────────────────────────────────── */
-  var SVG = 'http://www.w3.org/2000/svg', stage = E('auStage'), world = E('auWorld'), linksG = E('auLinks'), nodesG = E('auNodes'), stageLbl = E('auStageLbl');
+  var SVG = 'http://www.w3.org/2000/svg', stage = E('auStage'), world = E('auWorld'), nodesG = E('auNodes'), stageLbl = E('auStageLbl');
   var nodes = {}, layout = null, layoutById = {}, hotId = null, pinnedProp = null, hotProp = null;
   var view = { k: 1, tx: 0, ty: 0 }, ZMIN = 0.5, ZMAX = 4;
   var STYLES = [
@@ -1065,9 +1076,6 @@
     g.setAttribute('class', 'au-node kind-' + kind + (lens ? ' lens-' + lens : '') + ' is-out'); g.setAttribute('data-id', id);
     g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button'); g.setAttribute('aria-label', label);
     var fl = document.createElementNS(SVG, 'g'); fl.setAttribute('class', 'au-float');
-    /* Each node drifts on its own clock so the field breathes rather than bobs. */
-    var h = 0; for (var c = 0; c < id.length; c++) h = (h * 31 + id.charCodeAt(c)) % 997;
-    fl.style.setProperty('--fd', (4.5 + (h % 30) / 10).toFixed(1) + 's'); fl.style.setProperty('--fdl', '-' + ((h % 50) / 10).toFixed(1) + 's');
     var body = document.createElementNS(SVG, 'g'); body.setAttribute('class', 'au-body');
     var halo = document.createElementNS(SVG, 'circle'); halo.setAttribute('class', 'halo'); halo.setAttribute('r', 0);
     var dot = document.createElementNS(SVG, 'circle'); dot.setAttribute('class', 'dot'); dot.setAttribute('r', 0);
@@ -1077,24 +1085,19 @@
     return g;
   }
   function buildUniverse() {
-    nodesG.innerHTML = ''; linksG.innerHTML = ''; nodes = {};
+    nodesG.innerHTML = ''; nodes = {};
     GROUPS.forEach(function (g) { makeNode('hub:' + g.key, 'hub', g.lens, g.label + ' group. Open the first segment'); });
     PROPS.forEach(function (p) { makeNode('prop:' + p.key, 'prop', null, p.label + ', an Astro property'); });
     A.forEach(function (s) { makeNode(s.id, 'seg', s.lens, s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details'); });
   }
-  function linkPath(a, b) {
-    /* A quadratic curve bowed a little off the straight line, so a
-       fan of spokes reads as a fan and not a star. */
-    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-    var bend = Math.min(26, d * 0.16);
-    return 'M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) + ' Q' + (mx - dy / d * bend).toFixed(1) + ',' + (my + dx / d * bend).toFixed(1) + ' ' + b.x.toFixed(1) + ',' + b.y.toFixed(1);
-  }
-  var linkTimer = null;
   function renderUniverse(opts) {
     if (E('auPanelUniverse').hidden) return;
     sizeCanvas();
     var sz = stageSize();
-    layout = M.layoutUniverse(A, state.lens, { w: sz.w, h: sz.h, margin: 48 }, state.style);
+    /* The chips float over the top of the canvas and the reach tray
+       over the bottom, so the picture is fitted to the space between. */
+    var ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 90) + 40;
+    layout = M.layoutUniverse(A, state.lens, { w: sz.w, h: sz.h, margin: 44, padTop: padTop, padBottom: tray.length ? 96 : 44 }, state.style);
     layout.w = sz.w; layout.h = sz.h;
     layoutById = {}; layout.nodes.forEach(function (n) { layoutById[n.id] = n; });
     Object.keys(nodes).forEach(function (id) {
@@ -1107,9 +1110,11 @@
       var name = n.kind === 'seg' ? n.seg.name : n.kind === 'hub' ? n.groupDef.label : n.prop.label;
       txt.textContent = '';
       if (n.kind !== 'seg') {
-        /* Hubs and properties carry their name as a caption under the
-           disc, the way the reference graph leaves its hubs plain. */
-        txt.setAttribute('font-size', '10'); txt.setAttribute('y', (r + 13).toFixed(1)); txt.textContent = name;
+        /* A group's name floats above its cluster; a property's sits
+           under its disc. */
+        var above = n.kind === 'hub' && n.capDy != null;
+        txt.setAttribute('class', above ? 'above' : 'below');
+        txt.setAttribute('font-size', above ? '10' : '10'); txt.setAttribute('y', above ? n.capDy.toFixed(1) : (r + 12).toFixed(1)); txt.textContent = name;
         return;
       }
       txt.setAttribute('y', 0);
@@ -1123,25 +1128,46 @@
         });
       }
     });
-    /* Links cannot morph, so they fade out with the old picture and
-       draw back once the circles have arrived. */
-    clearTimeout(linkTimer);
-    linksG.classList.add('is-fading');
-    linkTimer = setTimeout(function () {
-      linksG.innerHTML = '';
-      layout.links.forEach(function (l) {
-        var a = layoutById[l.from], b = layoutById[l.to]; if (!a || !b) return;
-        var path = document.createElementNS(SVG, 'path');
-        path.setAttribute('class', 'k-' + l.kind); path.setAttribute('data-from', l.from); path.setAttribute('data-to', l.to);
-        path.setAttribute('d', linkPath(a, b)); linksG.appendChild(path);
-      });
-      if (hotId || hotProp) litLinks(hotId || 'prop:' + hotProp);
-      requestAnimationFrame(function () { linksG.classList.remove('is-fading'); });
-    }, REDUCED ? 0 : 420);
     if (!(opts && opts.keepView)) setView(1, 0, 0, false);
+    startMotion();
     if (pinnedProp) hotProperty(pinnedProp);
     if (hotId) placeLabel();
   }
+  /* ── Motion: every circle drifts on its own slow clock, and the field
+     gives way to the pointer — circles ease away from it, small ones
+     further than large ones, and settle back when it leaves. One
+     transform write per node per frame, on the middle group. ── */
+  var motion = { raf: 0, px: 0, py: 0, has: false, items: [] };
+  function startMotion() {
+    motion.items = layout.nodes.map(function (n) {
+      var h = 0; for (var c = 0; c < n.id.length; c++) h = (h * 31 + n.id.charCodeAt(c)) % 997;
+      return { n: n, el: nodes[n.id].firstChild, ph: h / 997 * Math.PI * 2, sp: 0.8 + (h % 40) / 100, amp: Math.min(4, 1.2 + 36 / (n.r + 10)), cx: 0, cy: 0 };
+    });
+    if (!REDUCED && !motion.raf) motion.raf = requestAnimationFrame(motionFrame);
+  }
+  function stopMotion() { if (motion.raf) { cancelAnimationFrame(motion.raf); motion.raf = 0; } }
+  function motionFrame(t) {
+    motion.raf = 0;
+    if (E('auPanelUniverse').hidden || document.hidden) return;
+    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k, R = 190 / Math.sqrt(view.k);
+    motion.items.forEach(function (it) {
+      var n = it.n, tx = Math.sin(t * 0.00045 * it.sp + it.ph) * it.amp, ty = Math.cos(t * 0.00037 * it.sp + it.ph * 1.3) * it.amp;
+      if (motion.has && !drag) {
+        var dx = n.x - wx, dy = n.y - wy, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        if (d < R) {
+          var f = Math.pow(1 - d / R, 2) * 26 * Math.max(0.35, Math.min(1.5, 22 / (n.r + 12)));
+          tx += dx / d * f; ty += dy / d * f;
+        }
+      }
+      it.cx += (tx - it.cx) * 0.085; it.cy += (ty - it.cy) * 0.085;
+      it.el.style.transform = 'translate(' + it.cx.toFixed(2) + 'px,' + it.cy.toFixed(2) + 'px)';
+    });
+    motion.raf = requestAnimationFrame(motionFrame);
+  }
+  stage.addEventListener('pointermove', function (e) { var p = stageXY(e); motion.px = p.x; motion.py = p.y; motion.has = e.pointerType !== 'touch'; });
+  stage.addEventListener('pointerleave', function () { motion.has = false; });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && layout && !E('auPanelUniverse').hidden) startMotion(); });
+
   /* ── Pan and zoom ── */
   function setView(k, tx, ty, direct) {
     view.k = Math.max(ZMIN, Math.min(ZMAX, k)); view.tx = tx; view.ty = ty;
@@ -1218,11 +1244,6 @@
     }
     return out;
   }
-  function litLinks(id, kin) {
-    linksG.querySelectorAll('path').forEach(function (p) {
-      p.classList.toggle('is-lit', !!id && (p.dataset.from === id || p.dataset.to === id));
-    });
-  }
   function hotNode(id) {
     if (!layout) return;
     hotId = id;
@@ -1232,7 +1253,6 @@
       nodes[nid].classList.toggle('is-hot', nid === id || (!id && hotProp && nid === 'prop:' + hotProp));
       nodes[nid].classList.toggle('is-kin', !!kin[nid] && nid !== id);
     });
-    litLinks(id || (hotProp ? 'prop:' + hotProp : null));
     if (!id) { stageLbl.classList.remove('is-on'); return; }
     var n = layoutById[id];
     if (n.kind === 'seg') {
