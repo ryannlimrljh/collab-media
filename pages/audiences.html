@@ -1070,7 +1070,7 @@
     motion.acc = (motion.acc || 0) + elapsed;
     var STEP = 1 / 60, steps = Math.min(4, Math.floor(motion.acc / STEP)); motion.acc -= steps * STEP;
     var wx = motion.px, wy = motion.py;
-    var hvx = (wx - motion.hx) / Math.max(dt, 1 / 120), hvy = (wy - motion.hy) / Math.max(dt, 1 / 120);
+    var hvx = (wx - motion.hx) / Math.max(elapsed, 1 / 120), hvy = (wy - motion.hy) / Math.max(elapsed, 1 / 120);
     motion.hvx += (hvx - motion.hvx) * 0.4; motion.hvy += (hvy - motion.hvy) * 0.4;
     motion.hx = wx; motion.hy = wy;
     var speed = Math.sqrt(motion.hvx * motion.hvx + motion.hvy * motion.hvy), hand = null;
