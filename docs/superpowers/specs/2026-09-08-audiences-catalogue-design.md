@@ -300,3 +300,11 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   stage. The row preview, the drawer, the related cards and the reach
   sheet use the same drawing and bars. `AudienceMarks.doodle(seg)` and
   `AudienceMarks.bars(el, seg)` live in the marks module.
+- 2026-09-08, twelfth pass: the doodles became scenes. Each segment's
+  drawing is a person in a pose with the props that tell its story — a
+  football, scarf and trophy for EPL fans, a bowl and a plate for
+  foodies, a key and a house for home buyers, a stroller for young
+  families, a ketupat, a lantern and a diya for the three ethnic groups
+  — composed from a library of fifty-odd motifs in `SCENES` in the marks
+  module. The bars stay as they are and read each segment's published
+  percentages directly.

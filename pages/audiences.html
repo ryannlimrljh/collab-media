@@ -175,10 +175,10 @@
      on the lens tint. Nothing covers it; the details come up in the
      body below, the way the ad-format cards do. */
   .au-stage{position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:1px solid var(--color-neutral-2);
-    display:grid; grid-template-columns:40% 1fr; align-items:end; gap:var(--spacing-8); padding:var(--spacing-16) var(--spacing-16) 0 var(--spacing-12);
+    display:grid; grid-template-columns:56% 1fr; align-items:end; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-12) 0 var(--spacing-8);
     transition:background-color var(--duration-slow) var(--ease-flow);}
   .au-card.is-live .au-stage{background:var(--au-strong);}
-  .au-stage .au-doodle{height:100%; max-height:150px; align-self:end; transition:transform var(--duration-slow) var(--ease-settle);}
+  .au-stage .au-doodle{width:100%; align-self:end; transition:transform var(--duration-slow) var(--ease-settle);}
   .au-card.is-live .au-stage .au-doodle{transform:translateY(-3px);}
   .au-stage .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:var(--spacing-8);}
   .au-live{position:absolute; top:var(--spacing-12); right:var(--spacing-12); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
@@ -229,7 +229,7 @@
   .au-table tbody tr{cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .au-table tbody tr:hover td,.au-table tbody tr.is-peeking td{background:var(--color-neutral-2);}
   .au-table .who{display:flex; align-items:center; gap:var(--spacing-12); white-space:nowrap;}
-  .au-table .who .au-doodle{width:36px; height:36px; border-radius:var(--radius-sm); flex:none; background:var(--au-bg); padding:3px 3px 0;}
+  .au-table .who .au-doodle{width:48px; height:36px; border-radius:var(--radius-sm); flex:none; background:var(--au-bg); padding:2px 2px 0; display:flex; align-items:flex-end;}
   .au-table .who b{display:block; font-weight:800;}
   .au-table .who small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
   .au-table .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:700;}
@@ -245,8 +245,8 @@
     transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-slow) var(--ease-settle), top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
   .au-rowpeek.is-visible{opacity:1; transform:none;}
   .au-rowpeek.is-jumping{transition-property:opacity, transform;}
-  .au-rowpeek .pic{position:relative; aspect-ratio:16/10; background:var(--au-strong); display:grid; grid-template-columns:40% 1fr; align-items:end; gap:6px; padding:12px 12px 0 8px; transition:opacity var(--duration-base) var(--ease-standard);}
-  .au-rowpeek .pic .au-doodle{height:100%; max-height:110px;}
+  .au-rowpeek .pic{position:relative; aspect-ratio:16/10; background:var(--au-strong); display:grid; grid-template-columns:56% 1fr; align-items:end; gap:6px; padding:10px 10px 0 6px; transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-rowpeek .pic .au-doodle{width:100%;}
   .au-rowpeek .pic .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:6px;}
   .au-rowpeek.is-switching .pic,.au-rowpeek.is-switching .lbl{opacity:0; transition-duration:var(--duration-instant);}
   .au-rowpeek .lbl{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size); font-weight:700; transition:opacity var(--duration-base) var(--ease-standard);}
@@ -284,8 +284,8 @@
   .au-dhead .crumbs b{color:var(--color-neutral-9); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-dbody{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24) var(--spacing-24); display:grid; grid-template-columns:240px 1fr; gap:var(--spacing-24); align-items:start;}
   .au-dside{position:sticky; top:0;}
-  .au-dpic{position:relative; aspect-ratio:1; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color); padding:var(--spacing-16) var(--spacing-24) 0;}
-  .au-dpic .au-doodle{height:100%;}
+  .au-dpic{position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color); padding:var(--spacing-12) var(--spacing-8) 0; display:flex; align-items:flex-end;}
+  .au-dpic .au-doodle{width:100%;}
   .au-dsize{margin-top:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16); background:var(--color-canvas-warm-card); border-radius:var(--radius-md);}
   .au-dsize b{display:block; font-size:26px; line-height:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
   .au-dsize span{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
@@ -316,8 +316,8 @@
   .au-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left; color:inherit;
     transition:box-shadow var(--duration-fast) var(--ease-standard);}
   .au-relcard:hover{box-shadow:var(--shadow-2);} .au-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-relcard .pic{aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color); padding:6px 30% 0;}
-  .au-relcard .pic .au-doodle{height:100%;}
+  .au-relcard .pic{aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color); padding:4px 6px 0; display:flex; align-items:flex-end;}
+  .au-relcard .pic .au-doodle{width:100%;}
   .au-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-relcard span small{display:block; font-weight:600; color:var(--color-neutral-5);}
   .au-dfoot{display:flex; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-3); flex-wrap:wrap; align-items:center;}
@@ -351,8 +351,8 @@
   .au-cscroll{overflow:auto; flex:1; padding:var(--spacing-20) var(--spacing-24);}
   .au-sheetcols{display:grid; grid-template-columns:repeat(var(--n, 3), minmax(160px, 1fr)); gap:var(--spacing-12); margin-bottom:var(--spacing-24);}
   .au-sheetcol{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
-  .au-sheetcol .pic{position:relative; aspect-ratio:16/10; background:var(--au-bg); border-bottom:3px solid var(--au-color); display:grid; grid-template-columns:40% 1fr; align-items:end; gap:6px; padding:12px 12px 0 8px;}
-  .au-sheetcol .pic .au-doodle{height:100%; max-height:110px;}
+  .au-sheetcol .pic{position:relative; aspect-ratio:16/10; background:var(--au-bg); border-bottom:3px solid var(--au-color); display:grid; grid-template-columns:56% 1fr; align-items:end; gap:6px; padding:10px 10px 0 6px;}
+  .au-sheetcol .pic .au-doodle{width:100%;}
   .au-sheetcol .pic .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:6px;}
   .au-sheetcol .txt{padding:var(--spacing-12);}
   .au-sheetcol .txt b{display:block; font-weight:800; font-size:var(--text-body2-size);}

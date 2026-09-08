@@ -102,52 +102,173 @@
   }
 
   /* ── The doodle ──────────────────────────────────────────────────
-     A line-drawn person for each segment, built from a few parts and
-     picked by hash so the same segment always gets the same face:
-     hair in six cuts, glasses or not, a top in four patterns, and one
-     prop for the group — a cap for sports, headphones for
-     entertainment, shades for trendsetters, a collar and tie for
-     business, a bag for shopping intent. Ink only, on the card's own
-     tint. Returns an SVG string.                                     */
-  function doodle(seg) {
-    var h = Math.floor(hash(seg.id) * 100000), hair = h % 6, glasses = Math.floor(h / 7) % 3 === 0, pat = Math.floor(h / 13) % 4, flip = Math.floor(h / 29) % 2;
-    var ink = 'var(--color-neutral-9)', pid = 'dp-' + seg.id;
-    var defs = '<defs>' +
-      '<pattern id="' + pid + '-dots" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="' + ink + '"/></pattern>' +
-      '<pattern id="' + pid + '-stripes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><rect width="7" height="2.4" fill="' + ink + '"/></pattern>' +
-      '<pattern id="' + pid + '-check" width="9" height="9" patternUnits="userSpaceOnUse"><rect width="4.5" height="4.5" fill="' + ink + '" opacity=".85"/><rect x="4.5" y="4.5" width="4.5" height="4.5" fill="' + ink + '" opacity=".85"/></pattern>' +
-      '</defs>';
-    var topFill = ['#fff', 'url(#' + pid + '-dots)', 'url(#' + pid + '-stripes)', 'url(#' + pid + '-check)'][pat];
-    var top = '<path d="M14 122 C16 96 34 84 48 82 L60 92 L72 82 C86 84 104 96 106 122 Z" fill="#fff" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>' +
-      (pat ? '<path d="M14 122 C16 96 34 84 48 82 L60 92 L72 82 C86 84 104 96 106 122 Z" fill="' + topFill + '" stroke="none"/>' : '');
-    var neck = '<path d="M52 68 L52 84 Q60 92 68 84 L68 68" fill="#fff" stroke="' + ink + '" stroke-width="2.4" stroke-linejoin="round"/>';
-    var head = '<ellipse cx="60" cy="48" rx="23" ry="26" fill="#fff" stroke="' + ink + '" stroke-width="2.4"/>' +
-      '<path d="M37 50 q-5 -2 -4 4 q1 5 5 4" fill="#fff" stroke="' + ink + '" stroke-width="2"/><path d="M83 50 q5 -2 4 4 q-1 5 -5 4" fill="#fff" stroke="' + ink + '" stroke-width="2"/>';
+     A drawn scene for each segment: a line-art person in a pose and
+     the props that tell the segment's story — a football and a scarf
+     for EPL fans, a bowl and chopsticks for foodies, a house and a key
+     for home buyers. The people are built from parts (hair and top by
+     hash, so a segment keeps its face); the props come from a small
+     library below, placed per segment in SCENES. Ink only, on the
+     card's own tint. Returns an SVG string, viewBox 0 0 160 120.     */
+  var INK = 'var(--color-neutral-9)', SW = 2.2;
+  function P(d, fill) { return '<path d="' + d + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round"/>'; }
+  function L(d) { return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function C(cx, cy, r, fill) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '"/>'; }
+  function D(cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + INK + '"/>'; }
+  function T(x, y, str) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-weight="800" fill="' + INK + '" text-anchor="middle" font-family="inherit">' + str + '</text>'; }
+  function G(x, y, sc, inner) { return '<g transform="translate(' + x + ' ' + y + ') scale(' + (sc || 1) + ')">' + inner + '</g>'; }
+
+  /* The props, each drawn around its own origin at about 30px tall. */
+  var MOTIF = {
+    football: function () { return C(0, 0, 11) + P('M0 -5 L5 -1 L3 5 L-3 5 L-5 -1 Z', INK) + L('M0 -5 L0 -11 M5 -1 L10 -4 M3 5 L6 10 M-3 5 L-6 10 M-5 -1 L-10 -4'); },
+    scarf: function () { return P('M-14 -4 L14 -4 L14 4 L-14 4 Z') + P('M8 4 L14 4 L16 18 L10 18 Z') + L('M-8 -4 L-8 4 M-2 -4 L-2 4 M4 -4 L4 4'); },
+    trophy: function () { return P('M-8 -14 L8 -14 L6 0 Q0 6 -6 0 Z') + L('M-8 -12 Q-16 -10 -8 -4 M8 -12 Q16 -10 8 -4') + P('M-3 4 L3 4 L5 10 L-5 10 Z', INK); },
+    golf: function () { return L('M10 -22 L10 8') + P('M10 -22 L26 -16 L10 -10 Z', INK) + P('M-2 8 Q10 12 22 8 Q10 4 -2 8 Z', INK) + C(-14, 6, 3); },
+    club: function () { return L('M-6 -20 L6 2') + P('M6 2 L14 6 L12 10 L4 6 Z', INK); },
+    racket: function () { return '<ellipse cx="0" cy="-8" rx="8" ry="11" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + L('M-4 -14 L-4 -2 M0 -18 L0 2 M4 -14 L4 -2 M-7 -8 L7 -8 M-6 -3 L6 -3') + L('M0 3 L0 16'); },
+    shuttle: function () { return P('M0 6 L-7 -8 L7 -8 Z') + C(0, 8, 3, INK) + L('M-4 -8 L-2 -2 M4 -8 L2 -2 M0 -8 L0 -2'); },
+    takraw: function () { return C(0, 0, 11) + L('M-11 0 Q0 -8 11 0 M-11 0 Q0 8 11 0 M0 -11 Q-8 0 0 11 M0 -11 Q8 0 0 11'); },
+    controller: function () { return P('M-14 -4 Q-14 -10 -6 -10 L6 -10 Q14 -10 14 -4 L16 6 Q14 12 8 8 L4 4 L-4 4 L-8 8 Q-14 12 -16 6 Z') + L('M-9 -2 L-9 2 M-11 0 L-7 0') + D(7, -3, 1.6) + D(10, 0, 1.6); },
+    headset: function () { return L('M-12 2 C-12 -14 12 -14 12 2') + P('M-14 0 L-8 0 L-8 10 L-14 10 Z', INK) + P('M8 0 L14 0 L14 10 L8 10 Z', INK) + L('M8 10 Q6 16 -2 16'); },
+    phone: function () { return P('M-6 -14 L6 -14 L6 14 L-6 14 Z') + L('M-2 11 L2 11') + '<rect x="-4" y="-11" width="8" height="18" fill="' + INK + '" opacity=".12"/>'; },
+    laptop: function () { return P('M-14 -10 L14 -10 L14 6 L-14 6 Z') + P('M-18 6 L18 6 L16 10 L-16 10 Z', INK) + '<rect x="-11" y="-7" width="22" height="10" fill="' + INK + '" opacity=".12"/>'; },
+    books: function () { return P('M-12 8 L12 8 L12 14 L-12 14 Z', INK) + P('M-10 2 L10 2 L10 8 L-10 8 Z') + P('M-12 -4 L8 -4 L8 2 L-12 2 Z', INK) + L('M-6 5 L6 5'); },
+    cap: function () { return P('M-12 0 Q-12 -12 0 -12 Q12 -12 12 0 Z', INK) + P('M-16 0 L16 0 L16 3 L-16 3 Z', INK) + L('M0 -12 L0 -16'); },
+    briefcase: function () { return P('M-14 -6 L14 -6 L14 10 L-14 10 Z') + L('M-5 -6 L-5 -11 L5 -11 L5 -6 M-14 0 L14 0') + D(0, 1, 1.8); },
+    shop: function () { return P('M-16 -6 L16 -6 L16 12 L-16 12 Z') + P('M-18 -6 L18 -6 L16 -14 L-16 -14 Z', INK) + P('M-4 12 L4 12 L4 0 L-4 0 Z', INK) + L('M-12 -2 L-8 -2 M8 -2 L12 -2'); },
+    rocket: function () { return P('M0 -18 Q10 -6 8 10 L-8 10 Q-10 -6 0 -18 Z') + C(0, -4, 3, INK) + P('M-8 4 L-14 12 L-6 10 Z', INK) + P('M8 4 L14 12 L6 10 Z', INK) + L('M-3 12 L0 18 L3 12'); },
+    coins: function (n) { var o = ''; for (var k = 0; k < (n || 3); k++) o += '<ellipse cx="0" cy="' + (8 - k * 5) + '" rx="10" ry="3.5" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>'; return o + T(0, 4 - (n || 3) * 5 + 1, '$'); },
+    chart: function () { return P('M-14 12 L-14 2 L-8 2 L-8 12 Z', INK) + P('M-5 12 L-5 -4 L1 -4 L1 12 Z', INK) + P('M4 12 L4 -12 L10 -12 L10 12 Z', INK) + L('M-16 -10 L-6 -6 L2 -12 L12 -16'); },
+    house: function () { return P('M-16 0 L0 -16 L16 0 L16 14 L-16 14 Z') + P('M-4 14 L4 14 L4 4 L-4 4 Z', INK) + L('M-14 0 L14 0'); },
+    key: function () { return C(-6, 0, 5) + L('M-1 0 L14 0 M10 0 L10 5 M6 0 L6 4'); },
+    car: function () { return P('M-18 6 L-14 -4 L-6 -10 L8 -10 L16 -4 L18 6 Z') + C(-10, 8, 4, INK) + C(10, 8, 4, INK) + L('M-8 -4 L8 -4 M-2 -10 L-2 -4'); },
+    bag: function () { return P('M-10 -4 L10 -4 L12 14 L-12 14 Z') + L('M-5 -4 C-5 -14 5 -14 5 -4'); },
+    diamond: function () { return P('M-10 -4 L-5 -10 L5 -10 L10 -4 L0 10 Z') + L('M-10 -4 L10 -4 M-5 -10 L0 10 M5 -10 L0 10'); },
+    watch: function () { return P('M-4 -14 L4 -14 L4 14 L-4 14 Z', INK) + P('M-7 -6 L7 -6 L7 6 L-7 6 Z') + L('M-3 0 L3 0 M0 -3 L0 3'); },
+    dumbbell: function () { return L('M-8 0 L8 0') + P('M-14 -6 L-8 -6 L-8 6 L-14 6 Z', INK) + P('M8 -6 L14 -6 L14 6 L8 6 Z', INK); },
+    mountain: function () { return P('M-22 14 L-6 -12 L4 4 L10 -4 L22 14 Z') + P('M-6 -12 L-2 -6 L-10 -6 Z', INK); },
+    tent: function () { return P('M-16 12 L0 -12 L16 12 Z') + P('M-5 12 L0 4 L5 12 Z', INK); },
+    bowl: function () { return P('M-14 0 Q-14 12 0 12 Q14 12 14 0 Z') + L('M-16 0 L16 0 M4 -2 L14 -18 M8 -2 L18 -16'); },
+    plate: function () { return '<ellipse cx="0" cy="4" rx="16" ry="6" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + P('M-8 2 Q0 -8 8 2 Z', INK) + L('M-22 -6 L-22 8 M22 -6 L22 8'); },
+    leaf: function () { return P('M0 14 Q-16 0 0 -14 Q16 0 0 14 Z') + L('M0 12 L0 -8'); },
+    hanger: function () { return L('M0 -14 Q6 -14 4 -9 L0 -6 L-18 6 L18 6 Z'); },
+    popcorn: function () { return P('M-10 -2 L10 -2 L8 14 L-8 14 Z') + L('M-4 -2 L-3 14 M4 -2 L3 14') + C(-6, -6, 4) + C(0, -8, 4) + C(6, -6, 4); },
+    heart: function () { return P('M0 12 C-16 0 -8 -14 0 -6 C8 -14 16 0 0 12 Z', INK); },
+    tv: function () { return P('M-16 -10 L16 -10 L16 10 L-16 10 Z') + L('M-6 10 L-8 16 M6 10 L8 16 M-8 -16 L0 -10 L8 -16') + P('M-2 -4 L2 0 L-2 4 Z', INK); },
+    planet: function () { return C(0, 0, 9) + '<ellipse cx="0" cy="0" rx="16" ry="5" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" transform="rotate(-20)"/>'; },
+    star: function () { return P('M0 -8 L2 -2 L8 -2 L3 2 L5 8 L0 4 L-5 8 L-3 2 L-8 -2 L-2 -2 Z', INK); },
+    ghost: function () { return P('M-10 12 L-10 -2 Q-10 -14 0 -14 Q10 -14 10 -2 L10 12 L6 8 L2 12 L-2 8 L-6 12 Z') + D(-4, -4, 1.8) + D(4, -4, 1.8); },
+    mic: function () { return P('M-5 -16 L5 -16 L5 -2 Q0 4 -5 -2 Z', INK) + L('M-9 -4 Q0 8 9 -4 M0 6 L0 12 M-6 12 L6 12'); },
+    notes: function () { return L('M0 8 L0 -12 L12 -16 L12 4') + D(-4, 8, 4) + D(8, 4, 4); },
+    cart: function () { return L('M-18 -12 L-12 -12 L-6 8 L12 8 L16 -4 L-10 -4') + D(-4, 14, 3) + D(10, 14, 3); },
+    suitcase: function () { return P('M-12 -6 L12 -6 L12 14 L-12 14 Z') + L('M-5 -6 L-5 -12 L5 -12 L5 -6 M-8 -6 L-8 14 M8 -6 L8 14'); },
+    plane: function () { return P('M-16 2 L16 -4 L12 0 L-4 8 Z', INK) + L('M-6 6 L-10 12 M2 -2 L-8 -12'); },
+    apple: function () { return P('M0 -6 Q-12 -10 -10 4 Q-6 14 0 12 Q6 14 10 4 Q12 -10 0 -6 Z') + L('M0 -6 L2 -14'); },
+    stroller: function () { return P('M-14 -6 L6 -6 Q8 6 -4 6 L-14 6 Z') + L('M6 -6 L14 -16 M-14 6 L-14 12 M6 6 L6 12') + C(-12, 14, 3, INK) + C(6, 14, 3, INK); },
+    coffee: function () { return P('M-8 -6 L8 -6 L6 10 L-6 10 Z') + L('M8 -3 Q16 -2 8 6 M-3 -14 Q-1 -10 -3 -8 M3 -14 Q5 -10 3 -8'); },
+    newspaper: function () { return P('M-14 -10 L14 -10 L14 10 L-14 10 Z') + L('M-10 -4 L-2 -4 M-10 0 L-2 0 M-10 4 L-2 4 M2 -4 L10 -4 M2 0 L10 0 M2 4 L10 4'); },
+    lantern: function () { return L('M0 -18 L0 -12') + P('M-8 -12 L8 -12 L8 -8 L-8 -8 Z', INK) + P('M-12 -8 Q-12 10 0 10 Q12 10 12 -8 Z') + L('M-4 -8 L-4 10 M4 -8 L4 10') + P('M-8 10 L8 10 L8 14 L-8 14 Z', INK) + L('M0 14 L0 20'); },
+    ketupat: function () { return P('M0 -14 L14 0 L0 14 L-14 0 Z') + L('M-7 -7 L7 7 M7 -7 L-7 7 M-10 -4 L4 10 M-4 -10 L10 4 M-10 4 L4 -10 M-4 10 L10 -4 M0 -14 L0 -22'); },
+    diya: function () { return P('M-14 2 Q0 12 14 2 L12 8 Q0 14 -12 8 Z') + P('M0 -12 Q6 -4 0 2 Q-6 -4 0 -12 Z', INK); },
+    ticket: function () { return P('M-14 -8 L14 -8 Q10 0 14 8 L-14 8 Q-10 0 -14 -8 Z') + L('M-2 -8 L-2 8'); },
+    clapper: function () { return P('M-14 -4 L14 -4 L14 12 L-14 12 Z') + P('M-14 -4 L12 -12 L14 -6 L-12 2 Z', INK) + L('M-8 -6 L-4 -10 M0 -8 L4 -12 M8 -10 L12 -13'); },
+    lipstick: function () { return P('M-4 -2 L4 -2 L4 14 L-4 14 Z', INK) + P('M-3 -2 L3 -2 L3 -12 L-3 -8 Z'); },
+    baby: function () { return C(0, -6, 6) + P('M-7 0 L7 0 L6 10 L-6 10 Z') + D(-2, -7, 1.2) + D(2, -7, 1.2); },
+    kid: function () { return C(0, -14, 6) + L('M0 -8 L0 6 M-7 -2 L7 -2 M0 6 L-5 16 M0 6 L5 16') + D(-2, -15, 1.2) + D(2, -15, 1.2); },
+    pen: function () { return P('M-12 10 L8 -10 L12 -6 L-8 14 Z') + P('M-12 10 L-8 14 L-14 16 Z', INK); },
+    yoga: function () { return P('M-18 6 L18 6 L18 10 L-18 10 Z', INK); },
+    graduation: function () { return P('M-14 -4 L0 -10 L14 -4 L0 2 Z', INK) + L('M8 -1 L8 6 M-8 -2 Q0 6 8 -2'); },
+    ring: function () { return C(0, 4, 8) + P('M-4 -4 L0 -12 L4 -4 Z', INK); },
+    gift: function () { return P('M-12 -4 L12 -4 L12 12 L-12 12 Z') + L('M0 -4 L0 12 M-12 2 L12 2 M-6 -4 Q-10 -14 0 -8 Q10 -14 6 -4'); },
+    spark: function () { return L('M0 -10 L0 10 M-10 0 L10 0 M-7 -7 L7 7 M7 -7 L-7 7'); }
+  };
+
+  /* People: a head with hair by hash, a top by hash, and a pose.
+     Poses: stand, cheer (arms up), sit, hold (one arm out), wave. */
+  function person(seg, pose, x, y, sc) {
+    var h = Math.floor(hash(seg.id) * 100000), hair = h % 6, glasses = Math.floor(h / 7) % 4 === 0, pat = Math.floor(h / 13) % 3;
+    var pid = 'dp-' + seg.id;
+    var defs = '<defs><pattern id="' + pid + '-d" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.2" fill="' + INK + '"/></pattern>' +
+      '<pattern id="' + pid + '-s" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><rect width="6" height="2" fill="' + INK + '"/></pattern></defs>';
+    var fill = ['#fff', 'url(#' + pid + '-d)', 'url(#' + pid + '-s)'][pat];
     var hairs = [
-      '<path d="M37 46 C36 24 50 18 60 18 C72 18 84 24 83 46 C80 36 72 30 60 30 C48 30 41 36 37 46 Z" fill="' + ink + '"/>',
-      '<path d="M36 52 C34 22 52 16 60 16 C70 16 86 22 84 52 L84 70 L76 70 L76 46 C72 34 66 30 60 30 C54 30 46 34 44 46 L44 70 L36 70 Z" fill="' + ink + '"/>',
-      '<g fill="' + ink + '"><circle cx="42" cy="30" r="9"/><circle cx="52" cy="22" r="10"/><circle cx="64" cy="19" r="10"/><circle cx="76" cy="25" r="9"/><circle cx="82" cy="36" r="8"/><circle cx="38" cy="40" r="7"/><path d="M38 44 C40 30 50 26 60 26 C70 26 80 30 82 44 Z"/></g>',
-      '<path d="M38 44 C40 26 50 20 60 20 C70 20 80 26 82 44 C78 36 70 32 60 32 C50 32 44 36 38 44 Z" fill="' + ink + '"/><circle cx="60" cy="14" r="8" fill="' + ink + '"/>',
-      '<path d="M36 50 C34 22 52 14 60 14 C70 14 86 22 84 50 L88 92 L78 92 L76 48 C72 36 66 32 60 32 C54 32 46 36 44 48 L42 92 L32 92 Z" fill="' + ink + '"/>',
-      '<path d="M38 46 C38 26 48 20 60 20 C74 20 84 26 82 40 L70 34 C58 32 48 38 38 46 Z" fill="' + ink + '"/>'
+      P('M-12 -50 C-12 -66 12 -66 12 -50 C8 -56 -8 -56 -12 -50 Z', INK),
+      P('M-13 -48 C-14 -68 14 -68 13 -48 L13 -36 L8 -36 L8 -46 C6 -54 -6 -54 -8 -46 L-8 -36 L-13 -36 Z', INK),
+      '<g fill="' + INK + '">' + '<circle cx="-9" cy="-58" r="5"/><circle cx="0" cy="-62" r="6"/><circle cx="9" cy="-58" r="5"/><circle cx="-13" cy="-50" r="4"/><circle cx="13" cy="-50" r="4"/></g>',
+      P('M-12 -50 C-12 -62 12 -62 12 -50 C8 -56 -8 -56 -12 -50 Z', INK) + D(0, -64, 5),
+      P('M-13 -48 C-14 -68 14 -68 13 -48 L15 -20 L9 -20 L8 -46 C6 -54 -6 -54 -8 -46 L-9 -20 L-15 -20 Z', INK),
+      P('M-12 -50 C-12 -62 8 -64 12 -54 L2 -56 C-6 -56 -10 -52 -12 -50 Z', INK)
     ];
-    var eyes = glasses
-      ? '<circle cx="51" cy="50" r="6.5" fill="none" stroke="' + ink + '" stroke-width="2.2"/><circle cx="69" cy="50" r="6.5" fill="none" stroke="' + ink + '" stroke-width="2.2"/><path d="M57.5 50 L62.5 50" stroke="' + ink + '" stroke-width="2.2"/><circle cx="51" cy="50" r="2" fill="' + ink + '"/><circle cx="69" cy="50" r="2" fill="' + ink + '"/>'
-      : '<circle cx="51" cy="50" r="2.3" fill="' + ink + '"/><circle cx="69" cy="50" r="2.3" fill="' + ink + '"/>';
-    var mouth = '<path d="M53 60 Q60 66 67 60" fill="none" stroke="' + ink + '" stroke-width="2.2" stroke-linecap="round"/>';
-    var prop = '';
-    switch (seg.group) {
-      case 'sports': prop = '<path d="M34 40 C36 20 50 14 60 14 C72 14 84 20 86 40 Z" fill="' + ink + '"/><path d="M60 40 L96 44 L96 38 L60 34 Z" fill="' + ink + '"/><path d="M34 40 L86 40" stroke="#fff" stroke-width="2"/>'; break;
-      case 'entertainment': prop = '<path d="M34 46 C34 18 86 18 86 46" fill="none" stroke="' + ink + '" stroke-width="3.2"/><rect x="29" y="42" width="10" height="16" rx="4" fill="' + ink + '"/><rect x="81" y="42" width="10" height="16" rx="4" fill="' + ink + '"/>'; break;
-      case 'trendsetter': prop = '<rect x="43" y="44" width="16" height="11" rx="4" fill="' + ink + '"/><rect x="61" y="44" width="16" height="11" rx="4" fill="' + ink + '"/><path d="M59 49 L61 49" stroke="' + ink + '" stroke-width="2.2"/>'; break;
-      case 'business': prop = '<path d="M50 84 L60 98 L70 84" fill="#fff" stroke="' + ink + '" stroke-width="2.2" stroke-linejoin="round"/><path d="M57 92 L60 122 L63 92 Z" fill="' + ink + '"/>'; break;
-      case 'shopping': prop = '<rect x="86" y="94" width="24" height="26" rx="3" fill="#fff" stroke="' + ink + '" stroke-width="2.2"/><path d="M92 94 C92 84 104 84 104 94" fill="none" stroke="' + ink + '" stroke-width="2.2"/>'; break;
-      case 'income': prop = '<circle cx="96" cy="104" r="11" fill="#fff" stroke="' + ink + '" stroke-width="2.2"/><path d="M96 98 L96 110 M92 101 L100 101 M92 107 L100 107" stroke="' + ink + '" stroke-width="2"/>'; break;
-      case 'life-stage': prop = '<path d="M26 108 C22 100 32 96 34 104 C36 96 46 100 42 108 L34 116 Z" fill="' + ink + '"/>'; break;
-      default: prop = '';
-    }
-    var body = defs + top + neck + head + hairs[hair] + eyes + mouth + prop;
-    return '<svg viewBox="0 0 120 122" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name) + '"' + (flip ? ' style="transform:scaleX(-1)"' : '') + '>' + body + '</svg>';
+    var head = C(0, -46, 13) + hairs[hair] +
+      (glasses ? C(-5, -45, 3.5) + C(5, -45, 3.5) + L('M-1.5 -45 L1.5 -45') : D(-4.5, -46, 1.6) + D(4.5, -46, 1.6)) + L('M-4 -40 Q0 -37 4 -40');
+    var top = P('M-11 -32 Q-14 -32 -15 -26 L-15 -6 L15 -6 L15 -26 Q14 -32 11 -32 Z') + (pat ? '<path d="M-11 -32 Q-14 -32 -15 -26 L-15 -6 L15 -6 L15 -26 Q14 -32 11 -32 Z" fill="' + fill + '"/>' : '');
+    var arms = { stand: L('M-15 -28 L-20 -8 M15 -28 L20 -8'), cheer: L('M-15 -28 L-24 -50 M15 -28 L24 -50'), sit: L('M-15 -28 L-18 -10 L-6 -10 M15 -28 L18 -10 L6 -10'), hold: L('M-15 -28 L-20 -8 M15 -28 L26 -18'), wave: L('M-15 -28 L-20 -8 M15 -28 L22 -46') }[pose || 'stand'];
+    var legs = pose === 'sit' ? L('M-9 -6 L-9 4 L-20 4 L-20 16 M9 -6 L9 4 L20 4 L20 16') : L('M-7 -6 L-8 16 M7 -6 L8 16');
+    return defs + G(x, y, sc, legs + top + arms + head);
+  }
+  function scene(seg, pose, personX, props) {
+    var out = person(seg, pose, personX == null ? 52 : personX, 100, 1);
+    (props || []).forEach(function (p) { out += G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4])); });
+    return out;
+  }
+  /* Each segment's scene: pose, where the person stands, and props as
+     [motif, x, y, scale]. */
+  var SCENES = {
+    'malay': function (s) { return scene(s, 'wave', 50, [['ketupat', 108, 78, 1.1], ['lantern', 132, 60, .8]]); },
+    'chinese': function (s) { return scene(s, 'wave', 50, [['lantern', 104, 60, 1.1], ['lantern', 130, 74, .8]]); },
+    'indian': function (s) { return scene(s, 'wave', 50, [['diya', 106, 96, 1.2], ['diya', 132, 96, .9]]); },
+    't15': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 6], ['diamond', 134, 70, .9]]); },
+    't20': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 5], ['chart', 134, 84, .9]]); },
+    'm40': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 3], ['house', 134, 92, .8]]); },
+    'b40': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 1], ['bag', 132, 96, .9]]); },
+    'gen-z': function (s) { return scene(s, 'hold', 48, [['phone', 84, 74, 1], ['spark', 120, 56, .8], ['headset', 132, 88, .9]]); },
+    'millennials': function (s) { return scene(s, 'sit', 44, [['laptop', 96, 92, 1], ['coffee', 132, 92, .9]]); },
+    'gen-x': function (s) { return scene(s, 'hold', 46, [['briefcase', 92, 96, 1], ['coffee', 130, 92, .9], ['house', 130, 60, .6]]); },
+    'baby-boomers': function (s) { return scene(s, 'sit', 44, [['newspaper', 98, 84, 1], ['coffee', 134, 94, .9]]); },
+    'young-working-adult': function (s) { return scene(s, 'hold', 46, [['laptop', 96, 96, .9], ['coffee', 128, 94, .8], ['chart', 130, 62, .7]]); },
+    'student': function (s) { return scene(s, 'hold', 46, [['books', 92, 96, 1], ['graduation', 128, 66, 1], ['pen', 134, 96, .8]]); },
+    'solo-lifestylers': function (s) { return scene(s, 'stand', 60, [['coffee', 108, 94, 1], ['plane', 130, 56, .9], ['suitcase', 134, 96, .8]]); },
+    'the-dynamic-duo': function (s) { return scene(s, 'wave', 44, [['ring', 100, 92, 1], ['house', 132, 92, .8]]); },
+    'young-families': function (s) { return scene(s, 'hold', 42, [['stroller', 96, 94, 1], ['kid', 132, 100, 1]]); },
+    'new-mothers': function (s) { return scene(s, 'hold', 46, [['baby', 82, 76, 1], ['stroller', 124, 94, 1]]); },
+    'family-dynamic': function (s) { return scene(s, 'stand', 40, [['kid', 76, 100, 1], ['kid', 96, 100, .8], ['house', 134, 88, .9]]); },
+    'experienced-mothers': function (s) { return scene(s, 'hold', 42, [['kid', 84, 100, 1], ['books', 118, 96, .9], ['apple', 140, 94, .8]]); },
+    'epl-fans': function (s) { return scene(s, 'cheer', 48, [['football', 100, 92, 1.1], ['scarf', 130, 74, 1], ['trophy', 134, 100, .8]]); },
+    'mfl-fans': function (s) { return scene(s, 'cheer', 48, [['football', 98, 94, 1], ['scarf', 130, 78, 1]]); },
+    'golf-fans': function (s) { return scene(s, 'hold', 42, [['club', 78, 90, 1], ['golf', 116, 92, 1.1]]); },
+    'badminton-fans': function (s) { return scene(s, 'hold', 42, [['racket', 82, 76, 1], ['shuttle', 118, 64, 1], ['trophy', 134, 100, .8]]); },
+    'sepak-takraw-fans': function (s) { return scene(s, 'cheer', 48, [['takraw', 100, 70, 1.1], ['trophy', 134, 100, .8]]); },
+    'e-sports-fans': function (s) { return scene(s, 'sit', 42, [['controller', 98, 88, 1], ['headset', 134, 76, 1], ['trophy', 136, 104, .6]]); },
+    'gadget-gurus': function (s) { return scene(s, 'hold', 44, [['phone', 82, 74, 1], ['watch', 112, 94, 1], ['headset', 140, 90, .9]]); },
+    'automotive-fans': function (s) { return scene(s, 'wave', 40, [['car', 112, 92, 1.2]]); },
+    'wellness-explorers': function (s) { return scene(s, 'cheer', 48, [['dumbbell', 104, 96, 1], ['apple', 134, 92, .9], ['leaf', 132, 60, .8]]); },
+    'adventure-seekers': function (s) { return scene(s, 'wave', 44, [['mountain', 112, 90, 1.1], ['tent', 138, 100, .7]]); },
+    'foodies': function (s) { return scene(s, 'sit', 44, [['bowl', 100, 92, 1], ['plate', 136, 94, .8]]); },
+    'environmentalist': function (s) { return scene(s, 'hold', 46, [['leaf', 86, 70, 1], ['leaf', 116, 92, 1.2], ['mountain', 136, 100, .6]]); },
+    'luxury-seekers': function (s) { return scene(s, 'stand', 46, [['diamond', 100, 82, 1], ['bag', 130, 96, 1], ['watch', 138, 66, .8]]); },
+    'fashion-icons': function (s) { return scene(s, 'wave', 44, [['hanger', 100, 86, 1.1], ['lipstick', 130, 96, .9], ['bag', 144, 92, .7]]); },
+    'corporate-leaders': function (s) { return scene(s, 'hold', 44, [['briefcase', 92, 96, 1], ['chart', 130, 88, 1]]); },
+    'smes': function (s) { return scene(s, 'wave', 40, [['shop', 112, 92, 1.1]]); },
+    'emerging-affluents': function (s) { return scene(s, 'stand', 46, [['chart', 100, 88, 1], ['watch', 130, 92, .9], ['coins', 140, 66, .6, 3]]); },
+    'start-up-entrepreneurs': function (s) { return scene(s, 'cheer', 46, [['rocket', 104, 84, 1.1], ['laptop', 138, 100, .7]]); },
+    'comedy-fans': function (s) { return scene(s, 'sit', 44, [['popcorn', 98, 88, 1], ['tv', 134, 88, .9]]); },
+    'rom-com-fans': function (s) { return scene(s, 'sit', 44, [['heart', 92, 72, 1], ['popcorn', 118, 90, .9], ['tv', 146, 92, .7]]); },
+    'animation-fans': function (s) { return scene(s, 'sit', 44, [['tv', 104, 86, 1], ['star', 134, 66, 1], ['star', 142, 92, .7]]); },
+    'sci-fi-fantasy-fans': function (s) { return scene(s, 'stand', 42, [['planet', 100, 70, 1], ['rocket', 132, 88, 1], ['star', 90, 44, .7]]); },
+    'horror-fans': function (s) { return scene(s, 'sit', 44, [['ghost', 100, 82, 1], ['popcorn', 134, 92, .9]]); },
+    'action-adventure-fans': function (s) { return scene(s, 'cheer', 46, [['clapper', 104, 92, 1], ['star', 134, 64, .8], ['ticket', 136, 96, .8]]); },
+    'music-concert-goers': function (s) { return scene(s, 'cheer', 46, [['mic', 100, 90, 1], ['notes', 130, 70, 1], ['ticket', 136, 100, .7]]); },
+    'online-shoppers': function (s) { return scene(s, 'hold', 42, [['phone', 82, 74, .9], ['cart', 116, 90, 1], ['gift', 144, 96, .7]]); },
+    'automotive-buyers': function (s) { return scene(s, 'hold', 40, [['key', 80, 76, 1], ['car', 116, 92, 1.1]]); },
+    'home-buyers': function (s) { return scene(s, 'hold', 42, [['key', 82, 78, 1], ['house', 118, 90, 1.2]]); },
+    'luxury-buyers': function (s) { return scene(s, 'hold', 44, [['bag', 86, 94, 1], ['diamond', 118, 78, 1], ['gift', 142, 96, .8]]); },
+    'tech-gadget-buyers': function (s) { return scene(s, 'hold', 42, [['phone', 82, 74, .9], ['laptop', 118, 96, .9], ['headset', 144, 76, .8]]); },
+    'health-wellness-buyers': function (s) { return scene(s, 'stand', 46, [['apple', 100, 92, 1], ['dumbbell', 130, 96, .9], ['leaf', 134, 64, .8]]); },
+    'travel-experience-seekers': function (s) { return scene(s, 'hold', 42, [['suitcase', 92, 96, 1], ['plane', 124, 60, 1], ['mountain', 136, 100, .6]]); }
+  };
+  function doodle(seg) {
+    var draw = SCENES[seg.id] || function (s) { return scene(s, 'stand', 60, []); };
+    return '<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name) + '">' +
+      '<path d="M8 116 L152 116" stroke="' + INK + '" stroke-width="2" stroke-linecap="round" opacity=".25"/>' + draw(seg) + '</svg>';
   }
 
   /* ── The bars ────────────────────────────────────────────────────
