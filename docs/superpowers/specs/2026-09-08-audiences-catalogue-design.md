@@ -583,3 +583,11 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   itself the signal that everything in it has landed. All five states
   measured exact: the full 577.7M, sports 38.8M, back to 577.7M, the love
   lens 235.5M, and back again.
+- 2026-09-09, the disc opens the segment, and closes back into it. A disc
+  has always been a button that opens the drawer — the same gesture as a
+  card, so the universe is somewhere to act from rather than only look
+  at. Closing was half the trip, though: it looked for the segment's card
+  to swing back into, and on the universe tab that card sits in a hidden
+  panel and measures nothing, so the swing was refused and the drawer
+  merely faded. It now closes back into whatever is actually on screen —
+  the disc in the jar, the card, or the row.

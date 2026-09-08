@@ -1559,8 +1559,18 @@
   }
   function closeDrawer() {
     if (!modal.classList.contains('is-open')) return;
-    var home = drawerId && grid.querySelector('.au-card[data-id="' + drawerId + '"]');
-    if (home && state.view === 'cards') { swingSrcEl = home; swingSrcRect = home.getBoundingClientRect(); }
+    /* Close back to whatever the segment is on screen right now: its
+       disc in the jar, its card, or its row. The card was being taken
+       even from the universe, where it sits in a hidden panel and
+       measures nothing, so a drawer opened from a disc swung out of it
+       and then merely faded away. */
+    var home = null;
+    if (drawerId) {
+      home = state.tab === 'universe' ? bubs[drawerId]
+        : state.view === 'cards' ? grid.querySelector('.au-card[data-id="' + drawerId + '"]')
+        : rows.querySelector('tr[data-id="' + drawerId + '"]');
+    }
+    if (home) { swingSrcEl = swingAnchor(home); swingSrcRect = home.getBoundingClientRect(); }
     var swung = !REDUCED && setSwingVars();
     if (swung) drawer.classList.add('is-swinging-closed');
     modal.classList.remove('is-shown');
