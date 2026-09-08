@@ -82,6 +82,8 @@
     transition:opacity 420ms var(--ease-standard); will-change:transform;}
   .au-bub.is-out{opacity:0; pointer-events:none;}
   .au-bub.is-hot{z-index:5;}
+  .au-bub.is-dim{opacity:.38;}
+  .au-space.has-hot .au-bub.is-dim{opacity:.2;}
   /* One flat colour per lens, deeper with size: --t is 0 for the
      smallest audience and 1 for the largest, and the fill mixes the
      element colour into white by it. Ink is white throughout. */
@@ -991,7 +993,14 @@
   }
   E('auLens').addEventListener('click', function (e) {
     var b = e.target.closest('[data-lens]'); if (!b) return;
-    hotNode(null); state.lens = b.dataset.lens; renderLensChips(); renderUniverse();
+    hotNode(null); state.lens = b.dataset.lens; renderLensChips();
+    if (!J) { renderUniverse(); return; }
+    /* No pour: the discs that matter grow where they sit and shove the
+       rest aside; the rest shrink to marbles and fade. */
+    M.jar.setLens(J, state.lens);
+    J.balls.forEach(function (ball) { bubs[ball.id].classList.toggle('is-dim', ball.dim); });
+    if (REDUCED || document.hidden) { M.jar.settle(J, 400); }
+    draw(); startMotion();
   });
   function buildUniverse() {
     world.innerHTML = ''; bubs = {};
@@ -1003,10 +1012,18 @@
       world.appendChild(b); bubs[s.id] = b;
     });
   }
+  function sizeBubble(el, b) {
+    var fs = Math.max(9, Math.min(12, b.r * 0.24));
+    el.style.setProperty('--d', (b.r * 2).toFixed(1) + 'px'); el.style.setProperty('--fs', fs.toFixed(1) + 'px');
+    el.classList.toggle('is-small', b.r < 34); el.classList.toggle('is-tiny', b.r < 17);
+    b.rd = b.r;
+  }
   function draw() {
     if (!J) return;
     J.balls.forEach(function (b) {
-      bubs[b.id].style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0)';
+      var el = bubs[b.id];
+      if (b.rd == null || Math.abs(b.rd - b.r) > 0.3) sizeBubble(el, b);
+      el.style.transform = 'translate3d(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px,0)';
     });
     if (hotId) placeLabel();
   }
@@ -1024,10 +1041,9 @@
     A.forEach(function (s) {
       var el = bubs[s.id], b = ballById[s.id];
       if (!b || b.out) { el.classList.add('is-out'); return; }
-      var fs = Math.max(9, Math.min(12, b.r * 0.24));
-      el.style.setProperty('--d', (b.r * 2).toFixed(1) + 'px'); el.style.setProperty('--t', b.t.toFixed(3));
-      el.style.setProperty('--fs', fs.toFixed(1) + 'px');
-      el.classList.toggle('is-small', b.r < 34); el.classList.toggle('is-tiny', b.r < 17);
+      el.style.setProperty('--t', b.t.toFixed(3));
+      sizeBubble(el, b);
+      el.classList.toggle('is-dim', !!b.dim);
       el.classList.remove('is-out');
     });
     /* Reduced motion, or a page nobody can see, gets the settled jar at
@@ -1052,11 +1068,6 @@
     var sz = stageSize(), ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 40) + 24;
     M.jar.resize(J, { w: sz.w, h: sz.h, padTop: padTop, padBottom: tray.length ? 84 : 16 });
     layout = { w: sz.w, h: sz.h };
-    J.balls.forEach(function (b) {
-      var el = bubs[b.id], fs = Math.max(9, Math.min(12, b.r * 0.24));
-      el.style.setProperty('--d', (b.r * 2).toFixed(1) + 'px'); el.style.setProperty('--fs', fs.toFixed(1) + 'px');
-      el.classList.toggle('is-small', b.r < 34); el.classList.toggle('is-tiny', b.r < 17);
-    });
     if (REDUCED || document.hidden) { M.jar.settle(J, 400); }
     draw(); startMotion();
   }
@@ -1078,9 +1089,13 @@
     var hvx = (wx - motion.hx) / Math.max(dt, 1 / 120), hvy = (wy - motion.hy) / Math.max(dt, 1 / 120);
     motion.hvx += (hvx - motion.hvx) * 0.4; motion.hvy += (hvy - motion.hvy) * 0.4;
     motion.hx = wx; motion.hy = wy;
-    var hand = stir ? { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54 / Math.sqrt(view.k), on: true } : null;
+    var speed = Math.sqrt(motion.hvx * motion.hvx + motion.hvy * motion.hvy), hand = null;
+    if (stir) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54 / Math.sqrt(view.k), on: true };
+    /* A pointer merely passing is a soft hand: the discs it brushes get
+       a tick each, never the one it is hovering. */
+    else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24 / Math.sqrt(view.k), on: true, soft: true, skip: hotId };
     var pouring = J.balls.some(function (b) { return !b.out && J.time < b.release + 0.5; });
-    var settled = !pouring && J.energy != null && J.energy < 0.5;
+    var settled = !pouring && !J.growing && J.energy != null && J.energy < 0.5;
     if (!settled || hand) { M.jar.step(J, dt, hand); draw(); }
     if (motion.has && !stir) {
       var under = null;

@@ -262,3 +262,13 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   Lives on — sits above both tabs and drives both: a filtered-out disc
   leaves the jar and a returning one pours back in (`jar.setActive`).
   The sort and view switch show only on the Segments tab.
+- 2026-09-08, eighth pass: a micro stir on plain hover, and lens
+  switches that never pour. A pointer moving through the jar without a
+  button is a soft hand: each disc it brushes gets one small nudge as its
+  rim is crossed, never the disc it is hovering, so the pile jostles a
+  few pixels and settles. (The hand is now applied once per substep,
+  after the contacts; it had been running inside the contact passes and
+  landing nine times a frame.) Switching lens calls `jar.setLens`: the
+  discs that matter grow, frame by frame, to the size the jar would give
+  them alone and shove the rest aside; the rest shrink to marbles and
+  fade. All / Who / What no longer rebuild the jar.
