@@ -1019,22 +1019,30 @@
   /* The jar's headline number counts to its new total rather than
      snapping, so a filter reads as the audience growing or shrinking.
      The wording underneath changes once, not sixty times a second. */
-  var totalRAF = 0, totalShown = 0;
+  var totalRAF = 0, totalShown = 0, totalTarget = 0;
+  function paintTotal(v) { E('auJarTotalN').textContent = fmtM(Math.round(v)); }
+  /* The headline only ever states a target here. What the number does to
+     get there — climb with the discs as they land, or run to it on its
+     own clock — is tallyJar's call, since only the jar knows whether it
+     is still filling. */
   function setJarTotal(to, n) {
-    var from = totalShown, num = E('auJarTotalN');
-    totalShown = to;
+    totalTarget = to;
     /* A sum of published sizes, not a headcount: these are audience-scale
        figures that overlap heavily, and 51 of them add up to many times
        the country. The label has to say so — the tray's deduplicated
        number is the one to quote for a buy. */
     E('auJarTotalS').textContent = n ? 'Combined reach · ' + n + (n === 1 ? ' segment' : ' segments') + ' · sizes overlap'
       : 'Nothing matches these filters';
-    if (REDUCED || document.hidden || from === to) { num.textContent = fmtM(to); return; }
-    if (totalRAF) cancelAnimationFrame(totalRAF);
+    if (!J) { totalShown = to; paintTotal(to); }
+  }
+  function tweenTotal(from, to) {
+    if (totalRAF) { cancelAnimationFrame(totalRAF); totalRAF = 0; }
+    totalShown = to;
+    if (REDUCED || document.hidden || from === to) { paintTotal(to); return; }
     var t0 = performance.now(), dur = 520;
     totalRAF = requestAnimationFrame(function step(now) {
       var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-      num.textContent = fmtM(Math.round(from + (to - from) * e));
+      paintTotal(from + (to - from) * e);
       totalRAF = k < 1 ? requestAnimationFrame(step) : 0;
     });
   }
@@ -1251,8 +1259,41 @@
     el.classList.toggle('is-small', rt < 34); el.classList.toggle('is-tiny', rt < 17);
     b.rd = rt;
   }
+  /* The headline is added up by the jar: a disc counts once it has come
+     to rest, so the number climbs as the audience piles in rather than
+     running a clock of its own. Discs outside the filters, and those
+     shrunk to marbles by a lens, are not in the sum — they are not in
+     the total either. A disc sent back up to pour again (a filter let it
+     back in) loses its place in the count until it lands. */
+  var LANDED = 0.25;
+  function tallyJar(atRest) {
+    if (!J) return;
+    /* When the jar as a whole has stopped, every disc in it has landed,
+       whatever its own last step measured. Without this a disc still
+       being jostled as the jar goes quiet is left out of the sum for
+       good, because the loop stops drawing the moment it settles. */
+    if (!atRest) atRest = J.maxSpeed != null && J.maxSpeed < 4;
+    var sum = 0, pending = 0;
+    for (var i = 0; i < J.balls.length; i++) {
+      var b = J.balls[i];
+      if (b.out || b.dim) continue;
+      if (!b.inside) b.landed = false;
+      else if (!b.landed) {
+        var vx = b.x - (b.px == null ? b.x : b.px), vy = b.y - (b.py == null ? b.y : b.py);
+        if (atRest || vx * vx + vy * vy < LANDED) b.landed = true;
+      }
+      if (b.landed) sum += b.seg.size; else pending++;
+    }
+    if (pending > 0) {
+      /* Still filling: the discs are the animation, so no tween runs
+         beside them. */
+      if (totalRAF) { cancelAnimationFrame(totalRAF); totalRAF = 0; }
+      if (sum !== totalShown) { totalShown = sum; paintTotal(sum); }
+    } else if (totalShown !== totalTarget) tweenTotal(totalShown, totalTarget);
+  }
   function draw() {
     if (!J) return;
+    tallyJar();
     J.balls.forEach(function (b) {
       var el = bubs[b.id], rt = b.rt || b.r;
       if (b.rd !== rt) sizeBubble(el, b);
@@ -1299,7 +1340,8 @@
       bubs[b.id].classList.toggle('is-out', !!b.out);
       bubs[b.id].classList.toggle('is-dim', !!b.dim);
     });
-    if (REDUCED || document.hidden) { M.jar.settle(J, 500); draw(); }
+    if (REDUCED || document.hidden) { M.jar.settle(J, 500); draw(); tallyJar(true); }
+    else tallyJar();
     startMotion();
   }
   /* A resized jar keeps its discs; they move to fill the new room. */
@@ -1346,6 +1388,10 @@
        rolling on its own would be frozen mid-roll. */
     var settled = !pouring && !J.growing && J.maxSpeed != null && J.maxSpeed < 4;
     if (!settled || hand) { for (var k = 0; k < steps; k++) M.jar.step(J, STEP, hand); if (steps) draw(); }
+    /* The jar has gone quiet: whatever the count still had outstanding
+       has landed by definition, and no more frames will be drawn to
+       notice it. */
+    else tallyJar(true);
     if (motion.has && !stir) {
       var under = null;
       J.balls.forEach(function (b) { if (b.out) return; var dx = b.x - wx, dy = b.y - wy; if (dx * dx + dy * dy <= b.r * b.r) under = b.id; });

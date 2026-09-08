@@ -564,3 +564,22 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   radius, with its bars at 172px. Shared assets go to ?v=4; the disc
   change lives in audience-marks.js, and without the bump a cached copy
   keeps the old sizes.
+- 2026-09-09, the jar counts itself. The headline no longer runs a clock
+  of its own while the discs pour: a disc is added to the sum once it has
+  come to rest, so the number climbs as the audience piles in. Stepping
+  the physics frame by frame, it reaches 15% of the total a second in,
+  45% at 1.7s, 85% at 2.3s and all of it by 4s. Discs the filters have
+  removed, and those a lens has shrunk to marbles, are not counted —
+  they are not in the total either — and a disc sent back up to pour
+  again loses its place in the count until it lands.
+  Two things had to change for the sum to be trustworthy. The tally is
+  now the only place that decides how the number moves: `setJarTotal`
+  states a target and nothing more, and the tally either lets the discs
+  carry it or, when the jar is at rest, tweens to it. Before that a stale
+  flag let a filter change leave the number untouched — 51 segments went
+  to 6 and the headline still read 577.7M. And the loop stops drawing the
+  moment it judges itself settled, so a disc still being jostled on that
+  last frame was left out of the sum for good: the jar going quiet is now
+  itself the signal that everything in it has landed. All five states
+  measured exact: the full 577.7M, sports 38.8M, back to 577.7M, the love
+  lens 235.5M, and back again.
