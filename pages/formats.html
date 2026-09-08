@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
-<link rel="stylesheet" href="../shared/format-previews.css?v=2" />
+<link rel="stylesheet" href="../shared/format-previews.css?v=3" />
 <style>
   /* Page-local. Composes tokens only — no new colours, radii or spacing.
 
@@ -179,7 +179,10 @@
      pills on forty cards was the loudest thing on the page. */
   .fm-funnel-line{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .fm-tag-neutral{background:var(--color-neutral-2); color:var(--color-neutral-5);}
+  /* Display's tag, in the secondary accent, built the way the DS builds
+     its elemental tags: 8% tint, the accent for text and dot. */
+  .fm-tag-purple{background:color-mix(in srgb, var(--color-purple) 8%, #fff); color:var(--color-purple);}
+  .fm-tag-purple .dot{background:var(--color-purple);}
   .c-tag{white-space:nowrap; flex:none;}
   /* Live demo is switched off for now: present, so nobody wonders where
      it went, but quiet and inert. The ghost recipe's disabled state. */
@@ -591,7 +594,7 @@
     });
   }
   var byId = {}; F.forEach(function (f) { byId[f.id] = f; });
-  var FAMILY_TAG = { 'Interactive': 'c-tag-water', 'Gamification': 'c-tag-fire', 'Video': 'c-tag-wood', 'Social': 'c-tag-earth', 'High impact': 'c-tag-gold', 'Display': 'fm-tag-neutral' };
+  var FAMILY_TAG = { 'Interactive': 'c-tag-water', 'Gamification': 'c-tag-fire', 'Video': 'c-tag-wood', 'Social': 'c-tag-earth', 'High impact': 'c-tag-gold', 'Display': 'fm-tag-purple' };
   var FUNNEL_LABEL = {}; window.FORMAT_FUNNEL.forEach(function (x) { FUNNEL_LABEL[x.key] = x.label; });
   function ctr(f) { var m = /CTR\s*>?\s*([\d.]+)%/i.exec(f.benchmark || ''); return m ? parseFloat(m[1]) : null; }
   function tag(f) { return '<span class="c-tag ' + FAMILY_TAG[f.family] + '"><i class="dot"></i>' + esc(f.family) + '</span>'; }

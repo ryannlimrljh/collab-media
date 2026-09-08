@@ -22,7 +22,10 @@
 .fp-stage[data-family="Video"]{--fp-brand:var(--color-salmon-pink); --fp-tint:var(--color-wood-bg); --fp-tint-strong:var(--color-wood-bg-strong);}
 .fp-stage[data-family="Social"]{--fp-brand:var(--color-green); --fp-tint:var(--color-earth-bg); --fp-tint-strong:var(--color-earth-bg-strong);}
 .fp-stage[data-family="High impact"]{--fp-brand:var(--color-amber); --fp-tint:var(--color-gold-bg); --fp-tint-strong:var(--color-gold-bg-strong);}
-.fp-stage[data-family="Display"]{--fp-brand:var(--color-neutral-7); --fp-tint:var(--color-neutral-2); --fp-tint-strong:var(--color-neutral-3);}
+/* Display takes the DLS secondary accent: the five elements are spoken
+   for, and a neutral sample read as muted beside the coloured ones. Its
+   tints are the same 8% / 16% mix the elemental -bg pairs use. */
+.fp-stage[data-family="Display"]{--fp-brand:var(--color-purple); --fp-tint:color-mix(in srgb, var(--color-purple) 8%, #fff); --fp-tint-strong:color-mix(in srgb, var(--color-purple) 16%, #fff);}
 .fp-stage *{box-sizing:border-box;}
 .fp-stage i,.fp-stage b,.fp-stage em,.fp-stage strong{font-style:normal;}
 
