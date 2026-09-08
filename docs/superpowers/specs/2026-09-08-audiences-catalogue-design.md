@@ -373,3 +373,11 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   Both sets are named by segment id, and the art is 4:3 like every box
   that holds it. The doodle generator came out of the marks module with
   them, which leaves it at 261 lines: the consumption arc and the jar.
+- 2026-09-08, and the bug that followed: the illustrations arrived
+  cropped to a corner for anyone who already had the page open. The
+  sizing rule that makes an image fill its box lives in
+  `shared/audience-marks.css`, whose cache-busting query was still `?v=1`
+  from the first build, so browsers served the old file. All three shared
+  assets are now `?v=2`, and the rule that matters most sits in the
+  page's own stylesheet, which ships with the HTML and can never be a
+  version behind. Bump the query whenever a shared file changes.

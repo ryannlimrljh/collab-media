@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
-<link rel="stylesheet" href="../shared/audience-marks.css?v=1" />
+<link rel="stylesheet" href="../shared/audience-marks.css?v=2" />
 <style>
   /* Page-local. Composes tokens only — no new colours, radii or spacing.
 
@@ -174,6 +174,11 @@
   /* The stage: the segment drawn, and its media consumption as bars,
      on the lens tint. Nothing covers it; the details come up in the
      body below, the way the ad-format cards do. */
+  /* An absolutely positioned image keeps its intrinsic size however
+     its offsets are set, so every box that holds one spells out the
+     width and height. This lives in the page's own stylesheet, which
+     ships with the HTML and so is never a cached version behind. */
+  img.au-doodle{width:100%; height:100%; object-fit:cover; display:block;}
   .au-stage{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:1px solid var(--color-neutral-2);}
   .au-stage .au-doodle{position:absolute; inset:0; transition:transform var(--duration-slow) var(--ease-settle);}
   .au-card.is-live .au-stage .au-doodle{transform:translateY(-3px) scale(1.02);}
@@ -618,8 +623,8 @@
 <div class="c-toast-host" id="auToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/audiences-data.js?v=1"></script>
-<script src="../shared/audience-marks.js?v=1"></script>
+<script src="../shared/audiences-data.js?v=2"></script>
+<script src="../shared/audience-marks.js?v=2"></script>
 <script>
 (function () {
   'use strict';
