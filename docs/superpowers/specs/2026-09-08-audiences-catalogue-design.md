@@ -492,3 +492,10 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   asynchronous left to wait for, `skeleton()` runs and is replaced before
   the browser can paint, so the bones can no longer be seen. The call is
   left in place against the day the data comes from somewhere else.
+- 2026-09-09, and after: the segment tab's bones are the card grid, and
+  only the card grid. A card carries the shape of a segment — a picture,
+  a name, a group, a size — where a row of bars carries the shape of a
+  spreadsheet, so the skeleton now forces the cards view on whatever the
+  visitor last chose and hands the table back the moment the real
+  segments arrive. The row bones and the one CSS rule that served them
+  came out.
