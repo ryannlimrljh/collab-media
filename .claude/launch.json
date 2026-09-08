@@ -2,11 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "planner",
-      "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd '/Users/kwlkokho/Desktop/Claude-Cowork-Space/Collabrium-Projects/collabsales-planner' && python3 -m http.server \"${PORT:-8794}\""],
-      "autoPort": false,
-      "port": 8794
+      "name": "media",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8797"],
+      "port": 8797,
+      "url": "http://localhost:8797",
+      "autoPort": false
     }
   ]
 }

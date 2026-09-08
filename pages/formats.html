@@ -48,7 +48,6 @@
   .fm-sk-ava{width:36px; height:36px; border-radius:var(--radius-sm); background:var(--color-neutral-3); flex:none;}
   .fm-sk-card{pointer-events:none; cursor:default;}
   .fm-sk-card .fm-body{gap:6px;}
-  .fm-sk-card .fm-foot{gap:var(--spacing-16);}
   .fm-table .fm-sk{display:block;}
   @media (prefers-reduced-motion:no-preference){
     .fm-sk,.fm-sk-stage,.fm-sk-ava{animation:fm-sk-pulse 1.4s var(--ease-standard) infinite;}
@@ -119,7 +118,7 @@
   .fm-count b{color:var(--color-neutral-9); font-weight:700;}
 
   /* ── Gallery ── */
-  .fm-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:var(--spacing-16);}
+  .fm-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:var(--spacing-20);}
   .fm-card{position:relative; display:flex; flex-direction:column; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; cursor:pointer;
     transition:box-shadow var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle), border-color var(--duration-base) var(--ease-settle);}
@@ -137,7 +136,7 @@
      the body below, where the tagline and chips were. */
   .fm-card .fp-stage{transition:background-color var(--duration-slow) var(--ease-flow);}
   .fm-card.is-live .fp-stage{background:var(--fp-tint);}
-  .fm-live{position:absolute; top:var(--spacing-12); right:var(--spacing-12); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
+  .fm-live{position:absolute; top:var(--spacing-16); right:var(--spacing-16); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
     opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
   .fm-live i{width:6px; height:6px; border-radius:50%; background:var(--color-green); animation:fm-blink 1.1s ease-in-out infinite;}
@@ -148,19 +147,23 @@
   @media (hover:none){ .fm-touchhint{display:inline-flex;} .fm-card.is-live .fm-touchhint{display:none;} }
   /* Top-left and always there, like the roster card's select box: a
      control you cannot see is a control nobody knows exists. */
-  .fm-ctl{position:absolute; top:var(--spacing-12); left:var(--spacing-12); display:flex; gap:6px; z-index:3;}
-  .fm-ctl button{width:28px; height:28px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:rgba(255,255,255,.96);
-    color:var(--color-neutral-9); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-1); font-size:14px; font-family:inherit;
-    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
-  .fm-ctl button:hover{background:var(--color-neutral-2);}
+  .fm-ctl{position:absolute; top:var(--spacing-16); left:var(--spacing-16); display:flex; gap:6px; z-index:3;}
+  /* Two states, like the roster's select box: an outlined plus at rest,
+     a filled check once the format is in the tray. Hover darkens the edge. */
+  .fm-ctl button{width:28px; height:28px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    color:var(--color-neutral-5); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-family:inherit;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .fm-card:hover .fm-ctl button:not(.is-on){border-color:var(--color-neutral-5); color:var(--color-neutral-9);}
+  .fm-ctl button:hover:not(.is-on){background:var(--color-neutral-2);}
+  .fm-ctl button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .fm-ctl button.is-on{background:var(--color-obsidian); color:var(--color-neutral-1); border-color:var(--color-obsidian);}
   .fm-ctl button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .fm-body{padding:var(--spacing-12) var(--spacing-16) var(--spacing-12); display:flex; flex-direction:column; gap:var(--spacing-8); flex:1;}
+  .fm-body{padding:var(--spacing-20) var(--spacing-24) var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-8); flex:1;}
   .fm-titlerow{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-8);}
   .fm-titlerow h4{margin:0; font-size:var(--text-h5-size); font-weight:800; line-height:20px;}
   .fm-tagline{margin:0; font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-5);
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .fm-swap{position:relative; height:74px;}
+  .fm-swap{position:relative; height:66px;}
   .fm-swap > div{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-8);
     transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle);}
   .fm-swap .spec{opacity:0; transform:translateY(8px); pointer-events:none; justify-content:center; gap:6px;}
@@ -172,14 +175,12 @@
   .fm-spec-cell b{flex:0 0 72px; font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; white-space:nowrap;}
   .fm-spec-cell span{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:18px; font-weight:700; color:var(--color-neutral-9);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .fm-meta{display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; padding-top:var(--spacing-4);}
-  .fm-meta .c-chip{height:22px; padding:0 8px; font-size:11px; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  /* Funnel as one quiet line rather than a row of chips: three grey
+     pills on forty cards was the loudest thing on the page. */
+  .fm-funnel-line{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .fm-tag-neutral{background:var(--color-neutral-2); color:var(--color-neutral-5);}
   .c-tag{white-space:nowrap; flex:none;}
-  .fm-foot{display:flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-8) var(--spacing-12); border-top:1px solid var(--color-neutral-2);}
-  .fm-foot .spacer{flex:1;}
-  .fm-foot .c-btn{text-decoration:none;}
-  .fm-foot .c-btn i{font-size:var(--icon-sm);}
   /* Live demo is switched off for now: present, so nobody wonders where
      it went, but quiet and inert. The ghost recipe's disabled state. */
   .fm-demo-off{background:transparent !important; color:var(--color-neutral-4) !important; border-color:transparent !important; cursor:not-allowed !important; box-shadow:none !important;}
@@ -198,8 +199,17 @@
   .fm-table .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   .fm-table .muted{color:var(--color-neutral-4);}
   .fm-table .sizes{font-variant-numeric:tabular-nums; color:var(--color-neutral-5); white-space:nowrap;}
-  .fm-table .act{white-space:nowrap; text-align:right;}
-  .fm-table .act .c-btn{text-decoration:none;}
+  /* The same compare control the card carries, leading the row. */
+  .fm-table .sel{width:44px; padding-right:0;}
+  .fm-table .sel .fm-rowcmp{width:28px; height:28px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    color:var(--color-neutral-5); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-family:inherit;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .fm-table tbody tr:hover .fm-rowcmp:not(.is-on){border-color:var(--color-neutral-5); color:var(--color-neutral-9);}
+  .fm-rowcmp:hover:not(.is-on){background:var(--color-neutral-2);}
+  /* Same specificity as the base rule above, or the outline wins and the
+     row shows a bare check where the card shows a filled one. */
+  .fm-table .sel .fm-rowcmp.is-on{background:var(--color-obsidian); color:var(--color-neutral-1); border-color:var(--color-obsidian);}
+  .fm-rowcmp:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .fm-table .fm-funnel{display:flex; flex-wrap:wrap; gap:3px;}
   .fm-table .fm-funnel span{font-size:11px; padding:1px 6px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5); white-space:nowrap;}
   /* Hovering a row floats its sample beside the table, so the list
@@ -285,7 +295,11 @@
   .fm-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left;
     transition:box-shadow var(--duration-fast) var(--ease-standard);}
   .fm-relcard:hover{box-shadow:var(--shadow-2);} .fm-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .fm-relcard .fp-stage{font-size:6px; aspect-ratio:16/10;}
+  /* A 6px stage would put its labels under the browser's minimum font
+     size, which clamps them up and out of their boxes. So the thumbnail
+     renders at the card's own 10px and is scaled down as a whole. */
+  .fm-relstage{position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--color-neutral-2);}
+  .fm-relstage .fp-stage{position:absolute; top:0; left:0; width:calc(100% / .58); font-size:10px; transform:scale(.58); transform-origin:0 0;}
   .fm-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .fm-dfoot{display:flex; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-3); flex-wrap:wrap; align-items:center;}
   .fm-dfoot .c-btn{text-decoration:none;}
@@ -463,8 +477,9 @@
           <table class="fm-table">
             <thead>
               <tr>
+                <th class="sel"><span class="sr-only">Compare</span></th>
                 <th>Format</th><th>Family</th><th>Objective</th><th>Funnel</th><th>Sizes</th><th>Devices</th>
-                <th class="num">Benchmark</th><th class="num">CPM (MYR)</th><th class="num">Inventory (M)</th><th><span class="sr-only">Actions</span></th>
+                <th class="num">Benchmark</th><th class="num">CPM (MYR)</th><th class="num">Inventory (M)</th>
               </tr>
             </thead>
             <tbody id="fmRows"></tbody>
@@ -758,19 +773,13 @@
       '<div class="fm-body">' +
         '<div class="fm-titlerow"><h4>' + esc(f.name) + '</h4>' + tag(f) + '</div>' +
         '<div class="fm-swap">' +
-          '<div class="rest"><p class="fm-tagline">' + esc(f.tagline) + '</p><div class="fm-meta">' + funnelChips(f, 3) + '</div></div>' +
+          '<div class="rest"><p class="fm-tagline">' + esc(f.tagline) + '</p><p class="fm-funnel-line">' + f.funnel.map(function (k) { return esc(FUNNEL_LABEL[k] || k); }).join(' · ') + '</p></div>' +
           '<div class="spec">' +
             '<div class="fm-spec-cell"><b>Objective</b><span>' + esc(f.objective) + '</span></div>' +
             '<div class="fm-spec-cell"><b>Sizes</b><span>' + esc(f.sizes.join(' · ') || '—') + '</span></div>' +
             '<div class="fm-spec-cell"><b>Benchmark</b><span>' + (f.benchmark ? esc(f.benchmark) : 'Not published') + '</span></div>' +
           '</div>' +
         '</div>' +
-      '</div>' +
-      '<div class="fm-foot">' +
-        '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-open="' + f.id + '"><i class="ph ph-info"></i> Details</button>' +
-        (f.demo ? '<button class="c-btn c-btn-ghost c-btn-sm fm-demo-off" type="button" disabled title="Live demos are switched off in this build" data-demo><i class="ph ph-arrow-square-out"></i> Live demo</button>' : '') +
-        '<span class="spacer"></span>' +
-        (f.cpm != null ? '<span class="u-caption" style="font-size:12px; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;">CPM RM ' + f.cpm.toFixed(2) + '</span>' : '') +
       '</div>' +
     '</article>';
   }
@@ -917,7 +926,9 @@
 
   /* ── Table ──────────────────────────────────────────────────────── */
   function rowHtml(f) {
+    var on = compare.indexOf(f.id) > -1;
     return '<tr data-id="' + f.id + '">' +
+      '<td class="sel"><button class="fm-rowcmp' + (on ? ' is-on' : '') + '" type="button" data-cmp="' + f.id + '" aria-label="' + (on ? 'Remove from compare' : 'Add to compare') + '" title="' + (on ? 'Remove from compare' : 'Add to compare') + '"><i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i></button></td>' +
       '<td class="name">' + esc(f.name) + '<small>' + esc(f.tagline) + '</small></td>' +
       '<td>' + tag(f) + '</td>' +
       '<td>' + esc(f.objective) + '</td>' +
@@ -927,8 +938,6 @@
       '<td class="num">' + (f.benchmark ? esc(f.benchmark) : '<span class="muted">—</span>') + '</td>' +
       '<td class="num">' + (f.cpm != null ? f.cpm.toFixed(2) : '<span class="muted">—</span>') + '</td>' +
       '<td class="num">' + (f.inventory != null ? f.inventory : '<span class="muted">—</span>') + '</td>' +
-      '<td class="act"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-cmp="' + f.id + '" title="Add to compare"><i class="ph ' + (compare.indexOf(f.id) > -1 ? 'ph-check' : 'ph-plus') + '"></i></button>' +
-        (f.demo ? '<button class="c-btn c-btn-ghost c-btn-sm fm-demo-off" type="button" disabled data-demo title="Live demos are switched off in this build"><i class="ph ph-arrow-square-out"></i></button>' : '') + '</td>' +
     '</tr>';
   }
   var rows = E('fmRows'), peek = E('fmRowpeek'), peekStage = E('fmRowpeekStage'), peekId = null, peekHideTimer = null, peekSwapTimer = null;
@@ -1054,7 +1063,7 @@
       (f.industries.length ? '<div class="fm-section"><h5>Industries it has run for</h5><div class="fm-chipset">' + f.industries.map(function (i) { return '<span class="c-chip">' + esc(i) + '</span>'; }).join('') + '</div></div>' : '') +
       (f.source === 'catalogue' ? '<div class="fm-section"><p class="fm-ddesc" style="margin:0; color:var(--color-neutral-5);"><i class="ph ph-info" style="vertical-align:-2px;"></i> Standard display unit. Copy and sizes here are catalogue defaults, not a KULT gallery page — verify before quoting.</p></div>' : '') +
       (rel.length ? '<div class="fm-section"><h5>Also consider</h5><div class="fm-related">' + rel.map(function (r) {
-        return '<button class="fm-relcard" type="button" data-rel="' + r.id + '"><div class="fp-stage" data-relstage="' + r.id + '"></div><span>' + esc(r.name) + '</span></button>';
+        return '<button class="fm-relcard" type="button" data-rel="' + r.id + '"><div class="fm-relstage"><div class="fp-stage" data-relstage="' + r.id + '"></div></div><span>' + esc(r.name) + '</span></button>';
       }).join('') + '</div></div>' : '');
     var inCmp = compare.indexOf(f.id) > -1;
     E('fmDrawerFoot').innerHTML =
@@ -1157,7 +1166,10 @@
       card.classList.toggle('is-compared', on);
       var b = card.querySelector('.fm-cmp'); if (b) { b.classList.toggle('is-on', on); b.innerHTML = '<i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i>'; var lbl = on ? 'Remove from compare' : 'Add to compare'; b.title = lbl; b.setAttribute('aria-label', lbl); }
     });
-    E('fmRows').querySelectorAll('[data-cmp]').forEach(function (b) { b.innerHTML = '<i class="ph ' + (compare.indexOf(b.dataset.cmp) > -1 ? 'ph-check' : 'ph-plus') + '"></i>'; });
+    E('fmRows').querySelectorAll('[data-cmp]').forEach(function (b) {
+      var on = compare.indexOf(b.dataset.cmp) > -1, lbl = on ? 'Remove from compare' : 'Add to compare';
+      b.classList.toggle('is-on', on); b.innerHTML = '<i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i>'; b.title = lbl; b.setAttribute('aria-label', lbl);
+    });
     E('fmCbarNames').innerHTML = compare.map(function (id) {
       return '<span>' + esc(byId[id].name) + '<button type="button" data-uncmp="' + id + '" aria-label="Remove ' + esc(byId[id].name) + '"><i class="ph ph-x"></i></button></span>';
     }).join('');
@@ -1325,13 +1337,12 @@
         '<div class="fm-stagewrap"><div class="fm-sk-stage"></div></div>' +
         '<div class="fm-body"><div class="fm-titlerow">' + sk(120, 16) + '<span class="fm-sk fm-sk-pill" style="width:74px; height:22px"></span></div>' +
           sk(0, 9, 'width:92%') + sk(0, 9, 'width:64%') +
-          '<div class="fm-meta"><span class="fm-sk fm-sk-pill" style="width:68px; height:22px"></span><span class="fm-sk fm-sk-pill" style="width:88px; height:22px"></span></div></div>' +
-        '<div class="fm-foot">' + sk(62, 10) + sk(80, 10) + '</div></article>';
+          sk(0, 9, 'width:46%; margin-top:6px') + '</div></article>';
     }).join('');
     E('fmRows').innerHTML = [0, 1, 2, 3, 4].map(function () {
       var cells = '';
       for (var c = 0; c < 9; c++) cells += '<td>' + sk(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
-      return '<tr aria-hidden="true">' + cells + '<td></td></tr>';
+      return '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
     }).join('');
   }
   skeleton();
