@@ -591,3 +591,10 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   panel and measures nothing, so the swing was refused and the drawer
   merely faded. It now closes back into whatever is actually on screen —
   the disc in the jar, the card, or the row.
+- 2026-09-09, the lens leaves the drawer. The header carried two pills,
+  the lens beside the category, and the lens was the weaker of the two:
+  it is a filter for finding a segment, not a fact about it, and the
+  drawer is where you have already found it. Only the category pill
+  remains, which is also the one the colour follows. `lensTag` and the
+  lens-to-DLS-tag map went with it; the lens still names itself in the
+  table's second line and still answers to search.

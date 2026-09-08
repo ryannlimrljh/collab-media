@@ -706,7 +706,6 @@
   var lensOf = {}; LENSES.forEach(function (l) { lensOf[l.key] = l; });
   var propOf = {}; PROPS.forEach(function (p) { propOf[p.key] = p; });
   var PROP_SHORT = { awani: 'Awani', gempak: 'Gempak', xuan: 'XUAN', syok: 'SYOK', stadium: 'Stadium', rasa: 'Rasa', hiburan: 'Hiburan', sooka: 'sooka', ulagam: 'Ulagam' };
-  var LENS_TAG = { who: 'c-tag-earth', love: 'c-tag-water', buying: 'c-tag-fire' };
   /* Colour comes from the category, not the lens: the illustrations are
      drawn that way, so the pills, the bars and the discs follow them. */
   function catClass(s) { return 'au-cat cat-' + s.group; }
@@ -724,7 +723,6 @@
   }
   function fmtFull(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function groupTag(s) { return '<span class="c-tag au-cattag ' + catClass(s) + '"><i class="dot"></i>' + esc(groupOf[s.group].label) + '</span>'; }
-  function lensTag(s) { return '<span class="c-tag ' + LENS_TAG[s.lens] + '"><i class="dot"></i>' + esc(lensOf[s.lens].label) + '</span>'; }
   function topChannels(s, n) {
     return Object.keys(s.consumption).map(function (k) { return { k: k, v: s.consumption[k] }; })
       .sort(function (a, b) { return b.v - a.v; }).slice(0, n || 2);
@@ -1512,7 +1510,7 @@
         (s.addressable != null ? '<div class="au-dsize addr"><b>' + fmtK(s.addressable) + '</b><span>Addressable on KULT digital · planner count</span><p>' + esc(s.fit) + '</p></div>' : '') + '</div>' +
       '</div>' +
       '<div>' +
-        '<div class="au-dtitle"><h2 id="auDrawerTitle">' + esc(s.name) + '</h2><div class="au-dtags">' + lensTag(s) + groupTag(s) + '</div></div>' +
+        '<div class="au-dtitle"><h2 id="auDrawerTitle">' + esc(s.name) + '</h2><div class="au-dtags">' + groupTag(s) + '</div></div>' +
         '<p class="au-ddesc">' + esc(s.desc) + '</p>' +
         '<div class="au-section"><h5>Media consumption</h5><div class="au-bars">' + chans.map(function (c) {
           return '<div class="au-bar"><span>' + esc(c.label) + '</span><i><b data-w="' + s.consumption[c.key] + '"></b></i><span>' + s.consumption[c.key] + '%</span></div>';
