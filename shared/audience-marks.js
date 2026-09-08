@@ -266,7 +266,7 @@
                  fingertip, not swept. */
               if (!b.touch) {
                 b.touch = true;
-                var nud = (1.5 + Math.min(2.5, Math.sqrt(hand.vx * hand.vx + hand.vy * hand.vy) * 0.005)) * w;
+                var nud = (0.8 + Math.min(1.4, Math.sqrt(hand.vx * hand.vx + hand.vy * hand.vy) * 0.003)) * w;
                 b.x += nx * nud; b.y += ny * nud;
               }
               continue;

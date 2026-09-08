@@ -85,7 +85,7 @@
   .au-bub.is-out{opacity:0; pointer-events:none;}
   .au-bub.is-hot{z-index:5;}
   .au-bub.is-dim{opacity:.38;}
-  .au-space.has-hot .au-bub.is-dim{opacity:.2;}
+  .au-space.has-hot .au-bub.is-dim{opacity:.28;}
   /* One flat colour per lens, deeper with size: --t is 0 for the
      smallest audience and 1 for the largest, and the fill mixes the
      element colour into white by it. Ink is white throughout. */
@@ -98,8 +98,10 @@
   .au-bub-txt small{font-size:calc(var(--fs, 11px) * .82); line-height:1.1; font-weight:600; color:var(--color-neutral-1); opacity:.85; margin-top:2px; font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(43,43,44,.22);}
   .au-bub.is-small .au-bub-txt small{display:none;}
   .au-bub.is-tiny .au-bub-txt{display:none;}
-  .au-bub.is-hot .au-bub-vis{transform:scale(1.06); box-shadow:0 14px 30px -14px rgba(43,43,44,.4);}
-  .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.34;}
+  /* Hover is quiet: a hair of lift on the disc, a soft shadow, and the
+     rest of the jar steps back only a little. */
+  .au-bub.is-hot .au-bub-vis{transform:scale(1.025); box-shadow:0 10px 22px -14px rgba(43,43,44,.3);}
+  .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.68;}
   .au-bub:focus-visible .au-bub-vis{box-shadow:0 0 0 2px var(--color-neutral-1), 0 0 0 4px var(--color-obsidian);}
   .au-sk-bub{position:absolute; border-radius:50%; background:var(--color-neutral-2); transform:translate(-50%, -50%);}
   @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
@@ -116,7 +118,7 @@
   .au-stagelbl{position:absolute; left:0; top:0; z-index:60; pointer-events:none; transform:translate(-50%, calc(-100% - 14px));
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
     display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
-  .au-stagelbl.is-on{opacity:1;}
+  .au-stagelbl.is-on{opacity:1; transition-delay:120ms;}
   .au-stagelbl .arc{width:44px; height:44px; flex:none;}
   .au-stagelbl .arc .am-arc{--am-color:var(--au-color);}
   .au-stagelbl b{display:block; font-weight:800; font-size:13px; line-height:16px;}
