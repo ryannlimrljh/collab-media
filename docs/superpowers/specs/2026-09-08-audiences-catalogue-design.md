@@ -349,3 +349,17 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   Adventure Seekers climbs, Wellness Explorers runs, the football fans
   kick, Badminton and the concert-goers jump, and the parents and
   shoppers push. Sitting now bends at the knee instead of lying flat.
+- 2026-09-08, sixteenth pass, against a fuller set of references the user
+  supplied. The drawing now follows seven rules, written at the head of
+  the doodle section in the marks module: one pen width for everything;
+  the line always on top, so legs go behind the body and arms in front;
+  limbs as white tubes outlined in that pen with a mitten hand, never
+  bare sticks; a prop either white with a dark outline or one flat accent
+  colour with no outline, never both; the accent drawn from the four DLS
+  colours that sit beside any mascot colour, one coloured prop a scene;
+  the mascot one squircle turned to the front, three-quarter or side; two
+  props at most and no scenery. The turn is decided by the movement where
+  there is movement (a runner and a kicker are seen side on, a climber
+  and a pusher three-quarter) and by the seed otherwise, and a profile
+  shows one eye with the mouth beneath it. Legs grew to nearly half the
+  figure, and sitting now folds the knees up with the body on the ground.

@@ -102,14 +102,33 @@
   }
 
   /* ── The doodle ──────────────────────────────────────────────────
-     A drawn scene for each segment: a line-art person in a pose and
-     the props that tell the segment's story — a football and a scarf
-     for EPL fans, a bowl and chopsticks for foodies, a house and a key
-     for home buyers. The people are built from parts (hair and top by
-     hash, so a segment keeps its face); the props come from a small
-     library below, placed per segment in SCENES. Ink only, on the
-     card's own tint. Returns an SVG string, viewBox 0 0 160 120.     */
-  var INK = 'var(--color-neutral-9)', SW = 1.6, PS = 'var(--ps,' + INK + ')', PF = 'var(--pf,#fff)';
+     A drawn scene for each segment: a mascot in a pose and the one or
+     two props that tell the segment's story — a football for EPL fans,
+     a bowl for foodies, a key and a house for home buyers.
+
+     The house rules, so a new motif or pose lands in the same world as
+     the rest:
+
+       1. One pen. SW is the only stroke width in the drawing —
+          prop outlines, limbs, faces, hair.
+       2. The line sits on top. Legs go behind the body and arms in
+          front, so a limb crossing the colour always shows its outline.
+       3. A limb is a white tube outlined in that pen with a mitten hand
+          at the end; never a bare stick.
+       4. A prop is either white with a dark outline, or one flat accent
+          colour with no outline at all — never both.
+       5. The accents are the four DLS colours that sit happily beside
+          every mascot colour: amber, turquoise, salmon and purple. One
+          coloured prop a scene, no more.
+       6. The mascot is one squircle of the lens colour, body and head
+          at once, turned to the front, three-quarter or side.
+       7. Two props at most, and no scenery behind them.
+
+     Everything that varies — the squircle's proportions, the face, the
+     hair, the lean, the turn — comes from the segment's own seed, so a
+     drawing never changes between visits and no two are alike. Returns
+     an SVG string, viewBox 0 0 160 120.                               */
+  var INK = 'var(--color-neutral-9)', SW = 1.7, PS = 'var(--ps,' + INK + ')', PF = 'var(--pf,#fff)';
   function P(d, fill) { return '<path d="' + d + '" fill="' + (fill || PF) + '" stroke="' + PS + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round"/>'; }
   function L(d) { return '<path d="' + d + '" fill="none" stroke="' + PS + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
   /* A thinner pen for the details inside a shape, so the drawing has
@@ -119,6 +138,21 @@
   function D(cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + PS + '"/>'; }
   function T(x, y, str) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-weight="800" fill="' + PS + '" text-anchor="middle" font-family="inherit">' + str + '</text>'; }
   function G(x, y, sc, inner) { return '<g transform="translate(' + x + ' ' + y + ') scale(' + (sc || 1) + ')">' + inner + '</g>'; }
+  /* A limb is a white tube with the one pen for its outline, and a
+     mitten at the end. Every dark edge is laid down first and the white
+     over it, so the arm and the hand read as one silhouette with no
+     seam where they meet — and the line always sits on top of the
+     colour it crosses. */
+  var MITTEN = 'M-5.2 -2.2 C-7.8 -2.2 -8.4 2 -6.2 4.2 C-4 6.6 1.2 6.6 4.2 4.6 C6.8 2.9 7.2 -1.2 5.2 -3.2 C3.6 -4.7 -0.2 -5.2 -2.6 -4.2 Z';
+  function limb(d, w, hx, hy, rot) {
+    var t = 'translate(' + n1(hx) + ' ' + n1(hy) + ') rotate(' + n1(rot || 0) + ')';
+    var wide = '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + n1(w + SW * 2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+    var thin = '<path d="' + d + '" fill="none" stroke="#fff" stroke-width="' + n1(w) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+    if (hx == null) return wide + thin;
+    return wide + '<g transform="' + t + '"><path d="' + MITTEN + '" fill="' + INK + '" stroke="' + INK + '" stroke-width="' + n1(SW * 2) + '" stroke-linejoin="round"/></g>' +
+      thin + '<g transform="' + t + '"><path d="' + MITTEN + '" fill="#fff"/>' +
+      '<path d="M-2.6 5.2 C-1.6 3.2 -0.2 2.2 1.8 1.8 M0.8 5.6 C1.8 3.6 3.2 2.6 5.2 2.2" fill="none" stroke="' + INK + '" stroke-width="' + n1(SW * 0.8) + '" stroke-linecap="round"/></g>';
+  }
 
   /* ── Hand-drawn geometry ─────────────────────────────────────────
      A seeded generator, so a segment's wobble is the same on every
@@ -277,108 +311,116 @@
   function face(fx, fy, h, look) {
     var eye = h % 4, mouth = Math.floor(h / 5) % 3, tick = Math.floor(h / 11) % 3;
     if (look.glasses) eye = 0;
+    if (look.view === 'side') {
+      /* In profile only the near eye shows, and the mouth sits just
+         under it rather than centred. */
+      var e1 = eye === 2 || eye === 3
+        ? LT('M' + n1(fx - 2.5) + ' ' + n1(fy + 1) + ' Q' + n1(fx) + ' ' + n1(fy - 2.5) + ' ' + n1(fx + 2.5) + ' ' + n1(fy + 1))
+        : D(fx, fy, 2);
+      var m1 = LT('M' + n1(fx - 3) + ' ' + n1(fy + 6.5) + ' Q' + n1(fx) + ' ' + n1(fy + 9.5) + ' ' + n1(fx + 3) + ' ' + n1(fy + 6.5));
+      return e1 + m1 + (look.glasses ? LT('M' + n1(fx - 4.6) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0') : '') +
+        (look.beard ? LT('M' + n1(fx - 6) + ' ' + n1(fy + 4) + ' C' + n1(fx - 6) + ' ' + n1(fy + 15) + ' ' + n1(fx + 7) + ' ' + n1(fy + 14) + ' ' + n1(fx + 7) + ' ' + n1(fy + 5)) : '');
+    }
     var e = [
       D(fx - 6, fy, 1.9) + D(fx + 6, fy, 1.9),
-      LT('M' + (fx - 6) + ' ' + (fy - 2) + ' L' + (fx - 6) + ' ' + (fy + 2) + ' M' + (fx + 6) + ' ' + (fy - 2) + ' L' + (fx + 6) + ' ' + (fy + 2), 2),
-      LT('M' + (fx - 8.5) + ' ' + (fy + 1) + ' Q' + (fx - 6) + ' ' + (fy - 2.5) + ' ' + (fx - 3.5) + ' ' + (fy + 1) + ' M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1), 1.8),
-      D(fx - 6, fy, 1.9) + LT('M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1), 1.8)
+      LT('M' + (fx - 6) + ' ' + (fy - 2) + ' L' + (fx - 6) + ' ' + (fy + 2) + ' M' + (fx + 6) + ' ' + (fy - 2) + ' L' + (fx + 6) + ' ' + (fy + 2)),
+      LT('M' + (fx - 8.5) + ' ' + (fy + 1) + ' Q' + (fx - 6) + ' ' + (fy - 2.5) + ' ' + (fx - 3.5) + ' ' + (fy + 1) + ' M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1)),
+      D(fx - 6, fy, 1.9) + LT('M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1))
     ][eye];
     var m = [
-      LT('M' + (fx - 3.5) + ' ' + (fy + 6) + ' Q' + fx + ' ' + (fy + 9.5) + ' ' + (fx + 3.5) + ' ' + (fy + 6), 1.8),
+      LT('M' + (fx - 3.5) + ' ' + (fy + 6) + ' Q' + fx + ' ' + (fy + 9.5) + ' ' + (fx + 3.5) + ' ' + (fy + 6)),
       '<path d="M' + (fx - 4) + ' ' + (fy + 5.5) + ' Q' + fx + ' ' + (fy + 11) + ' ' + (fx + 4) + ' ' + (fy + 5.5) + ' Z" fill="' + INK + '"/>',
-      LT('M' + (fx - 3) + ' ' + (fy + 7) + ' L' + (fx + 3) + ' ' + (fy + 7), 1.8)
+      LT('M' + (fx - 3) + ' ' + (fy + 7) + ' L' + (fx + 3) + ' ' + (fy + 7))
     ][mouth];
     /* The stray mark beside the face that says a hand drew this. */
-    var t = ['', LT('M' + n1(fx + 11) + ' ' + n1(fy - 5) + ' l3 -3', 1.4), D(fx - 12, fy + 4, 1.3)][tick];
-    if (look.glasses) e += LT('M' + n1(fx - 10) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx + 1.4) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx - 0.8) + ' ' + n1(fy) + ' l1.4 0', 1.6);
-    if (look.beard) e += LT('M' + n1(fx - 8) + ' ' + n1(fy + 4) + ' C' + n1(fx - 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 4), 2.4);
+    var t = ['', LT('M' + n1(fx + 11) + ' ' + n1(fy - 5) + ' l3 -3'), D(fx - 12, fy + 4, 1.3)][tick];
+    if (look.glasses) e += LT('M' + n1(fx - 10) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx + 1.4) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx - 0.8) + ' ' + n1(fy) + ' l1.4 0');
+    if (look.beard) e += LT('M' + n1(fx - 8) + ' ' + n1(fy + 4) + ' C' + n1(fx - 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 4));
     return e + m + t;
   }
   function person(seg, pose, x, y, sc) {
     var h = Math.floor(hash(seg.id) * 100000), R = rnd(h + 11);
-    var look = LOOKS[LOOK_BY_SEG[seg.id] != null ? LOOK_BY_SEG[seg.id] : h % LOOKS.length];
-    look = { hair: look.hair, beard: look.beard, ear: look.ear, glasses: Math.floor(h / 17) % 4 === 0 && !look.beard };
+    var base = LOOKS[LOOK_BY_SEG[seg.id] != null ? LOOK_BY_SEG[seg.id] : h % LOOKS.length];
+    /* Which way the character is turned. A field of characters all
+       facing the viewer reads as a row of stamps; turning some of them
+       is most of what makes a set feel drawn. Movement decides it where
+       there is movement, and the seed decides the rest. */
+    var view = (pose === 'run' || pose === 'kick') ? 'side' : (pose === 'climb' || pose === 'push') ? 'quarter' : ['front', 'front', 'quarter', 'side', 'quarter'][h % 5];
+    var facing = (Math.floor(h / 23) % 2) ? 1 : -1;
+    var look = { hair: base.hair, beard: base.beard, ear: base.ear, view: view,
+      glasses: Math.floor(h / 17) % 4 === 0 && !base.beard };
     var tilt = (R() - 0.5) * 5, w = 46 + R() * 8, bh = 42 + R() * 8;
-    var legLen = 28 + R() * 4, sit = pose === 'sit', cy = sit ? -bh / 2 - 9 : -legLen - bh / 2 + 2;
-    var strength = (0.82 + R() * 0.18).toFixed(2);
-    var fx = (R() - 0.5) * 6, fy = cy - bh * 0.1;
-    /* Legs first, so they tuck under the body. */
+    var legLen = 40 + R() * 7, sit = pose === 'sit', cy = sit ? -bh / 2 - 3 : -legLen - bh / 2 + 2;
+    var strength = (0.85 + R() * 0.15).toFixed(2);
+    var shift = view === 'side' ? 0.24 : view === 'quarter' ? 0.12 : 0;
+    var fx = w * shift * facing + (R() - 0.5) * 3, fy = cy - bh * 0.08;
+
     /* ── Posture. A character that only ever stands is a diagram; the
-       pose is most of what says what this segment does. Each one sets
-       its own legs and arms, and may lean into the movement or leave
-       the ground altogether. ── */
+       pose is most of what says what this segment does. ── */
     var lx = w * 0.17, toe = -w / 2 - 11, hip = cy + bh / 2 - 4;
-    var sy = cy + bh * 0.12, ax = w / 2 - 3, legs, arms, lift = 0, lean = 0;
-    function hand(hx, hy, rot) {
-      return '<g transform="translate(' + n1(hx) + ' ' + n1(hy) + ') rotate(' + n1(rot || 0) + ')">' +
-        L('M0 0 l0 4 M0 0 l-3.4 2.4 M0 0 l3.4 2.4') + '</g>';
-    }
-    function arm(d, hx, hy, rot) { return L(d) + hand(hx, hy, rot); }
-    function leg(d) { return L(d); }
-    var standLegs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 1) + ' 0 l-5 0') +
-      leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' 0 l5 0');
-    var armDownL = 'M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 9) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 4) + ' ' + n1(sy + 23);
-    var armDownR = 'M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 8) + ' ' + n1(ax + 9) + ' ' + n1(sy + 18) + ' ' + n1(ax + 4) + ' ' + n1(sy + 23);
+    var sy = cy + bh * 0.14, ax = w / 2 - 4, legs, arms, lift = 0, lean = 0;
+    var AW = 4.4, LW = 4.2;
+    function arm(d, hx, hy, rot) { return limb(d, AW, hx, hy, rot); }
+    function leg(d) { return limb(d, LW); }
+    var standLegs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 1) + ' -1 l-4 0') +
+      leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' -1 l4 0');
+    var armDownL = 'M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 12) + ' ' + n1(sy + 10) + ' ' + n1(-ax - 11) + ' ' + n1(sy + 24) + ' ' + n1(-ax - 5) + ' ' + n1(sy + 31);
+    var armDownR = 'M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy + 10) + ' ' + n1(ax + 11) + ' ' + n1(sy + 24) + ' ' + n1(ax + 5) + ' ' + n1(sy + 31);
     if (sit) {
-      legs = leg('M' + n1(-lx + 1) + ' -7 C' + n1(-lx - 9) + ' -16 ' + n1(toe + 5) + ' -17 ' + n1(toe + 1) + ' -12 C' + n1(toe - 2) + ' -8 ' + n1(toe - 3) + ' -4 ' + n1(toe - 2) + ' 0 l-5 0') +
-        leg('M' + n1(lx + 1) + ' -5 C' + n1(-lx - 4) + ' -12 ' + n1(toe + 12) + ' -12 ' + n1(toe + 9) + ' -8 C' + n1(toe + 6) + ' -5 ' + n1(toe + 6) + ' -2 ' + n1(toe + 7) + ' 0 l-5 0');
+      legs = leg('M' + n1(-lx) + ' -7 C' + n1(-lx - 14) + ' -10 ' + n1(toe + 5) + ' -27 ' + n1(toe - 1) + ' -22 C' + n1(toe - 7) + ' -18 ' + n1(toe - 8) + ' -6 ' + n1(toe - 7) + ' -1 l-4 0') +
+        leg('M' + n1(lx) + ' -6 C' + n1(-lx - 6) + ' -9 ' + n1(toe + 13) + ' -22 ' + n1(toe + 8) + ' -18 C' + n1(toe + 3) + ' -14 ' + n1(toe + 2) + ' -5 ' + n1(toe + 3) + ' -1 l-4 0');
       arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 15) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 19), -ax - 3, sy + 19, 10) +
         arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy + 4) + ' ' + n1(ax + 16) + ' ' + n1(sy + 10) + ' ' + n1(ax + 18) + ' ' + n1(sy + 17), ax + 18, sy + 17, -20);
     } else if (pose === 'run') {
-      /* Mid-stride: the front knee up, the back leg trailing, arms
-         swinging opposite, the whole body pitched into it. */
       lean = 7;
-      legs = leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 7) + ' ' + n1(-legLen * 0.55) + ' ' + n1(lx + 14) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 17) + ' -1 l5 0') +
-        leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 13) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 19) + ' ' + n1(-legLen * 0.28) + ' l-5 3');
-      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy - 2) + ' ' + n1(ax + 17) + ' ' + n1(sy - 8) + ' ' + n1(ax + 19) + ' ' + n1(sy - 15), ax + 19, sy - 15, 230) +
-        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 11) + ' ' + n1(sy + 6) + ' ' + n1(-ax - 17) + ' ' + n1(sy + 12) + ' ' + n1(-ax - 20) + ' ' + n1(sy + 17), -ax - 20, sy + 17, 30);
+      legs = leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 7) + ' ' + n1(-legLen * 0.55) + ' ' + n1(lx + 14) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 17) + ' -1 l4 0') +
+        leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 13) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 19) + ' ' + n1(-legLen * 0.28) + ' l-4 3');
+      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy - 2) + ' ' + n1(ax + 17) + ' ' + n1(sy - 8) + ' ' + n1(ax + 19) + ' ' + n1(sy - 15), ax + 20, sy - 17, 230) +
+        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 11) + ' ' + n1(sy + 6) + ' ' + n1(-ax - 17) + ' ' + n1(sy + 12) + ' ' + n1(-ax - 20) + ' ' + n1(sy + 17), -ax - 21, sy + 19, 30);
     } else if (pose === 'jump') {
-      /* Both feet off the ground, knees tucked, arms thrown up. */
       lift = -13;
-      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(-lx - 15) + ' ' + n1(-legLen * 0.24) + ' l-5 1') +
-        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(lx + 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(lx + 15) + ' ' + n1(-legLen * 0.24) + ' l5 1');
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 14) + ' ' + n1(sy - 6) + ' ' + n1(-ax - 19) + ' ' + n1(sy - 20) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 31), -ax - 17, sy - 31, 150) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 14) + ' ' + n1(sy - 6) + ' ' + n1(ax + 19) + ' ' + n1(sy - 20) + ' ' + n1(ax + 17) + ' ' + n1(sy - 31), ax + 17, sy - 31, 210);
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(-lx - 15) + ' ' + n1(-legLen * 0.24) + ' l-4 1') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(lx + 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(lx + 15) + ' ' + n1(-legLen * 0.24) + ' l4 1');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 14) + ' ' + n1(sy - 6) + ' ' + n1(-ax - 19) + ' ' + n1(sy - 20) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 31), -ax - 17, sy - 33, 150) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 14) + ' ' + n1(sy - 6) + ' ' + n1(ax + 19) + ' ' + n1(sy - 20) + ' ' + n1(ax + 17) + ' ' + n1(sy - 31), ax + 17, sy - 33, 210);
     } else if (pose === 'climb') {
-      /* One arm reaching for the next hold, the opposite knee drawn up,
-         the body leaning into the rock. */
       lean = -9;
-      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 3) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 4) + ' ' + n1(-legLen * 0.26) + ' ' + n1(-lx - 3) + ' 0 l-5 0') +
-        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 11) + ' ' + n1(-legLen * 0.78) + ' ' + n1(lx + 18) + ' ' + n1(-legLen * 0.66) + ' ' + n1(lx + 14) + ' ' + n1(-legLen * 0.42) + ' l4 3');
-      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 9) + ' ' + n1(sy - 13) + ' ' + n1(ax + 11) + ' ' + n1(sy - 27) + ' ' + n1(ax + 8) + ' ' + n1(sy - 36), ax + 8, sy - 36, 200) +
-        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy - 3) + ' ' + n1(-ax - 12) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 7) + ' ' + n1(sy + 15), -ax - 7, sy + 15, 20);
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 3) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 4) + ' ' + n1(-legLen * 0.26) + ' ' + n1(-lx - 3) + ' -1 l-4 0') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 12) + ' ' + n1(-legLen * 0.8) + ' ' + n1(lx + 15) + ' ' + n1(-legLen * 0.58) + ' ' + n1(lx + 9) + ' ' + n1(-legLen * 0.4) + ' l4 3');
+      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 9) + ' ' + n1(sy - 13) + ' ' + n1(ax + 11) + ' ' + n1(sy - 27) + ' ' + n1(ax + 8) + ' ' + n1(sy - 36), ax + 8, sy - 38, 200) +
+        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy - 3) + ' ' + n1(-ax - 12) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 7) + ' ' + n1(sy + 15), -ax - 7, sy + 17, 20);
     } else if (pose === 'kick') {
-      /* One foot planted, the other swung out at the ball. */
       lean = -6;
-      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 2) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 3) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 2) + ' 0 l-5 0') +
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 2) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 3) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 2) + ' -1 l-4 0') +
         leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 9) + ' ' + n1(-legLen * 0.95) + ' ' + n1(lx + 20) + ' ' + n1(-legLen * 0.86) + ' ' + n1(lx + 27) + ' ' + n1(-legLen * 0.62) + ' l4 -3');
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 13) + ' ' + n1(sy - 4) + ' ' + n1(-ax - 18) + ' ' + n1(sy - 14) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 22), -ax - 17, sy - 22, 150) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 7) + ' ' + n1(ax + 9) + ' ' + n1(sy + 16) + ' ' + n1(ax + 4) + ' ' + n1(sy + 22), ax + 4, sy + 22, -8);
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 13) + ' ' + n1(sy - 4) + ' ' + n1(-ax - 18) + ' ' + n1(sy - 14) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 22), -ax - 18, sy - 24, 150) +
+        arm(armDownR, ax + 4, sy + 33, -8);
     } else if (pose === 'push') {
-      /* Both arms out at the handle, one foot ahead of the other. */
       lean = 5;
-      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 4) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 10) + ' ' + n1(-legLen * 0.3) + ' ' + n1(-lx - 12) + ' 0 l-5 0') +
-        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 3) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 6) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 8) + ' 0 l5 0');
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax + 4) + ' ' + n1(sy + 8) + ' ' + n1(ax + 10) + ' ' + n1(sy + 12) + ' ' + n1(ax + 20) + ' ' + n1(sy + 12), ax + 20, sy + 12, 265) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 2) + ' ' + n1(ax + 18) + ' ' + n1(sy + 5) + ' ' + n1(ax + 24) + ' ' + n1(sy + 6), ax + 24, sy + 6, 265);
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 4) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 10) + ' ' + n1(-legLen * 0.3) + ' ' + n1(-lx - 12) + ' -1 l-4 0') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 3) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 6) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 8) + ' -1 l4 0');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax + 4) + ' ' + n1(sy + 8) + ' ' + n1(ax + 10) + ' ' + n1(sy + 12) + ' ' + n1(ax + 20) + ' ' + n1(sy + 12), ax + 22, sy + 12, 265) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 2) + ' ' + n1(ax + 18) + ' ' + n1(sy + 5) + ' ' + n1(ax + 24) + ' ' + n1(sy + 6), ax + 26, sy + 6, 265);
     } else if (pose === 'cheer') {
       legs = standLegs;
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 12) + ' ' + n1(sy - 8) + ' ' + n1(-ax - 14) + ' ' + n1(sy - 22) + ' ' + n1(-ax - 11) + ' ' + n1(sy - 31), -ax - 11, sy - 31, 160) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy - 8) + ' ' + n1(ax + 14) + ' ' + n1(sy - 22) + ' ' + n1(ax + 11) + ' ' + n1(sy - 31), ax + 11, sy - 31, 200);
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 12) + ' ' + n1(sy - 8) + ' ' + n1(-ax - 14) + ' ' + n1(sy - 22) + ' ' + n1(-ax - 11) + ' ' + n1(sy - 31), -ax - 11, sy - 33, 160) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy - 8) + ' ' + n1(ax + 14) + ' ' + n1(sy - 22) + ' ' + n1(ax + 11) + ' ' + n1(sy - 31), ax + 11, sy - 33, 200);
     } else if (pose === 'wave') {
       legs = standLegs;
-      arms = arm(armDownL, -ax - 4, sy + 23, 8) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 13) + ' ' + n1(sy - 4) + ' ' + n1(ax + 15) + ' ' + n1(sy - 18) + ' ' + n1(ax + 12) + ' ' + n1(sy - 27), ax + 12, sy - 27, 190);
+      arms = arm(armDownL, -ax - 4, sy + 33, 8) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 16) + ' ' + n1(sy - 2) + ' ' + n1(ax + 22) + ' ' + n1(sy - 16) + ' ' + n1(ax + 20) + ' ' + n1(sy - 28), ax + 20, sy - 31, 200);
     } else if (pose === 'hold') {
       legs = standLegs;
-      arms = arm(armDownL, -ax - 4, sy + 23, 8) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy + 2) + ' ' + n1(ax + 20) + ' ' + n1(sy + 4) + ' ' + n1(ax + 27) + ' ' + n1(sy + 2), ax + 27, sy + 2, 265);
+      arms = arm(armDownL, -ax - 4, sy + 33, 8) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy + 2) + ' ' + n1(ax + 20) + ' ' + n1(sy + 4) + ' ' + n1(ax + 27) + ' ' + n1(sy + 2), ax + 29, sy + 2, 265);
     } else {
       legs = standLegs;
-      arms = arm(armDownL, -ax - 4, sy + 23, 8) + arm(armDownR, ax + 4, sy + 23, -8);
+      arms = arm(armDownL, -ax - 4, sy + 33, 8) + arm(armDownR, ax + 4, sy + 33, -8);
     }
     var body = '<path d="' + squircle(0, cy, w, bh, R) + '" fill="var(--au-color)" fill-opacity="' + strength + '"/>';
     var hair = HAIR[look.hair](cy - bh / 2, w / 2, bh) + (look.ear ? D(-w / 2 + 1.5, cy + 3, 2) + D(w / 2 - 1.5, cy + 3, 2) : '');
+    /* Legs behind the body, arms in front of it: the line always ends
+       up on top of the colour it crosses. */
     return '<g transform="translate(' + x + ' ' + n1(y + lift) + ') rotate(' + n1(tilt + lean) + ') scale(' + (sc || 1) + ')">' +
       legs + body + hair + face(fx, fy, h, look) + arms + '</g>';
   }
@@ -396,13 +438,17 @@
     cart: ['turquoise', 0], stroller: ['turquoise', 0], shop: ['salmon-pink', 0], briefcase: ['amber', 0],
     newspaper: ['turquoise', 0], ring: ['amber', 0], scarf: ['salmon-pink', 0], club: ['amber', 0]
   };
+  /* A prop that takes a colour takes it whole: fill and line both, so
+     nothing dark outlines it. The palette is the four DLS accents that
+     sit happily beside every mascot colour. */
   function tinted(name, inner) {
     var t = TINT[name]; if (!t) return inner;
     var c = 'var(--color-' + t[0] + ')';
-    return '<g style="--pf:' + c + (t[1] ? ';--ps:' + c : '') + '">' + inner + '</g>';
+    return '<g style="--pf:' + c + ';--ps:' + c + '">' + inner + '</g>';
   }
   function scene(seg, pose, personX, props) {
-    var out = person(seg, pose, personX == null ? 52 : personX, 112, 1);
+    var wide = pose === 'run' || pose === 'kick' || pose === 'climb';
+    var out = person(seg, pose, (personX == null ? 52 : personX) - (wide ? 8 : 0), 112, 1);
     /* Two props at most. A third only ever repeated what the first
        two already said, and three drawings in one frame read as
        clutter rather than as a scene. */
