@@ -499,3 +499,8 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   visitor last chose and hands the table back the moment the real
   segments arrive. The row bones and the one CSS rule that served them
   came out.
+- 2026-09-09, and after that: the second is back. Nothing is fetched, so
+  it remains staging rather than loading — the page takes a moment to
+  compose itself rather than appearing mid-thought — and the bones sized
+  in the passes above are on screen again for it. Anyone who asked for
+  less motion still skips straight to the page.
