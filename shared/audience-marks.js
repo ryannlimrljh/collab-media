@@ -13,11 +13,12 @@
      order given, each at the first spot on a spiral from the centre
      where it touches nothing. Pure — no DOM, no randomness.
 
-   AudienceMarks.layoutUniverse(segments, lens, stage)
-     The universe: every segment a circle with r ∝ √size, packed into
-     its group, the groups packed into one cluster and fitted to the
-     stage. Segments outside the chosen lens come back as dots along the
-     bottom edge. Returns plain numbers; the page draws them.           */
+   AudienceMarks.layoutUniverse(segments, lens, stage, style)
+     The universe: every segment a circle with r ∝ √size, laid out one
+     of three ways — 'rings' (each group a hub with its segments around
+     it), 'size' (one pack, largest at the centre) or 'network' (the
+     Astro properties as hubs, segments pulled to the ones they live
+     on). Returns plain numbers; the page draws them.                   */
 (function () {
   'use strict';
 
@@ -101,73 +102,165 @@
     return { items: placed, R: R, w: maxX - minX, h: maxY - minY };
   }
 
-  /* ── The universe ────────────────────────────────────────────────── */
-  function layoutUniverse(segments, lens, stage) {
-    var W = stage.w, H = stage.h, margin = stage.margin == null ? 26 : stage.margin, labelH = 16;
-    var groups = window.AUDIENCE_GROUPS || [];
-    var inLens = function (g) { return lens === 'all' || g.lens === lens; };
-    var shown = groups.filter(inLens), hidden = groups.filter(function (g) { return !inLens(g); });
-    /* Unit space: r = √(size / 1000), so 17M → 130 units, 54K → 7 units.
-       A floor keeps the smallest fan bases visible as more than a speck. */
-    var unitR = function (s) { return Math.max(14, Math.sqrt(s.size / 1000)); };
-    var clusters = shown.map(function (g) {
-      var members = segments.filter(function (s) { return s.group === g.key; })
-        .sort(function (a, b) { return b.size - a.size; })
-        .map(function (s) { return { id: s.id, r: unitR(s), seg: s }; });
-      var p = pack(members, 2.5);
-      return { key: g.key, label: g.label, lens: g.lens, pack: p, r: p.R + 10 };
-    });
-    /* Groups run left to right in lens order — who, love, buying — as a
-       chain of touching clusters that zigzag above and below the centre
-       line, so the row interlocks instead of stringing out. The stage is
-       wide and short; a round packing of the clusters would waste it. */
-    var lensOrder = ['who', 'love', 'buying'];
-    clusters.sort(function (a, b) { return lensOrder.indexOf(a.lens) - lensOrder.indexOf(b.lens) || b.r - a.r; });
-    var chain = [], pad = 4;
-    clusters.forEach(function (c, i) {
-      if (!i) { chain.push({ c: c, x: 0, y: 0 }); return; }
-      var prev = chain[i - 1], dy = (i % 2 ? 1 : -1) * 0.42 * (prev.c.r + c.r);
-      var reach = prev.c.r + c.r + pad, x = prev.x + Math.sqrt(Math.max(0, reach * reach - dy * dy)), y = dy;
-      /* Slide right until it clears every earlier cluster, not just the last. */
+  /* ── The universe ────────────────────────────────────────────────
+     Three layouts, all pure: they take the segments and a stage
+     {w, h} in pixels and return {nodes, links}. A node is
+     {id, kind, x, y, r, lens, group, seg|prop|groupDef}; kinds are
+     'seg', 'hub' (a group) and 'prop' (an Astro property). A link is
+     {from, to} by node id. The page draws them and animates between
+     them; nothing here touches the DOM.                              */
+  function unitR(s) { return Math.max(14, Math.sqrt(s.size / 1000)); }
+  function chainPack(items, pad, zig) {
+    /* Clusters run left to right, zigzagging above and below the
+       centre line so the row interlocks. items: [{r, ...}], in order.
+       zig is the zigzag amplitude as a share of the two radii. */
+    var chain = [];
+    zig = zig == null ? 0.42 : zig;
+    items.forEach(function (c, i) {
+      if (!i) { chain.push({ it: c, x: 0, y: 0 }); return; }
+      var prev = chain[i - 1], dy = (i % 2 ? 1 : -1) * zig * (prev.it.r + c.r);
+      var reach = prev.it.r + c.r + pad, x = prev.x + Math.sqrt(Math.max(0, reach * reach - dy * dy)), y = dy;
       for (var k = 0; k < chain.length; k++) {
-        var q = chain[k], need = q.c.r + c.r + pad, ddy = y - q.y;
+        var q = chain[k], need = q.it.r + c.r + pad, ddy = y - q.y;
         if (Math.abs(ddy) < need) x = Math.max(x, q.x + Math.sqrt(need * need - ddy * ddy));
       }
-      chain.push({ c: c, x: x, y: y });
+      chain.push({ it: c, x: x, y: y });
     });
+    return chain;
+  }
+  function fitTo(nodes, stage, margin) {
+    /* Scale and centre a set of {x, y, r} so it fills the stage. One
+       scale for everything, so sizes stay comparable across clusters. */
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nodes.forEach(function (n) {
+      minX = Math.min(minX, n.x - n.r); maxX = Math.max(maxX, n.x + n.r);
+      minY = Math.min(minY, n.y - n.r); maxY = Math.max(maxY, n.y + n.r);
+    });
+    var s = Math.min((stage.w - margin * 2) / (maxX - minX), (stage.h - margin * 2) / (maxY - minY));
+    var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    nodes.forEach(function (n) { n.x = stage.w / 2 + (n.x - cx) * s; n.y = stage.h / 2 + (n.y - cy) * s; n.r = n.r * s; });
+    return s;
+  }
+  function groupsOf(segments, lens) {
+    return (window.AUDIENCE_GROUPS || []).filter(function (g) { return lens === 'all' || g.lens === lens; })
+      .map(function (g) {
+        var members = segments.filter(function (s) { return s.group === g.key; }).sort(function (a, b) { return b.size - a.size; });
+        return { def: g, members: members, total: members.reduce(function (t, s) { return t + s.size; }, 0) };
+      });
+  }
+
+  /* Rings: each group is a hub with its segments on a ring around it,
+     the groups chained across the stage. The reference picture. */
+  function layoutRings(segments, lens, stage) {
+    var lensOrder = ['who', 'love', 'buying'];
+    var clusters = groupsOf(segments, lens).map(function (g) {
+      var hubR = 22 + Math.sqrt(g.total / 1e6) * 2.4, gap = 9;
+      var sats = g.members.map(function (s) { return { seg: s, r: unitR(s) }; });
+      var maxR = sats.reduce(function (m, x) { return Math.max(m, x.r); }, 0);
+      var need = sats.reduce(function (t, x) { return t + 2 * x.r + gap; }, 0);
+      /* Room inside the ring for the hub and its caption beneath. */
+      var R = Math.max(hubR + maxR + 44, need / (2 * Math.PI));
+      /* Largest at twelve o'clock, then round the ring by size. */
+      var a = -Math.PI / 2, pts = [];
+      sats.forEach(function (x, i) {
+        var step = (2 * x.r + gap) / need * 2 * Math.PI;
+        var mid = a + step / 2;
+        pts.push({ seg: x.seg, r: x.r, x: R * Math.cos(mid), y: R * Math.sin(mid) });
+        a += step;
+      });
+      return { g: g, hubR: hubR, R: R, sats: pts, r: R + maxR + 8 };
+    });
+    clusters.sort(function (a, b) { return lensOrder.indexOf(a.g.def.lens) - lensOrder.indexOf(b.g.def.lens) || b.r - a.r; });
+    /* Rings are hollow, so neighbouring rings may tuck into each other
+       a little: a negative pad lets the chain sit tighter than the
+       bounding circles alone would allow. The zigzag amplitude is
+       chosen to suit the stage: a wide stage wants a flat chain, a
+       squarer one wants the clusters stacked two deep. */
+    var margin = stage.margin == null ? 40 : stage.margin, best = null;
+    [0.3, 0.45, 0.6, 0.75, 0.9, 1.05].forEach(function (zig) {
+      var ch = chainPack(clusters, -18, zig), minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      ch.forEach(function (n) { minX = Math.min(minX, n.x - n.it.r); maxX = Math.max(maxX, n.x + n.it.r); minY = Math.min(minY, n.y - n.it.r); maxY = Math.max(maxY, n.y + n.it.r); });
+      var sc = Math.min((stage.w - margin * 2) / (maxX - minX), (stage.h - margin * 2) / (maxY - minY));
+      if (!best || sc > best.sc) best = { chain: ch, sc: sc };
+    });
+    var chain = best.chain;
+    var nodes = [], links = [];
     chain.forEach(function (n) {
-      minX = Math.min(minX, n.x - n.c.r); maxX = Math.max(maxX, n.x + n.c.r);
-      minY = Math.min(minY, n.y - n.c.r); maxY = Math.max(maxY, n.y + n.c.r);
-    });
-    var outer = { w: maxX - minX, h: maxY - minY, items: chain.map(function (n) { return { x: n.x - (minX + maxX) / 2, y: n.y - (minY + maxY) / 2, ref: { c: n.c } }; }) };
-    /* Fit the chain to the stage: one scale for every circle, so a 13M
-       segment is the same size whichever group it sits in. */
-    var dotRow = hidden.length ? 22 : 0;
-    var sx = (W - margin * 2) / outer.w, sy = (H - margin * 2 - dotRow - labelH) / outer.h, s = Math.min(sx, sy);
-    var cx = W / 2, cy = (H - dotRow - labelH) / 2 + 4;
-    var circles = [], labels = [];
-    outer.items.forEach(function (o) {
-      var c = o.ref.c, gx = cx + o.x * s, gy = cy + o.y * s;
-      c.pack.items.forEach(function (m) {
-        circles.push({ id: m.id, x: gx + m.x * s, y: gy + m.y * s, r: m.r * s, group: c.key, lens: c.lens, seg: m.ref.seg, out: false });
+      var c = n.it, hubId = 'hub:' + c.g.def.key;
+      nodes.push({ id: hubId, kind: 'hub', x: n.x, y: n.y, r: c.hubR, lens: c.g.def.lens, group: c.g.def.key, groupDef: c.g.def, total: c.g.total, count: c.sats.length });
+      c.sats.forEach(function (p) {
+        nodes.push({ id: p.seg.id, kind: 'seg', x: n.x + p.x, y: n.y + p.y, r: p.r, lens: c.g.def.lens, group: c.g.def.key, seg: p.seg });
+        links.push({ from: hubId, to: p.seg.id, kind: 'spoke' });
       });
-      labels.push({ text: c.label, x: gx, y: gy + c.pack.R * s + 14, lens: c.lens, group: c.key });
     });
-    /* Whatever the lens leaves out sits as a row of dots along the
-       bottom edge, in group order, still hoverable. */
-    if (hidden.length) {
-      var dots = [];
-      hidden.forEach(function (g) {
-        segments.filter(function (s) { return s.group === g.key; }).sort(function (a, b) { return b.size - a.size; })
-          .forEach(function (s) { dots.push({ id: s.id, group: g.key, lens: g.lens, seg: s }); });
+    var s = fitTo(nodes, stage, margin);
+    return { nodes: nodes, links: links, scale: s };
+  }
+
+  /* Size: every segment in one pack, largest at the centre, so the
+     scale of the catalogue reads at a glance. */
+  function layoutSize(segments, lens, stage) {
+    var list = segments.filter(function (s) { return lens === 'all' || s.lens === lens; })
+      .sort(function (a, b) { return b.size - a.size; })
+      .map(function (s) { return { id: s.id, r: unitR(s), seg: s }; });
+    var p = pack(list, 3);
+    var nodes = p.items.map(function (m) { return { id: m.id, kind: 'seg', x: m.x, y: m.y, r: m.r, lens: m.ref.seg.lens, group: m.ref.seg.group, seg: m.ref.seg }; });
+    var s = fitTo(nodes, stage, stage.margin == null ? 40 : stage.margin);
+    return { nodes: nodes, links: [], scale: s };
+  }
+
+  /* Properties: the nine Astro properties as hubs and every segment
+     pulled toward the ones it lives on. A small force simulation, run
+     to rest here so the result is the same every time. */
+  function layoutNetwork(segments, lens, stage) {
+    var props = window.AUDIENCE_PROPERTIES || [];
+    var list = segments.filter(function (s) { return lens === 'all' || s.lens === lens; });
+    var counts = {}; list.forEach(function (s) { s.properties.forEach(function (p) { counts[p.key] = (counts[p.key] || 0) + 1; }); });
+    var nodes = [], byId = {}, links = [];
+    props.forEach(function (p, i) {
+      var a = -Math.PI / 2 + i / props.length * 2 * Math.PI, R = 260;
+      var n = { id: 'prop:' + p.key, kind: 'prop', x: R * Math.cos(a), y: R * Math.sin(a), r: 16 + Math.sqrt(counts[p.key] || 1) * 3.2, prop: p, count: counts[p.key] || 0, vx: 0, vy: 0 };
+      nodes.push(n); byId[n.id] = n;
+    });
+    list.forEach(function (s, i) {
+      /* Start near the centroid of its properties, nudged by a hash so
+         twins do not start on top of each other. */
+      var cx = 0, cy = 0, k = 0;
+      s.properties.forEach(function (p) { var h = byId['prop:' + p.key]; if (h) { cx += h.x; cy += h.y; k++; } });
+      if (k) { cx /= k; cy /= k; }
+      var hash = 0; for (var c = 0; c < s.id.length; c++) hash = (hash * 31 + s.id.charCodeAt(c)) % 1000;
+      var ang = hash / 1000 * 2 * Math.PI, d = 40 + (i % 5) * 12;
+      var n = { id: s.id, kind: 'seg', x: cx * 0.6 + Math.cos(ang) * d, y: cy * 0.6 + Math.sin(ang) * d, r: unitR(s) * 0.64, lens: s.lens, group: s.group, seg: s, vx: 0, vy: 0 };
+      nodes.push(n); byId[n.id] = n;
+      s.properties.forEach(function (p) { if (byId['prop:' + p.key]) links.push({ from: n.id, to: 'prop:' + p.key, kind: 'lives' }); });
+    });
+    for (var iter = 0; iter < 260; iter++) {
+      var alpha = 1 - iter / 260, t = 0.08 + 0.4 * alpha;
+      links.forEach(function (l) {
+        var a = byId[l.from], b = byId[l.to], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        var rest = a.r + b.r + 84, f = (d - rest) / d * 0.012 * t;
+        a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f * 0.35; b.vy -= dy * f * 0.35;
       });
-      var gap = Math.min(14, (W - margin * 2) / Math.max(1, dots.length)), x0 = W / 2 - gap * (dots.length - 1) / 2;
-      dots.forEach(function (d, i) {
-        circles.push({ id: d.id, x: x0 + i * gap, y: H - 10, r: 3, group: d.group, lens: d.lens, seg: d.seg, out: true });
+      for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
+        var a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy || 1, d = Math.sqrt(d2);
+        var hubs = a.kind !== 'seg' && b.kind !== 'seg';
+        var min = a.r + b.r + (hubs ? 110 : 34), f = (d < min ? (min - d) * 0.5 : 0) + (hubs ? 6000 : 2200) / d2 * t;
+        var fx = dx / d * f, fy = dy / d * f;
+        a.vx -= fx; a.vy -= fy; b.vx += fx; b.vy += fy;
+      }
+      nodes.forEach(function (n) {
+        n.vx -= n.x * 0.004 * t; n.vy -= n.y * 0.004 * t;   /* gravity to the centre */
+        n.x += n.vx; n.y += n.vy; n.vx *= 0.82; n.vy *= 0.82;
       });
     }
-    return { circles: circles, labels: labels, scale: s };
+    var s = fitTo(nodes, stage, stage.margin == null ? 40 : stage.margin);
+    return { nodes: nodes, links: links, scale: s };
+  }
+
+  function layoutUniverse(segments, lens, stage, style) {
+    if (style === 'size') return layoutSize(segments, lens, stage);
+    if (style === 'network') return layoutNetwork(segments, lens, stage);
+    return layoutRings(segments, lens, stage);
   }
 
   window.AudienceMarks = { arc: arc, pack: pack, layoutUniverse: layoutUniverse, CHANNELS: CHANNELS, channelLabel: channelLabel };

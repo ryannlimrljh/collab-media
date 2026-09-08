@@ -180,3 +180,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   the user's request. The pairing was a curation, not a kult.my fact; the
   page now carries only what the site publishes, plus Karen's clearly
   labelled planner counts.
+- 2026-09-08, second pass: the page split into two tabs, **Universe** and
+  **Segments**, at the user's request, with the universe rebuilt as a
+  full-bleed canvas after a network-graph reference they supplied. The
+  canvas pans (drag) and zooms (wheel, +/−, double-click a circle, 0 to
+  fit) and offers three arrangements: **Groups** (each group a hub with its
+  segments on a ring, spokes drawn between them), **Properties** (the nine
+  Astro properties as hubs and every segment pulled toward the ones it
+  lives on, a small force layout run to rest at load) and **Size** (one
+  pack, largest in the middle). Hovering a circle shows a card with the
+  consumption rings, lights its group and the properties it lives on, and
+  dims the rest; hubs and properties light their segments. Circles drift
+  gently at rest and a halo breathes behind the hovered one; reduced
+  motion stops both. The cards, table, filters and reach tray moved to the
+  Segments tab unchanged (`?tab=cards` deep-links to it). The lens chips
+  and property chips now live on the canvas, and the cards-tab filters no
+  longer reach into the universe.

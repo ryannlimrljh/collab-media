@@ -41,7 +41,7 @@
   /* ── Arrival — the same family as the formats page: header, then the
      universe, then the strip, then the controls, then the cards. ── */
   @keyframes au-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
-  .au-arriving .au-universe{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .au-arriving .au-universe,.au-arriving .au-tabs{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
   .au-arriving .au-controls,.au-arriving .au-count{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
   .au-arriving .au-card{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
 
@@ -51,62 +51,129 @@
   .au-sk-stage{aspect-ratio:4/3; background:var(--color-neutral-2);}
   .au-sk-card{pointer-events:none; cursor:default;}
   .au-table .au-sk{display:block;}
-  .au-sk-dot{fill:var(--color-neutral-2);}
   @media (prefers-reduced-motion:no-preference){
     .au-sk,.au-sk-stage,.au-sk-dot{animation:au-sk-pulse 1.4s var(--ease-standard) infinite;}
     @keyframes au-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
   }
 
-  /* ── The universe ── */
-  .au-universe{position:relative; margin-bottom:var(--spacing-32); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden;}
-  .au-uhead{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-20) 0; flex-wrap:wrap;}
-  .au-uhead h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
-  .au-uhead > span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .au-lens{margin-left:auto; display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
-  .au-lens .c-chip-filter{white-space:nowrap;}
-  .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px; vertical-align:0;}
-  .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
-  .au-stagewrap{position:relative;}
-  .au-stage{display:block; width:100%; height:auto; aspect-ratio:1200/420; user-select:none;}
-  .au-node{cursor:pointer; outline:none; transition:transform 520ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
-  .au-node circle{fill:var(--au-strong); stroke:var(--au-color); stroke-width:1.5; transition:r 520ms var(--ease-settle), fill var(--duration-base) var(--ease-standard), stroke-width var(--duration-fast) var(--ease-standard), opacity var(--duration-base) var(--ease-standard);}
+  /* ── Tabs: the universe and the segments are two ways in, not one
+     page. The DS tab strip, with a count on the second. ── */
+  .au-tabs{margin-bottom:var(--spacing-20);}
+  .au-tabs .c-tab .n{margin-left:6px; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-4);}
+  .au-tabs .c-tab.active .n{color:var(--color-neutral-5);}
+  .au-panel[hidden]{display:none;}
+
+  /* ── The universe: a canvas, not a card. It bleeds to the content
+     edges, takes the height of the viewport it has, and everything
+     else on it floats in the corners. ── */
+  .au-universe{position:relative; margin:0 calc(-1 * var(--spacing-32)) var(--spacing-24); height:var(--au-h, 560px); min-height:480px; overflow:hidden;
+    background:radial-gradient(ellipse at 50% 45%, var(--color-neutral-1) 0%, var(--color-canvas-warm) 62%, var(--color-canvas-warm) 100%);
+    border-top:1px solid var(--color-neutral-3); border-bottom:1px solid var(--color-neutral-3);}
+  .au-stage{position:absolute; inset:0; width:100%; height:100%; display:block; user-select:none; cursor:grab; touch-action:none;}
+  .au-stage.is-panning{cursor:grabbing;}
+  .au-stage.is-panning .au-node{pointer-events:none;}
+  /* The world: one group that pans and zooms. Buttons and double-clicks
+     glide there; the wheel and a drag move it directly. */
+  .au-world{transition:transform 560ms var(--ease-flow);}
+  .au-stage.is-direct .au-world{transition:none;}
+  .au-links path{fill:none; stroke:var(--color-neutral-4); stroke-width:1; opacity:.28; transition:opacity var(--duration-base) var(--ease-standard), stroke var(--duration-base) var(--ease-standard);}
+  .au-links path.k-lives{opacity:.16;}
+  .au-links.is-fading path{opacity:0;}
+  .au-stage.has-hot .au-links path{opacity:.06;}
+  .au-stage.has-hot .au-links path.is-lit{opacity:.9; stroke:var(--au-color, var(--color-neutral-9)); stroke-width:1.5;}
+  /* A node: translate on the outer group, an idle drift on the middle
+     one, the hover scale on the inner one. Three groups so the three
+     motions never fight over one transform. */
+  .au-node{cursor:pointer; outline:none; transition:transform 620ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
+  .au-node.is-out{opacity:0; pointer-events:none;}
+  .au-node.is-off{opacity:.18;}
+  .au-float{animation:au-drift var(--fd, 6s) ease-in-out var(--fdl, 0s) infinite alternate;}
+  @keyframes au-drift{from{transform:translate(0, -2.5px);} to{transform:translate(0, 2.5px);}}
+  .au-body{transition:transform var(--duration-slow) var(--ease-settle);}
+  .au-node.is-hot .au-body{transform:scale(1.14);}
+  .au-node.is-kin .au-body{transform:scale(1.05);}
+  .au-node circle.dot{fill:var(--au-strong); stroke:var(--au-color); stroke-width:1.5;
+    transition:r 620ms var(--ease-settle), fill var(--duration-base) var(--ease-standard), stroke-width var(--duration-fast) var(--ease-standard);}
+  .au-node.is-hot circle.dot{fill:var(--au-pastel); stroke-width:2.5;}
+  .au-node.is-kin circle.dot{stroke-width:2.5;}
+  .au-stage.has-hot .au-node:not(.is-hot):not(.is-kin):not(.is-out){opacity:.3;}
+  .au-stage.has-hot .au-node.is-kin,.au-stage.has-hot .au-node.is-hot{opacity:1;}
+  /* The halo: a soft ring that breathes behind the hovered node. */
+  .au-node circle.halo{fill:var(--au-color); opacity:0; transform-origin:center; transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-node.is-hot circle.halo{opacity:.16; animation:au-halo 1.6s var(--ease-flare) infinite;}
+  @keyframes au-halo{0%{transform:scale(1); opacity:.2;} 100%{transform:scale(1.55); opacity:0;}}
   .au-node text{font-family:inherit; font-weight:800; fill:var(--color-neutral-9); text-anchor:middle; dominant-baseline:central; pointer-events:none;
     paint-order:stroke; stroke:var(--au-strong); stroke-width:3px; stroke-linejoin:round; transition:opacity var(--duration-base) var(--ease-standard);}
-  .au-node.is-out circle{fill:var(--color-neutral-2); stroke:var(--color-neutral-4); stroke-width:1;}
-  .au-node.is-out text{opacity:0;}
-  .au-node.is-off{opacity:.28;}
-  .au-node.is-off text{opacity:0;}
-  .au-stage.has-hot .au-node:not(.is-hot):not(.is-kin):not(.is-out){opacity:.32;}
-  .au-stage.has-hot .au-node.is-kin circle{stroke-width:2.5;}
-  .au-node.is-hot circle{fill:var(--au-pastel); stroke-width:2.5;}
-  .au-node:focus-visible circle{stroke:var(--color-obsidian); stroke-width:3;}
-  .au-glabel{font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; fill:var(--color-neutral-5); text-anchor:middle;
-    paint-order:stroke; stroke:var(--color-neutral-1); stroke-width:4px; stroke-linejoin:round; pointer-events:none; transition:transform 520ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
-  .au-glabel.is-off{opacity:0;}
-  @media (prefers-reduced-motion:reduce){ .au-node,.au-node circle,.au-glabel{transition:none;} }
-  /* The floating label: name and size over the circle under the pointer.
-     Positioned from the circle's own coordinates, so it tracks the stage
-     at any width. */
-  .au-stagelbl{position:absolute; left:0; top:0; z-index:3; pointer-events:none; transform:translate(-50%, calc(-100% - 10px));
-    background:var(--color-obsidian); color:var(--color-neutral-1); border-radius:var(--radius-sm); padding:6px 10px; box-shadow:var(--shadow-3);
-    font-size:12px; line-height:16px; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
-  .au-stagelbl.is-on{opacity:1;}
-  .au-stagelbl b{display:block; font-weight:800; font-size:13px;}
-  .au-stagelbl span{opacity:.75;}
-  .au-stagelbl i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
-  /* Where they live: nine property chips; hovering one lights every
-     segment that lives on it. */
-  .au-props{display:flex; align-items:center; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-20) var(--spacing-16); flex-wrap:wrap; border-top:1px solid var(--color-neutral-2);}
-  .au-props > span{font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-right:var(--spacing-4);}
-  .au-prop{height:28px; padding:0 10px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); font:inherit; font-size:12px; font-weight:700;
-    color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  /* Hubs and properties: solid discs with the name inside. */
+  .au-node.kind-hub circle.dot{fill:var(--au-color); stroke:var(--color-neutral-1); stroke-width:3;}
+  .au-node.kind-hub.is-hot circle.dot{fill:var(--au-color);}
+  .au-node.kind-hub text{fill:var(--color-neutral-9); stroke:var(--color-canvas-warm); stroke-width:4px; font-size:10px; letter-spacing:.06em; text-transform:uppercase; dominant-baseline:hanging;}
+  .au-node.kind-prop circle.dot{fill:var(--color-obsidian); stroke:var(--color-neutral-1); stroke-width:3;}
+  .au-node.kind-prop text{fill:var(--color-neutral-9); stroke:var(--color-canvas-warm); stroke-width:4px; font-size:10px; font-weight:800; dominant-baseline:hanging;}
+  .au-node.kind-prop circle.halo{fill:var(--color-obsidian);}
+  .au-node:focus-visible circle.dot{stroke:var(--color-obsidian); stroke-width:3;}
+  @media (prefers-reduced-motion:reduce){
+    .au-node,.au-node circle.dot,.au-body,.au-world{transition:none;}
+    .au-float,.au-node.is-hot circle.halo{animation:none;}
+    .au-node.is-hot circle.halo{opacity:.16;}
+  }
+
+  /* Overlays: the corners of the canvas. */
+  .au-ovl{position:absolute; z-index:4; display:flex; gap:var(--spacing-8); align-items:center; flex-wrap:wrap; max-width:calc(100% - 32px);}
+  .au-ovl-tl{left:var(--spacing-20); top:var(--spacing-16); flex-direction:column; align-items:flex-start; gap:var(--spacing-8);}
+  .au-arrange{display:flex; align-items:center; gap:var(--spacing-8);}
+  .au-ovl-br{right:var(--spacing-20); bottom:var(--spacing-16);}
+  .au-ovl-tr{right:var(--spacing-20); top:var(--spacing-16); justify-content:flex-end;}
+  .au-lens,.au-styles{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
+  .au-lens .c-chip-filter,.au-styles .c-chip-filter{white-space:nowrap; background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
+  .au-lens .c-chip-filter.is-active,.au-styles .c-chip-filter.is-active{background:var(--color-obsidian);}
+  .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px;}
+  .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
+  .au-styles .c-chip-filter i{font-size:14px; margin-right:6px;}
+  .au-ovl-lbl{font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-right:var(--spacing-4); white-space:nowrap;}
+  /* Where they live: the property chips, hover to light, click to pin. */
+  .au-props{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .au-prop{height:26px; padding:0 9px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); font:inherit; font-size:11px; font-weight:700;
+    color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:var(--shadow-1);
+    transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   .au-prop .n{color:var(--color-neutral-5); font-weight:600; font-variant-numeric:tabular-nums;}
   .au-prop:hover,.au-prop:focus-visible,.au-prop.is-on{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
   .au-prop:hover .n,.au-prop:focus-visible .n,.au-prop.is-on .n{color:var(--color-neutral-3);}
   .au-prop:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-uhint{margin-left:auto; font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px;}
-  @media (hover:none) and (max-width:720px){ .au-universe{display:none;} }
+  /* Zoom: minus, the level, plus, fit. */
+  .au-zoom{display:inline-flex; align-items:center; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); box-shadow:var(--shadow-1); padding:3px;}
+  .au-zoom button{width:30px; height:30px; border-radius:50%; border:0; background:transparent; font:inherit; color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .au-zoom button:hover{background:var(--color-neutral-2);}
+  .au-zoom button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px;}
+  .au-zoom .lvl{min-width:46px; text-align:center; font-size:12px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .au-zoom .sep{width:1px; height:18px; background:var(--color-neutral-3); margin:0 2px;}
+  .au-uhint{font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.8); padding:4px 10px; border-radius:var(--radius-pill);}
+  /* The hover card: name, group, size and the consumption rings, over
+     the node under the pointer. */
+  .au-stagelbl{position:absolute; left:0; top:0; z-index:5; pointer-events:none; transform:translate(-50%, calc(-100% - 14px));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12) var(--spacing-12) var(--spacing-12) var(--spacing-12); box-shadow:var(--shadow-3);
+    display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .au-stagelbl.is-on{opacity:1;}
+  .au-stagelbl .arc{width:44px; height:44px; flex:none;}
+  .au-stagelbl .arc .am-arc{--am-color:var(--au-color);}
+  .au-stagelbl b{display:block; font-weight:800; font-size:13px; line-height:16px;}
+  .au-stagelbl span{display:block; font-size:11px; line-height:14px; color:var(--color-neutral-5);}
+  .au-stagelbl span em{font-style:normal; font-weight:800; color:var(--color-neutral-9); font-size:15px; font-variant-numeric:tabular-nums;}
+  .au-stagelbl i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
+  .au-stagelbl.kind-hub .arc,.au-stagelbl.kind-prop .arc{display:none;}
+  .au-stagelbl .kbd{margin-top:4px; font-size:10px; color:var(--color-neutral-4);}
+  .au-sk-dot{fill:var(--color-neutral-2);}
+  @media (max-width:900px){
+    .au-universe{margin:0 calc(-1 * var(--spacing-16)) var(--spacing-24); min-height:420px;}
+    .au-ovl-tr{display:none;}
+  }
+  @media (max-width:640px){
+    /* A phone canvas has no room for nine property chips over the map;
+       the lens chips stay, the properties wait for the cards tab. */
+    .au-props,.au-arrange .au-ovl-lbl{display:none;}
+    .au-ovl-tl{gap:var(--spacing-4);}
+  }
 
   /* ── Controls (the formats page's line, verbatim in behaviour) ── */
   .au-controls{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
@@ -420,21 +487,32 @@
         </div>
       </header>
 
-      <hr class="au-divider" />
+      <div class="c-tabs au-tabs" role="tablist" aria-label="Audiences views">
+        <button class="c-tab active" type="button" role="tab" aria-selected="true" data-tab="universe" id="auTabBtnUniverse"><i class="ph ph-planet"></i>Universe</button>
+        <button class="c-tab" type="button" role="tab" aria-selected="false" data-tab="cards" id="auTabBtnCards"><i class="ph ph-squares-four"></i>Segments<span class="n" id="auTabCount"></span></button>
+      </div>
 
-      <section class="au-universe" aria-label="The audience universe">
-        <div class="au-uhead">
-          <h2>The universe</h2>
-          <span>Every segment, sized by audience, packed into its group.</span>
+      <section class="au-universe au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
+        <svg class="au-stage" id="auStage" aria-label="Audience segments as circles"><g class="au-world" id="auWorld"><g class="au-links" id="auLinks"></g><g class="au-nodes" id="auNodes"></g></g></svg>
+        <div class="au-ovl au-ovl-tl">
           <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
+          <div class="au-props" id="auProps"></div>
+          <div class="au-arrange"><span class="au-ovl-lbl">Arrange</span><div class="au-styles" id="auStyles" role="radiogroup" aria-label="Arrangement"></div></div>
         </div>
-        <div class="au-stagewrap">
-          <svg class="au-stage" id="auStage" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid meet" aria-label="Audience segments as circles"></svg>
-          <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
+        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Hover a circle · drag to move · scroll to zoom</span></div>
+        <div class="au-ovl au-ovl-br">
+          <div class="au-zoom" role="group" aria-label="Zoom">
+            <button type="button" id="auZoomOut" aria-label="Zoom out" title="Zoom out (−)"><i class="ph ph-minus"></i></button>
+            <span class="lvl" id="auZoomLvl">100%</span>
+            <button type="button" id="auZoomIn" aria-label="Zoom in" title="Zoom in (+)"><i class="ph ph-plus"></i></button>
+            <span class="sep"></span>
+            <button type="button" id="auZoomFit" aria-label="Fit to view" title="Fit (0)"><i class="ph ph-corners-out"></i></button>
+          </div>
         </div>
-        <div class="au-props" id="auProps"></div>
+        <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
       </section>
 
+      <section class="au-panel" id="auPanelCards" role="tabpanel" aria-labelledby="auTabBtnCards" hidden>
       <div class="au-controls">
         <div class="au-linewrap" id="auLineWrap">
           <div class="au-line" id="auLine">
@@ -491,6 +569,7 @@
         <p>Try another word, or clear the group and property filters.</p>
         <div class="c-empty-actions"><button class="c-btn c-btn-secondary c-btn-sm" type="button" id="auEmptyClear">Clear filters</button></div>
       </div>
+      </section>
 
     </div>
   </div>
@@ -618,10 +697,11 @@
       .sort(function (a, b) { return b.v - a.v; }).slice(0, n || 2);
   }
   function hasProp(s, key) { return s.properties.some(function (p) { return p.key === key; }); }
-  if (TOUCH) E('auHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap a card to see more; tap again to open it.';
+  if (TOUCH) { E('auHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap a circle or card to see more; tap again to open it.'; }
 
   /* ── State ──────────────────────────────────────────────────────── */
-  var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all' };
+  var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all', style: 'rings', tab: 'universe' };
+  try { var ss = sessionStorage.getItem('collab-audiences-style'); if (ss) state.style = ss; } catch (e) {}
   function filtered() {
     var q = state.q.trim().toLowerCase();
     var rows = A.filter(function (s) {
@@ -826,10 +906,10 @@
     E('auCount').innerHTML = '<b>' + current.length + '</b> of ' + A.length + ' segments · ' + mapped + ' with an addressable count from the planner' +
       (state.sort === 'size' ? ' · largest first' : state.sort === 'sizeAsc' ? ' · smallest first' : state.sort === 'group' ? ' · by group' : ' · A to Z');
     E('auEmpty').hidden = current.length > 0;
+    E('auTabCount').textContent = current.length;
     E('auCardsView').style.display = current.length ? '' : 'none';
     E('auTableView').style.display = current.length ? '' : 'none';
     renderTray();
-    syncUniverseFilter();
     playMove(before);
   }
   function setLive(card, on) { if (card) card.classList.toggle('is-live', on); }
@@ -911,155 +991,316 @@
   E('auTableView').querySelector('.au-tablewrap').addEventListener('scroll', function () { hideRowpeek(true); });
   E('auContent').addEventListener('scroll', function () { if (peek.classList.contains('is-visible')) hideRowpeek(true); }, { passive: true });
 
+  /* ── Tabs ───────────────────────────────────────────────────────── */
+  function setTab(tab, silent) {
+    state.tab = tab;
+    document.querySelectorAll('.au-tabs [data-tab]').forEach(function (b) {
+      var on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on);
+    });
+    E('auPanelUniverse').hidden = tab !== 'universe';
+    E('auPanelCards').hidden = tab !== 'cards';
+    if (tab === 'universe') { hotNode(null); renderUniverse({ keepView: !!layout }); }
+    else { hideRowpeek(true); staggerIn(visibleItems()); }
+    if (!silent) try { history.replaceState(null, '', tab === 'cards' ? '?tab=cards' : location.pathname); } catch (e) {}
+  }
+  document.querySelector('.au-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
+
   /* ── The universe ───────────────────────────────────────────────── */
-  var SVG = 'http://www.w3.org/2000/svg', stage = E('auStage'), stageLbl = E('auStageLbl');
-  var nodes = {}, glabels = {}, layout = null, hotId = null, hotProp = null;
+  var SVG = 'http://www.w3.org/2000/svg', stage = E('auStage'), world = E('auWorld'), linksG = E('auLinks'), nodesG = E('auNodes'), stageLbl = E('auStageLbl');
+  var nodes = {}, layout = null, layoutById = {}, hotId = null, pinnedProp = null, hotProp = null;
+  var view = { k: 1, tx: 0, ty: 0 }, ZMIN = 0.5, ZMAX = 4;
+  var STYLES = [
+    { key: 'rings',   label: 'Groups',     icon: 'ph-circles-three',   hint: 'Each group is a hub, its segments around it' },
+    { key: 'network', label: 'Properties', icon: 'ph-graph',           hint: 'The Astro properties as hubs, segments pulled to the ones they live on' },
+    { key: 'size',    label: 'Size',       icon: 'ph-circles-four',    hint: 'Every segment in one pack, largest in the middle' }
+  ];
+  function sizeCanvas() {
+    /* The canvas takes whatever the viewport has left under the tabs,
+       so the corner controls always sit on screen. */
+    var uni = E('auPanelUniverse'), top = uni.getBoundingClientRect().top;
+    uni.style.setProperty('--au-h', Math.max(480, Math.round(window.innerHeight - top - 28)) + 'px');
+  }
+  function stageSize() { var r = stage.getBoundingClientRect(); return { w: Math.max(320, r.width), h: Math.max(320, r.height) }; }
   function renderLensChips() {
-    E('auLens').innerHTML = '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.lens === 'all' ? ' is-active' : '') + '" data-lens="all" aria-checked="' + (state.lens === 'all') + '">All segments</button>' +
+    E('auLens').innerHTML = '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.lens === 'all' ? ' is-active' : '') + '" data-lens="all" aria-checked="' + (state.lens === 'all') + '">All <span class="count">' + A.length + '</span></button>' +
       LENSES.map(function (l) {
         var n = A.filter(function (s) { return s.lens === l.key; }).length;
         return '<button type="button" role="radio" class="c-chip c-chip-filter lens-' + l.key + (state.lens === l.key ? ' is-active' : '') + '" data-lens="' + l.key + '" aria-checked="' + (state.lens === l.key) + '"><i class="dot"></i>' + esc(l.label) + ' <span class="count">' + n + '</span></button>';
       }).join('');
   }
+  function renderStyleChips() {
+    E('auStyles').innerHTML = STYLES.map(function (st) {
+      return '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.style === st.key ? ' is-active' : '') + '" data-style="' + st.key + '" aria-checked="' + (state.style === st.key) + '" title="' + esc(st.hint) + '"><i class="ph ' + st.icon + '"></i>' + esc(st.label) + '</button>';
+    }).join('');
+  }
   E('auLens').addEventListener('click', function (e) {
     var b = e.target.closest('[data-lens]'); if (!b) return;
     hotNode(null); state.lens = b.dataset.lens; renderLensChips(); renderUniverse();
   });
-  function shortName(s, r) {
+  E('auStyles').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-style]'); if (!b) return;
+    hotNode(null); state.style = b.dataset.style; renderStyleChips(); renderUniverse();
+    try { sessionStorage.setItem('collab-audiences-style', state.style); } catch (x) {}
+  });
+  function shortName(name, r, kind) {
     /* A label only where it fits: the whole name on one line, then on
-       two, then the first word, then nothing. The hover label always
+       two, then the first word, then nothing. The hover card always
        carries the full name. */
-    var fs = Math.max(9, Math.min(13, r / 2.4)), fits = function (t) { return t.length * fs * 0.58 <= r * 1.85; };
-    if (r < 15) return null;
-    if (fits(s.name)) return { lines: [s.name], fs: fs };
-    var words = s.name.split(/\s+/), best = null;
+    var fs = kind === 'seg' ? Math.max(9, Math.min(14, r / 2.3)) : 10;
+    var fits = function (t) { return t.length * fs * 0.6 <= r * 1.8; };
+    if (r < 13) return null;
+    if (fits(name)) return { lines: [name], fs: fs };
+    var words = name.split(/\s+/), best = null;
     for (var i = 1; i < words.length; i++) {
       var a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
       if (fits(a) && fits(b) && (!best || Math.abs(a.length - b.length) < best.d)) best = { lines: [a, b], fs: fs, d: Math.abs(a.length - b.length) };
     }
-    if (best && r >= 20) return best;
+    if (best && r >= 18) return best;
     var first = words[0].replace(/[&,]$/, '');
     if (fits(first)) return { lines: [first], fs: fs };
     return null;
   }
-  function buildUniverse() {
-    stage.innerHTML = '';
-    GROUPS.forEach(function (g) {
-      var t = document.createElementNS(SVG, 'text');
-      t.setAttribute('class', 'au-glabel'); t.textContent = g.label; t.setAttribute('x', 0); t.setAttribute('y', 0);
-      stage.appendChild(t); glabels[g.key] = t;
-    });
-    A.forEach(function (s) {
-      var g = document.createElementNS(SVG, 'g');
-      g.setAttribute('class', 'au-node ' + lensClass(s)); g.setAttribute('data-id', s.id);
-      g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
-      g.setAttribute('aria-label', s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details');
-      var c = document.createElementNS(SVG, 'circle'); c.setAttribute('r', 0);
-      var t = document.createElementNS(SVG, 'text');
-      g.appendChild(c); g.appendChild(t); stage.appendChild(g); nodes[s.id] = g;
-    });
+  function makeNode(id, kind, lens, label) {
+    var g = document.createElementNS(SVG, 'g');
+    g.setAttribute('class', 'au-node kind-' + kind + (lens ? ' lens-' + lens : '') + ' is-out'); g.setAttribute('data-id', id);
+    g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button'); g.setAttribute('aria-label', label);
+    var fl = document.createElementNS(SVG, 'g'); fl.setAttribute('class', 'au-float');
+    /* Each node drifts on its own clock so the field breathes rather than bobs. */
+    var h = 0; for (var c = 0; c < id.length; c++) h = (h * 31 + id.charCodeAt(c)) % 997;
+    fl.style.setProperty('--fd', (4.5 + (h % 30) / 10).toFixed(1) + 's'); fl.style.setProperty('--fdl', '-' + ((h % 50) / 10).toFixed(1) + 's');
+    var body = document.createElementNS(SVG, 'g'); body.setAttribute('class', 'au-body');
+    var halo = document.createElementNS(SVG, 'circle'); halo.setAttribute('class', 'halo'); halo.setAttribute('r', 0);
+    var dot = document.createElementNS(SVG, 'circle'); dot.setAttribute('class', 'dot'); dot.setAttribute('r', 0);
+    var t = document.createElementNS(SVG, 'text');
+    body.appendChild(halo); body.appendChild(dot); body.appendChild(t); fl.appendChild(body); g.appendChild(fl);
+    nodesG.appendChild(g); nodes[id] = g;
+    return g;
   }
-  function renderUniverse() {
-    var w = 1200, h = 420;
-    layout = M.layoutUniverse(A, state.lens, { w: w, h: h });
-    var seen = {};
-    layout.labels.forEach(function (l) {
-      var t = glabels[l.group]; seen[l.group] = true;
-      t.style.transform = 'translate(' + l.x.toFixed(1) + 'px,' + l.y.toFixed(1) + 'px)';
-      t.classList.remove('is-off');
-    });
-    GROUPS.forEach(function (g) { if (!seen[g.key]) glabels[g.key].classList.add('is-off'); });
-    layout.circles.forEach(function (c) {
-      var g = nodes[c.id], circ = g.firstChild, txt = g.lastChild, r = Math.max(4, c.r);
-      g.style.transform = 'translate(' + c.x.toFixed(1) + 'px,' + c.y.toFixed(1) + 'px)';
-      circ.style.r = r.toFixed(1) + 'px';
-      g.classList.toggle('is-out', c.out);
-      var lbl = c.out ? null : shortName(c.seg, r);
+  function buildUniverse() {
+    nodesG.innerHTML = ''; linksG.innerHTML = ''; nodes = {};
+    GROUPS.forEach(function (g) { makeNode('hub:' + g.key, 'hub', g.lens, g.label + ' group. Open the first segment'); });
+    PROPS.forEach(function (p) { makeNode('prop:' + p.key, 'prop', null, p.label + ', an Astro property'); });
+    A.forEach(function (s) { makeNode(s.id, 'seg', s.lens, s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details'); });
+  }
+  function linkPath(a, b) {
+    /* A quadratic curve bowed a little off the straight line, so a
+       fan of spokes reads as a fan and not a star. */
+    var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+    var bend = Math.min(26, d * 0.16);
+    return 'M' + a.x.toFixed(1) + ',' + a.y.toFixed(1) + ' Q' + (mx - dy / d * bend).toFixed(1) + ',' + (my + dx / d * bend).toFixed(1) + ' ' + b.x.toFixed(1) + ',' + b.y.toFixed(1);
+  }
+  var linkTimer = null;
+  function renderUniverse(opts) {
+    if (E('auPanelUniverse').hidden) return;
+    sizeCanvas();
+    var sz = stageSize();
+    layout = M.layoutUniverse(A, state.lens, { w: sz.w, h: sz.h, margin: 48 }, state.style);
+    layout.w = sz.w; layout.h = sz.h;
+    layoutById = {}; layout.nodes.forEach(function (n) { layoutById[n.id] = n; });
+    Object.keys(nodes).forEach(function (id) {
+      var g = nodes[id], n = layoutById[id], body = g.firstChild.firstChild, halo = body.childNodes[0], dot = body.childNodes[1], txt = body.childNodes[2];
+      if (!n) { g.classList.add('is-out'); dot.style.r = '0px'; halo.style.r = '0px'; return; }
+      var r = Math.max(4, n.r);
+      g.style.transform = 'translate(' + n.x.toFixed(1) + 'px,' + n.y.toFixed(1) + 'px)';
+      dot.style.r = r.toFixed(1) + 'px'; halo.style.r = (r + 6).toFixed(1) + 'px';
+      g.classList.remove('is-out');
+      var name = n.kind === 'seg' ? n.seg.name : n.kind === 'hub' ? n.groupDef.label : n.prop.label;
       txt.textContent = '';
+      if (n.kind !== 'seg') {
+        /* Hubs and properties carry their name as a caption under the
+           disc, the way the reference graph leaves its hubs plain. */
+        txt.setAttribute('font-size', '10'); txt.setAttribute('y', (r + 13).toFixed(1)); txt.textContent = name;
+        return;
+      }
+      txt.setAttribute('y', 0);
+      var lbl = shortName(name, r, n.kind);
       if (lbl) {
         txt.setAttribute('font-size', lbl.fs.toFixed(1));
         lbl.lines.forEach(function (line, i) {
           var ts = document.createElementNS(SVG, 'tspan');
-          ts.setAttribute('x', 0); ts.setAttribute('dy', i === 0 ? ((1 - lbl.lines.length) * 0.55 + 0.0).toFixed(2) + 'em' : '1.1em');
+          ts.setAttribute('x', 0); ts.setAttribute('dy', i === 0 ? ((1 - lbl.lines.length) * 0.55).toFixed(2) + 'em' : '1.1em');
           ts.textContent = line; txt.appendChild(ts);
         });
       }
     });
-    syncUniverseFilter();
+    /* Links cannot morph, so they fade out with the old picture and
+       draw back once the circles have arrived. */
+    clearTimeout(linkTimer);
+    linksG.classList.add('is-fading');
+    linkTimer = setTimeout(function () {
+      linksG.innerHTML = '';
+      layout.links.forEach(function (l) {
+        var a = layoutById[l.from], b = layoutById[l.to]; if (!a || !b) return;
+        var path = document.createElementNS(SVG, 'path');
+        path.setAttribute('class', 'k-' + l.kind); path.setAttribute('data-from', l.from); path.setAttribute('data-to', l.to);
+        path.setAttribute('d', linkPath(a, b)); linksG.appendChild(path);
+      });
+      if (hotId || hotProp) litLinks(hotId || 'prop:' + hotProp);
+      requestAnimationFrame(function () { linksG.classList.remove('is-fading'); });
+    }, REDUCED ? 0 : 420);
+    if (!(opts && opts.keepView)) setView(1, 0, 0, false);
+    if (pinnedProp) hotProperty(pinnedProp);
+    if (hotId) placeLabel();
   }
-  function syncUniverseFilter() {
-    var keep = {}; current.forEach(function (s) { keep[s.id] = true; });
-    var filtering = current.length !== A.length;
-    A.forEach(function (s) { nodes[s.id].classList.toggle('is-off', filtering && !keep[s.id]); });
+  /* ── Pan and zoom ── */
+  function setView(k, tx, ty, direct) {
+    view.k = Math.max(ZMIN, Math.min(ZMAX, k)); view.tx = tx; view.ty = ty;
+    stage.classList.toggle('is-direct', !!direct);
+    world.style.transform = 'translate(' + view.tx.toFixed(1) + 'px,' + view.ty.toFixed(1) + 'px) scale(' + view.k.toFixed(3) + ')';
+    E('auZoomLvl').textContent = Math.round(view.k * 100) + '%';
+    if (hotId) placeLabel();
   }
-  function stagePoint(x, y) {
-    /* viewBox → CSS pixels, honouring xMidYMid meet. */
-    var r = stage.getBoundingClientRect(), k = Math.min(r.width / 1200, r.height / 420);
-    return { x: (r.width - 1200 * k) / 2 + x * k, y: (r.height - 420 * k) / 2 + y * k, k: k };
+  function zoomAt(k, px, py, direct) {
+    var k2 = Math.max(ZMIN, Math.min(ZMAX, k)), f = k2 / view.k;
+    setView(k2, px - (px - view.tx) * f, py - (py - view.ty) * f, direct);
+  }
+  function stageXY(e) { var r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  function focusNode(id) {
+    var n = layoutById[id]; if (!n) return;
+    var sz = stageSize(), k = Math.min(2.6, Math.max(1.6, 110 / Math.max(12, n.r)));
+    setView(k, sz.w / 2 - n.x * k, sz.h / 2 - n.y * k, false);
+  }
+  stage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var p = stageXY(e);
+    if (e.ctrlKey || e.metaKey || Math.abs(e.deltaY) >= Math.abs(e.deltaX)) zoomAt(view.k * Math.exp(-e.deltaY * 0.0022), p.x, p.y, true);
+    else setView(view.k, view.tx - e.deltaX, view.ty, true);
+  }, { passive: false });
+  var drag = null;
+  stage.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty, moved: false };
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+    if (!drag.moved) { drag.moved = true; stage.classList.add('is-panning'); hotNode(null); }
+    setView(view.k, drag.tx + dx, drag.ty + dy, true);
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    var moved = drag.moved; drag = null;
+    stage.classList.remove('is-panning');
+    if (moved) stage.dataset.justPanned = '1';
+    setTimeout(function () { delete stage.dataset.justPanned; }, 60);
+  }
+  stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
+  E('auZoomIn').addEventListener('click', function () { var sz = stageSize(); zoomAt(view.k * 1.3, sz.w / 2, sz.h / 2, false); });
+  E('auZoomOut').addEventListener('click', function () { var sz = stageSize(); zoomAt(view.k / 1.3, sz.w / 2, sz.h / 2, false); });
+  E('auZoomFit').addEventListener('click', function () { setView(1, 0, 0, false); });
+  stage.addEventListener('dblclick', function (e) {
+    var g = e.target.closest('.au-node');
+    if (g) { e.preventDefault(); focusNode(g.dataset.id); }
+    else { var p = stageXY(e); zoomAt(view.k * 1.6, p.x, p.y, false); }
+  });
+  /* ── Hover, focus, click ── */
+  function worldToStage(x, y) { return { x: x * view.k + view.tx, y: y * view.k + view.ty }; }
+  function placeLabel() {
+    var n = layoutById[hotId]; if (!n) return;
+    var p = worldToStage(n.x, n.y - Math.max(4, n.r) * 1.14);
+    stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
+  }
+  function kinOf(id) {
+    /* Who lights up with the hovered node: a segment's group and the
+       properties it lives on; a hub's segments; a property's segments. */
+    var n = layoutById[id], out = {};
+    if (!n) return out;
+    if (n.kind === 'seg') {
+      A.forEach(function (s) { if (s.group === n.seg.group && s.id !== id) out[s.id] = true; });
+      out['hub:' + n.seg.group] = true;
+      n.seg.properties.forEach(function (p) { out['prop:' + p.key] = true; });
+    } else if (n.kind === 'hub') {
+      A.forEach(function (s) { if (s.group === n.group) out[s.id] = true; });
+    } else if (n.kind === 'prop') {
+      A.forEach(function (s) { if (hasProp(s, n.prop.key)) out[s.id] = true; });
+    }
+    return out;
+  }
+  function litLinks(id, kin) {
+    linksG.querySelectorAll('path').forEach(function (p) {
+      p.classList.toggle('is-lit', !!id && (p.dataset.from === id || p.dataset.to === id));
+    });
   }
   function hotNode(id) {
-    if (!layout) return; /* nothing to light before the first layout */
+    if (!layout) return;
     hotId = id;
-    stage.classList.toggle('has-hot', !!id);
-    A.forEach(function (s) {
-      var g = nodes[s.id];
-      g.classList.toggle('is-hot', s.id === id);
-      /* Kin: the rest of the group. */
-      var kin = id && s.id !== id && s.group === byId[id].group;
-      g.classList.toggle('is-kin', !!kin);
+    stage.classList.toggle('has-hot', !!id || !!hotProp);
+    var kin = id ? kinOf(id) : (hotProp ? kinOf('prop:' + hotProp) : {});
+    Object.keys(nodes).forEach(function (nid) {
+      nodes[nid].classList.toggle('is-hot', nid === id || (!id && hotProp && nid === 'prop:' + hotProp));
+      nodes[nid].classList.toggle('is-kin', !!kin[nid] && nid !== id);
     });
+    litLinks(id || (hotProp ? 'prop:' + hotProp : null));
     if (!id) { stageLbl.classList.remove('is-on'); return; }
-    var c = null; layout.circles.forEach(function (x) { if (x.id === id) c = x; });
-    if (!c) return;
-    var s = byId[id], p = stagePoint(c.x, c.y - Math.max(4, c.r));
-    stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
-    stageLbl.innerHTML = '<b><i></i>' + esc(s.name) + '</b><span>' + fmtM(s.size) + ' · ' + esc(groupOf[s.group].label) + '</span>';
-    stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
+    var n = layoutById[id];
+    if (n.kind === 'seg') {
+      var s = n.seg, top = topChannels(s, 1)[0];
+      stageLbl.className = 'au-stagelbl is-on kind-seg ' + lensClass(s);
+      stageLbl.innerHTML = '<div class="arc"><div data-lblarc></div></div><div><b>' + esc(s.name) + '</b><span><i></i>' + esc(groupOf[s.group].label) + '</span>' +
+        '<span><em>' + fmtM(s.size) + '</em> audience' + (top ? ' · ' + top.v + '% ' + CH_SHORT[top.k] : '') + '</span><span class="kbd">Click to open · double-click to zoom</span></div>';
+      M.arc(stageLbl.querySelector('[data-lblarc]'), s, { still: true });
+    } else if (n.kind === 'hub') {
+      stageLbl.className = 'au-stagelbl is-on kind-hub lens-' + n.lens;
+      stageLbl.innerHTML = '<div><b>' + esc(n.groupDef.label) + '</b><span><i></i>' + esc(lensOf[n.lens].label) + '</span><span><em>' + n.count + '</em> segments · ' + fmtM(n.total) + ' combined</span></div>';
+    } else {
+      stageLbl.className = 'au-stagelbl is-on kind-prop';
+      stageLbl.innerHTML = '<div><b>' + esc(n.prop.label) + '</b><span>Astro property</span><span><em>' + n.count + '</em> segments live here</span></div>';
+    }
+    placeLabel();
   }
   function hotProperty(key) {
     if (!layout) return;
     hotProp = key;
-    stage.classList.toggle('has-hot', !!key);
-    A.forEach(function (s) {
-      var g = nodes[s.id];
-      g.classList.toggle('is-hot', false);
-      g.classList.toggle('is-kin', !!key && hasProp(s, key));
-    });
-    stageLbl.classList.remove('is-on');
     E('auProps').querySelectorAll('.au-prop').forEach(function (b) { b.classList.toggle('is-on', b.dataset.prop === key); });
+    hotNode(null);
   }
-  stage.addEventListener('mouseover', function (e) { var g = e.target.closest('.au-node'); if (g && !TOUCH) hotNode(g.dataset.id); });
-  stage.addEventListener('mouseout', function (e) { var g = e.target.closest('.au-node'); if (g && !g.contains(e.relatedTarget) && hotId === g.dataset.id) hotNode(null); });
-  stage.addEventListener('focusin', function (e) { var g = e.target.closest('.au-node'); if (g) hotNode(g.dataset.id); });
-  stage.addEventListener('focusout', function (e) { var g = e.target.closest('.au-node'); if (g && hotId === g.dataset.id) hotNode(null); });
+  nodesG.addEventListener('mouseover', function (e) { var g = e.target.closest('.au-node'); if (g && !TOUCH && !drag) hotNode(g.dataset.id); });
+  nodesG.addEventListener('mouseout', function (e) { var g = e.target.closest('.au-node'); if (g && !g.contains(e.relatedTarget) && hotId === g.dataset.id) hotNode(null); });
+  nodesG.addEventListener('focusin', function (e) { var g = e.target.closest('.au-node'); if (g) hotNode(g.dataset.id); });
+  nodesG.addEventListener('focusout', function (e) { var g = e.target.closest('.au-node'); if (g && hotId === g.dataset.id) hotNode(null); });
   stage.addEventListener('mouseleave', function () { if (hotId) hotNode(null); });
-  stage.addEventListener('click', function (e) {
-    var g = e.target.closest('.au-node'); if (!g) return;
+  function openFromNode(id, g) {
+    var n = layoutById[id]; if (!n) return;
+    if (n.kind === 'seg') openDrawer(id, false, g);
+    else if (n.kind === 'hub') { var first = A.filter(function (s) { return s.group === n.group; }).sort(function (a, b) { return b.size - a.size; })[0]; if (first) openDrawer(first.id, false, g); }
+    else focusNode(id);
+  }
+  nodesG.addEventListener('click', function (e) {
+    var g = e.target.closest('.au-node'); if (!g || stage.dataset.justPanned) return;
     if (TOUCH && hotId !== g.dataset.id) { hotNode(g.dataset.id); return; }
-    openDrawer(g.dataset.id, false, g);
+    openFromNode(g.dataset.id, g);
   });
-  stage.addEventListener('keydown', function (e) {
+  nodesG.addEventListener('keydown', function (e) {
     var g = e.target.closest('.au-node'); if (!g) return;
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(g.dataset.id, false, g); }
-    if (e.key === 'r' || e.key === 'R') toggleTray(g.dataset.id);
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromNode(g.dataset.id, g); }
+    if (e.key === 'r' || e.key === 'R') { var n = layoutById[g.dataset.id]; if (n && n.kind === 'seg') toggleTray(g.dataset.id); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (E('auPanelUniverse').hidden || e.target.matches('input, textarea, select') || modal.classList.contains('is-open') || cmodal.classList.contains('is-open')) return;
+    var sz = stageSize();
+    if (e.key === '+' || e.key === '=') zoomAt(view.k * 1.3, sz.w / 2, sz.h / 2, false);
+    if (e.key === '-' || e.key === '_') zoomAt(view.k / 1.3, sz.w / 2, sz.h / 2, false);
+    if (e.key === '0') setView(1, 0, 0, false);
   });
   function renderProps() {
     var counts = {}; A.forEach(function (s) { s.properties.forEach(function (p) { counts[p.key] = (counts[p.key] || 0) + 1; }); });
-    E('auProps').innerHTML = '<span>Where they live</span>' + PROPS.slice().sort(function (a, b) { return (counts[b.key] || 0) - (counts[a.key] || 0); }).map(function (p) {
-      return '<button type="button" class="au-prop" data-prop="' + p.key + '" aria-label="' + esc(p.label) + ', ' + (counts[p.key] || 0) + ' segments">' + esc(p.label) + ' <span class="n">' + (counts[p.key] || 0) + '</span></button>';
-    }).join('') + '<span class="au-uhint"><i class="ph ph-cursor"></i>Hover a property to light up who lives there</span>';
+    E('auProps').innerHTML = '<span class="au-ovl-lbl">Lives on</span>' + PROPS.slice().sort(function (a, b) { return (counts[b.key] || 0) - (counts[a.key] || 0); }).map(function (p) {
+      return '<button type="button" class="au-prop" data-prop="' + p.key + '" aria-pressed="false" aria-label="' + esc(p.label) + ', ' + (counts[p.key] || 0) + ' segments">' + esc(p.label) + ' <span class="n">' + (counts[p.key] || 0) + '</span></button>';
+    }).join('');
   }
-  E('auProps').addEventListener('mouseover', function (e) { var b = e.target.closest('.au-prop'); if (b && !TOUCH) hotProperty(b.dataset.prop); });
-  E('auProps').addEventListener('mouseout', function (e) { var b = e.target.closest('.au-prop'); if (b && !b.contains(e.relatedTarget) && !TOUCH) hotProperty(null); });
-  E('auProps').addEventListener('focusin', function (e) { var b = e.target.closest('.au-prop'); if (b) hotProperty(b.dataset.prop); });
-  E('auProps').addEventListener('focusout', function (e) { var b = e.target.closest('.au-prop'); if (b) hotProperty(null); });
+  E('auProps').addEventListener('mouseover', function (e) { var b = e.target.closest('.au-prop'); if (b && !TOUCH && !pinnedProp) hotProperty(b.dataset.prop); });
+  E('auProps').addEventListener('mouseout', function (e) { var b = e.target.closest('.au-prop'); if (b && !b.contains(e.relatedTarget) && !TOUCH && !pinnedProp) hotProperty(null); });
+  E('auProps').addEventListener('focusin', function (e) { var b = e.target.closest('.au-prop'); if (b && !pinnedProp) hotProperty(b.dataset.prop); });
+  E('auProps').addEventListener('focusout', function (e) { var b = e.target.closest('.au-prop'); if (b && !pinnedProp) hotProperty(null); });
   E('auProps').addEventListener('click', function (e) {
-    /* A click turns the hover into a filter, so the cards below agree. */
+    /* A click pins the property so the lit segments stay lit while you
+       move the pointer; a second click lets go. */
     var b = e.target.closest('.au-prop'); if (!b) return;
-    var i = state.props.indexOf(b.dataset.prop);
-    if (i > -1) state.props.splice(i, 1); else state.props.push(b.dataset.prop);
-    renderPills(); render();
-    if (TOUCH) hotProperty(hotProp === b.dataset.prop ? null : b.dataset.prop);
+    pinnedProp = pinnedProp === b.dataset.prop ? null : b.dataset.prop;
+    E('auProps').querySelectorAll('.au-prop').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.prop === pinnedProp); });
+    hotProperty(pinnedProp);
   });
 
   /* ── Drawer ─────────────────────────────────────────────────────── */
@@ -1142,7 +1383,7 @@
       if (!REDUCED && setSwingVars()) drawer.classList.add('is-swinging-open');
       setTimeout(function () { modal.classList.add('is-shown'); }, 20);
     }
-    try { history.replaceState(null, '', '?a=' + encodeURIComponent(id)); } catch (e) {}
+    try { history.replaceState(null, '', '?' + (state.tab === 'cards' ? 'tab=cards&' : '') + 'a=' + encodeURIComponent(id)); } catch (e) {}
     E('auDrawerClose').focus();
   }
   function closeDrawer() {
@@ -1154,7 +1395,7 @@
     modal.classList.remove('is-shown');
     document.body.style.overflow = '';
     drawerId = null;
-    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    try { history.replaceState(null, '', state.tab === 'cards' ? '?tab=cards' : location.pathname); } catch (e) {}
     clearTimeout(hideTimer);
     hideTimer = setTimeout(function () {
       modal.classList.remove('is-open');
@@ -1330,20 +1571,37 @@
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { fades(); if (openFacet) placePanel(); if (hotId) hotNode(hotId); }, 80);
+    resizeTimer = setTimeout(function () { fades(); if (openFacet) placePanel(); relayoutIfStale(); }, 120);
   });
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) fades(); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { fades(); relayoutIfStale(); } });
+  /* The rail folds itself shortly after load and hands the canvas its
+     width without a window resize, so the canvas watches its own box
+     and lays out again whenever the box it drew for is not the box it
+     has. */
+  function relayoutIfStale() {
+    if (E('auPanelUniverse').hidden || !nodesG.querySelector('.au-node')) return;
+    sizeCanvas();
+    var sz = stageSize();
+    if (!layout || Math.abs(sz.w - layout.w) > 2 || Math.abs(sz.h - layout.h) > 2) renderUniverse({ keepView: !!layout });
+  }
+  if (window.ResizeObserver) {
+    var canvasTimer = null, lastW = 0, lastH = 0;
+    new ResizeObserver(function () {
+      clearTimeout(canvasTimer); canvasTimer = setTimeout(relayoutIfStale, 100);
+    }).observe(E('auPanelUniverse'));
+  }
 
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
     var sk = function (w, h, extra) { return '<span class="au-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
-    var dots = '';
-    [[180, 210, 70], [330, 150, 48], [420, 290, 60], [560, 200, 84], [700, 300, 40], [820, 170, 66], [960, 260, 58], [1080, 190, 44]].forEach(function (d) {
-      dots += '<circle class="au-sk-dot" cx="' + d[0] + '" cy="' + d[1] + '" r="' + d[2] + '"></circle>';
+    var sz = stageSize(), dots = '';
+    [[.15, .5, 60], [.28, .3, 40], [.36, .68, 50], [.5, .45, 72], [.6, .75, 34], [.7, .3, 56], [.82, .58, 48], [.9, .35, 38]].forEach(function (d) {
+      dots += '<circle class="au-sk-dot" cx="' + (d[0] * sz.w).toFixed(0) + '" cy="' + (d[1] * sz.h).toFixed(0) + '" r="' + d[2] + '"></circle>';
     });
-    stage.innerHTML = dots;
-    E('auLens').innerHTML = [110, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
-    E('auProps').innerHTML = '<span>Where they live</span>' + [90, 80, 70, 70, 100, 64, 110, 70, 76].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px; height:28px"></span>'; }).join('');
+    nodesG.innerHTML = dots;
+    E('auLens').innerHTML = [70, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
+    E('auProps').innerHTML = [90, 80, 70, 70, 100, 64, 110, 70, 76].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px; height:26px"></span>'; }).join('');
+    E('auStyles').innerHTML = [84, 100, 66].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106, 120].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('auPills').innerHTML = '<span class="au-sk au-sk-pill" style="width:92px"></span>';
     E('auCount').textContent = 'Loading audiences…';
@@ -1362,10 +1620,13 @@
   syncTrayUI();
   setTimeout(function () {
     if (document.hidden) E('auContent').classList.remove('au-arriving');
-    buildUniverse(); renderLensChips(); renderProps();
+    buildUniverse(); renderLensChips(); renderStyleChips(); renderProps();
     renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
+    var tabDeep = /[?&]tab=cards/.test(location.search);
+    setTab(tabDeep ? 'cards' : 'universe', true);
     /* The circles grow from nothing: r starts at 0 and transitions in. */
-    requestAnimationFrame(function () { renderUniverse(); });
+    renderUniverse();
+    setTimeout(relayoutIfStale, 800); setTimeout(relayoutIfStale, 2000);
     setTimeout(function () { E('auContent').classList.remove('au-arriving'); }, 1200);
     var deep = /[?&]a=([^&]+)/.exec(location.search);
     if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 500);
