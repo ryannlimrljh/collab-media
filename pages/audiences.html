@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
-<link rel="stylesheet" href="../shared/audience-marks.css?v=3" />
+<link rel="stylesheet" href="../shared/audience-marks.css?v=4" />
 <style>
   /* Page-local. Composes tokens only — no new colours, radii or spacing.
 
@@ -161,8 +161,8 @@
   /* The hover card: name, group, size and the consumption rings, over
      the bubble under the pointer. */
   .au-stagelbl{position:absolute; left:0; top:0; z-index:60; pointer-events:none; transform:translate(-50%, calc(-100% - 14px));
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
-    display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); padding:var(--spacing-16); box-shadow:var(--shadow-3);
+    display:flex; gap:var(--spacing-16); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
   .au-stagelbl.is-on{opacity:1; transition-delay:120ms;}
   .au-stagelbl > div > b{display:block; font-weight:800; font-size:13px; line-height:16px;}
   .au-stagelbl > div > span{display:block; font-size:11px; line-height:14px; color:var(--color-neutral-5);}
@@ -280,7 +280,7 @@
      sheet's columns, where they stand complete rather than growing. */
   .au-peekbars{padding:0 var(--spacing-12) var(--spacing-12);}
   .au-sheetcol .au-minibars{margin-top:8px;}
-  .au-stagelbl .au-minibars{margin-top:8px; width:168px;}
+  .au-stagelbl .au-minibars{margin-top:10px; width:172px;}
   .au-sizeline{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-sizeline b{color:var(--color-neutral-9); font-weight:800; font-variant-numeric:tabular-nums; font-size:var(--text-body2-size);}
 
@@ -686,8 +686,8 @@
 <div class="c-toast-host" id="auToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/audiences-data.js?v=3"></script>
-<script src="../shared/audience-marks.js?v=3"></script>
+<script src="../shared/audiences-data.js?v=4"></script>
+<script src="../shared/audience-marks.js?v=4"></script>
 <script>
 (function () {
   'use strict';
@@ -1212,7 +1212,7 @@
      sized against the viewport. */
   function padTop() {
     var h = E('auJarTotal').offsetHeight;
-    return h ? Math.round(h + 30) : 14;
+    return h ? Math.round(h + 40) : 14;
   }
   function sizeCanvas() {
     var jarEl = E('auJar'), top = jarEl.getBoundingClientRect().top;

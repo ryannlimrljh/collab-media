@@ -81,7 +81,7 @@
        since big discs pack less tightly, capped so the largest never
        dwarfs a small canvas. */
     scaleFor: function (J, n, sum) {
-      var area = (J.W - 2 * (J.padX || 0)) * (J.H - J.top - J.bottom), fill = 0.32 + 0.2 * Math.min(1, n / 51);
+      var area = (J.W - 2 * (J.padX || 0)) * (J.H - J.top - J.bottom), fill = 0.37 + 0.24 * Math.min(1, n / 51);
       var scale = Math.sqrt(area * fill / Math.max(1, sum));
       return Math.min(scale, Math.min(J.W - 2 * (J.padX || 0), J.H - J.top - J.bottom) * 0.19 / unitR({ size: MAX_SIZE }));
     },

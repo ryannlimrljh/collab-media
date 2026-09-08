@@ -553,3 +553,14 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   so the figure came down from clamp(52-96px) to clamp(34-58px) and kept
   Mulish 900. The block is 72px tall rather than 103, which the measured
   ceiling passes straight back to the discs.
+- 2026-09-09, a little bigger, a little roomier. The discs cover more of
+  the jar: the share the scale aims for went from 0.32 + 0.20 to 0.37 +
+  0.24 of the area, about 7% on the radius, which the area formula
+  governs here rather than the cap. The taller pile ate the headline's
+  clearance, so the ceiling's margin over the block went from 30 to 40 —
+  a change worth under 1% of the disc size and worth 15px of air. The
+  jar's hover card takes the DLS's larger step throughout: 16px of
+  padding and 16px between the picture and the words, on the large
+  radius, with its bars at 172px. Shared assets go to ?v=4; the disc
+  change lives in audience-marks.js, and without the bump a cached copy
+  keeps the old sizes.
