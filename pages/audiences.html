@@ -41,7 +41,7 @@
   /* ── Arrival — the same family as the formats page: header, then the
      universe, then the strip, then the controls, then the cards. ── */
   @keyframes au-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
-  .au-arriving .au-universe,.au-arriving .au-tabs{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .au-arriving .au-jar,.au-arriving .au-lensrow,.au-arriving .au-tabs{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
   .au-arriving .au-controls,.au-arriving .au-count{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
   .au-arriving .au-card{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
 
@@ -66,13 +66,15 @@
   /* ── The universe: a space, not a card. It bleeds to the content
      edges, takes the height the viewport has, and the bubbles fill it
      edge to edge. Everything else floats in the corners. ── */
-  .au-universe{position:relative; margin:0 calc(-1 * var(--spacing-32)) var(--spacing-24); height:var(--au-h, 560px); min-height:480px; overflow:hidden;
-    background:var(--color-canvas-warm);}
+  /* The lens row sits in the page, lined up with the filter line above,
+     and the jar below it holds the discs. Nothing floats over the jar. */
+  .au-lensrow{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12); flex-wrap:wrap;}
+  .au-lensrow .au-legend{margin-left:auto;}
+  .au-jar{position:relative; margin:0 0 var(--spacing-24); height:var(--au-h, 560px); min-height:440px; overflow:hidden; background:var(--color-canvas-warm);}
   .au-space{position:absolute; inset:0; touch-action:none; user-select:none; overflow:hidden;}
   .au-space.is-stirring{cursor:grabbing;}
   .au-space.is-stirring .au-bub{pointer-events:none;}
-  .au-world{position:absolute; inset:0; transform-origin:0 0; transition:transform 560ms var(--ease-flow);}
-  .au-space.is-direct .au-world{transition:none;}
+  .au-world{position:absolute; inset:0;}
 
   /* A disc is a button. Its place is written every frame by the jar,
      so there is no transition on position; only the fill and the lift
@@ -102,26 +104,12 @@
   .au-sk-bub{position:absolute; border-radius:50%; background:var(--color-neutral-2); transform:translate(-50%, -50%);}
   @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
 
-  /* Overlays: the corners of the canvas. */
-  .au-ovl{position:absolute; z-index:4; display:flex; gap:var(--spacing-8); align-items:center; flex-wrap:wrap; max-width:calc(100% - 32px);}
-  .au-ovl-tl{left:var(--spacing-20); top:var(--spacing-16);}
-  .au-ovl-br{right:var(--spacing-20); bottom:var(--spacing-16);}
-  .au-ovl-tr{right:var(--spacing-20); top:var(--spacing-16); justify-content:flex-end;}
   .au-lens{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
-  .au-lens .c-chip-filter{white-space:nowrap; background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
-  .au-lens .c-chip-filter.is-active{background:var(--color-obsidian);}
+  .au-lens .c-chip-filter{white-space:nowrap;}
   .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px;}
   .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
-  .au-zoom{display:inline-flex; align-items:center; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); box-shadow:var(--shadow-1); padding:3px;}
-  .au-zoom button{width:30px; height:30px; border-radius:50%; border:0; background:transparent; font:inherit; color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px;
-    transition:background-color var(--duration-fast) var(--ease-standard);}
-  .au-zoom button:hover{background:var(--color-neutral-2);}
-  .au-zoom button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px;}
-  .au-zoom .lvl{min-width:46px; text-align:center; font-size:12px; font-weight:800; font-variant-numeric:tabular-nums;}
-  .au-zoom .sep{width:1px; height:18px; background:var(--color-neutral-3); margin:0 2px;}
-  .au-uhint{font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px; padding:4px 0;}
-  /* The ramp legend: five steps of the current hue, lighter to deeper. */
-  .au-legend{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-left:var(--spacing-12);}
+  /* The ramp legend: five steps, lighter to deeper. */
+  .au-legend{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .au-legend i{display:inline-block; width:10px; height:10px; border-radius:50%; background:color-mix(in srgb, var(--color-neutral-5) var(--m), #fff);}
   /* The hover card: name, group, size and the consumption rings, over
      the bubble under the pointer. */
@@ -137,11 +125,8 @@
   .au-stagelbl i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
   .au-stagelbl .kbd{margin-top:4px; font-size:10px; color:var(--color-neutral-4);}
   @media (max-width:900px){
-    .au-universe{margin:0 calc(-1 * var(--spacing-16)) var(--spacing-24); min-height:420px;}
-    .au-ovl-tr{display:none;}
-  }
-  @media (max-width:640px){
-    .au-ovl-tl{gap:var(--spacing-4);}
+    .au-jar{min-height:400px;}
+    .au-lensrow .au-legend{display:none;}
   }
 
   /* ── Controls (the formats page's line, verbatim in behaviour) ── */
@@ -492,23 +477,15 @@
         </div>
       </div>
       <div class="c-filter-tray" id="auFilterTray" hidden></div>
-      <section class="au-universe au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
-        <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
-        <div class="au-ovl au-ovl-tl">
+      <section class="au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
+        <div class="au-lensrow">
           <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
+          <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span>
         </div>
-        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-hand"></i>Press and drag to stir · scroll to move · pinch or ± to zoom</span>
-          <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span></div>
-        <div class="au-ovl au-ovl-br">
-          <div class="au-zoom" role="group" aria-label="Zoom">
-            <button type="button" id="auZoomOut" aria-label="Zoom out" title="Zoom out (−)"><i class="ph ph-minus"></i></button>
-            <span class="lvl" id="auZoomLvl">100%</span>
-            <button type="button" id="auZoomIn" aria-label="Zoom in" title="Zoom in (+)"><i class="ph ph-plus"></i></button>
-            <span class="sep"></span>
-            <button type="button" id="auZoomFit" aria-label="Fit to view" title="Fit (0)"><i class="ph ph-corners-out"></i></button>
-          </div>
+        <div class="au-jar" id="auJar">
+          <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
+          <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
         </div>
-        <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
       </section>
 
       <section class="au-panel" id="auPanelCards" role="tabpanel" aria-labelledby="auTabBtnCards" hidden>
@@ -978,10 +955,11 @@
   /* ── The universe: a jar ────────────────────────────────────────── */
   var space = E('auSpace'), world = E('auWorld'), stageLbl = E('auStageLbl');
   var bubs = {}, J = null, ballById = {}, layout = null, hotId = null, hotProp = null;
-  var view = { k: 1, tx: 0, ty: 0 }, ZMIN = 0.5, ZMAX = 4;
+  var view = { k: 1, tx: 0, ty: 0 }; /* the jar does not pan or zoom; kept so the maths reads the same */
+  var PADX = 28, PADTOP = 14;
   function sizeCanvas() {
-    var uni = E('auPanelUniverse'), top = uni.getBoundingClientRect().top;
-    uni.style.setProperty('--au-h', Math.max(480, Math.round(window.innerHeight - top - 28)) + 'px');
+    var jarEl = E('auJar'), top = jarEl.getBoundingClientRect().top;
+    jarEl.style.setProperty('--au-h', Math.max(440, Math.round(window.innerHeight - top - 28)) + 'px');
   }
   function stageSize() { var r = space.getBoundingClientRect(); return { w: Math.max(320, r.width), h: Math.max(320, r.height) }; }
   function renderLensChips() {
@@ -1033,8 +1011,7 @@
     var sz = stageSize();
     /* The chips float over the top of the jar and the reach tray over
        the bottom, so the jar is the space between. */
-    var ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 40) + 24;
-    J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: padTop, padBottom: tray.length ? 84 : 16 });
+    J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: PADTOP, padBottom: tray.length ? 84 : 16, padX: PADX });
     layout = { w: sz.w, h: sz.h };
     ballById = {}; J.balls.forEach(function (b) { ballById[b.id] = b; });
     M.jar.setActive(J, current.map(function (s) { return s.id; }));
@@ -1050,7 +1027,6 @@
        once; otherwise the discs pour in from the top. */
     if (REDUCED || document.hidden) M.jar.settle(J, 700);
     draw();
-    if (!(opts && opts.keepView)) setView(1, 0, 0, false);
     startMotion();
   }
   /* The filter line above both tabs decides who is in the jar. */
@@ -1065,8 +1041,8 @@
   function resizeJar() {
     if (!J) return;
     sizeCanvas();
-    var sz = stageSize(), ovl = E('auPanelUniverse').querySelector('.au-ovl-tl'), padTop = (ovl ? ovl.getBoundingClientRect().height : 40) + 24;
-    M.jar.resize(J, { w: sz.w, h: sz.h, padTop: padTop, padBottom: tray.length ? 84 : 16 });
+    var sz = stageSize();
+    M.jar.resize(J, { w: sz.w, h: sz.h, padTop: PADTOP, padBottom: tray.length ? 84 : 16, padX: PADX });
     layout = { w: sz.w, h: sz.h };
     if (REDUCED || document.hidden) { M.jar.settle(J, 400); }
     draw(); startMotion();
@@ -1085,15 +1061,15 @@
     motion.raf = 0;
     if (E('auPanelUniverse').hidden || document.hidden || !J) return;
     var dt = motion.last ? Math.min(0.05, (t - motion.last) / 1000) : 1 / 60; motion.last = t;
-    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k;
+    var wx = motion.px, wy = motion.py;
     var hvx = (wx - motion.hx) / Math.max(dt, 1 / 120), hvy = (wy - motion.hy) / Math.max(dt, 1 / 120);
     motion.hvx += (hvx - motion.hvx) * 0.4; motion.hvy += (hvy - motion.hvy) * 0.4;
     motion.hx = wx; motion.hy = wy;
     var speed = Math.sqrt(motion.hvx * motion.hvx + motion.hvy * motion.hvy), hand = null;
-    if (stir) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54 / Math.sqrt(view.k), on: true };
+    if (stir) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54, on: true };
     /* A pointer merely passing is a soft hand: the discs it brushes get
        a tick each, never the one it is hovering. */
-    else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24 / Math.sqrt(view.k), on: true, soft: true, skip: hotId };
+    else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24, on: true, soft: true, skip: hotId };
     var pouring = J.balls.some(function (b) { return !b.out && J.time < b.release + 0.5; });
     var settled = !pouring && !J.growing && J.energy != null && J.energy < 0.5;
     if (!settled || hand) { M.jar.step(J, dt, hand); draw(); }
@@ -1108,32 +1084,10 @@
   space.addEventListener('pointerleave', function () { motion.has = false; if (hotId) hotNode(null); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && J && !E('auPanelUniverse').hidden) { motion.last = 0; startMotion(); } });
 
-  /* ── Pan and zoom ── */
-  function setView(k, tx, ty, direct) {
-    view.k = Math.max(ZMIN, Math.min(ZMAX, k)); view.tx = tx; view.ty = ty;
-    space.classList.toggle('is-direct', !!direct);
-    world.style.transform = 'translate(' + view.tx.toFixed(1) + 'px,' + view.ty.toFixed(1) + 'px) scale(' + view.k.toFixed(3) + ')';
-    E('auZoomLvl').textContent = Math.round(view.k * 100) + '%';
-    if (hotId) placeLabel();
-  }
-  function zoomAt(k, px, py, direct) {
-    var k2 = Math.max(ZMIN, Math.min(ZMAX, k)), f = k2 / view.k;
-    setView(k2, px - (px - view.tx) * f, py - (py - view.ty) * f, direct);
-  }
+  /* ── The hand: press and drag stirs. No panning, no zoom — the jar is
+     the jar. ── */
   function stageXY(e) { var r = space.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-  function focusNode(id) {
-    var n = ballById[id]; if (!n) return;
-    var sz = stageSize(), k = Math.min(2.4, Math.max(1.5, 130 / Math.max(20, n.r)));
-    setView(k, sz.w / 2 - n.x * k, sz.h / 2 - n.y * k, false);
-  }
-  space.addEventListener('wheel', function (e) {
-    e.preventDefault();
-    var p = stageXY(e);
-    /* A pinch (ctrl+wheel) zooms; a plain scroll moves the jar. */
-    if (e.ctrlKey || e.metaKey) zoomAt(view.k * Math.exp(-e.deltaY * 0.0022), p.x, p.y, true);
-    else setView(view.k, view.tx - e.deltaX, view.ty - e.deltaY, true);
-  }, { passive: false });
-  var drag = null; /* kept for the click guard; stirring replaces panning by drag */
+  var drag = null; /* kept for the click guard */
   space.addEventListener('pointerdown', function (e) {
     if (e.button !== 0) return;
     var p = stageXY(e); motion.px = p.x; motion.py = p.y; motion.has = true;
@@ -1152,17 +1106,9 @@
     if (moved) { space.dataset.justPanned = '1'; setTimeout(function () { delete space.dataset.justPanned; }, 60); }
   }
   space.addEventListener('pointerup', endStir); space.addEventListener('pointercancel', endStir);
-  E('auZoomIn').addEventListener('click', function () { var sz = stageSize(); zoomAt(view.k * 1.3, sz.w / 2, sz.h / 2, false); });
-  E('auZoomOut').addEventListener('click', function () { var sz = stageSize(); zoomAt(view.k / 1.3, sz.w / 2, sz.h / 2, false); });
-  E('auZoomFit').addEventListener('click', function () { setView(1, 0, 0, false); });
-  space.addEventListener('dblclick', function (e) {
-    var b = e.target.closest('.au-bub');
-    if (b) { e.preventDefault(); focusNode(b.dataset.id); }
-    else { var p = stageXY(e); zoomAt(view.k * 1.6, p.x, p.y, false); }
-  });
 
   /* ── Hover, focus, click ── */
-  function worldToStage(x, y) { return { x: x * view.k + view.tx, y: y * view.k + view.ty }; }
+  function worldToStage(x, y) { return { x: x, y: y }; }
   function placeLabel() {
     var n = ballById[hotId]; if (!n) return;
     var p = worldToStage(n.x, n.y - n.r * 1.06);
@@ -1202,13 +1148,6 @@
   world.addEventListener('keydown', function (e) {
     var b = e.target.closest('.au-bub'); if (!b) return;
     if (e.key === 'r' || e.key === 'R') toggleTray(b.dataset.id);
-  });
-  document.addEventListener('keydown', function (e) {
-    if (E('auPanelUniverse').hidden || e.target.matches('input, textarea, select') || modal.classList.contains('is-open') || cmodal.classList.contains('is-open')) return;
-    var sz = stageSize();
-    if (e.key === '+' || e.key === '=') zoomAt(view.k * 1.3, sz.w / 2, sz.h / 2, false);
-    if (e.key === '-' || e.key === '_') zoomAt(view.k / 1.3, sz.w / 2, sz.h / 2, false);
-    if (e.key === '0') setView(1, 0, 0, false);
   });
 
   /* Hovering a property in the Lives on panel lights its segments in

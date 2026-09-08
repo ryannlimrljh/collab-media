@@ -272,3 +272,9 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   discs that matter grow, frame by frame, to the size the jar would give
   them alone and shove the rest aside; the rest shrink to marbles and
   fade. All / Who / What no longer rebuild the jar.
+- 2026-09-08, ninth pass: the jar is fixed. No panning, no zoom, no
+  controls over it; a scroll scrolls the page. The jar's walls stand 28px
+  in from the canvas edges (`padX`) so no disc touches the side, and the
+  jar no longer bleeds past the content width. The lens chips left the
+  canvas for a row of their own between the filter line and the jar,
+  left-aligned with the search box, with the size legend at the right.

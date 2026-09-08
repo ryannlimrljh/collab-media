@@ -118,7 +118,7 @@
 
   var jar = {
     build: function (segments, lens, stage) {
-      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0;
+      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0, padX = stage.padX || 0;
       var groups = window.AUDIENCE_GROUPS || [], lensOrder = ['who', 'love', 'buying'];
       var list = segments.slice();
       /* Pour order: lens by lens, group by group, so like sits near
@@ -131,12 +131,12 @@
       /* One scale for every disc: together they cover most of the jar,
          the way poured marbles do, capped so the largest never dwarfs
          a small canvas. */
-      var J = { balls: [], W: W, H: H, top: top, bottom: bottom, time: 0, lens: 'all' };
+      var J = { balls: [], W: W, H: H, top: top, bottom: bottom, padX: padX, time: 0, lens: 'all' };
       var scale = jar.scaleFor(J, list.length, list.reduce(function (t, s) { var r = unitR(s); return t + Math.PI * r * r; }, 0));
       J.balls = list.map(function (s, i) {
         var u = unitR(s), r = u * scale, h = hash(s.id + ':pour');
         return { id: s.id, seg: s, lens: s.lens, group: s.group, u: u, r: r, rt: r, dim: false, t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9),
-          x: r + 8 + h * (W - 2 * r - 16), y: top - r - 10 - i * 22, release: i * 0.02, inside: false, out: false };
+          x: padX + r + 8 + h * (W - 2 * padX - 2 * r - 16), y: top - r - 10 - i * 22, release: i * 0.02, inside: false, out: false };
       });
       J.scale = scale;
       if (lens && lens !== 'all') jar.setLens(J, lens, true);
@@ -147,9 +147,9 @@
        since big discs pack less tightly, capped so the largest never
        dwarfs a small canvas. */
     scaleFor: function (J, n, sum) {
-      var area = J.W * (J.H - J.top - J.bottom), fill = 0.32 + 0.2 * Math.min(1, n / 51);
+      var area = (J.W - 2 * (J.padX || 0)) * (J.H - J.top - J.bottom), fill = 0.32 + 0.2 * Math.min(1, n / 51);
       var scale = Math.sqrt(area * fill / Math.max(1, sum));
-      return Math.min(scale, Math.min(J.W, J.H - J.top - J.bottom) * 0.19 / unitR({ size: MAX_SIZE }));
+      return Math.min(scale, Math.min(J.W - 2 * (J.padX || 0), J.H - J.top - J.bottom) * 0.19 / unitR({ size: MAX_SIZE }));
     },
     /* A lens picks the discs that matter. They grow to the size the
        jar would give them on their own and shove the others aside; the
@@ -173,12 +173,13 @@
        and the physics moves them into whatever room appeared. Nothing
        pours again. */
     resize: function (J, stage) {
-      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0, oldH = J.H, oldB = J.bottom, kx = W / J.W;
-      J.W = W; J.H = H; J.top = top; J.bottom = bottom;
+      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0, padX = stage.padX || 0, oldH = J.H, oldB = J.bottom, oldP = J.padX || 0;
+      var kx = (W - 2 * padX) / (J.W - 2 * oldP);
+      J.W = W; J.H = H; J.top = top; J.bottom = bottom; J.padX = padX;
       var rel = J.balls.filter(function (b) { return !b.out && !b.dim; });
       var scale = jar.scaleFor(J, rel.length, rel.reduce(function (t, b) { return t + Math.PI * b.u * b.u; }, 0)), k = scale / J.scale;
       J.balls.forEach(function (b) {
-        b.rt *= k; b.r *= k; b.x *= kx; b.y = H - bottom - (oldH - oldB - b.y) * k;
+        b.rt *= k; b.r *= k; b.x = padX + (b.x - oldP) * kx; b.y = H - bottom - (oldH - oldB - b.y) * k;
         b.px = b.x; b.py = b.y;
       });
       J.scale = scale; J.energy = 1;
@@ -193,7 +194,7 @@
         if (was && !is) { b.out = true; }
         else if (!was && is) {
           b.out = false; b.inside = false; b.release = J.time + (i % 7) * 0.05;
-          b.x = b.r + 8 + hash(b.id + J.time) * (J.W - 2 * b.r - 16); b.y = J.top - b.r - 10; b.px = b.x; b.py = b.y;
+          b.x = (J.padX || 0) + b.r + 8 + hash(b.id + J.time) * (J.W - 2 * (J.padX || 0) - 2 * b.r - 16); b.y = J.top - b.r - 10; b.px = b.x; b.py = b.y;
         }
       });
       J.energy = 1;
@@ -210,7 +211,7 @@
       J.time += dt;
       /* Real gravity: the jar is taken to stand about 1.5 m tall, so
          9.81 m/s² becomes pixels per second squared at its height. */
-      var balls = J.balls, W = J.W, floor = J.H - J.bottom, ceil = J.top, G = 9.81 * ((J.H - J.top - J.bottom) / 1.5), sub = 3, h = dt / sub, DAMP = 0.992;
+      var balls = J.balls, W = J.W, L = J.padX || 0, R = J.W - (J.padX || 0), floor = J.H - J.bottom, ceil = J.top, G = 9.81 * ((J.H - J.top - J.bottom) / 1.5), sub = 3, h = dt / sub, DAMP = 0.992;
       /* Discs growing or shrinking toward a new size do it here, a
          little each frame, and the contacts below do the shoving. */
       var growing = false;
@@ -244,8 +245,8 @@
           }
           for (var i = 0; i < balls.length; i++) {
             var b = balls[i]; if (b.out || J.time < b.release) continue;
-            if (b.x < b.r) b.x = b.r;
-            if (b.x > W - b.r) b.x = W - b.r;
+            if (b.x < L + b.r) b.x = L + b.r;
+            if (b.x > R - b.r) b.x = R - b.r;
             if (b.y > floor - b.r) b.y = floor - b.r;
             if (b.inside && b.y < ceil + b.r) b.y = ceil + b.r;
           }
@@ -274,7 +275,7 @@
             /* Out of the hand's way, and carried a little with it — a
                stir, not a shove. Lighter discs give more. */
             b.x += (nx * over * 0.5 + hand.vx * h * 0.3) * w; b.y += (ny * over * 0.5 + hand.vy * h * 0.3) * w;
-            if (b.x < b.r) b.x = b.r; if (b.x > W - b.r) b.x = W - b.r; if (b.y > floor - b.r) b.y = floor - b.r;
+            if (b.x < L + b.r) b.x = L + b.r; if (b.x > R - b.r) b.x = R - b.r; if (b.y > floor - b.r) b.y = floor - b.r;
           }
         }
       }
