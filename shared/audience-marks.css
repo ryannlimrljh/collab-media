@@ -22,22 +22,5 @@
   .is-live .am-arc .am-val{animation:none;}
 }
 
-/* .am-bars  media consumption as five bars. Colour from --am-color on
-             the bars or an ancestor; the strongest channel is full
-             strength, the rest lighter. Bars grow from the baseline
-             when an ancestor gains .is-live, or stand at once when the
-             chart itself carries .is-still. */
-.am-bars{display:block; --am-color:var(--color-neutral-9);}
-.am-bars svg{display:block; width:100%; height:100%; font-family:inherit;}
-.am-bar-base{stroke:var(--color-neutral-9); stroke-opacity:.14; stroke-width:1;}
-.am-bar-fill{fill:var(--am-color); opacity:.55; transform:scaleY(1);}
-.am-bar-fill.is-best{opacity:1;}
-.am-bar-val{font-size:9.5px; font-weight:800; fill:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
-.am-bar-lbl{font-size:8.5px; font-weight:600; fill:var(--color-neutral-5);}
-.is-live .am-bars .am-bar-fill{animation:am-grow var(--duration-reveal, .6s) var(--ease-flow, ease-out) both; animation-delay:calc(var(--am-i, 0) * 50ms);}
-.is-live .am-bars .am-bar-val{animation:am-fade var(--duration-base, .3s) var(--ease-standard, ease) both; animation-delay:calc(var(--am-i, 0) * 50ms + 300ms);}
-@keyframes am-grow{from{transform:scaleY(0);} to{transform:scaleY(1);}}
-@keyframes am-fade{from{opacity:0;} to{opacity:1;}}
 /* .au-doodle host: the drawing fills whatever box it is given. */
 .au-doodle{display:block;} .au-doodle svg{display:block; width:100%; height:100%;}
-@media (prefers-reduced-motion:reduce){ .is-live .am-bars .am-bar-fill,.is-live .am-bars .am-bar-val{animation:none;} }

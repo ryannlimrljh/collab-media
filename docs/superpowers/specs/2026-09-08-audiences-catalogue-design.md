@@ -308,3 +308,19 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   — composed from a library of fifty-odd motifs in `SCENES` in the marks
   module. The bars stay as they are and read each segment's published
   percentages directly.
+- 2026-09-08, thirteenth pass: the numbers went back to the ring chart —
+  the five concentric arcs, on a white disc over the drawing's corner, on
+  the card, the row preview and the reach sheet. The bar chart and its CSS
+  were removed with it. The drawings were redrawn to a reference the user
+  supplied: the character is now one soft squircle of the lens colour that
+  is body and head at once, with a tiny face on it (eyes, mouth and a
+  stray tick, all picked by the segment's seed), stick arms and legs in
+  the same weight as the props, and a three-stroke hand at the end of each
+  arm. Props are outline only — no solid black shapes — at that one pen
+  width. Behind the character sit a pale wash and a faint group backdrop
+  (a stadium arc for sports, bunting for ethnicity, an arch for
+  trendsetters, a skyline for business, shelves for shopping, steps for
+  income, a sun and cloud for life stage, curtains for entertainment),
+  both drawn thin. A drawn ground line, a shadow and two or three margin
+  accents finish it. Everything organic is generated from a seeded
+  wobble, so a segment's drawing never changes but no two are alike.

@@ -35,7 +35,7 @@ see [Gotchas](#gotchas).
 | `campaign-list.html` | My media plans | Full listing: search, facet filters, sortable columns, A-Z rail, row actions |
 | `planner.html` | Media planner | The four-step wizard — Brief, Audience, Media mix, Summary — with a persistent right rail and a per-plan Collab AI thread |
 | `formats.html` | Ad formats (General) | The ad-format catalogue: 49 KULT units with a live sample on every card, objective/family/size/device filters, gallery and table views, a spec drawer, and a compare tray of up to four. Design note: `docs/superpowers/specs/2026-09-07-formats-catalogue-design.md` |
-| `audiences.html` | Audiences (General) | The audience catalogue in two tabs. Universe: 51 KULT segments as flat discs poured into a fixed jar, colour deepening with audience size, stirred by the pointer, three lenses over eight groups. Segments: cards with a drawn doodle of each segment and its consumption as bars, a table, a drawer, and a reach tray of up to five with Karen's overlap rule and refine filters. Design note: `docs/superpowers/specs/2026-09-08-audiences-catalogue-design.md` |
+| `audiences.html` | Audiences (General) | The audience catalogue in two tabs. Universe: 51 KULT segments as flat discs poured into a fixed jar, colour deepening with audience size, stirred by the pointer, three lenses over eight groups. Segments: cards with a drawn scene for each segment and its consumption as rings, a table, a drawer, and a reach tray of up to five with Karen's overlap rule and refine filters. Design note: `docs/superpowers/specs/2026-09-08-audiences-catalogue-design.md` |
 
 `vercel.json` redirects `/` to `pages/campaigns.html`.
 
@@ -51,7 +51,7 @@ see [Gotchas](#gotchas).
 | `formats-data.js` | The format catalogue: specs transcribed from kult.my/gallery (2026-09-07) merged with the rate card's `bestFor` / `cpm` / `inventory`. The nine standard display units are catalogue defaults, flagged `source: "catalogue"` |
 | `format-previews.css` / `format-previews.js` | The live samples. `FormatPreviews.mount(el, format)` draws the miniature, `FormatPreviews.live(el, on)` plays it. Independent of the page so the planner can reuse it |
 | `audiences-data.js` | The audience catalogue: 51 segments read from kult.my/audience (2026-09-08) with size, portrait, properties, consumption and topics; Karen's addressable counts and fit notes on the ten that map by name; her refine dimensions and overlap rule |
-| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.doodle(segment)` draws the line-art person, `AudienceMarks.bars(el, segment)` the consumption bars, `AudienceMarks.arc(el, segment)` the rings on the hover card, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`, `resize(J, stage)`, `setActive(J, ids)`, `setLens(J, lens)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
+| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.doodle(segment)` draws the scene, `AudienceMarks.arc(el, segment)` the consumption rings, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`, `resize(J, stage)`, `setActive(J, ids)`, `setLens(J, lens)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
 
 ### Assets (`assets/audiences/`)
 

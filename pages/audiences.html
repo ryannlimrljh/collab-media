@@ -21,8 +21,8 @@
      The catalogue is a map first and a list second: the page opens on
      every segment drawn as a circle sized by its audience, packed into
      its group, so a planner sees who sits next to whom before reading a
-     word. The cards below carry a drawing of each segment and its
-     consumption as bars;
+     word. The cards below carry a drawn scene for each segment and its
+     consumption as rings;
      the table is the same list for people who scan in columns. */
   .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
   .au-divider{border:none; border-top:1px solid var(--color-neutral-3); margin:0 0 var(--spacing-24);}
@@ -174,19 +174,14 @@
   /* The stage: the segment drawn, and its media consumption as bars,
      on the lens tint. Nothing covers it; the details come up in the
      body below, the way the ad-format cards do. */
-  .au-stage{position:relative; aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:1px solid var(--color-neutral-2);
-    display:grid; grid-template-columns:56% 1fr; align-items:end; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-12) 0 var(--spacing-8);
-    transition:background-color var(--duration-slow) var(--ease-flow);}
-  .au-card.is-live .au-stage{background:var(--au-strong);}
-  .au-stage .au-doodle{width:100%; align-self:end; transition:transform var(--duration-slow) var(--ease-settle);}
-  .au-card.is-live .au-stage .au-doodle{transform:translateY(-3px);}
-  .au-stage .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:var(--spacing-8);}
-  .au-live{position:absolute; top:var(--spacing-12); right:var(--spacing-12); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
-    border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
-    opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
-  .au-live i{width:6px; height:6px; border-radius:50%; background:var(--color-green); animation:au-blink 1.1s ease-in-out infinite;}
-  .au-card.is-live .au-live{opacity:1;}
-  @keyframes au-blink{50%{opacity:.25}}
+  .au-stage{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:1px solid var(--color-neutral-2);}
+  .au-stage .au-doodle{position:absolute; inset:0; transition:transform var(--duration-slow) var(--ease-settle);}
+  .au-card.is-live .au-stage .au-doodle{transform:translateY(-3px) scale(1.02);}
+  /* The rings sit over the drawing's corner, on a disc of their own so
+     they read against whatever the scene has put behind them. */
+  .au-arcwrap{position:absolute; top:var(--spacing-12); right:var(--spacing-12); width:62px; height:62px; border-radius:50%;
+    background:rgba(255,255,255,.9); box-shadow:var(--shadow-1); padding:5px; z-index:2;}
+  .au-arcwrap .am-arc{--am-color:var(--au-color); width:100%; height:100%;}
   .au-touchhint{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:none; align-items:center; gap:6px; height:28px; padding:0 12px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:12px; font-weight:800; box-shadow:var(--shadow-2); pointer-events:none;}
   @media (hover:none){ .au-touchhint{display:inline-flex;} .au-card.is-live .au-touchhint{display:none;} }
@@ -229,7 +224,7 @@
   .au-table tbody tr{cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .au-table tbody tr:hover td,.au-table tbody tr.is-peeking td{background:var(--color-neutral-2);}
   .au-table .who{display:flex; align-items:center; gap:var(--spacing-12); white-space:nowrap;}
-  .au-table .who .au-doodle{width:48px; height:36px; border-radius:var(--radius-sm); flex:none; background:var(--au-bg); padding:2px 2px 0; display:flex; align-items:flex-end;}
+  .au-table .who .au-doodle{width:44px; height:33px; border-radius:var(--radius-sm); flex:none; background:var(--au-bg); overflow:hidden;}
   .au-table .who b{display:block; font-weight:800;}
   .au-table .who small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
   .au-table .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:700;}
@@ -245,9 +240,9 @@
     transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-slow) var(--ease-settle), top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
   .au-rowpeek.is-visible{opacity:1; transform:none;}
   .au-rowpeek.is-jumping{transition-property:opacity, transform;}
-  .au-rowpeek .pic{position:relative; aspect-ratio:16/10; background:var(--au-strong); display:grid; grid-template-columns:56% 1fr; align-items:end; gap:6px; padding:10px 10px 0 6px; transition:opacity var(--duration-base) var(--ease-standard);}
-  .au-rowpeek .pic .au-doodle{width:100%;}
-  .au-rowpeek .pic .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:6px;}
+  .au-rowpeek .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-rowpeek .pic .au-doodle{position:absolute; inset:0;}
+  .au-rowpeek .au-arcwrap{width:52px; height:52px; top:8px; right:8px;}
   .au-rowpeek.is-switching .pic,.au-rowpeek.is-switching .lbl{opacity:0; transition-duration:var(--duration-instant);}
   .au-rowpeek .lbl{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size); font-weight:700; transition:opacity var(--duration-base) var(--ease-standard);}
 
@@ -284,8 +279,8 @@
   .au-dhead .crumbs b{color:var(--color-neutral-9); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-dbody{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24) var(--spacing-24); display:grid; grid-template-columns:240px 1fr; gap:var(--spacing-24); align-items:start;}
   .au-dside{position:sticky; top:0;}
-  .au-dpic{position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color); padding:var(--spacing-12) var(--spacing-8) 0; display:flex; align-items:flex-end;}
-  .au-dpic .au-doodle{width:100%;}
+  .au-dpic{position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color);}
+  .au-dpic .au-doodle{position:absolute; inset:0;}
   .au-dsize{margin-top:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16); background:var(--color-canvas-warm-card); border-radius:var(--radius-md);}
   .au-dsize b{display:block; font-size:26px; line-height:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
   .au-dsize span{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
@@ -316,8 +311,8 @@
   .au-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left; color:inherit;
     transition:box-shadow var(--duration-fast) var(--ease-standard);}
   .au-relcard:hover{box-shadow:var(--shadow-2);} .au-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-relcard .pic{aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color); padding:4px 6px 0; display:flex; align-items:flex-end;}
-  .au-relcard .pic .au-doodle{width:100%;}
+  .au-relcard .pic{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color);}
+  .au-relcard .pic .au-doodle{position:absolute; inset:0;}
   .au-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-relcard span small{display:block; font-weight:600; color:var(--color-neutral-5);}
   .au-dfoot{display:flex; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-3); flex-wrap:wrap; align-items:center;}
@@ -349,11 +344,13 @@
   .au-cmodal.is-shown .au-cbox{opacity:1;}
   .au-cbox .c-modal-head{border-bottom:1px solid var(--color-neutral-3);}
   .au-cscroll{overflow:auto; flex:1; padding:var(--spacing-20) var(--spacing-24);}
-  .au-sheetcols{display:grid; grid-template-columns:repeat(var(--n, 3), minmax(160px, 1fr)); gap:var(--spacing-12); margin-bottom:var(--spacing-24);}
+  /* Capped, so a tray holding one segment does not blow its drawing up
+     to the width of the sheet. */
+  .au-sheetcols{display:grid; grid-template-columns:repeat(var(--n, 3), minmax(0, 210px)); gap:var(--spacing-12); margin-bottom:var(--spacing-24);}
   .au-sheetcol{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
-  .au-sheetcol .pic{position:relative; aspect-ratio:16/10; background:var(--au-bg); border-bottom:3px solid var(--au-color); display:grid; grid-template-columns:56% 1fr; align-items:end; gap:6px; padding:10px 10px 0 6px;}
-  .au-sheetcol .pic .au-doodle{width:100%;}
-  .au-sheetcol .pic .am-bars{--am-color:var(--au-color); align-self:center; padding-bottom:6px;}
+  .au-sheetcol .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); border-bottom:3px solid var(--au-color);}
+  .au-sheetcol .pic .au-doodle{position:absolute; inset:0;}
+  .au-sheetcol .pic .au-arcwrap{width:50px; height:50px; top:8px; right:8px;}
   .au-sheetcol .txt{padding:var(--spacing-12);}
   .au-sheetcol .txt b{display:block; font-weight:800; font-size:var(--text-body2-size);}
   .au-sheetcol .txt small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
@@ -576,7 +573,7 @@
 </div>
 
 <!-- Table view: the portrait that floats beside the hovered row -->
-<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><div class="au-doodle" id="auRowpeekDoodle"></div><div id="auRowpeekBars"></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
+<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic is-live"><div class="au-doodle" id="auRowpeekDoodle"></div><div class="au-arcwrap"><div id="auRowpeekArc"></div></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
 
 <!-- Detail modal: swings out of the card you clicked -->
 <div class="au-cardmodal" id="auModal">
@@ -802,8 +799,7 @@
   function cardHtml(s, i) {
     var inTray = tray.indexOf(s.id) > -1, top = topChannels(s, 1)[0];
     return '<article class="au-card ' + lensClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
-      '<div class="au-stage"><div class="au-doodle" data-doodle></div><div data-bars></div>' +
-        '<span class="au-live"><i></i>Media mix</span>' +
+      '<div class="au-stage"><div class="au-doodle" data-doodle></div><div class="au-arcwrap"><div data-arc></div></div>' +
         '<span class="au-touchhint"><i class="ph ph-play"></i>Tap to see</span>' +
         '<div class="au-ctl">' + addBtn(s, 'au-add') + '</div>' +
       '</div>' +
@@ -876,7 +872,7 @@
     grid.querySelectorAll('.au-card').forEach(function (card) {
       var sg = byId[card.dataset.id];
       card.querySelector('[data-doodle]').innerHTML = M.doodle(sg);
-      M.bars(card.querySelector('[data-bars]'), sg);
+      M.arc(card.querySelector('[data-arc]'), sg);
     });
     E('auRows').innerHTML = current.map(rowHtml).join('');
     var mapped = current.filter(function (s) { return s.addressable != null; }).length;
@@ -939,7 +935,7 @@
       peekSwapTimer = setTimeout(function () {
         peek.className = 'au-rowpeek is-visible is-switching ' + lensClass(s) + (wasVisible ? '' : ' is-jumping');
         E('auRowpeekDoodle').innerHTML = M.doodle(s);
-        M.bars(E('auRowpeekBars'), s, { still: true });
+        M.arc(E('auRowpeekArc'), s, { still: true });
         E('auRowpeekLbl').textContent = s.name + ' · ' + fmtM(s.size);
         peek.classList.remove('is-switching');
       }, wasVisible ? 90 : 0);
@@ -1391,7 +1387,7 @@
     var sameGroup = Object.keys(groupsIn).filter(function (k) { return groupsIn[k] > 1; }).map(function (k) { return groupOf[k].label; });
     E('auSheet').innerHTML =
       '<div class="au-sheetcols" style="--n:' + list.length + '">' + list.map(function (s) {
-        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live"><div class="au-doodle">' + M.doodle(s) + '</div><div data-sheetbars="' + s.id + '"></div></div>' +
+        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live"><div class="au-doodle">' + M.doodle(s) + '</div><div class="au-arcwrap"><div data-sheetarc="' + s.id + '"></div></div></div>' +
           '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span></div></div>';
       }).join('') + '</div>' +
       '<div class="au-sheetgrid">' +
@@ -1409,7 +1405,7 @@
           }).join('') + '</select></div>';
         }).join('') + '</div><p>Narrows reach proportionally, with the planner\'s own population shares. Malaysia in full is ' + fmtM(OVERLAP.malaysia) + '.</p></div>' +
       '</div>';
-    E('auSheet').querySelectorAll('[data-sheetbars]').forEach(function (el) { M.bars(el, byId[el.dataset.sheetbars], { still: true }); });
+    E('auSheet').querySelectorAll('[data-sheetarc]').forEach(function (el) { M.arc(el, byId[el.dataset.sheetarc], { still: true }); });
     E('auCmodalPlan').href = 'planner.html?audiences=' + tray.map(encodeURIComponent).join(',');
   }
   function openSheet(sourceEl) {

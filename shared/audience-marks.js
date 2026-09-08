@@ -109,104 +109,231 @@
      hash, so a segment keeps its face); the props come from a small
      library below, placed per segment in SCENES. Ink only, on the
      card's own tint. Returns an SVG string, viewBox 0 0 160 120.     */
-  var INK = 'var(--color-neutral-9)', SW = 2.2;
+  var INK = 'var(--color-neutral-9)', SW = 2;
   function P(d, fill) { return '<path d="' + d + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round"/>'; }
   function L(d) { return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  /* A thinner pen for the details inside a shape, so the drawing has
+     two weights the way a hand does. */
+  function LT(d, w) { return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + (w || SW) + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
   function C(cx, cy, r, fill) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '"/>'; }
   function D(cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + INK + '"/>'; }
   function T(x, y, str) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-weight="800" fill="' + INK + '" text-anchor="middle" font-family="inherit">' + str + '</text>'; }
   function G(x, y, sc, inner) { return '<g transform="translate(' + x + ' ' + y + ') scale(' + (sc || 1) + ')">' + inner + '</g>'; }
 
+  /* ── Hand-drawn geometry ─────────────────────────────────────────
+     A seeded generator, so a segment's wobble is the same on every
+     visit while no two segments wobble alike. Everything organic on
+     the card — the shape behind, the ground, the accents — is drawn
+     through these, which is what keeps the scenes from looking
+     machined.                                                        */
+  function rnd(seed) {
+    var s = Math.floor(seed) % 2147483647; if (s <= 0) s += 2147483646;
+    return function () { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
+  }
+  function n1(v) { return Math.round(v * 10) / 10; }
+  /* A closed smooth curve through points on a circle, each pushed in
+     or out a little: the soft shape that sits behind every scene. */
+  function blobPath(cx, cy, rx, ry, sides, wob, R) {
+    var pts = [], i;
+    for (i = 0; i < sides; i++) {
+      var a = i / sides * Math.PI * 2, k = 1 + (R() - 0.5) * wob;
+      pts.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]);
+    }
+    var d = 'M' + n1(pts[0][0]) + ' ' + n1(pts[0][1]);
+    for (i = 0; i < sides; i++) {
+      var p0 = pts[(i - 1 + sides) % sides], p1 = pts[i], p2 = pts[(i + 1) % sides], p3 = pts[(i + 2) % sides];
+      d += ' C' + n1(p1[0] + (p2[0] - p0[0]) / 6) + ' ' + n1(p1[1] + (p2[1] - p0[1]) / 6) +
+           ' ' + n1(p2[0] - (p3[0] - p1[0]) / 6) + ' ' + n1(p2[1] - (p3[1] - p1[1]) / 6) +
+           ' ' + n1(p2[0]) + ' ' + n1(p2[1]);
+    }
+    return d + 'Z';
+  }
+  /* A line that bows a little off true, the way a drawn one does. */
+  function wline(x1, y1, x2, y2, R, amp) {
+    var dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx * dx + dy * dy) || 1;
+    var o = (R() - 0.5) * (amp == null ? len * 0.05 : amp);
+    return 'M' + n1(x1) + ' ' + n1(y1) + ' Q' + n1((x1 + x2) / 2 - dy / len * o) + ' ' + n1((y1 + y2) / 2 + dx / len * o) + ' ' + n1(x2) + ' ' + n1(y2);
+  }
+
   /* The props, each drawn around its own origin at about 30px tall. */
   var MOTIF = {
-    football: function () { return C(0, 0, 11) + P('M0 -5 L5 -1 L3 5 L-3 5 L-5 -1 Z', INK) + L('M0 -5 L0 -11 M5 -1 L10 -4 M3 5 L6 10 M-3 5 L-6 10 M-5 -1 L-10 -4'); },
-    scarf: function () { return P('M-14 -4 L14 -4 L14 4 L-14 4 Z') + P('M8 4 L14 4 L16 18 L10 18 Z') + L('M-8 -4 L-8 4 M-2 -4 L-2 4 M4 -4 L4 4'); },
-    trophy: function () { return P('M-8 -14 L8 -14 L6 0 Q0 6 -6 0 Z') + L('M-8 -12 Q-16 -10 -8 -4 M8 -12 Q16 -10 8 -4') + P('M-3 4 L3 4 L5 10 L-5 10 Z', INK); },
-    golf: function () { return L('M10 -22 L10 8') + P('M10 -22 L26 -16 L10 -10 Z', INK) + P('M-2 8 Q10 12 22 8 Q10 4 -2 8 Z', INK) + C(-14, 6, 3); },
-    club: function () { return L('M-6 -20 L6 2') + P('M6 2 L14 6 L12 10 L4 6 Z', INK); },
-    racket: function () { return '<ellipse cx="0" cy="-8" rx="8" ry="11" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + L('M-4 -14 L-4 -2 M0 -18 L0 2 M4 -14 L4 -2 M-7 -8 L7 -8 M-6 -3 L6 -3') + L('M0 3 L0 16'); },
-    shuttle: function () { return P('M0 6 L-7 -8 L7 -8 Z') + C(0, 8, 3, INK) + L('M-4 -8 L-2 -2 M4 -8 L2 -2 M0 -8 L0 -2'); },
-    takraw: function () { return C(0, 0, 11) + L('M-11 0 Q0 -8 11 0 M-11 0 Q0 8 11 0 M0 -11 Q-8 0 0 11 M0 -11 Q8 0 0 11'); },
-    controller: function () { return P('M-14 -4 Q-14 -10 -6 -10 L6 -10 Q14 -10 14 -4 L16 6 Q14 12 8 8 L4 4 L-4 4 L-8 8 Q-14 12 -16 6 Z') + L('M-9 -2 L-9 2 M-11 0 L-7 0') + D(7, -3, 1.6) + D(10, 0, 1.6); },
-    headset: function () { return L('M-12 2 C-12 -14 12 -14 12 2') + P('M-14 0 L-8 0 L-8 10 L-14 10 Z', INK) + P('M8 0 L14 0 L14 10 L8 10 Z', INK) + L('M8 10 Q6 16 -2 16'); },
-    phone: function () { return P('M-6 -14 L6 -14 L6 14 L-6 14 Z') + L('M-2 11 L2 11') + '<rect x="-4" y="-11" width="8" height="18" fill="' + INK + '" opacity=".12"/>'; },
-    laptop: function () { return P('M-14 -10 L14 -10 L14 6 L-14 6 Z') + P('M-18 6 L18 6 L16 10 L-16 10 Z', INK) + '<rect x="-11" y="-7" width="22" height="10" fill="' + INK + '" opacity=".12"/>'; },
-    books: function () { return P('M-12 8 L12 8 L12 14 L-12 14 Z', INK) + P('M-10 2 L10 2 L10 8 L-10 8 Z') + P('M-12 -4 L8 -4 L8 2 L-12 2 Z', INK) + L('M-6 5 L6 5'); },
-    cap: function () { return P('M-12 0 Q-12 -12 0 -12 Q12 -12 12 0 Z', INK) + P('M-16 0 L16 0 L16 3 L-16 3 Z', INK) + L('M0 -12 L0 -16'); },
-    briefcase: function () { return P('M-14 -6 L14 -6 L14 10 L-14 10 Z') + L('M-5 -6 L-5 -11 L5 -11 L5 -6 M-14 0 L14 0') + D(0, 1, 1.8); },
-    shop: function () { return P('M-16 -6 L16 -6 L16 12 L-16 12 Z') + P('M-18 -6 L18 -6 L16 -14 L-16 -14 Z', INK) + P('M-4 12 L4 12 L4 0 L-4 0 Z', INK) + L('M-12 -2 L-8 -2 M8 -2 L12 -2'); },
-    rocket: function () { return P('M0 -18 Q10 -6 8 10 L-8 10 Q-10 -6 0 -18 Z') + C(0, -4, 3, INK) + P('M-8 4 L-14 12 L-6 10 Z', INK) + P('M8 4 L14 12 L6 10 Z', INK) + L('M-3 12 L0 18 L3 12'); },
-    coins: function (n) { var o = ''; for (var k = 0; k < (n || 3); k++) o += '<ellipse cx="0" cy="' + (8 - k * 5) + '" rx="10" ry="3.5" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>'; return o + T(0, 4 - (n || 3) * 5 + 1, '$'); },
-    chart: function () { return P('M-14 12 L-14 2 L-8 2 L-8 12 Z', INK) + P('M-5 12 L-5 -4 L1 -4 L1 12 Z', INK) + P('M4 12 L4 -12 L10 -12 L10 12 Z', INK) + L('M-16 -10 L-6 -6 L2 -12 L12 -16'); },
-    house: function () { return P('M-16 0 L0 -16 L16 0 L16 14 L-16 14 Z') + P('M-4 14 L4 14 L4 4 L-4 4 Z', INK) + L('M-14 0 L14 0'); },
-    key: function () { return C(-6, 0, 5) + L('M-1 0 L14 0 M10 0 L10 5 M6 0 L6 4'); },
-    car: function () { return P('M-18 6 L-14 -4 L-6 -10 L8 -10 L16 -4 L18 6 Z') + C(-10, 8, 4, INK) + C(10, 8, 4, INK) + L('M-8 -4 L8 -4 M-2 -10 L-2 -4'); },
-    bag: function () { return P('M-10 -4 L10 -4 L12 14 L-12 14 Z') + L('M-5 -4 C-5 -14 5 -14 5 -4'); },
-    diamond: function () { return P('M-10 -4 L-5 -10 L5 -10 L10 -4 L0 10 Z') + L('M-10 -4 L10 -4 M-5 -10 L0 10 M5 -10 L0 10'); },
-    watch: function () { return P('M-4 -14 L4 -14 L4 14 L-4 14 Z', INK) + P('M-7 -6 L7 -6 L7 6 L-7 6 Z') + L('M-3 0 L3 0 M0 -3 L0 3'); },
-    dumbbell: function () { return L('M-8 0 L8 0') + P('M-14 -6 L-8 -6 L-8 6 L-14 6 Z', INK) + P('M8 -6 L14 -6 L14 6 L8 6 Z', INK); },
-    mountain: function () { return P('M-22 14 L-6 -12 L4 4 L10 -4 L22 14 Z') + P('M-6 -12 L-2 -6 L-10 -6 Z', INK); },
-    tent: function () { return P('M-16 12 L0 -12 L16 12 Z') + P('M-5 12 L0 4 L5 12 Z', INK); },
-    bowl: function () { return P('M-14 0 Q-14 12 0 12 Q14 12 14 0 Z') + L('M-16 0 L16 0 M4 -2 L14 -18 M8 -2 L18 -16'); },
-    plate: function () { return '<ellipse cx="0" cy="4" rx="16" ry="6" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + P('M-8 2 Q0 -8 8 2 Z', INK) + L('M-22 -6 L-22 8 M22 -6 L22 8'); },
-    leaf: function () { return P('M0 14 Q-16 0 0 -14 Q16 0 0 14 Z') + L('M0 12 L0 -8'); },
+    football: function () { return C(0, 0, 11) + P('M0 -5 L5 -1 L3 5 L-3 5 L-5 -1 Z') + LT('M0 -5 L0 -11 M5 -1 L10 -4 M3 5 L6 10 M-3 5 L-6 10 M-5 -1 L-10 -4'); },
+    scarf: function () { return P('M-14 -4 L14 -4 L14 4 L-14 4 Z') + P('M8 4 L14 4 L16 18 L10 18 Z') + LT('M-8 -4 L-8 4 M-2 -4 L-2 4 M4 -4 L4 4 M11 6 L11 16'); },
+    trophy: function () { return P('M-8 -14 L8 -14 L6 0 Q0 6 -6 0 Z') + L('M-8 -12 Q-16 -10 -8 -4 M8 -12 Q16 -10 8 -4') + P('M-3 4 L3 4 L5 10 L-5 10 Z') + LT('M-3 -10 L0 -6 L3 -10'); },
+    golf: function () { return L('M10 -22 L10 8') + P('M10 -22 L26 -16 L10 -10 Z') + P('M-2 8 Q10 12 22 8 Q10 4 -2 8 Z') + C(-14, 6, 3) + LT('M-14 3 L-14 9 M-17 6 L-11 6'); },
+    club: function () { return L('M-6 -20 L6 2') + P('M6 2 L14 6 L12 10 L4 6 Z') + LT('M-6 -20 L-9 -23'); },
+    racket: function () { return '<ellipse cx="0" cy="-8" rx="8" ry="11" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + LT('M-4 -14 L-4 -2 M0 -18 L0 2 M4 -14 L4 -2 M-7 -8 L7 -8 M-6 -3 L6 -3') + L('M0 3 L0 16') + LT('M-2 16 L2 16'); },
+    shuttle: function () { return P('M0 6 L-7 -8 L7 -8 Z') + C(0, 8, 3) + LT('M-4 -8 L-2 -2 M4 -8 L2 -2 M0 -8 L0 -2'); },
+    takraw: function () { return C(0, 0, 11) + LT('M-11 0 Q0 -8 11 0 M-11 0 Q0 8 11 0 M0 -11 Q-8 0 0 11 M0 -11 Q8 0 0 11'); },
+    controller: function () { return P('M-14 -4 Q-14 -10 -6 -10 L6 -10 Q14 -10 14 -4 L16 6 Q14 12 8 8 L4 4 L-4 4 L-8 8 Q-14 12 -16 6 Z') + LT('M-9 -2 L-9 2 M-11 0 L-7 0') + D(7, -3, 1.8) + D(10, 1, 1.8); },
+    headset: function () { return L('M-12 2 C-12 -14 12 -14 12 2') + P('M-14 0 L-8 0 L-8 10 L-14 10 Z') + P('M8 0 L14 0 L14 10 L8 10 Z') + LT('M8 10 Q6 16 -2 16'); },
+    phone: function () { return P('M-6 -14 L6 -14 L6 14 L-6 14 Z') + LT('M-2 11 L2 11') + LT('M-3 -9 L3 -9 M-3 -5 L1 -5 M-3 -1 L3 -1'); },
+    laptop: function () { return P('M-14 -10 L14 -10 L14 6 L-14 6 Z') + P('M-18 6 L18 6 L16 10 L-16 10 Z') + LT('M-10 -6 L4 -6 M-10 -2 L8 -2 M-10 2 L0 2'); },
+    books: function () { return P('M-12 8 L12 8 L12 14 L-12 14 Z') + P('M-10 2 L10 2 L10 8 L-10 8 Z') + P('M-12 -4 L8 -4 L8 2 L-12 2 Z') + LT('M-6 5 L6 5'); },
+    briefcase: function () { return P('M-14 -6 L14 -6 L14 10 L-14 10 Z') + L('M-5 -6 L-5 -11 L5 -11 L5 -6') + LT('M-14 0 L14 0') + D(0, 1, 1.8); },
+    shop: function () { return P('M-16 -6 L16 -6 L16 12 L-16 12 Z') + P('M-18 -6 L18 -6 L16 -14 L-16 -14 Z') + P('M-4 12 L4 12 L4 0 L-4 0 Z') + LT('M-12 -2 L-8 -2 M8 -2 L12 -2 M-12 4 L-8 4 M8 4 L12 4'); },
+    rocket: function () { return P('M0 -18 Q10 -6 8 10 L-8 10 Q-10 -6 0 -18 Z') + C(0, -4, 3) + P('M-8 4 L-14 12 L-6 10 Z') + P('M8 4 L14 12 L6 10 Z') + L('M-3 12 L0 18 L3 12') + LT('M-4 0 L4 0'); },
+    coins: function (n) { var o = '', k; for (k = 0; k < (n || 3); k++) o += '<ellipse cx="0" cy="' + (8 - k * 5) + '" rx="10" ry="3.5" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>'; return o + T(0, 4 - (n || 3) * 5 + 1, '$'); },
+    chart: function () { return P('M-14 12 L-14 2 L-8 2 L-8 12 Z') + P('M-5 12 L-5 -4 L1 -4 L1 12 Z') + P('M4 12 L4 -12 L10 -12 L10 12 Z') + L('M-16 -10 L-6 -6 L2 -12 L12 -16') + D(12, -16, 2); },
+    house: function () { return P('M-16 0 L0 -16 L16 0 L16 14 L-16 14 Z') + P('M-4 14 L4 14 L4 4 L-4 4 Z') + LT('M-14 0 L14 0') + P('M-12 -4 L-6 -4 L-6 -9 L-12 -9 Z') + LT('M-9 -9 L-9 -4 M-12 -6.5 L-6 -6.5'); },
+    key: function () { return C(-6, 0, 5) + L('M-1 0 L14 0 M10 0 L10 5 M6 0 L6 4') + D(-6, 0, 1.4); },
+    car: function () { return P('M-18 6 L-14 -4 L-6 -10 L8 -10 L16 -4 L18 6 Z') + C(-10, 8, 4) + C(10, 8, 4) + LT('M-8 -4 L8 -4 M-2 -10 L-2 -4') + LT('M14 0 L17 0'); },
+    bag: function () { return P('M-10 -4 L10 -4 L12 14 L-12 14 Z') + L('M-5 -4 C-5 -14 5 -14 5 -4') + LT('M-4 4 L4 4'); },
+    diamond: function () { return P('M-10 -4 L-5 -10 L5 -10 L10 -4 L0 10 Z') + LT('M-10 -4 L10 -4 M-5 -10 L0 -4 M5 -10 L0 -4 M0 -4 L0 10'); },
+    watch: function () { return P('M-4 -14 L4 -14 L4 14 L-4 14 Z') + P('M-7 -6 L7 -6 L7 6 L-7 6 Z') + LT('M0 0 L3 0 M0 -3 L0 0'); },
+    dumbbell: function () { return L('M-8 0 L8 0') + P('M-14 -6 L-8 -6 L-8 6 L-14 6 Z') + P('M8 -6 L14 -6 L14 6 L8 6 Z'); },
+    mountain: function () { return P('M-22 14 L-6 -12 L4 4 L10 -4 L22 14 Z') + P('M-6 -12 L-2 -6 L-10 -6 Z') + LT('M6 0 L10 -4 L14 2'); },
+    tent: function () { return P('M-16 12 L0 -12 L16 12 Z') + P('M-5 12 L0 4 L5 12 Z') + LT('M0 -12 L0 -17'); },
+    bowl: function () { return P('M-14 0 Q-14 12 0 12 Q14 12 14 0 Z') + L('M-16 0 L16 0') + LT('M4 -2 L14 -18 M8 -2 L18 -16') + LT('M-8 5 Q0 8 8 5'); },
+    plate: function () { return '<ellipse cx="0" cy="4" rx="16" ry="6" fill="#fff" stroke="' + INK + '" stroke-width="' + SW + '"/>' + P('M-8 2 Q0 -8 8 2 Z') + LT('M-22 -6 L-22 8 M22 -6 L22 8'); },
+    leaf: function () { return P('M0 14 Q-16 0 0 -14 Q16 0 0 14 Z') + LT('M0 12 L0 -8 M0 4 L-6 0 M0 -2 L6 -6'); },
     hanger: function () { return L('M0 -14 Q6 -14 4 -9 L0 -6 L-18 6 L18 6 Z'); },
-    popcorn: function () { return P('M-10 -2 L10 -2 L8 14 L-8 14 Z') + L('M-4 -2 L-3 14 M4 -2 L3 14') + C(-6, -6, 4) + C(0, -8, 4) + C(6, -6, 4); },
-    heart: function () { return P('M0 12 C-16 0 -8 -14 0 -6 C8 -14 16 0 0 12 Z', INK); },
-    tv: function () { return P('M-16 -10 L16 -10 L16 10 L-16 10 Z') + L('M-6 10 L-8 16 M6 10 L8 16 M-8 -16 L0 -10 L8 -16') + P('M-2 -4 L2 0 L-2 4 Z', INK); },
-    planet: function () { return C(0, 0, 9) + '<ellipse cx="0" cy="0" rx="16" ry="5" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" transform="rotate(-20)"/>'; },
-    star: function () { return P('M0 -8 L2 -2 L8 -2 L3 2 L5 8 L0 4 L-5 8 L-3 2 L-8 -2 L-2 -2 Z', INK); },
-    ghost: function () { return P('M-10 12 L-10 -2 Q-10 -14 0 -14 Q10 -14 10 -2 L10 12 L6 8 L2 12 L-2 8 L-6 12 Z') + D(-4, -4, 1.8) + D(4, -4, 1.8); },
-    mic: function () { return P('M-5 -16 L5 -16 L5 -2 Q0 4 -5 -2 Z', INK) + L('M-9 -4 Q0 8 9 -4 M0 6 L0 12 M-6 12 L6 12'); },
-    notes: function () { return L('M0 8 L0 -12 L12 -16 L12 4') + D(-4, 8, 4) + D(8, 4, 4); },
-    cart: function () { return L('M-18 -12 L-12 -12 L-6 8 L12 8 L16 -4 L-10 -4') + D(-4, 14, 3) + D(10, 14, 3); },
-    suitcase: function () { return P('M-12 -6 L12 -6 L12 14 L-12 14 Z') + L('M-5 -6 L-5 -12 L5 -12 L5 -6 M-8 -6 L-8 14 M8 -6 L8 14'); },
-    plane: function () { return P('M-16 2 L16 -4 L12 0 L-4 8 Z', INK) + L('M-6 6 L-10 12 M2 -2 L-8 -12'); },
-    apple: function () { return P('M0 -6 Q-12 -10 -10 4 Q-6 14 0 12 Q6 14 10 4 Q12 -10 0 -6 Z') + L('M0 -6 L2 -14'); },
-    stroller: function () { return P('M-14 -6 L6 -6 Q8 6 -4 6 L-14 6 Z') + L('M6 -6 L14 -16 M-14 6 L-14 12 M6 6 L6 12') + C(-12, 14, 3, INK) + C(6, 14, 3, INK); },
-    coffee: function () { return P('M-8 -6 L8 -6 L6 10 L-6 10 Z') + L('M8 -3 Q16 -2 8 6 M-3 -14 Q-1 -10 -3 -8 M3 -14 Q5 -10 3 -8'); },
-    newspaper: function () { return P('M-14 -10 L14 -10 L14 10 L-14 10 Z') + L('M-10 -4 L-2 -4 M-10 0 L-2 0 M-10 4 L-2 4 M2 -4 L10 -4 M2 0 L10 0 M2 4 L10 4'); },
-    lantern: function () { return L('M0 -18 L0 -12') + P('M-8 -12 L8 -12 L8 -8 L-8 -8 Z', INK) + P('M-12 -8 Q-12 10 0 10 Q12 10 12 -8 Z') + L('M-4 -8 L-4 10 M4 -8 L4 10') + P('M-8 10 L8 10 L8 14 L-8 14 Z', INK) + L('M0 14 L0 20'); },
-    ketupat: function () { return P('M0 -14 L14 0 L0 14 L-14 0 Z') + L('M-7 -7 L7 7 M7 -7 L-7 7 M-10 -4 L4 10 M-4 -10 L10 4 M-10 4 L4 -10 M-4 10 L10 -4 M0 -14 L0 -22'); },
-    diya: function () { return P('M-14 2 Q0 12 14 2 L12 8 Q0 14 -12 8 Z') + P('M0 -12 Q6 -4 0 2 Q-6 -4 0 -12 Z', INK); },
-    ticket: function () { return P('M-14 -8 L14 -8 Q10 0 14 8 L-14 8 Q-10 0 -14 -8 Z') + L('M-2 -8 L-2 8'); },
-    clapper: function () { return P('M-14 -4 L14 -4 L14 12 L-14 12 Z') + P('M-14 -4 L12 -12 L14 -6 L-12 2 Z', INK) + L('M-8 -6 L-4 -10 M0 -8 L4 -12 M8 -10 L12 -13'); },
-    lipstick: function () { return P('M-4 -2 L4 -2 L4 14 L-4 14 Z', INK) + P('M-3 -2 L3 -2 L3 -12 L-3 -8 Z'); },
-    baby: function () { return C(0, -6, 6) + P('M-7 0 L7 0 L6 10 L-6 10 Z') + D(-2, -7, 1.2) + D(2, -7, 1.2); },
-    kid: function () { return C(0, -14, 6) + L('M0 -8 L0 6 M-7 -2 L7 -2 M0 6 L-5 16 M0 6 L5 16') + D(-2, -15, 1.2) + D(2, -15, 1.2); },
-    pen: function () { return P('M-12 10 L8 -10 L12 -6 L-8 14 Z') + P('M-12 10 L-8 14 L-14 16 Z', INK); },
-    yoga: function () { return P('M-18 6 L18 6 L18 10 L-18 10 Z', INK); },
-    graduation: function () { return P('M-14 -4 L0 -10 L14 -4 L0 2 Z', INK) + L('M8 -1 L8 6 M-8 -2 Q0 6 8 -2'); },
-    ring: function () { return C(0, 4, 8) + P('M-4 -4 L0 -12 L4 -4 Z', INK); },
-    gift: function () { return P('M-12 -4 L12 -4 L12 12 L-12 12 Z') + L('M0 -4 L0 12 M-12 2 L12 2 M-6 -4 Q-10 -14 0 -8 Q10 -14 6 -4'); },
-    spark: function () { return L('M0 -10 L0 10 M-10 0 L10 0 M-7 -7 L7 7 M7 -7 L-7 7'); }
+    popcorn: function () { return P('M-10 -2 L10 -2 L8 14 L-8 14 Z') + LT('M-4 -2 L-3 14 M4 -2 L3 14') + C(-6, -6, 4) + C(0, -8, 4) + C(6, -6, 4); },
+    heart: function () { return P('M0 12 C-16 0 -8 -14 0 -6 C8 -14 16 0 0 12 Z'); },
+    tv: function () { return P('M-16 -10 L16 -10 L16 10 L-16 10 Z') + L('M-6 10 L-8 16 M6 10 L8 16 M-8 -16 L0 -10 L8 -16') + P('M-2 -4 L2 0 L-2 4 Z'); },
+    planet: function () { return C(0, 0, 9) + '<ellipse cx="0" cy="0" rx="16" ry="5" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" transform="rotate(-20)"/>' + LT('M-4 -3 Q0 0 4 -4'); },
+    star: function () { return P('M0 -8 L2 -2 L8 -2 L3 2 L5 8 L0 4 L-5 8 L-3 2 L-8 -2 L-2 -2 Z'); },
+    ghost: function () { return P('M-10 12 L-10 -2 Q-10 -14 0 -14 Q10 -14 10 -2 L10 12 L6 8 L2 12 L-2 8 L-6 12 Z') + D(-4, -4, 1.8) + D(4, -4, 1.8) + LT('M-2 2 Q0 4 2 2'); },
+    mic: function () { return P('M-5 -16 L5 -16 L5 -2 Q0 4 -5 -2 Z') + L('M-9 -4 Q0 8 9 -4 M0 6 L0 12 M-6 12 L6 12'); },
+    notes: function () { return L('M0 8 L0 -12 L12 -16 L12 4') + C(-4, 8, 4) + C(8, 4, 4) + LT('M0 -8 L12 -12'); },
+    cart: function () { return L('M-18 -12 L-12 -12 L-6 8 L12 8 L16 -4 L-10 -4') + C(-4, 14, 3) + C(10, 14, 3) + LT('M-8 0 L14 0'); },
+    suitcase: function () { return P('M-12 -6 L12 -6 L12 14 L-12 14 Z') + L('M-5 -6 L-5 -12 L5 -12 L5 -6') + LT('M-8 -6 L-8 14 M8 -6 L8 14'); },
+    plane: function () { return P('M-16 2 L16 -4 L12 0 L-4 8 Z') + LT('M-6 6 L-10 12 M2 -2 L-8 -12'); },
+    apple: function () { return P('M0 -6 Q-12 -10 -10 4 Q-6 14 0 12 Q6 14 10 4 Q12 -10 0 -6 Z') + L('M0 -6 L2 -14') + LT('M2 -12 Q8 -14 8 -9'); },
+    stroller: function () { return P('M-14 -6 L6 -6 Q8 6 -4 6 L-14 6 Z') + L('M6 -6 L14 -16 M-14 6 L-14 12 M6 6 L6 12') + C(-12, 14, 3) + C(6, 14, 3) + LT('M-8 -6 L-8 6'); },
+    coffee: function () { return P('M-8 -6 L8 -6 L6 10 L-6 10 Z') + L('M8 -3 Q16 -2 8 6') + LT('M-3 -14 Q-1 -10 -3 -8 M3 -14 Q5 -10 3 -8'); },
+    newspaper: function () { return P('M-14 -10 L14 -10 L14 10 L-14 10 Z') + LT('M-10 -4 L-2 -4 M-10 0 L-2 0 M-10 4 L-2 4 M2 -4 L10 -4 M2 0 L10 0 M2 4 L10 4') + LT('M-10 -7 L10 -7'); },
+    lantern: function () { return L('M0 -18 L0 -12') + P('M-8 -12 L8 -12 L8 -8 L-8 -8 Z') + P('M-12 -8 Q-12 10 0 10 Q12 10 12 -8 Z') + LT('M-4 -8 L-4 10 M4 -8 L4 10') + P('M-8 10 L8 10 L8 14 L-8 14 Z') + L('M0 14 L0 20'); },
+    ketupat: function () { return P('M0 -14 L14 0 L0 14 L-14 0 Z') + LT('M-7 -7 L7 7 M7 -7 L-7 7 M-10 -4 L4 10 M-4 -10 L10 4 M-10 4 L4 -10 M-4 10 L10 -4') + L('M0 -14 L0 -22'); },
+    diya: function () { return P('M-14 2 Q0 12 14 2 L12 8 Q0 14 -12 8 Z') + P('M0 -12 Q6 -4 0 2 Q-6 -4 0 -12 Z') + LT('M-6 -6 Q-9 -10 -7 -13 M6 -6 Q9 -10 7 -13'); },
+    ticket: function () { return P('M-14 -8 L14 -8 Q10 0 14 8 L-14 8 Q-10 0 -14 -8 Z') + LT('M-2 -8 L-2 8') + LT('M4 -2 L10 -2 M4 2 L8 2'); },
+    clapper: function () { return P('M-14 -4 L14 -4 L14 12 L-14 12 Z') + P('M-14 -4 L12 -12 L14 -6 L-12 2 Z') + LT('M-8 -6 L-4 -10 M0 -8 L4 -12 M8 -10 L12 -13'); },
+    lipstick: function () { return P('M-4 -2 L4 -2 L4 14 L-4 14 Z') + P('M-3 -2 L3 -2 L3 -12 L-3 -8 Z'); },
+    baby: function () { return '<path d="M-6 -13 C-9 -13 -10 -10 -10 -6 C-10 -2 -8 0 -5 0 L5 0 C8 0 10 -2 10 -6 C10 -10 9 -13 6 -13 C3 -15 -3 -15 -6 -13 Z" fill="var(--au-color)" fill-opacity=".9"/>' + D(-3, -8, 1.4) + D(3, -8, 1.4) + LT('M-1.5 -4 Q0 -2.4 1.5 -4') + L('M-4 0 l0 5 l-3 0 M4 0 l0 5 l3 0'); },
+    kid: function () { return '<path d="M-8 -19 C-12 -19 -13 -15 -13 -9 C-13 -4 -11 -1 -7 -1 L7 -1 C11 -1 13 -4 13 -9 C13 -15 12 -19 8 -19 C4 -21 -4 -21 -8 -19 Z" fill="var(--au-color)" fill-opacity=".9"/>' + D(-4, -12, 1.5) + D(4, -12, 1.5) + LT('M-2 -7 Q0 -5 2 -7') + L('M-5 -1 l-1 10 l-4 0 M5 -1 l1 10 l4 0') + L('M-12 -8 C-16 -5 -17 -2 -16 1 M12 -8 C16 -5 17 -2 16 1'); },
+    pen: function () { return P('M-12 10 L8 -10 L12 -6 L-8 14 Z') + P('M-12 10 L-8 14 L-14 16 Z') + LT('M4 -6 L8 -2'); },
+    graduation: function () { return P('M-14 -4 L0 -10 L14 -4 L0 2 Z') + L('M8 -1 L8 6 M-8 -2 Q0 6 8 -2') + D(8, 7, 2); },
+    ring: function () { return C(0, 4, 8) + P('M-4 -4 L0 -12 L4 -4 Z') + LT('M-3 2 Q0 0 3 2'); },
+    gift: function () { return P('M-12 -4 L12 -4 L12 12 L-12 12 Z') + LT('M0 -4 L0 12 M-12 2 L12 2') + L('M-6 -4 Q-10 -14 0 -8 Q10 -14 6 -4'); },
+    spark: function () { return L('M0 -12 L0 12 M-12 0 L12 0') + LT('M-8 -8 L8 8 M8 -8 L-8 8'); }
   };
 
-  /* People: a head with hair by hash, a top by hash, and a pose.
-     Poses: stand, cheer (arms up), sit, hold (one arm out), wave. */
+  /* Accents: the little marks in the margins that make a drawing feel
+     drawn — sparkles, squiggles, motion lines, a stray dot or two. */
+  var ACCENT = {
+    sparkle: function (R) { return LT('M0 -7 L0 7 M-7 0 L7 0 M-4 -4 L4 4 M4 -4 L-4 4', 1.5); },
+    twinkle: function (R) { return LT('M0 -6 Q1 -1 6 0 Q1 1 0 6 Q-1 1 -6 0 Q-1 -1 0 -6', 1.5); },
+    squiggle: function (R) { return LT(wline(-9, 0, -3, 0, R, 4) + ' ' + wline(-3, 0, 3, 0, R, 4) + ' ' + wline(3, 0, 9, 0, R, 4), 1.5); },
+    dots: function (R) { return D(-5, 0, 1.5) + D(0, -3, 1.5) + D(5, 1, 1.5); },
+    arcs: function (R) { return LT('M-6 -6 Q0 0 -6 6 M0 -8 Q7 0 0 8', 1.5); },
+    plus: function (R) { return LT('M0 -5 L0 5 M-5 0 L5 0', 1.5); },
+    tinyleaf: function (R) { return LT('M0 6 Q-7 0 0 -6 Q7 0 0 6 Z M0 5 L0 -3', 1.4); },
+    tinyheart: function (R) { return LT('M0 6 C-8 0 -4 -7 0 -3 C4 -7 8 0 0 6 Z', 1.4); },
+    note: function (R) { return LT('M0 4 L0 -7 L6 -9 L6 2', 1.4) + D(-2, 4, 2.2) + D(4, 2, 2.2); },
+    coin: function (R) { return LT('M0 -5 A5 5 0 1 1 0 5 A5 5 0 1 1 0 -5 M0 -3 L0 3', 1.4); }
+  };
+  var ACCENTS_BY_LENS = {
+    who: ['tinyleaf', 'dots', 'plus', 'tinyheart', 'squiggle'],
+    love: ['sparkle', 'twinkle', 'note', 'arcs', 'dots'],
+    buying: ['sparkle', 'coin', 'plus', 'squiggle', 'twinkle']
+  };
+  /* Where an accent may sit without landing on the scene. */
+  var ANCHORS = [[20, 26], [38, 16], [16, 52], [128, 20], [146, 40], [150, 72], [112, 14], [64, 12]];
+
+  /* A backdrop per group: the faint drawing behind the scene that says
+     where we are before the props do. */
+  var BACKDROP = {
+    sports: function (R) { return LT('M8 74 Q80 26 152 74', 1.1) + LT('M20 74 Q80 42 140 74', 1.1) + LT('M6 62 L6 74 M154 62 L154 74', 1.1); },
+    entertainment: function (R) { return LT('M4 8 Q22 30 4 44 M28 8 Q46 30 28 44 M52 8 Q70 30 52 44', 1.1) + LT('M108 8 Q126 30 108 44 M132 8 Q150 30 132 44', 1.1) + LT('M0 8 L160 8', 1.1); },
+    trendsetter: function (R) { return LT('M34 96 L34 46 Q80 8 126 46 L126 96', 1.1); },
+    business: function (R) { return LT('M96 96 L96 44 L118 44 L118 96 M122 96 L122 58 L140 58 L140 96 M78 96 L78 62 L92 62 L92 96', 1.1) + LT('M100 50 L114 50 M100 58 L114 58 M126 64 L136 64 M82 68 L88 68', 1.1); },
+    shopping: function (R) { return LT('M92 34 L154 34 M92 56 L154 56', 1.1) + LT('M100 34 L100 24 M112 34 L112 26 M126 56 L126 46 M140 56 L140 44', 1.1) + LT('M100 20 L112 20 M126 42 L140 42', 1.1); },
+    income: function (R) { return LT('M100 96 L100 82 L118 82 L118 96 M118 82 L118 66 L136 66 L136 96 M136 66 L136 48 L154 48 L154 96', 1.1); },
+    'life-stage': function (R) { return LT('M132 30 A14 14 0 1 1 132 29.9', 1.1) + LT('M132 10 L132 4 M132 56 L132 50 M112 30 L106 30 M158 30 L152 30 M118 16 L114 12 M146 44 L150 48', 1.1) + LT('M14 34 Q14 24 24 24 Q28 14 40 18 Q50 16 50 28 Q58 30 54 38 L16 38 Q10 38 14 34 Z', 1.1); },
+    ethnicity: function (R) { return LT('M0 10 Q40 26 80 12 Q120 26 160 10', 1.1) + LT('M14 17 L11 26 L20 24 Z M40 22 L38 32 L46 28 Z M66 18 L66 28 L74 24 Z M104 20 L102 30 L110 26 Z M132 15 L131 25 L139 21 Z', 1.1); }
+  };
+
+  /* ── People ──────────────────────────────────────────────────────
+     One soft blob of colour is the whole body and the head at once,
+     with a tiny face drawn on it; the arms and legs are white tubes
+     with a thin dark outline, ending in mitten hands and small feet.
+     The blob's shape, the face and the tilt all come from the
+     segment's own seed, so no two characters stand the same way.
+     Local origin is where the character stands: feet at y = 0.      */
+  /* A squircle with each corner rounded a little differently: the soft
+     mass the whole character hangs off. */
+  function squircle(cx, cy, w, h, R) {
+    var m = Math.min(w, h) / 2, r = [0, 0, 0, 0], k;
+    for (k = 0; k < 4; k++) r[k] = m * (0.72 + R() * 0.24);
+    var x0 = cx - w / 2, x1 = cx + w / 2, y0 = cy - h / 2, y1 = cy + h / 2;
+    return 'M' + n1(x0 + r[0]) + ' ' + n1(y0) +
+      ' L' + n1(x1 - r[1]) + ' ' + n1(y0) + ' Q' + n1(x1) + ' ' + n1(y0) + ' ' + n1(x1) + ' ' + n1(y0 + r[1]) +
+      ' L' + n1(x1) + ' ' + n1(y1 - r[2]) + ' Q' + n1(x1) + ' ' + n1(y1) + ' ' + n1(x1 - r[2]) + ' ' + n1(y1) +
+      ' L' + n1(x0 + r[3]) + ' ' + n1(y1) + ' Q' + n1(x0) + ' ' + n1(y1) + ' ' + n1(x0) + ' ' + n1(y1 - r[3]) +
+      ' L' + n1(x0) + ' ' + n1(y0 + r[0]) + ' Q' + n1(x0) + ' ' + n1(y0) + ' ' + n1(x0 + r[0]) + ' ' + n1(y0) + ' Z';
+  }
+  function face(fx, fy, h) {
+    var eye = h % 4, mouth = Math.floor(h / 5) % 3, tick = Math.floor(h / 11) % 3;
+    var e = [
+      D(fx - 6, fy, 1.9) + D(fx + 6, fy, 1.9),
+      LT('M' + (fx - 6) + ' ' + (fy - 2) + ' L' + (fx - 6) + ' ' + (fy + 2) + ' M' + (fx + 6) + ' ' + (fy - 2) + ' L' + (fx + 6) + ' ' + (fy + 2), 2),
+      LT('M' + (fx - 8.5) + ' ' + (fy + 1) + ' Q' + (fx - 6) + ' ' + (fy - 2.5) + ' ' + (fx - 3.5) + ' ' + (fy + 1) + ' M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1), 1.8),
+      D(fx - 6, fy, 1.9) + LT('M' + (fx + 3.5) + ' ' + (fy + 1) + ' Q' + (fx + 6) + ' ' + (fy - 2.5) + ' ' + (fx + 8.5) + ' ' + (fy + 1), 1.8)
+    ][eye];
+    var m = [
+      LT('M' + (fx - 3.5) + ' ' + (fy + 6) + ' Q' + fx + ' ' + (fy + 9.5) + ' ' + (fx + 3.5) + ' ' + (fy + 6), 1.8),
+      '<path d="M' + (fx - 4) + ' ' + (fy + 5.5) + ' Q' + fx + ' ' + (fy + 11) + ' ' + (fx + 4) + ' ' + (fy + 5.5) + ' Z" fill="' + INK + '"/>',
+      LT('M' + (fx - 3) + ' ' + (fy + 7) + ' L' + (fx + 3) + ' ' + (fy + 7), 1.8)
+    ][mouth];
+    /* The stray mark beside the face that says a hand drew this. */
+    var t = ['', LT('M' + (fx + 11) + ' ' + (fy - 5) + ' l3 -3 M' + (fx + 12.5) + ' ' + (fy - 1) + ' l4 0', 1.3), D(fx - 12, fy + 4, 1.3)][tick];
+    return e + m + t;
+  }
   function person(seg, pose, x, y, sc) {
-    var h = Math.floor(hash(seg.id) * 100000), hair = h % 6, glasses = Math.floor(h / 7) % 4 === 0, pat = Math.floor(h / 13) % 3;
-    var pid = 'dp-' + seg.id;
-    var defs = '<defs><pattern id="' + pid + '-d" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.2" fill="' + INK + '"/></pattern>' +
-      '<pattern id="' + pid + '-s" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><rect width="6" height="2" fill="' + INK + '"/></pattern></defs>';
-    var fill = ['#fff', 'url(#' + pid + '-d)', 'url(#' + pid + '-s)'][pat];
-    var hairs = [
-      P('M-12 -50 C-12 -66 12 -66 12 -50 C8 -56 -8 -56 -12 -50 Z', INK),
-      P('M-13 -48 C-14 -68 14 -68 13 -48 L13 -36 L8 -36 L8 -46 C6 -54 -6 -54 -8 -46 L-8 -36 L-13 -36 Z', INK),
-      '<g fill="' + INK + '">' + '<circle cx="-9" cy="-58" r="5"/><circle cx="0" cy="-62" r="6"/><circle cx="9" cy="-58" r="5"/><circle cx="-13" cy="-50" r="4"/><circle cx="13" cy="-50" r="4"/></g>',
-      P('M-12 -50 C-12 -62 12 -62 12 -50 C8 -56 -8 -56 -12 -50 Z', INK) + D(0, -64, 5),
-      P('M-13 -48 C-14 -68 14 -68 13 -48 L15 -20 L9 -20 L8 -46 C6 -54 -6 -54 -8 -46 L-9 -20 L-15 -20 Z', INK),
-      P('M-12 -50 C-12 -62 8 -64 12 -54 L2 -56 C-6 -56 -10 -52 -12 -50 Z', INK)
-    ];
-    var head = C(0, -46, 13) + hairs[hair] +
-      (glasses ? C(-5, -45, 3.5) + C(5, -45, 3.5) + L('M-1.5 -45 L1.5 -45') : D(-4.5, -46, 1.6) + D(4.5, -46, 1.6)) + L('M-4 -40 Q0 -37 4 -40');
-    var top = P('M-11 -32 Q-14 -32 -15 -26 L-15 -6 L15 -6 L15 -26 Q14 -32 11 -32 Z') + (pat ? '<path d="M-11 -32 Q-14 -32 -15 -26 L-15 -6 L15 -6 L15 -26 Q14 -32 11 -32 Z" fill="' + fill + '"/>' : '');
-    var arms = { stand: L('M-15 -28 L-20 -8 M15 -28 L20 -8'), cheer: L('M-15 -28 L-24 -50 M15 -28 L24 -50'), sit: L('M-15 -28 L-18 -10 L-6 -10 M15 -28 L18 -10 L6 -10'), hold: L('M-15 -28 L-20 -8 M15 -28 L26 -18'), wave: L('M-15 -28 L-20 -8 M15 -28 L22 -46') }[pose || 'stand'];
-    var legs = pose === 'sit' ? L('M-9 -6 L-9 4 L-20 4 L-20 16 M9 -6 L9 4 L20 4 L20 16') : L('M-7 -6 L-8 16 M7 -6 L8 16');
-    return defs + G(x, y, sc, legs + top + arms + head);
+    var h = Math.floor(hash(seg.id) * 100000), R = rnd(h + 11);
+    var tilt = (R() - 0.5) * 5, w = 46 + R() * 8, bh = 42 + R() * 8;
+    var legLen = 28 + R() * 4, sit = pose === 'sit', cy = sit ? -bh / 2 - 9 : -legLen - bh / 2 + 2;
+    var strength = (0.82 + R() * 0.18).toFixed(2);
+    var fx = (R() - 0.5) * 6, fy = cy - bh * 0.1;
+    /* Legs first, so they tuck under the body. */
+    var lx = w * 0.17, toe = -w / 2 - 11, legs;
+    if (sit) {
+      legs = L('M' + n1(-lx + 2) + ' -6 C' + n1(-lx - 10) + ' -3 ' + n1(toe + 10) + ' -2 ' + n1(toe) + ' -2 l-5 -3') +
+        L('M' + n1(lx + 2) + ' -4 C' + n1(-lx - 6) + ' -1 ' + n1(toe + 14) + ' 1 ' + n1(toe + 6) + ' 1 l-5 -3');
+    } else {
+      legs = L('M' + n1(-lx) + ' ' + n1(cy + bh / 2 - 4) + ' C' + n1(-lx - 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 1) + ' 0 l-5 0') +
+        L('M' + n1(lx) + ' ' + n1(cy + bh / 2 - 4) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' 0 l5 0');
+    }
+    var body = '<path d="' + squircle(0, cy, w, bh, R) + '" fill="var(--au-color)" fill-opacity="' + strength + '"/>';
+    /* Arms are lines too; the hand is three short strokes at the end,
+       the way a stick figure's is. */
+    var sy = cy + bh * 0.12, ax = w / 2 - 3, arms;
+    function hand(hx, hy, rot) {
+      return '<g transform="translate(' + n1(hx) + ' ' + n1(hy) + ') rotate(' + n1(rot || 0) + ')">' +
+        L('M0 0 l0 4 M0 0 l-3.4 2.4 M0 0 l3.4 2.4') + '</g>';
+    }
+    function arm(d, hx, hy, rot) { return L(d) + hand(hx, hy, rot); }
+    if (pose === 'cheer') {
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 12) + ' ' + n1(sy - 8) + ' ' + n1(-ax - 14) + ' ' + n1(sy - 22) + ' ' + n1(-ax - 11) + ' ' + n1(sy - 31), -ax - 11, sy - 31, 160) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy - 8) + ' ' + n1(ax + 14) + ' ' + n1(sy - 22) + ' ' + n1(ax + 11) + ' ' + n1(sy - 31), ax + 11, sy - 31, 200);
+    } else if (pose === 'wave') {
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 23), -ax - 3, sy + 23, 10) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 13) + ' ' + n1(sy - 4) + ' ' + n1(ax + 15) + ' ' + n1(sy - 18) + ' ' + n1(ax + 12) + ' ' + n1(sy - 27), ax + 12, sy - 27, 190);
+    } else if (pose === 'hold') {
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 23), -ax - 3, sy + 23, 10) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy + 2) + ' ' + n1(ax + 20) + ' ' + n1(sy + 4) + ' ' + n1(ax + 27) + ' ' + n1(sy + 2), ax + 27, sy + 2, 265);
+    } else if (sit) {
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 15) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 19), -ax - 3, sy + 19, 10) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy + 4) + ' ' + n1(ax + 16) + ' ' + n1(sy + 10) + ' ' + n1(ax + 18) + ' ' + n1(sy + 17), ax + 18, sy + 17, -20);
+    } else {
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 9) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 4) + ' ' + n1(sy + 23), -ax - 4, sy + 23, 8) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 8) + ' ' + n1(ax + 9) + ' ' + n1(sy + 18) + ' ' + n1(ax + 4) + ' ' + n1(sy + 23), ax + 4, sy + 23, -8);
+    }
+    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + n1(tilt) + ') scale(' + (sc || 1) + ')">' +
+      legs + body + face(fx, fy, h) + arms + '</g>';
   }
   function scene(seg, pose, personX, props) {
-    var out = person(seg, pose, personX == null ? 52 : personX, 100, 1);
+    var out = person(seg, pose, personX == null ? 52 : personX, 112, 1);
     (props || []).forEach(function (p) { out += G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4])); });
     return out;
   }
@@ -266,33 +393,35 @@
     'travel-experience-seekers': function (s) { return scene(s, 'hold', 42, [['suitcase', 92, 96, 1], ['plane', 124, 60, 1], ['mountain', 136, 100, .6]]); }
   };
   function doodle(seg) {
-    var draw = SCENES[seg.id] || function (s) { return scene(s, 'stand', 60, []); };
-    return '<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name) + '">' +
-      '<path d="M8 116 L152 116" stroke="' + INK + '" stroke-width="2" stroke-linecap="round" opacity=".25"/>' + draw(seg) + '</svg>';
-  }
-
-  /* ── The bars ────────────────────────────────────────────────────
-     Media consumption as five small bars with their values, in the
-     lens colour, the strongest channel at full strength. Bars grow
-     from the baseline when an ancestor gains .is-live.                */
-  function bars(el, seg, opts) {
-    opts = opts || {};
-    var chans = CHANNELS.filter(function (c) { return seg.consumption[c.key] != null; }).slice(0, 5);
-    var SHORT = { video: 'Video', audio: 'Audio', tv: 'TV', podcast: 'Podcast', social: 'Social', games: 'Games', communities: 'Forums' };
-    var W = 160, H = 96, base = 76, maxH = 54, n = chans.length, gap = 8, bw = (W - 16 - gap * (n - 1)) / n;
-    var best = Math.max.apply(null, chans.map(function (c) { return seg.consumption[c.key]; }));
-    var out = chans.map(function (c, i) {
-      var v = seg.consumption[c.key], bh = maxH * v / 100, x = 8 + i * (bw + gap);
-      return '<g class="am-bar" style="--am-i:' + i + '">' +
-        '<rect class="am-bar-fill' + (v === best ? ' is-best' : '') + '" x="' + x.toFixed(1) + '" y="' + (base - bh).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="3" style="transform-origin:0 ' + base + 'px"/>' +
-        '<text class="am-bar-val" x="' + (x + bw / 2).toFixed(1) + '" y="' + (base - bh - 5).toFixed(1) + '" text-anchor="middle">' + v + '%</text>' +
-        '<text class="am-bar-lbl" x="' + (x + bw / 2).toFixed(1) + '" y="' + (base + 13) + '" text-anchor="middle">' + SHORT[c.key] + '</text></g>';
-    }).join('');
-    el.classList.add('am-bars');
-    if (opts.still) el.classList.add('is-still');
-    el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc('Media consumption: ' + chans.map(function (c) { return channelLabel(c.key) + ' ' + seg.consumption[c.key] + '%'; }).join(', ')) + '">' +
-      '<line class="am-bar-base" x1="8" y1="' + base + '" x2="' + (W - 8) + '" y2="' + base + '"/>' + out + '</svg>';
-    return el;
+    var draw = SCENES[seg.id] || function (x) { return scene(x, 'stand', 60, []); };
+    var seed = Math.floor(hash(seg.id + ':art') * 1e6) + 7, R = rnd(seed);
+    var g = (window.AUDIENCE_GROUPS || []).filter(function (x) { return x.key === seg.group; })[0];
+    /* 1. A pale shape behind, off-centre and never twice the same, so
+       the character has something to stand against. */
+    var bx = 88 + (R() - 0.5) * 24, by = 58 + (R() - 0.5) * 14;
+    var back = '<path d="' + blobPath(bx, by, 48 + R() * 10, 34 + R() * 8, 8, 0.26, R) + '" fill="var(--au-strong)" opacity=".42"/>';
+    /* 2. Where we are, drawn faintly behind the scene. */
+    var bd = BACKDROP[seg.group];
+    back += bd ? '<g opacity=".22">' + bd(R) + '</g>' : '';
+    /* 3. The ground: a drawn line, a shadow under the figure, and a
+       few marks so it reads as somewhere rather than nowhere. */
+    var ink = '<g opacity=".38">' + LT(wline(10, 112, 150, 112, R, 3), 1.2) + '</g>';
+    ink += '<ellipse cx="52" cy="113.5" rx="24" ry="3" fill="' + INK + '" opacity=".13"/>';
+    var marks = '', k, mx;
+    for (k = 0; k < 4; k++) {
+      mx = 18 + k * 36 + R() * 14;
+      marks += LT('M' + n1(mx) + ' 116 l' + n1(3 + R() * 5) + ' 0', 1.1);
+    }
+    ink += '<g opacity=".22">' + marks + '</g>';
+    /* 4. The scene itself, then the marks in the margins. */
+    var pool = ACCENTS_BY_LENS[seg.lens] || ACCENTS_BY_LENS.who, spots = ANCHORS.slice(), acc = '';
+    var count = 2 + Math.floor(R() * 2);
+    for (k = 0; k < count; k++) {
+      var at = spots.splice(Math.floor(R() * spots.length), 1)[0];
+      acc += G(at[0], at[1], 0.7 + R() * 0.5, ACCENT[pool[Math.floor(R() * pool.length)]](R));
+    }
+    return '<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name + ', ' + (g ? g.label : '')) + '">' +
+      back + ink + draw(seg) + '<g opacity=".55">' + acc + '</g></svg>';
   }
 
   /* ── The jar ─────────────────────────────────────────────────────
@@ -488,5 +617,5 @@
     }
   };
 
-  window.AudienceMarks = { arc: arc, bars: bars, doodle: doodle, pack: pack, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
+  window.AudienceMarks = { arc: arc, doodle: doodle, pack: pack, jar: jar, CHANNELS: CHANNELS, channelLabel: channelLabel };
 })();
