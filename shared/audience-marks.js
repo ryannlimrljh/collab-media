@@ -228,9 +228,10 @@
           if (b.px == null) { b.px = b.x; b.py = b.y; }
           var vx = (b.x - b.px) * DAMP, vy = (b.y - b.py) * DAMP + G * h * h;
           /* A disc that has all but stopped is stopped: no creep. */
-          /* Rolling friction: a disc that is only creeping stops, so a
-             tick from a passing pointer does not send it down a slope. */
-          if (vx * vx + vy * vy < 0.2 && b.inside) { vx = 0; vy = G * h * h; }
+          /* A disc that has all but stopped is stopped: no creep. The
+             threshold is tiny on purpose — anything nudged onto a slope
+             must still roll down it, or the jar stops feeling like one. */
+          if (vx * vx + vy * vy < 0.03 && b.inside) { vx = 0; vy = G * h * h; }
           b.px = b.x; b.py = b.y; b.x += vx; b.y += vy;
           if (!b.inside && b.y > ceil + b.r) b.inside = true;
         }
