@@ -68,84 +68,49 @@
      edge to edge. Everything else floats in the corners. ── */
   .au-universe{position:relative; margin:0 calc(-1 * var(--spacing-32)) var(--spacing-24); height:var(--au-h, 560px); min-height:480px; overflow:hidden;
     background:var(--color-canvas-warm); border-top:1px solid var(--color-neutral-3); border-bottom:1px solid var(--color-neutral-3);}
-  .au-space{position:absolute; inset:0; perspective:1400px; cursor:grab; touch-action:none; user-select:none; overflow:hidden;}
+  .au-space{position:absolute; inset:0; cursor:grab; touch-action:none; user-select:none; overflow:hidden;}
   .au-space.is-panning{cursor:grabbing;}
   .au-space.is-panning .au-bub{pointer-events:none;}
-  /* Ambient colour: three big soft washes of the three elements drift
-     behind the glass, so the blur has something to refract. */
-  .au-ambient{position:absolute; inset:-12%; pointer-events:none;}
-  .au-ambient i{position:absolute; width:48%; height:64%; border-radius:50%; filter:blur(72px); opacity:.5; animation:au-amb 28s ease-in-out infinite alternate;}
-  .au-ambient i:nth-child(1){left:-6%; top:4%; background:radial-gradient(circle, var(--color-earth-pastel), transparent 70%);}
-  .au-ambient i:nth-child(2){left:28%; top:36%; background:radial-gradient(circle, var(--color-water-pastel), transparent 70%); animation-delay:-9s; animation-duration:33s;}
-  .au-ambient i:nth-child(3){left:60%; top:-4%; background:radial-gradient(circle, var(--color-fire-pastel), transparent 70%); animation-delay:-19s; animation-duration:24s;}
-  @keyframes au-amb{from{transform:translate(0, 0) scale(1);} to{transform:translate(7%, 9%) scale(1.14);}}
-  /* Three nested planes: the tilt follows the pointer, the world pans
-     and zooms, the bubbles sit on the world. */
-  .au-tilt{position:absolute; inset:0; transition:transform 900ms var(--ease-flow); will-change:transform;}
   .au-world{position:absolute; inset:0; transform-origin:0 0; transition:transform 560ms var(--ease-flow);}
-  .au-space.is-direct .au-world,.au-space.is-direct .au-tilt{transition:none;}
+  .au-space.is-direct .au-world{transition:none;}
 
   /* A bubble is a button: the outer box is its hit area and its place
-     on the world, the inner group carries the drift and parallax the
-     motion loop writes, and the visible glass scales on hover. Three
-     layers, so the box under the pointer never moves while the glass
-     inside it does — that is what stopped the hover flicker. */
+     on the world; the inner group carries the drift the motion loop
+     writes; the disc inside scales on hover. The box under the pointer
+     never moves while the disc does — that is what keeps hover steady. */
   .au-bub{position:absolute; left:0; top:0; width:var(--d); height:var(--d); margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
-    transform:translate3d(var(--x), var(--y), 0); z-index:var(--zi, 50); border:0; padding:0; background:transparent; font:inherit; color:inherit; cursor:pointer; border-radius:50%; outline:none;
-    transition:transform 760ms var(--ease-settle), width 760ms var(--ease-settle), height 760ms var(--ease-settle), margin 760ms var(--ease-settle), opacity 420ms var(--ease-standard), filter 420ms var(--ease-standard);}
+    transform:translate3d(var(--x), var(--y), 0); border:0; padding:0; background:transparent; font:inherit; color:inherit; cursor:pointer; border-radius:50%; outline:none;
+    transition:transform 760ms var(--ease-settle), width 760ms var(--ease-settle), height 760ms var(--ease-settle), margin 760ms var(--ease-settle), opacity 420ms var(--ease-standard);}
   .au-bub.is-out{opacity:0; pointer-events:none;}
+  .au-bub.is-hot{z-index:5;}
   .au-bub-in{position:absolute; inset:0; will-change:transform;}
+  /* One flat colour per lens, deeper with size: --t is 0 for the
+     smallest audience and 1 for the largest, and the fill mixes the
+     element colour into white by it. Ink stays dark on every step. */
   .au-bub-vis{position:absolute; inset:0; border-radius:50%;
-    --p1x:32%; --p1y:36%; --p2x:74%; --p2y:66%; --p3x:52%; --p3y:100%;
-    background:
-      radial-gradient(circle at 30% 24%, rgba(255,255,255,.92), rgba(255,255,255,0) 44%),
-      radial-gradient(circle at var(--p1x) var(--p1y), var(--c1) 0, transparent 64%),
-      radial-gradient(circle at var(--p2x) var(--p2y), var(--c2) 0, transparent 62%),
-      radial-gradient(circle at var(--p3x) var(--p3y), var(--c3) 0, transparent 68%),
-      rgba(255,255,255,.46);
-    -webkit-backdrop-filter:blur(14px) saturate(1.5); backdrop-filter:blur(14px) saturate(1.5);
-    border:1px solid rgba(255,255,255,.7);
-    box-shadow:inset 0 1px 1px rgba(255,255,255,.95), inset 0 -16px 30px rgba(255,255,255,.28), inset 0 0 0 1px rgba(255,255,255,.14), 0 22px 44px -20px var(--au-shadow);
-    animation:au-swirl var(--swirl, 16s) ease-in-out var(--swirl-d, 0s) infinite alternate;
-    transition:transform 380ms var(--ease-settle), box-shadow 380ms var(--ease-standard);}
-  /* The gradient positions are registered so they interpolate; the
-     three washes wander around inside the glass. */
-  @property --p1x{syntax:'<percentage>'; inherits:false; initial-value:32%;}
-  @property --p1y{syntax:'<percentage>'; inherits:false; initial-value:36%;}
-  @property --p2x{syntax:'<percentage>'; inherits:false; initial-value:74%;}
-  @property --p2y{syntax:'<percentage>'; inherits:false; initial-value:66%;}
-  @property --p3x{syntax:'<percentage>'; inherits:false; initial-value:52%;}
-  @property --p3y{syntax:'<percentage>'; inherits:false; initial-value:100%;}
-  @keyframes au-swirl{
-    0%{--p1x:32%; --p1y:36%; --p2x:74%; --p2y:66%; --p3x:52%; --p3y:100%;}
-    50%{--p1x:60%; --p1y:24%; --p2x:30%; --p2y:78%; --p3x:88%; --p3y:70%;}
-    100%{--p1x:22%; --p1y:70%; --p2x:70%; --p2y:26%; --p3x:40%; --p3y:96%;}
-  }
-  .au-bub.lens-who .au-bub-vis{--c1:color-mix(in srgb, var(--color-green) 78%, #fff); --c2:color-mix(in srgb, var(--color-turquoise) 72%, #fff); --c3:var(--color-earth-pastel); --au-shadow:rgba(0,194,110,.5);}
-  .au-bub.lens-love .au-bub-vis{--c1:color-mix(in srgb, var(--color-navy) 74%, #fff); --c2:color-mix(in srgb, var(--color-purple) 70%, #fff); --c3:var(--color-water-pastel); --au-shadow:rgba(20,115,230,.5);}
-  .au-bub.lens-buying .au-bub-vis{--c1:color-mix(in srgb, var(--color-orange) 76%, #fff); --c2:color-mix(in srgb, var(--color-salmon-pink) 74%, #fff); --c3:color-mix(in srgb, var(--color-amber) 70%, #fff); --au-shadow:rgba(255,88,37,.5);}
+    background:color-mix(in srgb, var(--au-color) calc(18% + var(--t, .5) * 82%), #fff);
+    transition:transform 380ms var(--ease-settle), box-shadow 380ms var(--ease-standard), background-color var(--duration-base) var(--ease-standard);}
   .au-bub-txt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 11%; pointer-events:none;}
-  .au-bub-txt b{font-size:var(--fs, 12px); line-height:1.08; font-weight:800; color:var(--color-neutral-9); letter-spacing:-.01em;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 0 rgba(255,255,255,.75), 0 0 10px rgba(255,255,255,.7);}
-  .au-bub-txt small{font-size:calc(var(--fs, 12px) * .8); line-height:1.1; font-weight:700; color:var(--color-neutral-9); opacity:.72; margin-top:3px; font-variant-numeric:tabular-nums; text-shadow:0 1px 0 rgba(255,255,255,.7);}
+  .au-bub-txt b{font-size:var(--fs, 12px); line-height:1.08; font-weight:700; color:var(--color-neutral-9); letter-spacing:-.01em;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .au-bub-txt small{font-size:calc(var(--fs, 12px) * .8); line-height:1.1; font-weight:600; color:var(--color-neutral-9); opacity:.7; margin-top:3px; font-variant-numeric:tabular-nums;}
+  .au-bub.is-deep .au-bub-txt b,.au-bub.is-deep .au-bub-txt small{color:var(--color-neutral-1); opacity:1;}
+  .au-bub.is-deep .au-bub-txt small{opacity:.85;}
   .au-bub.is-small .au-bub-txt small{display:none;}
-  /* Hover: the glass swells and brightens, the group stays, the rest
-     recedes. Focus reads the same as hover, plus the DS ring. */
-  .au-bub.is-hot .au-bub-vis{transform:scale(1.08); box-shadow:inset 0 1px 1px rgba(255,255,255,1), inset 0 -16px 30px rgba(255,255,255,.4), 0 30px 60px -22px var(--au-shadow), 0 0 0 6px rgba(255,255,255,.35);}
-  .au-bub.is-kin .au-bub-vis{box-shadow:inset 0 1px 1px rgba(255,255,255,1), inset 0 -16px 30px rgba(255,255,255,.34), 0 22px 44px -20px var(--au-shadow), 0 0 0 3px rgba(255,255,255,.3);}
-  .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.32; filter:saturate(.55);}
-  .au-bub:focus-visible .au-bub-vis{box-shadow:0 0 0 2px var(--color-neutral-1), 0 0 0 4px var(--color-obsidian), 0 22px 44px -20px var(--au-shadow);}
-  /* A group's name floats above its cluster on a sliver of glass. */
-  .au-gcap{position:absolute; left:0; top:0; transform:translate(-50%, -100%); padding:4px 11px; border-radius:var(--radius-pill); pointer-events:none; z-index:1; white-space:nowrap;
-    background:rgba(255,255,255,.55); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.75);
-    font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:800; color:var(--au-color);
+  /* Hover: the disc lifts a little and the rest of the field recedes. */
+  .au-bub.is-hot .au-bub-vis{transform:scale(1.06); box-shadow:0 14px 30px -14px rgba(43,43,44,.35);}
+  .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.34;}
+  .au-bub:focus-visible .au-bub-vis{box-shadow:0 0 0 2px var(--color-neutral-1), 0 0 0 4px var(--color-obsidian);}
+  /* A group's name sits above its cluster. */
+  .au-gcap{position:absolute; left:0; top:0; transform:translate(-50%, -100%); padding:0 0 4px; pointer-events:none; z-index:1; white-space:nowrap;
+    font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:800; color:var(--color-neutral-5);
     transition:transform 760ms var(--ease-settle), opacity 420ms var(--ease-standard);}
   .au-gcap.is-out{opacity:0;}
   .au-space.has-hot .au-gcap:not(.is-kin){opacity:.35;}
+  .au-space.has-hot .au-gcap.is-kin{color:var(--au-color);}
   .au-sk-bub{position:absolute; border-radius:50%; background:var(--color-neutral-2); transform:translate(-50%, -50%);}
   @media (prefers-reduced-motion:reduce){
-    .au-bub,.au-bub-vis,.au-world,.au-tilt,.au-gcap{transition:none;}
-    .au-bub-vis,.au-ambient i{animation:none;}
+    .au-bub,.au-bub-vis,.au-world,.au-gcap{transition:none;}
   }
 
   /* Overlays: the corners of the canvas. */
@@ -155,32 +120,35 @@
   .au-ovl-tr{right:var(--spacing-20); top:var(--spacing-16); justify-content:flex-end;}
   .au-arrange{display:flex; align-items:center; gap:var(--spacing-8);}
   .au-lens,.au-styles{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
-  .au-lens .c-chip-filter,.au-styles .c-chip-filter{white-space:nowrap; background:rgba(255,255,255,.8); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); box-shadow:var(--shadow-1);}
+  .au-lens .c-chip-filter,.au-styles .c-chip-filter{white-space:nowrap; background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
   .au-lens .c-chip-filter.is-active,.au-styles .c-chip-filter.is-active{background:var(--color-obsidian);}
   .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px;}
   .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
   .au-styles .c-chip-filter i{font-size:14px; margin-right:6px;}
   .au-ovl-lbl{font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-right:var(--spacing-4); white-space:nowrap;}
   .au-props{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
-  .au-prop{height:26px; padding:0 9px; border-radius:var(--radius-pill); border:1px solid rgba(255,255,255,.8); background:rgba(255,255,255,.75); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); font:inherit; font-size:11px; font-weight:700;
+  .au-prop{height:26px; padding:0 9px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); font:inherit; font-size:11px; font-weight:700;
     color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; gap:5px; box-shadow:var(--shadow-1);
     transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   .au-prop .n{color:var(--color-neutral-5); font-weight:600; font-variant-numeric:tabular-nums;}
   .au-prop:hover,.au-prop:focus-visible,.au-prop.is-on{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
   .au-prop:hover .n,.au-prop:focus-visible .n,.au-prop.is-on .n{color:var(--color-neutral-3);}
   .au-prop:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-zoom{display:inline-flex; align-items:center; background:rgba(255,255,255,.8); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.8); border-radius:var(--radius-pill); box-shadow:var(--shadow-1); padding:3px;}
+  .au-zoom{display:inline-flex; align-items:center; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); box-shadow:var(--shadow-1); padding:3px;}
   .au-zoom button{width:30px; height:30px; border-radius:50%; border:0; background:transparent; font:inherit; color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px;
     transition:background-color var(--duration-fast) var(--ease-standard);}
   .au-zoom button:hover{background:var(--color-neutral-2);}
   .au-zoom button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px;}
   .au-zoom .lvl{min-width:46px; text-align:center; font-size:12px; font-weight:800; font-variant-numeric:tabular-nums;}
   .au-zoom .sep{width:1px; height:18px; background:var(--color-neutral-3); margin:0 2px;}
-  .au-uhint{font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.7); padding:4px 10px; border-radius:var(--radius-pill);}
+  .au-uhint{font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px; padding:4px 0;}
+  /* The ramp legend: five steps of the current hue, lighter to deeper. */
+  .au-legend{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-left:var(--spacing-12);}
+  .au-legend i{display:inline-block; width:10px; height:10px; border-radius:50%; background:color-mix(in srgb, var(--color-neutral-5) var(--m), #fff);}
   /* The hover card: name, group, size and the consumption rings, over
      the bubble under the pointer. */
   .au-stagelbl{position:absolute; left:0; top:0; z-index:60; pointer-events:none; transform:translate(-50%, calc(-100% - 14px));
-    background:rgba(255,255,255,.88); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.9); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12); box-shadow:var(--shadow-3);
     display:flex; gap:var(--spacing-12); align-items:center; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
   .au-stagelbl.is-on{opacity:1;}
   .au-stagelbl .arc{width:44px; height:44px; flex:none;}
@@ -517,16 +485,14 @@
       </div>
 
       <section class="au-universe au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
-        <div class="au-space" id="auSpace">
-          <div class="au-ambient" aria-hidden="true"><i></i><i></i><i></i></div>
-          <div class="au-tilt" id="auTilt"><div class="au-world" id="auWorld"></div></div>
-        </div>
+        <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
         <div class="au-ovl au-ovl-tl">
           <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
           <div class="au-props" id="auProps"></div>
           <div class="au-arrange"><span class="au-ovl-lbl">Arrange</span><div class="au-styles" id="auStyles" role="radiogroup" aria-label="Arrangement"></div></div>
         </div>
-        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Drag to move · scroll to zoom · double-click a bubble</span></div>
+        <div class="au-ovl au-ovl-tr"><span class="au-uhint" id="auUhint"><i class="ph ph-cursor"></i>Drag to move · scroll to zoom · double-click a bubble</span>
+          <span class="au-legend" aria-label="Deeper colour, larger audience">Smaller <i style="--m:18%"></i><i style="--m:38%"></i><i style="--m:58%"></i><i style="--m:78%"></i><i style="--m:100%"></i> larger</span></div>
         <div class="au-ovl au-ovl-br">
           <div class="au-zoom" role="group" aria-label="Zoom">
             <button type="button" id="auZoomOut" aria-label="Zoom out" title="Zoom out (−)"><i class="ph ph-minus"></i></button>
@@ -1032,7 +998,7 @@
   document.querySelector('.au-tabs').addEventListener('click', function (e) { var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 
   /* ── The universe ───────────────────────────────────────────────── */
-  var space = E('auSpace'), tilt = E('auTilt'), world = E('auWorld'), stageLbl = E('auStageLbl');
+  var space = E('auSpace'), world = E('auWorld'), stageLbl = E('auStageLbl');
   var bubs = {}, caps = {}, layout = null, layoutById = {}, hotId = null, pinnedProp = null, hotProp = null;
   var view = { k: 1, tx: 0, ty: 0 }, ZMIN = 0.5, ZMAX = 4;
   var STYLES = [
@@ -1078,8 +1044,7 @@
       var b = document.createElement('button');
       b.type = 'button'; b.className = 'au-bub is-out lens-' + s.lens; b.dataset.id = s.id;
       b.setAttribute('aria-label', s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details');
-      var h = Math.floor(2000 + (s.id.split('').reduce(function (t, ch) { return (t * 31 + ch.charCodeAt(0)) % 9973; }, 0)));
-      b.innerHTML = '<span class="au-bub-in"><span class="au-bub-vis" style="--swirl:' + (13 + h % 9) + 's; --swirl-d:-' + (h % 11) + 's"></span>' +
+      b.innerHTML = '<span class="au-bub-in"><span class="au-bub-vis"></span>' +
         '<span class="au-bub-txt"><b>' + esc(s.name) + '</b><small>' + fmtM(s.size) + '</small></span></span>';
       world.appendChild(b); bubs[s.id] = b;
     });
@@ -1097,12 +1062,13 @@
     A.forEach(function (s) {
       var b = bubs[s.id], n = layoutById[s.id];
       if (!n) { b.classList.add('is-out'); return; }
-      /* Depth: nearer bubbles draw a little larger and sit on top. */
-      var d = n.r * 2 * (1 + n.z * 0.14), fs = Math.max(10, Math.min(17, n.r * 0.3));
+      var d = n.r * 2, fs = Math.max(10, Math.min(17, n.r * 0.3));
       b.style.setProperty('--x', n.x.toFixed(1) + 'px'); b.style.setProperty('--y', n.y.toFixed(1) + 'px');
-      b.style.setProperty('--d', d.toFixed(1) + 'px'); b.style.setProperty('--zi', String(Math.round(50 + n.z * 40)));
+      b.style.setProperty('--d', d.toFixed(1) + 'px'); b.style.setProperty('--t', n.t.toFixed(3));
       b.style.setProperty('--fs', fs.toFixed(1) + 'px');
       b.classList.toggle('is-small', n.r < 30);
+      /* White ink only where the fill is deep enough to carry it. */
+      b.classList.toggle('is-deep', n.t >= 0.82 && s.lens === 'love');
       b.classList.remove('is-out');
     });
     var seen = {};
@@ -1118,17 +1084,15 @@
     if (hotId) placeLabel();
   }
 
-  /* ── Motion: the field breathes and gives way. Each bubble drifts on
-     its own slow clock; the pointer pushes bubbles gently aside, small
-     ones further than large, never the one under it; each depth
-     shifts with the pointer at its own rate so the field reads as
-     layers; and the whole plane tilts a few degrees toward the
-     pointer. One transform write per bubble per frame. ── */
-  var motion = { raf: 0, px: 0, py: 0, has: false, items: [], rx: 0, ry: 0 };
+  /* ── Motion: the field breathes and gives way, quietly. Each bubble
+     drifts a pixel or two on its own slow clock, and the pointer eases
+     bubbles aside, small ones a little further than large, never the
+     one under it. One transform write per bubble per frame. ── */
+  var motion = { raf: 0, px: 0, py: 0, has: false, items: [] };
   function startMotion() {
     motion.items = layout.nodes.map(function (n) {
       var h = n.id.split('').reduce(function (t, ch) { return (t * 31 + ch.charCodeAt(0)) % 997; }, 0);
-      return { n: n, el: bubs[n.id].firstChild, ph: h / 997 * Math.PI * 2, sp: 0.7 + (h % 40) / 100, amp: Math.min(5, 1.5 + 60 / (n.r + 12)), cx: 0, cy: 0 };
+      return { n: n, el: bubs[n.id].firstChild, ph: h / 997 * Math.PI * 2, sp: 0.7 + (h % 40) / 100, amp: Math.min(2.2, 0.8 + 24 / (n.r + 12)), cx: 0, cy: 0 };
     });
     if (!REDUCED && !motion.raf) motion.raf = requestAnimationFrame(motionFrame);
   }
@@ -1136,19 +1100,13 @@
   function motionFrame(t) {
     motion.raf = 0;
     if (E('auPanelUniverse').hidden || document.hidden) return;
-    var sz = stageSize();
-    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k, R = 220 / Math.sqrt(view.k);
-    var nx = motion.has ? (motion.px / sz.w - 0.5) : 0, ny = motion.has ? (motion.py / sz.h - 0.5) : 0;
-    motion.rx += (-ny * 6 - motion.rx) * 0.06; motion.ry += (nx * 6 - motion.ry) * 0.06;
-    tilt.style.transform = 'rotateX(' + motion.rx.toFixed(2) + 'deg) rotateY(' + motion.ry.toFixed(2) + 'deg)';
+    var wx = (motion.px - view.tx) / view.k, wy = (motion.py - view.ty) / view.k, R = 170 / Math.sqrt(view.k);
     motion.items.forEach(function (it) {
       var n = it.n, tx = Math.sin(t * 0.00042 * it.sp + it.ph) * it.amp, ty = Math.cos(t * 0.00035 * it.sp + it.ph * 1.3) * it.amp;
-      /* Parallax: depth times distance from the centre of the view. */
-      tx += nx * sz.w * n.z * 0.05; ty += ny * sz.h * n.z * 0.05;
       if (motion.has && !drag && n.id !== hotId) {
         var dx = n.x - wx, dy = n.y - wy, d = Math.sqrt(dx * dx + dy * dy) || 1;
         if (d < R) {
-          var f = Math.pow(1 - d / R, 2) * 30 * Math.max(0.35, Math.min(1.4, 30 / (n.r + 14)));
+          var f = Math.pow(1 - d / R, 2) * 10 * Math.max(0.4, Math.min(1.3, 30 / (n.r + 14)));
           tx += dx / d * f; ty += dy / d * f;
         }
       }
@@ -1219,7 +1177,7 @@
   function worldToStage(x, y) { return { x: x * view.k + view.tx, y: y * view.k + view.ty }; }
   function placeLabel() {
     var n = layoutById[hotId]; if (!n) return;
-    var p = worldToStage(n.x, n.y - n.r * (1 + n.z * 0.14) * 1.08);
+    var p = worldToStage(n.x, n.y - n.r * 1.06);
     stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
   }
   function kinOf(id) {

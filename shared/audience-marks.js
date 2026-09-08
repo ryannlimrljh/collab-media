@@ -15,9 +15,9 @@
 
    AudienceMarks.layoutSpace(segments, lens, stage, style)
      The universe: every segment a bubble sized by audience, filling
-     the stage by group ('groups') or by size alone ('size'), with a
-     depth per group and per bubble. Returns plain numbers; the page
-     draws them.                                                        */
+     the stage by group ('groups') or by size alone ('size'), close but
+     never overlapping, each with t in 0..1 for its size on the colour
+     ramp. Returns plain numbers; the page draws them.                  */
 (function () {
   'use strict';
 
@@ -104,11 +104,10 @@
   /* ── The universe ────────────────────────────────────────────────
      One layout, pure: it takes the segments, a lens, a stage {w, h,
      padTop, padBottom} in pixels and an arrangement ('groups' or
-     'size'), and returns {nodes, groups}. A node is {id, x, y, r, z,
-     lens, group, seg}; a group is {key, label, lens, x, y, top, z}.
-     The bubbles fill the whole stage — overlapping a little, the way
-     glass does — rather than sitting in a band across the middle.
-     Nothing here touches the DOM.                                    */
+     'size'), and returns {nodes, groups}. A node is {id, x, y, r, t,
+     lens, group, seg}; a group is {key, label, lens, x, y, top}. The
+     circles fill the whole stage, close together and never touching,
+     in a settled, loosely random order. Nothing here touches the DOM. */
   var MAX_SIZE = 17000000;
   /* Size to radius, in layout units. A power curve above one spreads
      the top of the range so 9M and 17M read apart; a floor keeps the
@@ -134,7 +133,7 @@
        never dominates a small canvas. */
     var area = W * (H - top - bottom), sum = 0;
     list.forEach(function (s) { var r = unitR(s); sum += Math.PI * r * r; });
-    var scale = Math.sqrt(area * (style === 'size' ? 0.5 : 0.7) / sum);
+    var scale = Math.sqrt(area * (style === 'size' ? 0.44 : 0.52) / sum);
     var maxR = Math.min(W, H - top - bottom) * 0.23;
     scale = Math.min(scale, maxR / unitR({ size: MAX_SIZE }));
     /* Group centres: a grid across the stage in lens order, then
@@ -163,26 +162,44 @@
        glass can carry, kept inside the stage, drawn gently home. */
     var nodes = [];
     groups.forEach(function (g) {
-      var items = g.members.map(function (s) { return { id: s.id, r: unitR(s) * scale, seg: s }; });
-      var p = pack(items, -Math.min(8, scale * 6));
+      /* Packed in a shuffled order, not by size, so each cluster reads
+         as a handful of circles set down together rather than a target;
+         the shuffle is by hash, so it is the same every visit. */
+      var items = g.members.map(function (s) { return { id: s.id, r: unitR(s) * scale, seg: s, h: hash(s.id + g.key) }; })
+        .sort(function (a, b) { return a.h - b.h; });
+      var p = pack(items, 6);
       p.items.forEach(function (m, k) {
         var s = m.ref.seg;
         nodes.push({ id: m.id, x: g.x + m.x, y: g.y + m.y, r: m.r, lens: s.lens, group: g.key, gref: g, seg: s,
-          z: g.z * 0.7 + (m.r / (unitR({ size: MAX_SIZE }) * scale) - 0.5) * 0.6 + (hash(s.id) - 0.5) * 0.2 });
+          t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9) });
       });
     });
     for (var iter = 0; iter < 200; iter++) {
       var t = 1 - iter / 200;
       for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
         var a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-        var allow = (a.group === b.group ? 0.3 : 0.1) * Math.min(a.r, b.r), min = a.r + b.r - allow;
+        var min = a.r + b.r + (a.group === b.group ? 5 : 9);
         if (d < min) { var f = (min - d) / d * 0.9 * (0.4 + 0.6 * t); a.x -= dx * f * 0.5; a.y -= dy * f * 0.5; b.x += dx * f * 0.5; b.y += dy * f * 0.5; }
       }
       nodes.forEach(function (nd) {
-        nd.x += (nd.gref.x - nd.x) * 0.004; nd.y += (nd.gref.y - nd.y) * 0.004;
-        nd.x = Math.max(nd.r * 0.9, Math.min(W - nd.r * 0.9, nd.x));
-        nd.y = Math.max(top + nd.r * 0.9, Math.min(H - bottom - nd.r * 0.9, nd.y));
+        nd.x += (nd.gref.x - nd.x) * 0.006; nd.y += (nd.gref.y - nd.y) * 0.006;
+        nd.x = Math.max(nd.r + 6, Math.min(W - nd.r - 6, nd.x));
+        nd.y = Math.max(top + nd.r + 6, Math.min(H - bottom - nd.r - 6, nd.y));
       });
+    }
+    /* A last, firm pass: any two still touching are pushed fully apart,
+       so the field never overlaps whatever the walls did above. */
+    for (var hard = 0; hard < 120; hard++) {
+      var moved = false;
+      for (var i = 0; i < nodes.length; i++) for (var j = i + 1; j < nodes.length; j++) {
+        var a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, min = a.r + b.r + 4;
+        if (d < min) { var f = (min - d) / d * 0.5; a.x -= dx * f; a.y -= dy * f; b.x += dx * f; b.y += dy * f; moved = true; }
+      }
+      nodes.forEach(function (nd) {
+        nd.x = Math.max(nd.r + 4, Math.min(W - nd.r - 4, nd.x));
+        nd.y = Math.max(top + nd.r + 4, Math.min(H - bottom - nd.r - 4, nd.y));
+      });
+      if (!moved) break;
     }
     var out = groups.map(function (g) {
       var mine = nodes.filter(function (nd) { return nd.group === g.key; }), sx = 0, sy = 0, topY = Infinity;

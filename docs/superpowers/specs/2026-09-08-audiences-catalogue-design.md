@@ -223,3 +223,14 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   glass inside drifts, swells and gives way, the hovered bubble is never
   pushed, and leaving waits a beat before the field relaxes. The
   Properties arrangement was dropped; Groups and Size remain.
+- 2026-09-08, fifth pass, after the user's manager saw the glass ("looks
+  like Mentos"): flat again, and calmer. No gradients, no glass, no tilt,
+  no ambient washes. Each segment is a flat disc in its lens's element
+  colour, mixed into white by its size — the smallest audiences pale, the
+  largest at full strength — with a five-step legend in the corner. Ink is
+  dark on every step, white only on the deepest Water discs, where the
+  contrast allows it. The discs sit close but never touch, packed in a
+  shuffled-by-hash order inside each group so the field reads as circles
+  set down together, not a target, and a final firm pass guarantees the
+  gap. The drift and the give-way to the pointer stay, at a fraction of
+  their former reach.
