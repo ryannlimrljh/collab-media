@@ -381,3 +381,17 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   assets are now `?v=2`, and the rule that matters most sits in the
   page's own stylesheet, which ships with the HTML and can never be a
   version behind. Bump the query whenever a shared file changes.
+- 2026-09-08, eighteenth pass: the illustrations move. The user supplied
+  a four-second animation per segment, so hovering a card now plays its
+  clip over the still, the way the ad-format cards play their sample.
+  The 1112px masters with audio live in `assets/clips/` and are kept out
+  of git (87 MB); the page plays 600px silent H.264 from
+  `assets/clips-web/`, 4.4 MB for all 51, encoded with
+  `ffmpeg -an -vf scale=600:-2 -crf 28 -preset medium -movflags +faststart`.
+  Nothing is fetched until a pointer lands: the video element is built on
+  first hover, and it fades in only once it is actually playing, so a
+  card never shows a black frame. A play asked for before any data has
+  arrived is refused, so the clip asks again on `canplay` — and only
+  fades in if the pointer is still on it. Cards, the row preview and the
+  drawer all play; the drawer stops when it closes; reduced motion keeps
+  the still.

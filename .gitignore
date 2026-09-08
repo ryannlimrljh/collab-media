@@ -4,3 +4,7 @@
 # Source illustrations: 2400px masters, ~149 MB. The web copies the
 # page actually loads live in assets/stills-web and are committed.
 assets/stills/
+
+# Source clips: 1112px masters with audio, ~87 MB. The muted, silent
+# 600px versions the page plays on hover live in assets/clips-web.
+assets/clips/

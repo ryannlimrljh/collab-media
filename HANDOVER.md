@@ -56,9 +56,13 @@ see [Gotchas](#gotchas).
 ### Assets (`assets/audiences/`)
 
 `stills/` holds the drawn illustration masters, one per segment at 2400px
-(149 MB, kept out of git); `stills-web/` holds the 700px JPEGs the page
-loads (2.3 MB), regenerated with
-`for f in assets/stills/*.png; do sips -Z 700 -s format jpeg -s formatOptions 88 "$f" --out "assets/stills-web/$(basename "$f" .png).jpg"; done`.
+(149 MB, kept out of git); `clips/` holds the four-second animation
+masters (87 MB, also out of git). `stills-web/` holds the 700px JPEGs the
+page loads (2.3 MB) and `clips-web/` the 600px silent clips it plays on
+hover (4.4 MB), regenerated with
+`for f in assets/stills/*.png; do sips -Z 700 -s format jpeg -s formatOptions 88 "$f" --out "assets/stills-web/$(basename "$f" .png).jpg"; done`
+and
+`for f in assets/clips/*.mp4; do ffmpeg -y -i "$f" -an -vf scale=600:-2 -c:v libx264 -profile:v main -pix_fmt yuv420p -crf 28 -preset medium -movflags +faststart "assets/clips-web/$(basename "$f" .mp4).mp4"; done`.
 `audiences/` holds the 51 kult.my photographs, which nothing references
 any more and which are kept until someone decides to delete them.
 
