@@ -278,3 +278,10 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   jar no longer bleeds past the content width. The lens chips left the
   canvas for a row of their own between the filter line and the jar,
   left-aligned with the search box, with the size legend at the right.
+- 2026-09-08, tenth pass: discs fell in slow motion in some situations.
+  Two causes. The physics stepped once per painted frame with whatever
+  time had elapsed, and Verlet carries speed as a displacement per step,
+  so a slow frame halved the speed; the loop now runs a fixed 1/60 s
+  clock and takes as many steps as the frame owes. And "settled" was a
+  mean over all discs, so one disc rolling on its own could be frozen
+  mid-roll; it is now the fastest disc.

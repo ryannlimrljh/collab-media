@@ -282,9 +282,10 @@
           }
         }
       }
-      var energy = 0;
-      balls.forEach(function (b) { if (b.out) return; var vx = (b.x - b.px) / h, vy = (b.y - b.py) / h; energy += vx * vx + vy * vy; });
+      var energy = 0, maxV = 0;
+      balls.forEach(function (b) { if (b.out) return; var vx = (b.x - b.px) / h, vy = (b.y - b.py) / h, v2 = vx * vx + vy * vy; energy += v2; if (v2 > maxV) maxV = v2; });
       J.energy = energy / Math.max(1, balls.length);
+      J.maxSpeed = Math.sqrt(maxV);
       return J;
     },
     settle: function (J, steps) {

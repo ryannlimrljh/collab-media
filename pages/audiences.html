@@ -1062,7 +1062,13 @@
   function motionFrame(t) {
     motion.raf = 0;
     if (E('auPanelUniverse').hidden || document.hidden || !J) return;
-    var dt = motion.last ? Math.min(0.05, (t - motion.last) / 1000) : 1 / 60; motion.last = t;
+    /* The physics runs on a fixed clock, 1/60 s a step, however fast
+       the screen paints: a slow frame gets two or three steps, a fast
+       one sometimes none, so a fall takes the same real time either
+       way. Verlet needs this — its speed is a displacement per step. */
+    var elapsed = motion.last ? Math.min(0.1, (t - motion.last) / 1000) : 1 / 60; motion.last = t;
+    motion.acc = (motion.acc || 0) + elapsed;
+    var STEP = 1 / 60, steps = Math.min(4, Math.floor(motion.acc / STEP)); motion.acc -= steps * STEP;
     var wx = motion.px, wy = motion.py;
     var hvx = (wx - motion.hx) / Math.max(dt, 1 / 120), hvy = (wy - motion.hy) / Math.max(dt, 1 / 120);
     motion.hvx += (hvx - motion.hvx) * 0.4; motion.hvy += (hvy - motion.hvy) * 0.4;
@@ -1073,8 +1079,10 @@
        a tick each, never the one it is hovering. */
     else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24, on: true, soft: true, skip: hotId };
     var pouring = J.balls.some(function (b) { return !b.out && J.time < b.release + 0.5; });
-    var settled = !pouring && !J.growing && J.energy != null && J.energy < 0.5;
-    if (!settled || hand) { M.jar.step(J, dt, hand); draw(); }
+    /* Settled means every disc is still — not the average, or one disc
+       rolling on its own would be frozen mid-roll. */
+    var settled = !pouring && !J.growing && J.maxSpeed != null && J.maxSpeed < 4;
+    if (!settled || hand) { for (var k = 0; k < steps; k++) M.jar.step(J, STEP, hand); if (steps) draw(); }
     if (motion.has && !stir) {
       var under = null;
       J.balls.forEach(function (b) { if (b.out) return; var dx = b.x - wx, dy = b.y - wy; if (dx * dx + dy * dy <= b.r * b.r) under = b.id; });
