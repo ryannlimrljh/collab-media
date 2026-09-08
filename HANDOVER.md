@@ -51,7 +51,7 @@ see [Gotchas](#gotchas).
 | `formats-data.js` | The format catalogue: specs transcribed from kult.my/gallery (2026-09-07) merged with the rate card's `bestFor` / `cpm` / `inventory`. The nine standard display units are catalogue defaults, flagged `source: "catalogue"` |
 | `format-previews.css` / `format-previews.js` | The live samples. `FormatPreviews.mount(el, format)` draws the miniature, `FormatPreviews.live(el, on)` plays it. Independent of the page so the planner can reuse it |
 | `audiences-data.js` | The audience catalogue: 51 segments read from kult.my/audience (2026-09-08) with size, portrait, properties, consumption and topics; Karen's addressable counts and fit notes on the ten that map by name; her refine dimensions and overlap rule |
-| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.arc(el, segment)` renders the consumption rings, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
+| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.arc(el, segment)` renders the consumption rings, `AudienceMarks.jar` is the jar physics: `build(segments, lens, stage)`, `step(J, dt, hand)`, `settle(J, steps)`, `resize(J, stage)`, `setActive(J, ids)`. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
 
 ### Assets (`assets/audiences/`)
 

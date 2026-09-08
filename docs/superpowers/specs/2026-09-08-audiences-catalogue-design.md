@@ -250,3 +250,15 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   filters collapsed to one row: the lens chips and a single "Lives on"
   pill that opens the nine properties. The Arrange chips and the group
   captions are gone, since the jar has no arrangements to choose.
+- 2026-09-08, seventh pass, on the user's notes: gravity is the real
+  thing (9.81 m/s² with the jar taken to stand 1.5 m tall, so a disc
+  dropped from the top lands in about a third of a second). Resizing the
+  canvas — the rail folding, the window growing — no longer pours again:
+  the discs stay, scale with the jar, and roll into whatever room appears
+  (`jar.resize`). Stirring is a press-and-drag now, hovering a plain move,
+  so the two never fight; a plain scroll moves the jar and a pinch or the
+  ± buttons zoom it. The lines above and below the canvas are gone and
+  the tab strip is the DLS's own. The filter line — search, group chips,
+  Lives on — sits above both tabs and drives both: a filtered-out disc
+  leaves the jar and a returning one pours back in (`jar.setActive`).
+  The sort and view switch show only on the Segments tab.

@@ -135,15 +135,46 @@
       list.forEach(function (s) { var r = unitR(s); sum += Math.PI * r * r; });
       /* Fewer, larger discs pack less tightly, so a lens view fills a
          little less of the jar than the whole catalogue does. */
-      var fill = 0.4 + 0.15 * Math.min(1, list.length / 51);
+      var fill = 0.32 + 0.2 * Math.min(1, list.length / 51);
       var scale = Math.sqrt(area * fill / sum);
       scale = Math.min(scale, Math.min(W, H - top - bottom) * 0.19 / unitR({ size: MAX_SIZE }));
       var balls = list.map(function (s, i) {
         var r = unitR(s) * scale, h = hash(s.id + ':' + lens);
         return { id: s.id, seg: s, lens: s.lens, group: s.group, r: r, t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9),
-          x: r + 8 + h * (W - 2 * r - 16), y: top - r - 10 - i * 22, vx: 0, vy: 0, release: i * 0.028, inside: false };
+          x: r + 8 + h * (W - 2 * r - 16), y: top - r - 10 - i * 22, release: i * 0.02, inside: false, out: false };
       });
-      return { balls: balls, W: W, H: H, top: top, bottom: bottom, time: 0, scale: scale };
+      return { balls: balls, W: W, H: H, top: top, bottom: bottom, time: 0, scale: scale, fill: fill, sum: sum };
+    },
+    /* The jar changed size — the rail folded, the window grew. The discs
+       stay where they are, scaled with the jar so they still fill it,
+       and the physics moves them into whatever room appeared. Nothing
+       pours again. */
+    resize: function (J, stage) {
+      var W = stage.w, H = stage.h, top = stage.padTop || 0, bottom = stage.padBottom || 0;
+      var area = W * (H - top - bottom), scale = Math.sqrt(area * J.fill / J.sum);
+      scale = Math.min(scale, Math.min(W, H - top - bottom) * 0.19 / unitR({ size: MAX_SIZE }));
+      var k = scale / J.scale, kx = W / J.W;
+      J.balls.forEach(function (b) {
+        b.r *= k; b.x *= kx; b.y = H - bottom - (J.H - J.bottom - b.y) * k;
+        b.px = b.x; b.py = b.y;
+      });
+      J.W = W; J.H = H; J.top = top; J.bottom = bottom; J.scale = scale; J.energy = 1;
+      return J;
+    },
+    /* Which discs are in the jar. Filtered-out discs leave the physics
+       and hide; a disc coming back pours in from the top again. */
+    setActive: function (J, activeIds) {
+      var on = {}; activeIds.forEach(function (id) { on[id] = true; });
+      J.balls.forEach(function (b, i) {
+        var was = !b.out, is = !!on[b.id];
+        if (was && !is) { b.out = true; }
+        else if (!was && is) {
+          b.out = false; b.inside = false; b.release = J.time + (i % 7) * 0.05;
+          b.x = b.r + 8 + hash(b.id + J.time) * (J.W - 2 * b.r - 16); b.y = J.top - b.r - 10; b.px = b.x; b.py = b.y;
+        }
+      });
+      J.energy = 1;
+      return J;
     },
     /* One frame. hand: {x, y, vx, vy, r, on} in world units, or null.
        Position-based: each disc steps by its last displacement plus
@@ -154,22 +185,24 @@
     step: function (J, dt, hand) {
       dt = Math.min(dt || 1 / 60, 1 / 30);
       J.time += dt;
-      var balls = J.balls, W = J.W, floor = J.H - J.bottom, ceil = J.top, G = 1400, sub = 2, h = dt / sub, DAMP = 0.975;
+      /* Real gravity: the jar is taken to stand about 1.5 m tall, so
+         9.81 m/s² becomes pixels per second squared at its height. */
+      var balls = J.balls, W = J.W, floor = J.H - J.bottom, ceil = J.top, G = 9.81 * ((J.H - J.top - J.bottom) / 1.5), sub = 3, h = dt / sub, DAMP = 0.992;
       for (var st = 0; st < sub; st++) {
         for (var i = 0; i < balls.length; i++) {
           var b = balls[i];
-          if (J.time < b.release) { b.px = b.x; b.py = b.y; continue; }
+          if (b.out || J.time < b.release) { b.px = b.x; b.py = b.y; continue; }
           if (b.px == null) { b.px = b.x; b.py = b.y; }
           var vx = (b.x - b.px) * DAMP, vy = (b.y - b.py) * DAMP + G * h * h;
           /* A disc that has all but stopped is stopped: no creep. */
-          if (vx * vx + vy * vy < 0.02 && b.inside) { vx = 0; vy = G * h * h; }
+          if (vx * vx + vy * vy < 0.03 && b.inside) { vx = 0; vy = G * h * h; }
           b.px = b.x; b.py = b.y; b.x += vx; b.y += vy;
           if (!b.inside && b.y > ceil + b.r) b.inside = true;
         }
         for (var pass = 0; pass < 3; pass++) {
           for (var i = 0; i < balls.length; i++) for (var j = i + 1; j < balls.length; j++) {
             var a = balls[i], c = balls[j];
-            if (J.time < a.release || J.time < c.release) continue;
+            if (a.out || c.out || J.time < a.release || J.time < c.release) continue;
             var dx = c.x - a.x, dy = c.y - a.y, min = a.r + c.r + 2, d2 = dx * dx + dy * dy;
             if (d2 >= min * min) continue;
             var d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d, over = (min - d) * 0.55;
@@ -179,7 +212,7 @@
           }
           if (hand && hand.on) {
             for (var i = 0; i < balls.length; i++) {
-              var b = balls[i]; if (J.time < b.release) continue;
+              var b = balls[i]; if (b.out || J.time < b.release) continue;
               var dx = b.x - hand.x, dy = b.y - hand.y, min = hand.r + b.r, d2 = dx * dx + dy * dy;
               if (d2 >= min * min) continue;
               var d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d, over = min - d;
@@ -190,7 +223,7 @@
             }
           }
           for (var i = 0; i < balls.length; i++) {
-            var b = balls[i]; if (J.time < b.release) continue;
+            var b = balls[i]; if (b.out || J.time < b.release) continue;
             if (b.x < b.r) b.x = b.r;
             if (b.x > W - b.r) b.x = W - b.r;
             if (b.y > floor - b.r) b.y = floor - b.r;
@@ -199,7 +232,7 @@
         }
       }
       var energy = 0;
-      balls.forEach(function (b) { var vx = (b.x - b.px) / h, vy = (b.y - b.py) / h; energy += vx * vx + vy * vy; });
+      balls.forEach(function (b) { if (b.out) return; var vx = (b.x - b.px) / h, vy = (b.y - b.py) / h; energy += vx * vx + vy * vy; });
       J.energy = energy / Math.max(1, balls.length);
       return J;
     },
