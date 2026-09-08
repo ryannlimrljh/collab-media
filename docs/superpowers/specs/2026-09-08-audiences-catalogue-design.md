@@ -444,3 +444,21 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   jar always means the category and never the lens. The lens chips lost
   their dots for the same reason: green, navy and orange are now spoken
   for by Ethnicity, Business and Shopping.
+- 2026-09-08, twenty-second pass: a colour audit, and the jar's labels
+  failed it. Measured live, all 48 visible disc labels fell short of
+  4.5:1 and 32 of them missed even 3:1, the worst at 1.58 — white ink on
+  turquoise and amber. White was safe when a disc was one deep lens
+  colour; it stopped being safe when the fill started mixing toward white
+  by size and the palette moved to eight category hues, three of them
+  inherently light. Dropping the size ramp alone would not have saved it
+  (the labels would still top out at 1.76 on turquoise), so the ink
+  changed: each label is now a deep shade of its own disc,
+  `color-mix(--au-color 40%, #000)`, and the fill ramp narrowed from
+  52-100% to 56-70% so the ink always has something light to sit on. The
+  count lost its `opacity:.85`, which had been quietly washing it back
+  into the fill and undoing the gain. Every name and every count now
+  measures between 4.80 and 5.90. Discs outside the lens take neutral ink
+  to match their grey. The size legend came out altogether: the radius
+  already says how big a segment is, its five dots were drawn as a grey
+  ramp while every disc on screen was a coloured one, and with the fill
+  ramp this quiet there is no longer a scale to explain.
