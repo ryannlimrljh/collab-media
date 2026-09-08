@@ -512,3 +512,23 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   those before laying a single bone. A `?tab=cards` load opens on eight
   card bones with the jar hidden; everything else opens on the jar, which
   only measures itself when it is the one on screen.
+- 2026-09-09, sorting and the jar's headline. Changing the sort rebuilt
+  the grid, so every card was a new element and the FLIP had nothing to
+  recognise: the cards blinked into their new order. A sort keeps the
+  same segments and only moves them, so the cards are now moved rather
+  than rebuilt — each card keeps its element and its picture across the
+  sort — and the snapshot covers every card, not only the ones on screen,
+  so a card arriving from below the fold knows it came from below. What
+  travels a short way travels; what would streak across the whole screen
+  arrives from the edge it came from instead. The stagger widens from
+  16ms to 38ms for a sort, which is what makes a reshuffle read as a
+  re-sort rather than a flicker. Three viewport reads moved from
+  `window.innerHeight` to the page's own `vh()` helper, which is the one
+  that keeps answering in a backgrounded tab.
+  The jar gained a headline number in the room the discs leave above
+  them: the combined size of whatever the filters have left, counting to
+  its new value over 520ms rather than snapping. It is labelled
+  "combined reach … sizes overlap", not "total audience", because these
+  are published audience-scale figures that overlap heavily — all 51 add
+  to 577.7M against an addressable universe of 16.15M, and the tray's
+  deduplicated number remains the one to quote for a buy.

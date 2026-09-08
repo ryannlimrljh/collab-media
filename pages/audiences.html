@@ -135,6 +135,16 @@
   /* The jar's bones settle on the same floor the real discs settle on
      (their bases land at 81% of the jar's height), so the pile does not
      jump up the canvas when the real ones arrive. */
+  /* The jar's discs settle at the bottom, so the total stands in the
+     room they leave above them. It never takes the pointer, and it steps
+     back while a disc is telling its own story. */
+  .au-jartotal{position:absolute; left:28px; top:18px; margin:0; pointer-events:none; z-index:1;
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-jartotal b{display:block; font-size:44px; line-height:46px; font-weight:800; letter-spacing:-.03em;
+    color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
+  .au-jartotal span{display:block; margin-top:2px; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
+  .au-space.has-hot ~ .au-jartotal{opacity:.25;}
+  @media (max-width:900px){ .au-jartotal{left:16px; top:12px;} .au-jartotal b{font-size:32px; line-height:34px;} }
   .au-sk-bub{position:absolute; bottom:19%; border-radius:50%; background:var(--color-neutral-3); transform:translate(-50%, 0);}
   @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
 
@@ -549,6 +559,7 @@
       <section class="au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
         <div class="au-jar" id="auJar">
           <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
+          <p class="au-jartotal" id="auJarTotal"><b id="auJarTotalN">0</b><span id="auJarTotalS"></span></p>
           <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
         </div>
       </section>
@@ -833,7 +844,7 @@
     state.q = this.value; E('auSearchClear').hidden = !this.value; render();
   });
   E('auSearchClear').addEventListener('click', function () { E('auSearch').value = ''; state.q = ''; this.hidden = true; render(); E('auSearch').focus(); });
-  E('auSort').addEventListener('change', function () { state.sort = this.value; render(); });
+  E('auSort').addEventListener('change', function () { state.sort = this.value; render({ reorder: true }); });
   document.querySelectorAll('.c-seg[data-view]').forEach(function (b) {
     b.addEventListener('click', function () {
       state.view = b.dataset.view;
@@ -916,34 +927,71 @@
   function visibleItems() {
     return document.querySelectorAll(state.view === 'table' ? '#auRows tr[data-id]' : '#auGrid .au-card[data-id]');
   }
-  function snapshotRects() {
+  function snapshotRects(all) {
     if (REDUCED || document.hidden) return null;
-    var map = {}, vh = window.innerHeight, els = visibleItems();
+    var map = {}, vpH = vh(), els = visibleItems();
     for (var i = 0; i < els.length; i++) {
       var rc = els[i].getBoundingClientRect();
-      if (rc.top > vh + FLIP_PAD) break;
-      if (rc.bottom < -FLIP_PAD) continue;
+      /* A sort keeps every card and only moves it, so every card's old
+         place is worth remembering: one that travels in from below the
+         fold should arrive from below, not appear out of nowhere. */
+      if (!all) { if (rc.top > vpH + FLIP_PAD) break; if (rc.bottom < -FLIP_PAD) continue; }
       map[els[i].dataset.id] = rc;
     }
     return map;
   }
-  function playMove(before) {
+  /* Same segments, new order — then the cards can be moved rather than
+     rebuilt, which keeps each card's own element (and its picture) alive
+     across the sort so the movement reads as one card going somewhere. */
+  function sameMembers(a, b) {
+    if (!a || a.length !== b.length) return false;
+    var seen = {};
+    for (var i = 0; i < a.length; i++) seen[a[i].id] = 1;
+    for (var j = 0; j < b.length; j++) if (!seen[b[j].id]) return false;
+    return true;
+  }
+  function reorderTo(container, list) {
+    var by = {}, kids = container.children, i;
+    for (i = 0; i < kids.length; i++) if (kids[i].dataset.id) by[kids[i].dataset.id] = kids[i];
+    for (i = 0; i < list.length; i++) {
+      var el = by[list[i].id];
+      if (!el) return false;
+      el.style.setProperty('--i', Math.min(i, 14));
+      container.appendChild(el);
+    }
+    return true;
+  }
+  function playMove(before, wave) {
     if (!before) return;
     var hadAny = false; for (var k in before) { hadAny = true; break; }
     if (!hadAny) return;
-    var moved = 0, appeared = 0, vh = window.innerHeight, els = visibleItems();
+    /* A sort reshuffles which cards are on screen at all, so most of them
+       arrive rather than travel. A slower wave across them is what makes
+       that read as a re-sort instead of a flicker; a filter, which swaps
+       the set outright, keeps the brisk one. */
+    var step = wave ? 38 : 16, cap = wave ? 340 : 200;
+    var moved = 0, appeared = 0, vpH = vh(), els = visibleItems();
     for (var i = 0; i < els.length; i++) {
       var el = els[i], now = el.getBoundingClientRect();
-      if (now.top > vh + FLIP_PAD) break;
+      if (now.top > vpH + FLIP_PAD) break;
       if (now.bottom < -FLIP_PAD) continue;
       var was = before[el.dataset.id];
       if (!was) {
         el.animate([{ opacity: 0, transform: 'translateY(10px) scale(.98)' }, { opacity: 1, transform: 'none' }],
-          { duration: 300, delay: Math.min(appeared * 14, 180), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+          { duration: 300, delay: Math.min(appeared * step, cap), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
         appeared++; continue;
       }
       var dx = was.left - now.left, dy = was.top - now.top;
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      /* A card that has come up from pages below would streak across the
+         screen if it travelled the whole way, so it arrives from the
+         edge it came from instead — still the right direction, without
+         the streak. */
+      if (Math.abs(dy) > vpH) {
+        el.animate([{ opacity: 0, transform: 'translateY(' + (dy > 0 ? 22 : -22) + 'px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 340, delay: Math.min(appeared * step, cap), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+        appeared++; continue;
+      }
       el.animate([{ transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)' }, { transform: 'translate(0,0)' }],
         { duration: 520, delay: Math.min(moved * 22, 220), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
       moved++;
@@ -951,32 +999,59 @@
   }
   function staggerIn(els) {
     if (REDUCED || document.hidden) return;
-    var vh = window.innerHeight, n = 0;
+    var vpH = vh(), n = 0;
     for (var i = 0; i < els.length; i++) {
       var r = els[i].getBoundingClientRect();
-      if (r.top > vh + FLIP_PAD) break;
+      if (r.top > vpH + FLIP_PAD) break;
       els[i].animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
         { duration: 320, delay: Math.min(n * 24, 260), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
       n++;
     }
   }
+  /* The jar's headline number counts to its new total rather than
+     snapping, so a filter reads as the audience growing or shrinking.
+     The wording underneath changes once, not sixty times a second. */
+  var totalRAF = 0, totalShown = 0;
+  function setJarTotal(to, n) {
+    var from = totalShown, num = E('auJarTotalN');
+    totalShown = to;
+    /* A sum of published sizes, not a headcount: these are audience-scale
+       figures that overlap heavily, and 51 of them add up to many times
+       the country. The label has to say so — the tray's deduplicated
+       number is the one to quote for a buy. */
+    E('auJarTotalS').textContent = n ? 'combined reach across ' + n + (n === 1 ? ' segment' : ' segments') + ' · sizes overlap'
+      : 'no segments match these filters';
+    if (REDUCED || document.hidden || from === to) { num.textContent = fmtM(to); return; }
+    if (totalRAF) cancelAnimationFrame(totalRAF);
+    var t0 = performance.now(), dur = 520;
+    totalRAF = requestAnimationFrame(function step(now) {
+      var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      num.textContent = fmtM(Math.round(from + (to - from) * e));
+      totalRAF = k < 1 ? requestAnimationFrame(step) : 0;
+    });
+  }
   function render(opts) {
-    var before = (opts && opts.flip === false) ? null : snapshotRects();
-    current = filtered();
+    opts = opts || {};
+    var next = filtered(), sorting = !!opts.reorder && sameMembers(current, next);
+    var before = opts.flip === false ? null : snapshotRects(sorting);
+    current = next;
     var grid = E('auGrid');
-    grid.innerHTML = current.map(cardHtml).join('');
-    E('auRows').innerHTML = current.map(rowHtml).join('');
+    if (!(sorting && reorderTo(grid, current) && reorderTo(E('auRows'), current))) {
+      grid.innerHTML = current.map(cardHtml).join('');
+      E('auRows').innerHTML = current.map(rowHtml).join('');
+    }
     var mapped = current.filter(function (s) { return s.addressable != null; }).length;
     var total = current.reduce(function (t, s) { return t + s.size; }, 0);
     E('auCount').innerHTML = '<b>' + current.length + '</b> of ' + A.length + ' segments · ' + mapped + ' with an addressable count from the planner' +
       (state.sort === 'size' ? ' · largest first' : state.sort === 'sizeAsc' ? ' · smallest first' : state.sort === 'group' ? ' · by group' : ' · A to Z');
+    setJarTotal(total, current.length);
     E('auEmpty').hidden = current.length > 0;
     E('auTabCount').textContent = current.length;
     E('auCardsView').style.display = current.length ? '' : 'none';
     E('auTableView').style.display = current.length ? '' : 'none';
     renderTray();
     syncJar();
-    playMove(before);
+    playMove(before, sorting);
   }
   function setLive(card, on) {
     if (!card) return;
