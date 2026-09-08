@@ -66,8 +66,15 @@
   .au-sk-stage{aspect-ratio:4/3; background:var(--color-neutral-2);}
   .au-sk-card{pointer-events:none; cursor:default;}
   .au-table .au-sk{display:block;}
+  /* The filter line's bones are the real chips with the ink taken out,
+     so a pill is exactly as wide as the label it is standing in for and
+     the row wraps where the real row will wrap. */
+  .au-bones{pointer-events:none;}
+  .au-bones .c-chip,.au-bones .c-filter-trigger{color:transparent; background:var(--color-neutral-2); border-color:transparent; box-shadow:none;}
+  .au-bones .c-chip > *,.au-bones .c-filter-trigger > *{visibility:hidden;}
+  .au-bones .c-filter-panel{display:none;}
   @media (prefers-reduced-motion:no-preference){
-    .au-sk,.au-sk-stage,.au-sk-dot{animation:au-sk-pulse 1.4s var(--ease-standard) infinite;}
+    .au-sk,.au-sk-stage,.au-sk-bub,.au-bones .c-chip,.au-bones .c-filter-trigger{animation:au-sk-pulse 1.4s var(--ease-standard) infinite;}
     @keyframes au-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
   }
 
@@ -126,7 +133,10 @@
   .au-bub.is-hot .au-bub-vis{transform:scale(1.025); box-shadow:0 10px 22px -14px rgba(43,43,44,.3);}
   .au-space.has-hot .au-bub:not(.is-hot):not(.is-kin):not(.is-out){opacity:.68;}
   .au-bub:focus-visible .au-bub-vis{box-shadow:0 0 0 2px var(--color-neutral-1), 0 0 0 4px var(--color-obsidian);}
-  .au-sk-bub{position:absolute; border-radius:50%; background:var(--color-neutral-2); transform:translate(-50%, -50%);}
+  /* The jar's bones settle on the same floor the real discs settle on
+     (their bases land at 81% of the jar's height), so the pile does not
+     jump up the canvas when the real ones arrive. */
+  .au-sk-bub{position:absolute; bottom:19%; border-radius:50%; background:var(--color-neutral-3); transform:translate(-50%, 0);}
   @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
 
   .au-lens{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
@@ -1628,31 +1638,81 @@
 
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
-    var sk = function (w, h, extra) { return '<span class="au-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
-    var sz = stageSize(), dots = '';
-    [[.12, .5, 60], [.26, .3, 40], [.36, .7, 52], [.5, .45, 76], [.6, .78, 34], [.7, .3, 58], [.84, .6, 50], [.92, .32, 38]].forEach(function (d) {
-      dots += '<span class="au-sk-bub" style="left:' + (d[0] * 100).toFixed(0) + '%; top:' + (d[1] * 100).toFixed(0) + '%; width:' + d[2] * 2 + 'px; height:' + d[2] * 2 + 'px"></span>';
-    });
-    world.innerHTML = dots;
-    E('auLens').innerHTML = [70, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
-    E('auChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106, 120].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
-    E('auPills').innerHTML = '<span class="au-sk au-sk-pill" style="width:92px"></span>';
-    E('auCount').textContent = 'Loading audiences…';
-    E('auGrid').innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) {
-      return '<article class="au-card au-sk-card" style="--i:' + i + '" aria-hidden="true"><div class="au-sk-stage" style="aspect-ratio:16/10"></div>' +
-        '<div class="au-body"><div class="au-titlerow">' + sk(120, 16) + '<span class="au-sk au-sk-pill" style="width:74px; height:22px"></span></div>' +
-        sk(60, 22) + sk(0, 9, 'width:64%') + '</div></article>';
+    /* The jar takes its real height before the bones go in, so it does
+       not stand at the 560px default and then collapse on arrival. */
+    sizeCanvas();
+    var sk = function (w, h, extra) {
+      return '<span class="au-sk" style="width:' + (typeof w === 'number' ? w + 'px' : w) + '; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>';
+    };
+    /* A pile, not a scatter: [left %, radius, px above the floor]. The
+       real jar settles 51 discs with a median diameter near 27 and a few
+       near 130, so the bones keep that spread. */
+    var pile = [[5, 22, 0], [12, 34, 0], [21, 46, 0], [32, 30, 0], [40, 26, 0], [48, 40, 0], [58, 24, 0], [65, 36, 0],
+                [74, 28, 0], [81, 44, 0], [90, 25, 0], [96, 18, 0],
+                [9, 16, 46], [17, 26, 62], [27, 20, 82], [36, 32, 56], [45, 18, 54], [53, 28, 74],
+                [62, 20, 50], [70, 30, 66], [78, 17, 58], [86, 26, 82], [93, 15, 52],
+                [22, 15, 128], [50, 17, 126], [72, 14, 122]];
+    world.innerHTML = pile.map(function (d) {
+      return '<span class="au-sk-bub" style="left:' + d[0] + '%; bottom:calc(19% + ' + d[2] + 'px); width:' + d[1] * 2 + 'px; height:' + d[1] * 2 + 'px"></span>';
     }).join('');
-    E('auRows').innerHTML = [0, 1, 2, 3, 4].map(function () {
-      var cells = '';
-      for (var c = 0; c < 7; c++) cells += '<td>' + sk(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
-      return '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
+    /* The filter line draws itself for real and then has its ink taken
+       out, so every pill is the width of the label it stands for. */
+    renderLensChips(); renderChips(); renderPills();
+    E('auLens').classList.add('au-bones');
+    E('auChips').classList.add('au-bones');
+    E('auPills').classList.add('au-bones');
+    E('auCount').textContent = 'Loading audiences\u2026';
+    /* The card's bones wear the card's own classes, so the stage keeps
+       its 4/3 and .au-swap its fixed 96px and the bone card stands
+       exactly as tall as the card that replaces it. */
+    E('auGrid').innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) {
+      var t = [78, 92, 68, 84][i % 4];
+      /* A title runs one, two or three lines and the card grows with it
+         (a titlerow of 24, 40 or 60); the bones keep that mix so the
+         grid does not reflow when the names arrive. */
+      var lines = [1, 2, 2, 1, 3, 2, 2, 1][i], ttl = '';
+      /* 3px of padding on the h4 and 6px between bars rebuilds the 20px
+         line box the real title sits on, so N bars stand exactly as tall
+         as N lines of name. */
+      for (var L = 0; L < lines; L++) ttl += sk(L === lines - 1 ? '62%' : '100%', 14, 'display:block; margin-bottom:' + (L === lines - 1 ? 0 : 6) + 'px');
+      return '<article class="au-card au-sk-card" style="--i:' + i + '" aria-hidden="true">' +
+        '<div class="au-stage au-sk-stage"></div>' +
+        '<div class="au-body">' +
+          '<div class="au-titlerow"><h4 style="flex:1; padding:3px 0">' + ttl + '</h4><span class="au-sk au-sk-pill" style="width:' + t + 'px; height:24px"></span></div>' +
+          '<div class="au-swap"><div class="rest">' +
+            '<p class="au-tagline">' + sk('100%', 11, 'margin:3px 0 6px') + sk('92%', 11, 'margin:0 0 6px') + sk('58%', 11) + '</p>' +
+            '<p class="au-sizeline">' + sk(124, 13) + '</p>' +
+          '</div></div>' +
+        '</div></article>';
+    }).join('');
+    /* Same for a row: the portrait, two lines of name, a group pill, two
+       numbers, the property pills and the topics line all stand in. */
+    E('auRows').innerHTML = [0, 1, 2, 3, 4].map(function (i) {
+      var w = [128, 96, 150, 112, 134][i], props = [5, 4, 5, 4, 5][i];
+      /* The properties column is what makes a row tall: its pills are
+         wider than half the column, so each takes its own line and five
+         of them stand 92px high, the height the real rows come out at. */
+      var mini = '';
+      for (var k = 0; k < props; k++) mini += '<span class="au-sk" style="width:' + (58 + (k * 11) % 26) + 'px; height:16px; border-radius:var(--radius-pill)"></span>';
+      return '<tr aria-hidden="true">' +
+        '<td class="sel">' + sk(28, 28, 'border-radius:var(--radius-pill)') + '</td>' +
+        '<td><div class="who">' + sk(44, 33) + '<div>' + sk(w, 13, 'margin-bottom:5px') + sk(72, 10) + '</div></div></td>' +
+        '<td><span class="au-sk" style="width:96px; height:24px; border-radius:var(--radius-pill)"></span></td>' +
+        '<td class="num">' + sk(38, 13) + '</td>' +
+        '<td class="num">' + sk(46, 13) + '</td>' +
+        '<td>' + sk(92, 13) + '</td>' +
+        '<td><div class="au-props-mini">' + mini + '</div></td>' +
+        '<td class="au-topics-line">' + sk('100%', 10, 'margin-bottom:5px') + sk('72%', 10) + '</td>' +
+      '</tr>';
     }).join('');
   }
   skeleton();
   syncTrayUI();
   setTimeout(function () {
     if (document.hidden) E('auContent').classList.remove('au-arriving');
+    E('auLens').classList.remove('au-bones');
+    E('auChips').classList.remove('au-bones');
+    E('auPills').classList.remove('au-bones');
     buildUniverse(); renderLensChips();
     renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
     var tabDeep = /[?&]tab=cards/.test(location.search);

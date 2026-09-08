@@ -462,3 +462,24 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   already says how big a segment is, its five dots were drawn as a grey
   ramp while every disc on screen was a coloured one, and with the fill
   ramp this quiet there is no longer a scale to explain.
+- 2026-09-09, twenty-third pass: the bones now stand where the page will.
+  Measured against the real thing, the old skeleton was guessing: the card
+  stage was drawn 16/10 against a real 4/3, the table's rows stood 34px
+  against a real 98, the filter pills were nine hand-typed widths against
+  labels that run from 62 to 208, and the jar kept its 560px default and
+  then collapsed to 440 the moment the real one measured itself. Four
+  changes fix it, and none of them is a new number to maintain. The
+  filter line draws the real chips and has its ink taken out, so a pill
+  is exactly as wide as the label it stands for and the row wraps where
+  the real row wraps. The card's bones wear the card's own classes, so
+  the stage keeps its aspect ratio at any column width and `.au-swap`
+  its fixed 96px; the titles run one, two or three bars because the real
+  names run one, two or three lines, and the bone cards come out at
+  352/368/388 exactly as the real ones do. A row's height turned out to
+  be set by the properties column, whose pills are wider than half the
+  column and so stand one per line, five of them 92px high; the bones
+  keep that and measure 98 to 117, the range the real rows occupy. And
+  the jar sizes itself before the bones go in. The disc bones moved from
+  a scatter across the canvas to a pile resting on the floor the real
+  discs settle on, in neutral-3 rather than neutral-2, which was
+  invisible against the warm canvas.
