@@ -1526,7 +1526,6 @@
     var inTray = tray.indexOf(s.id) > -1;
     E('auDrawerFoot').innerHTML =
       '<a class="c-btn c-btn-primary c-btn-md" href="planner.html?audiences=' + encodeURIComponent(s.id) + '"><i class="ph ph-compass-tool"></i> Use in a media plan</a>' +
-      '<a class="c-btn c-btn-secondary c-btn-md" href="https://kult.my/audience/" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out"></i> On kult.my</a>' +
       '<span class="spacer"></span>' +
       '<button class="c-btn c-btn-ghost c-btn-md" type="button" id="auDrawerAdd"><i class="ph ' + (inTray ? 'ph-check' : 'ph-plus') + '"></i> ' + (inTray ? 'In the reach tray' : 'Add to reach tray') + '</button>';
     E('auDrawerBody').scrollTop = 0;

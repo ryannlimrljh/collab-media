@@ -598,3 +598,8 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   remains, which is also the one the colour follows. `lensTag` and the
   lens-to-DLS-tag map went with it; the lens still names itself in the
   table's second line and still answers to search.
+- 2026-09-09, and the outbound link with it. The drawer's footer sent
+  people to kult.my's own audience page, which is where the numbers came
+  from but not where the work happens; it left two actions that both
+  belong here, the media plan and the reach tray. The size still says
+  where it was published.
