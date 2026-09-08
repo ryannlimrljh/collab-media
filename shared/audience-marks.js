@@ -218,41 +218,6 @@
     spark: function () { return L('M0 -12 L0 12 M-12 0 L12 0') + LT('M-8 -8 L8 8 M8 -8 L-8 8'); }
   };
 
-  /* Accents: the little marks in the margins that make a drawing feel
-     drawn — sparkles, squiggles, motion lines, a stray dot or two. */
-  var ACCENT = {
-    sparkle: function (R) { return LT('M0 -7 L0 7 M-7 0 L7 0 M-4 -4 L4 4 M4 -4 L-4 4', 1.5); },
-    twinkle: function (R) { return LT('M0 -6 Q1 -1 6 0 Q1 1 0 6 Q-1 1 -6 0 Q-1 -1 0 -6', 1.5); },
-    squiggle: function (R) { return LT(wline(-9, 0, -3, 0, R, 4) + ' ' + wline(-3, 0, 3, 0, R, 4) + ' ' + wline(3, 0, 9, 0, R, 4), 1.5); },
-    dots: function (R) { return D(-5, 0, 1.5) + D(0, -3, 1.5) + D(5, 1, 1.5); },
-    arcs: function (R) { return LT('M-6 -6 Q0 0 -6 6 M0 -8 Q7 0 0 8', 1.5); },
-    plus: function (R) { return LT('M0 -5 L0 5 M-5 0 L5 0', 1.5); },
-    tinyleaf: function (R) { return LT('M0 6 Q-7 0 0 -6 Q7 0 0 6 Z M0 5 L0 -3', 1.4); },
-    tinyheart: function (R) { return LT('M0 6 C-8 0 -4 -7 0 -3 C4 -7 8 0 0 6 Z', 1.4); },
-    note: function (R) { return LT('M0 4 L0 -7 L6 -9 L6 2', 1.4) + D(-2, 4, 2.2) + D(4, 2, 2.2); },
-    coin: function (R) { return LT('M0 -5 A5 5 0 1 1 0 5 A5 5 0 1 1 0 -5 M0 -3 L0 3', 1.4); }
-  };
-  var ACCENTS_BY_LENS = {
-    who: ['tinyleaf', 'dots', 'plus', 'tinyheart', 'squiggle'],
-    love: ['sparkle', 'twinkle', 'note', 'arcs', 'dots'],
-    buying: ['sparkle', 'coin', 'plus', 'squiggle', 'twinkle']
-  };
-  /* Where an accent may sit without landing on the scene. */
-  var ANCHORS = [[20, 26], [38, 16], [16, 52], [128, 20], [146, 40], [150, 72], [112, 14], [64, 12]];
-
-  /* A backdrop per group: the faint drawing behind the scene that says
-     where we are before the props do. */
-  var BACKDROP = {
-    sports: function (R) { return LT('M8 74 Q80 26 152 74', 1.1) + LT('M20 74 Q80 42 140 74', 1.1) + LT('M6 62 L6 74 M154 62 L154 74', 1.1); },
-    entertainment: function (R) { return LT('M4 8 Q22 30 4 44 M28 8 Q46 30 28 44 M52 8 Q70 30 52 44', 1.1) + LT('M108 8 Q126 30 108 44 M132 8 Q150 30 132 44', 1.1) + LT('M0 8 L160 8', 1.1); },
-    trendsetter: function (R) { return LT('M34 96 L34 46 Q80 8 126 46 L126 96', 1.1); },
-    business: function (R) { return LT('M96 96 L96 44 L118 44 L118 96 M122 96 L122 58 L140 58 L140 96 M78 96 L78 62 L92 62 L92 96', 1.1) + LT('M100 50 L114 50 M100 58 L114 58 M126 64 L136 64 M82 68 L88 68', 1.1); },
-    shopping: function (R) { return LT('M92 34 L154 34 M92 56 L154 56', 1.1) + LT('M100 34 L100 24 M112 34 L112 26 M126 56 L126 46 M140 56 L140 44', 1.1) + LT('M100 20 L112 20 M126 42 L140 42', 1.1); },
-    income: function (R) { return LT('M100 96 L100 82 L118 82 L118 96 M118 82 L118 66 L136 66 L136 96 M136 66 L136 48 L154 48 L154 96', 1.1); },
-    'life-stage': function (R) { return LT('M132 30 A14 14 0 1 1 132 29.9', 1.1) + LT('M132 10 L132 4 M132 56 L132 50 M112 30 L106 30 M158 30 L152 30 M118 16 L114 12 M146 44 L150 48', 1.1) + LT('M14 34 Q14 24 24 24 Q28 14 40 18 Q50 16 50 28 Q58 30 54 38 L16 38 Q10 38 14 34 Z', 1.1); },
-    ethnicity: function (R) { return LT('M0 10 Q40 26 80 12 Q120 26 160 10', 1.1) + LT('M14 17 L11 26 L20 24 Z M40 22 L38 32 L46 28 Z M66 18 L66 28 L74 24 Z M104 20 L102 30 L110 26 Z M132 15 L131 25 L139 21 Z', 1.1); }
-  };
-
   /* ── People ──────────────────────────────────────────────────────
      One soft blob of colour is the whole body and the head at once,
      with a tiny face drawn on it; the arms and legs are white tubes
@@ -272,8 +237,46 @@
       ' L' + n1(x0 + r[3]) + ' ' + n1(y1) + ' Q' + n1(x0) + ' ' + n1(y1) + ' ' + n1(x0) + ' ' + n1(y1 - r[3]) +
       ' L' + n1(x0) + ' ' + n1(y0 + r[0]) + ' Q' + n1(x0) + ' ' + n1(y0) + ' ' + n1(x0 + r[0]) + ' ' + n1(y0) + ' Z';
   }
-  function face(fx, fy, h) {
+  /* Hair is one band that sits over the top of the body and falls down
+     both sides by however much the style calls for, leaving an opening
+     for the face. Every style is that band plus, sometimes, one extra
+     piece — a bun, a tail, a few curls. */
+  function hairCap(t, hw, bh, fall) {
+    var o = hw + 3, inner = t + bh * 0.24, low = t + bh * fall, lip = t + bh * 0.2;
+    return P('M' + n1(-o) + ' ' + n1(low) +
+      ' C' + n1(-o - 2) + ' ' + n1(lip) + ' ' + n1(-hw + 3) + ' ' + n1(t - 5) + ' 0 ' + n1(t - 5) +
+      ' C' + n1(hw - 3) + ' ' + n1(t - 5) + ' ' + n1(o + 2) + ' ' + n1(lip) + ' ' + n1(o) + ' ' + n1(low) +
+      ' L' + n1(o - 6) + ' ' + n1(low) +
+      ' C' + n1(o - 6) + ' ' + n1(lip) + ' ' + n1(hw - 5) + ' ' + n1(inner) + ' 0 ' + n1(inner) +
+      ' C' + n1(-hw + 5) + ' ' + n1(inner) + ' ' + n1(-o + 6) + ' ' + n1(lip) + ' ' + n1(-o + 6) + ' ' + n1(low) + ' Z', INK);
+  }
+  var HAIR = {
+    none: function () { return ''; },
+    /* A single curl, for a character who wears almost none. */
+    tuft: function (t) { return L('M1 ' + n1(t + 3) + ' C0 ' + n1(t - 9) + ' 13 ' + n1(t - 10) + ' 10 ' + n1(t - 1)); },
+    crop: function (t, hw, bh) { return hairCap(t, hw, bh, 0.3); },
+    bun:  function (t, hw, bh) { return hairCap(t, hw, bh, 0.28) + D(0, t - 10, 6.5); },
+    curly: function (t, hw, bh) { return hairCap(t, hw, bh, 0.3) + D(-13, t - 3, 5.5) + D(-4.5, t - 7, 6) + D(4.5, t - 7, 6) + D(13, t - 3, 5.5); },
+    long: function (t, hw, bh) { return hairCap(t, hw, bh, 0.86); },
+    bob:  function (t, hw, bh) { return hairCap(t, hw, bh, 0.5); },
+    pony: function (t, hw, bh) {
+      return hairCap(t, hw, bh, 0.3) +
+        P('M' + n1(hw + 1) + ' ' + n1(t + bh * 0.2) + ' C' + n1(hw + 11) + ' ' + n1(t + bh * 0.16) + ' ' + n1(hw + 14) + ' ' + n1(t + bh * 0.62) + ' ' + n1(hw + 6) + ' ' + n1(t + bh * 0.78) +
+          ' C' + n1(hw + 10) + ' ' + n1(t + bh * 0.5) + ' ' + n1(hw + 6) + ' ' + n1(t + bh * 0.3) + ' ' + n1(hw + 1) + ' ' + n1(t + bh * 0.2) + ' Z', INK);
+    }
+  };
+  /* A bundle of features per look, so a character reads as a person
+     rather than a shape. Which look a segment gets comes from its own
+     seed, except where the segment itself says who it is. */
+  var LOOKS = [
+    { hair: 'none' }, { hair: 'tuft' }, { hair: 'crop', beard: true }, { hair: 'bun', ear: true },
+    { hair: 'long', ear: true }, { hair: 'curly' }, { hair: 'bob', ear: true }, { hair: 'pony' },
+    { hair: 'crop' }, { hair: 'long' }, { hair: 'bob' }, { hair: 'tuft', beard: true }
+  ];
+  var LOOK_BY_SEG = { 'new-mothers': 4, 'experienced-mothers': 3, 'fashion-icons': 9, 'the-dynamic-duo': 6 };
+  function face(fx, fy, h, look) {
     var eye = h % 4, mouth = Math.floor(h / 5) % 3, tick = Math.floor(h / 11) % 3;
+    if (look.glasses) eye = 0;
     var e = [
       D(fx - 6, fy, 1.9) + D(fx + 6, fy, 1.9),
       LT('M' + (fx - 6) + ' ' + (fy - 2) + ' L' + (fx - 6) + ' ' + (fy + 2) + ' M' + (fx + 6) + ' ' + (fy - 2) + ' L' + (fx + 6) + ' ' + (fy + 2), 2),
@@ -286,11 +289,15 @@
       LT('M' + (fx - 3) + ' ' + (fy + 7) + ' L' + (fx + 3) + ' ' + (fy + 7), 1.8)
     ][mouth];
     /* The stray mark beside the face that says a hand drew this. */
-    var t = ['', LT('M' + (fx + 11) + ' ' + (fy - 5) + ' l3 -3 M' + (fx + 12.5) + ' ' + (fy - 1) + ' l4 0', 1.3), D(fx - 12, fy + 4, 1.3)][tick];
+    var t = ['', LT('M' + n1(fx + 11) + ' ' + n1(fy - 5) + ' l3 -3', 1.4), D(fx - 12, fy + 4, 1.3)][tick];
+    if (look.glasses) e += LT('M' + n1(fx - 10) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx + 1.4) + ' ' + n1(fy) + ' a4.6 4.6 0 1 0 9.2 0 a4.6 4.6 0 1 0 -9.2 0 M' + n1(fx - 0.8) + ' ' + n1(fy) + ' l1.4 0', 1.6);
+    if (look.beard) e += LT('M' + n1(fx - 8) + ' ' + n1(fy + 4) + ' C' + n1(fx - 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 16) + ' ' + n1(fx + 8) + ' ' + n1(fy + 4), 2.4);
     return e + m + t;
   }
   function person(seg, pose, x, y, sc) {
     var h = Math.floor(hash(seg.id) * 100000), R = rnd(h + 11);
+    var look = LOOKS[LOOK_BY_SEG[seg.id] != null ? LOOK_BY_SEG[seg.id] : h % LOOKS.length];
+    look = { hair: look.hair, beard: look.beard, ear: look.ear, glasses: Math.floor(h / 17) % 4 === 0 && !look.beard };
     var tilt = (R() - 0.5) * 5, w = 46 + R() * 8, bh = 42 + R() * 8;
     var legLen = 28 + R() * 4, sit = pose === 'sit', cy = sit ? -bh / 2 - 9 : -legLen - bh / 2 + 2;
     var strength = (0.82 + R() * 0.18).toFixed(2);
@@ -305,6 +312,7 @@
         L('M' + n1(lx) + ' ' + n1(cy + bh / 2 - 4) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' 0 l5 0');
     }
     var body = '<path d="' + squircle(0, cy, w, bh, R) + '" fill="var(--au-color)" fill-opacity="' + strength + '"/>';
+    var hair = HAIR[look.hair](cy - bh / 2, w / 2, bh) + (look.ear ? D(-w / 2 + 1.5, cy + 3, 2) + D(w / 2 - 1.5, cy + 3, 2) : '');
     /* Arms are lines too; the hand is three short strokes at the end,
        the way a stick figure's is. */
     var sy = cy + bh * 0.12, ax = w / 2 - 3, arms;
@@ -330,11 +338,14 @@
         arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 8) + ' ' + n1(ax + 9) + ' ' + n1(sy + 18) + ' ' + n1(ax + 4) + ' ' + n1(sy + 23), ax + 4, sy + 23, -8);
     }
     return '<g transform="translate(' + x + ' ' + y + ') rotate(' + n1(tilt) + ') scale(' + (sc || 1) + ')">' +
-      legs + body + face(fx, fy, h) + arms + '</g>';
+      legs + body + hair + face(fx, fy, h, look) + arms + '</g>';
   }
   function scene(seg, pose, personX, props) {
     var out = person(seg, pose, personX == null ? 52 : personX, 112, 1);
-    (props || []).forEach(function (p) { out += G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4])); });
+    /* Two props at most. A third only ever repeated what the first
+       two already said, and three drawings in one frame read as
+       clutter rather than as a scene. */
+    (props || []).slice(0, 2).forEach(function (p) { out += G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4])); });
     return out;
   }
   /* Each segment's scene: pose, where the person stands, and props as
@@ -347,12 +358,12 @@
     't20': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 5], ['chart', 134, 84, .9]]); },
     'm40': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 3], ['house', 134, 92, .8]]); },
     'b40': function (s) { return scene(s, 'stand', 46, [['coins', 104, 96, 1, 1], ['bag', 132, 96, .9]]); },
-    'gen-z': function (s) { return scene(s, 'hold', 48, [['phone', 84, 74, 1], ['spark', 120, 56, .8], ['headset', 132, 88, .9]]); },
+    'gen-z': function (s) { return scene(s, 'hold', 48, [['phone', 84, 74, 1], ['headset', 124, 86, 1]]); },
     'millennials': function (s) { return scene(s, 'sit', 44, [['laptop', 96, 92, 1], ['coffee', 132, 92, .9]]); },
     'gen-x': function (s) { return scene(s, 'hold', 46, [['briefcase', 92, 96, 1], ['coffee', 130, 92, .9], ['house', 130, 60, .6]]); },
     'baby-boomers': function (s) { return scene(s, 'sit', 44, [['newspaper', 98, 84, 1], ['coffee', 134, 94, .9]]); },
     'young-working-adult': function (s) { return scene(s, 'hold', 46, [['laptop', 96, 96, .9], ['coffee', 128, 94, .8], ['chart', 130, 62, .7]]); },
-    'student': function (s) { return scene(s, 'hold', 46, [['books', 92, 96, 1], ['graduation', 128, 66, 1], ['pen', 134, 96, .8]]); },
+    'student': function (s) { return scene(s, 'hold', 46, [['books', 94, 96, 1.1], ['graduation', 130, 74, 1.1]]); },
     'solo-lifestylers': function (s) { return scene(s, 'stand', 60, [['coffee', 108, 94, 1], ['plane', 130, 56, .9], ['suitcase', 134, 96, .8]]); },
     'the-dynamic-duo': function (s) { return scene(s, 'wave', 44, [['ring', 100, 92, 1], ['house', 132, 92, .8]]); },
     'young-families': function (s) { return scene(s, 'hold', 42, [['stroller', 96, 94, 1], ['kid', 132, 100, 1]]); },
@@ -380,10 +391,10 @@
     'comedy-fans': function (s) { return scene(s, 'sit', 44, [['popcorn', 98, 88, 1], ['tv', 134, 88, .9]]); },
     'rom-com-fans': function (s) { return scene(s, 'sit', 44, [['heart', 92, 72, 1], ['popcorn', 118, 90, .9], ['tv', 146, 92, .7]]); },
     'animation-fans': function (s) { return scene(s, 'sit', 44, [['tv', 104, 86, 1], ['star', 134, 66, 1], ['star', 142, 92, .7]]); },
-    'sci-fi-fantasy-fans': function (s) { return scene(s, 'stand', 42, [['planet', 100, 70, 1], ['rocket', 132, 88, 1], ['star', 90, 44, .7]]); },
+    'sci-fi-fantasy-fans': function (s) { return scene(s, 'stand', 44, [['planet', 102, 66, 1.1], ['rocket', 136, 90, 1]]); },
     'horror-fans': function (s) { return scene(s, 'sit', 44, [['ghost', 100, 82, 1], ['popcorn', 134, 92, .9]]); },
     'action-adventure-fans': function (s) { return scene(s, 'cheer', 46, [['clapper', 104, 92, 1], ['star', 134, 64, .8], ['ticket', 136, 96, .8]]); },
-    'music-concert-goers': function (s) { return scene(s, 'cheer', 46, [['mic', 100, 90, 1], ['notes', 130, 70, 1], ['ticket', 136, 100, .7]]); },
+    'music-concert-goers': function (s) { return scene(s, 'cheer', 46, [['mic', 100, 92, 1.1], ['notes', 132, 74, 1.1]]); },
     'online-shoppers': function (s) { return scene(s, 'hold', 42, [['phone', 82, 74, .9], ['cart', 116, 90, 1], ['gift', 144, 96, .7]]); },
     'automotive-buyers': function (s) { return scene(s, 'hold', 40, [['key', 80, 76, 1], ['car', 116, 92, 1.1]]); },
     'home-buyers': function (s) { return scene(s, 'hold', 42, [['key', 82, 78, 1], ['house', 118, 90, 1.2]]); },
@@ -396,32 +407,15 @@
     var draw = SCENES[seg.id] || function (x) { return scene(x, 'stand', 60, []); };
     var seed = Math.floor(hash(seg.id + ':art') * 1e6) + 7, R = rnd(seed);
     var g = (window.AUDIENCE_GROUPS || []).filter(function (x) { return x.key === seg.group; })[0];
-    /* 1. A pale shape behind, off-centre and never twice the same, so
-       the character has something to stand against. */
-    var bx = 88 + (R() - 0.5) * 24, by = 58 + (R() - 0.5) * 14;
-    var back = '<path d="' + blobPath(bx, by, 48 + R() * 10, 34 + R() * 8, 8, 0.26, R) + '" fill="var(--au-strong)" opacity=".42"/>';
-    /* 2. Where we are, drawn faintly behind the scene. */
-    var bd = BACKDROP[seg.group];
-    back += bd ? '<g opacity=".22">' + bd(R) + '</g>' : '';
-    /* 3. The ground: a drawn line, a shadow under the figure, and a
-       few marks so it reads as somewhere rather than nowhere. */
-    var ink = '<g opacity=".38">' + LT(wline(10, 112, 150, 112, R, 3), 1.2) + '</g>';
-    ink += '<ellipse cx="52" cy="113.5" rx="24" ry="3" fill="' + INK + '" opacity=".13"/>';
-    var marks = '', k, mx;
-    for (k = 0; k < 4; k++) {
-      mx = 18 + k * 36 + R() * 14;
-      marks += LT('M' + n1(mx) + ' 116 l' + n1(3 + R() * 5) + ' 0', 1.1);
-    }
-    ink += '<g opacity=".22">' + marks + '</g>';
-    /* 4. The scene itself, then the marks in the margins. */
-    var pool = ACCENTS_BY_LENS[seg.lens] || ACCENTS_BY_LENS.who, spots = ANCHORS.slice(), acc = '';
-    var count = 2 + Math.floor(R() * 2);
-    for (k = 0; k < count; k++) {
-      var at = spots.splice(Math.floor(R() * spots.length), 1)[0];
-      acc += G(at[0], at[1], 0.7 + R() * 0.5, ACCENT[pool[Math.floor(R() * pool.length)]](R));
-    }
+    /* A pale wash behind, off-centre and never twice the same, so the
+       character has something to stand against. */
+    var bx = 90 + (R() - 0.5) * 22, by = 58 + (R() - 0.5) * 12;
+    var back = '<path d="' + blobPath(bx, by, 46 + R() * 10, 33 + R() * 7, 8, 0.26, R) + '" fill="var(--au-strong)" opacity=".42"/>';
+    /* The ground: one drawn line and the shadow the figure casts on it. */
+    var ink = '<g opacity=".3">' + LT(wline(14, 112, 146, 112, R, 3), 1.2) + '</g>' +
+      '<ellipse cx="52" cy="113.5" rx="24" ry="3" fill="' + INK + '" opacity=".11"/>';
     return '<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(seg.name + ', ' + (g ? g.label : '')) + '">' +
-      back + ink + draw(seg) + '<g opacity=".55">' + acc + '</g></svg>';
+      back + ink + draw(seg) + '</svg>';
   }
 
   /* ── The jar ─────────────────────────────────────────────────────

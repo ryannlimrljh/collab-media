@@ -324,3 +324,15 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   both drawn thin. A drawn ground line, a shadow and two or three margin
   accents finish it. Everything organic is generated from a seeded
   wobble, so a segment's drawing never changes but no two are alike.
+- 2026-09-08, fourteenth pass: the frames were too busy, so everything
+  that was not carrying meaning came out — the faint group backdrops, the
+  margin accents and the ground marks. What is left is a pale wash, one
+  drawn ground line, the shadow, the character and at most two props (a
+  third only ever repeated what the first two said). In their place the
+  characters got an identity: a hairstyle drawn as a band over the top of
+  the body that falls down both sides by however much the style calls for
+  — none, a single curl, a crop, a bob, long hair, a bun, curls, a
+  ponytail — plus glasses, earrings or a beard. Which look a segment gets
+  comes from its own seed, except where the segment says who it is:
+  New Mothers and Experienced Mothers are drawn as the women KULT
+  describes them to be.
