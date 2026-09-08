@@ -116,8 +116,10 @@ to fill the width. Motion is `transform` and `opacity` only, one FLIP pass,
 `--ease-settle`, 420ms; reduced motion snaps.
 
 Hover or focus a circle: it lifts, its name and size appear in a floating
-label, and every other circle that shares a property with it brightens while
-the rest dim. Click opens the drawer. Below the stage, a row of nine property
+label, its fans-to-buyers twin and the rest of its group brighten, and the
+rest dim. (Sharing a property was the first idea; Awani and Gempak sit on
+almost every segment, so that lit the whole stage. Properties light the
+stage from their own chips instead.) Click opens the drawer. Below the stage, a row of nine property
 chips ("Where they live"): hovering Gempak lights every segment that lives on
 Gempak, with a count. This absorbs the matrix idea without a second view.
 
@@ -160,6 +162,9 @@ media plan.
 
 **Reach tray.** Bottom bar, up to five segments, kept for the tab session in
 `sessionStorage`. Shows raw total and unique reach using the overlap rule.
+When the unique figure passes Malaysia's 16.15M the sheet says so and points
+at the planner's addressable counts, since KULT's sizes are audience-scale
+figures across platforms rather than unique people.
 Opens a sheet: the chosen segments as columns (portrait, size, arc), the
 reach maths spelled out, and Karen's four refine selects; changing one
 scales unique reach and says what percentage is kept. Footer: Send to a

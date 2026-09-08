@@ -1,0 +1,23 @@
+/* Collab:Media — audience marks. Composes tokens only.
+
+   .am-arc  the consumption arc. Colour comes from --am-color on the arc
+            or an ancestor (the page sets it from the segment's lens);
+            rings step down in opacity from the outermost. Rings are drawn
+            from nothing when an ancestor gains .is-live, or sit complete
+            when the arc itself carries .is-still. */
+.am-arc{display:block; --am-color:var(--color-neutral-9);}
+.am-arc svg{display:block; width:100%; height:100%; transform:rotate(-90deg);}
+.am-arc circle{fill:none; stroke-width:5.5; stroke-linecap:round;}
+.am-arc .am-track{stroke:var(--color-neutral-9); opacity:.07;}
+/* At rest the rings sit complete but faint, so the card still says
+   "this one is social-heavy" from across the room; going live draws
+   them in from nothing at full strength, outermost first. */
+.am-arc .am-val{stroke:var(--am-color); opacity:calc(.38 - var(--am-i, 0) * .05);
+  stroke-dasharray:var(--c); stroke-dashoffset:var(--o);
+  transition:opacity var(--duration-base, .2s) var(--ease-standard, ease);}
+.is-live .am-arc .am-val,.am-arc.is-still .am-val{opacity:calc(1 - var(--am-i, 0) * .16);}
+.is-live .am-arc .am-val{animation:am-draw var(--duration-reveal, .6s) var(--ease-flow, ease-out) both; animation-delay:calc(var(--am-i, 0) * 60ms);}
+@keyframes am-draw{from{stroke-dashoffset:var(--c);} to{stroke-dashoffset:var(--o);}}
+@media (prefers-reduced-motion:reduce){
+  .is-live .am-arc .am-val{animation:none;}
+}

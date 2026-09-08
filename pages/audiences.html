@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collab:Media · Audiences</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Water is Collab:Media's element, so the drop is the tab mark. -->
+<link rel="icon" type="image/svg+xml" href="../collabrium-dls/SVG/water.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
+<link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
+<link rel="stylesheet" href="../shared/audience-marks.css?v=1" />
+<style>
+  /* Page-local. Composes tokens only — no new colours, radii or spacing.
+
+     The catalogue is a map first and a list second: the page opens on
+     every segment drawn as a circle sized by its audience, packed into
+     its group, so a planner sees who sits next to whom before reading a
+     word. The cards below carry the portraits and the consumption arcs;
+     the table is the same list for people who scan in columns. */
+  .c-shell .c-pageheader{margin-bottom:var(--spacing-24);}
+  .au-divider{border:none; border-top:1px solid var(--color-neutral-3); margin:0 0 var(--spacing-24);}
+  .au-sub-hint{display:inline-flex; align-items:center; gap:6px;}
+  .au-sub-hint i{font-size:var(--icon-sm);}
+  .au-badge-n{display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; border-radius:var(--radius-pill);
+    background:var(--color-obsidian); color:var(--color-neutral-1); font-size:11px; font-weight:800; margin-left:2px;}
+  .au-badge-n[hidden]{display:none;}
+
+  /* ── Lens colours. Each lens owns one element: who → Earth, what they
+     love → Water, what they're buying → Fire. Everything coloured on the
+     page reads these three variables. ── */
+  .lens-who{--au-color:var(--color-green); --au-bg:var(--color-earth-bg); --au-strong:var(--color-earth-bg-strong); --au-pastel:var(--color-earth-pastel);}
+  .lens-love{--au-color:var(--color-navy); --au-bg:var(--color-water-bg); --au-strong:var(--color-water-bg-strong); --au-pastel:var(--color-water-pastel);}
+  .lens-buying{--au-color:var(--color-orange); --au-bg:var(--color-fire-bg); --au-strong:var(--color-fire-bg-strong); --au-pastel:var(--color-fire-pastel);}
+
+  /* ── Arrival — the same family as the formats page: header, then the
+     universe, then the strip, then the controls, then the cards. ── */
+  @keyframes au-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  .au-arriving .au-universe{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .au-arriving .au-pairs{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:140ms;}
+  .au-arriving .au-controls,.au-arriving .au-count{animation:au-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
+  .au-arriving .au-card{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(300ms + var(--i, 0) * 40ms);}
+  .au-arriving .au-pair{animation:au-arrive 380ms var(--ease-settle) both; animation-delay:calc(180ms + var(--k, 0) * 60ms);}
+
+  /* ── Skeleton first paint ── */
+  .au-sk{display:inline-block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2); vertical-align:middle;}
+  .au-sk-pill{height:32px; border-radius:var(--radius-pill); flex:none;}
+  .au-sk-stage{aspect-ratio:4/3; background:var(--color-neutral-2);}
+  .au-sk-card{pointer-events:none; cursor:default;}
+  .au-table .au-sk{display:block;}
+  .au-sk-dot{fill:var(--color-neutral-2);}
+  @media (prefers-reduced-motion:no-preference){
+    .au-sk,.au-sk-stage,.au-sk-dot{animation:au-sk-pulse 1.4s var(--ease-standard) infinite;}
+    @keyframes au-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
+
+  /* ── The universe ── */
+  .au-universe{position:relative; margin-bottom:var(--spacing-32); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden;}
+  .au-uhead{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-20) 0; flex-wrap:wrap;}
+  .au-uhead h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
+  .au-uhead > span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-lens{margin-left:auto; display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
+  .au-lens .c-chip-filter{white-space:nowrap;}
+  .au-lens .c-chip-filter .dot{width:8px; height:8px; border-radius:50%; background:var(--au-color, var(--color-neutral-5)); display:inline-block; margin-right:6px; vertical-align:0;}
+  .au-lens .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
+  .au-stagewrap{position:relative;}
+  .au-stage{display:block; width:100%; height:auto; aspect-ratio:1200/420; user-select:none;}
+  .au-node{cursor:pointer; outline:none; transition:transform 520ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
+  .au-node circle{fill:var(--au-strong); stroke:var(--au-color); stroke-width:1.5; transition:r 520ms var(--ease-settle), fill var(--duration-base) var(--ease-standard), stroke-width var(--duration-fast) var(--ease-standard), opacity var(--duration-base) var(--ease-standard);}
+  .au-node text{font-family:inherit; font-weight:800; fill:var(--color-neutral-9); text-anchor:middle; dominant-baseline:central; pointer-events:none;
+    paint-order:stroke; stroke:var(--au-strong); stroke-width:3px; stroke-linejoin:round; transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-node.is-out circle{fill:var(--color-neutral-2); stroke:var(--color-neutral-4); stroke-width:1;}
+  .au-node.is-out text{opacity:0;}
+  .au-node.is-off{opacity:.28;}
+  .au-node.is-off text{opacity:0;}
+  .au-stage.has-hot .au-node:not(.is-hot):not(.is-kin):not(.is-out){opacity:.32;}
+  .au-stage.has-hot .au-node.is-kin circle{stroke-width:2.5;}
+  .au-node.is-hot circle{fill:var(--au-pastel); stroke-width:2.5;}
+  .au-node:focus-visible circle{stroke:var(--color-obsidian); stroke-width:3;}
+  .au-glabel{font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; fill:var(--color-neutral-5); text-anchor:middle;
+    paint-order:stroke; stroke:var(--color-neutral-1); stroke-width:4px; stroke-linejoin:round; pointer-events:none; transition:transform 520ms var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
+  .au-glabel.is-off{opacity:0;}
+  @media (prefers-reduced-motion:reduce){ .au-node,.au-node circle,.au-glabel{transition:none;} }
+  /* The floating label: name and size over the circle under the pointer.
+     Positioned from the circle's own coordinates, so it tracks the stage
+     at any width. */
+  .au-stagelbl{position:absolute; left:0; top:0; z-index:3; pointer-events:none; transform:translate(-50%, calc(-100% - 10px));
+    background:var(--color-obsidian); color:var(--color-neutral-1); border-radius:var(--radius-sm); padding:6px 10px; box-shadow:var(--shadow-3);
+    font-size:12px; line-height:16px; white-space:nowrap; opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .au-stagelbl.is-on{opacity:1;}
+  .au-stagelbl b{display:block; font-weight:800; font-size:13px;}
+  .au-stagelbl span{opacity:.75;}
+  .au-stagelbl i{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--au-color); margin-right:5px; vertical-align:1px;}
+  /* Where they live: nine property chips; hovering one lights every
+     segment that lives on it. */
+  .au-props{display:flex; align-items:center; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-20) var(--spacing-16); flex-wrap:wrap; border-top:1px solid var(--color-neutral-2);}
+  .au-props > span{font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-right:var(--spacing-4);}
+  .au-prop{height:28px; padding:0 10px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); font:inherit; font-size:12px; font-weight:700;
+    color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .au-prop .n{color:var(--color-neutral-5); font-weight:600; font-variant-numeric:tabular-nums;}
+  .au-prop:hover,.au-prop:focus-visible,.au-prop.is-on{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
+  .au-prop:hover .n,.au-prop:focus-visible .n,.au-prop.is-on .n{color:var(--color-neutral-3);}
+  .au-prop:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-uhint{margin-left:auto; font-size:var(--text-caption-size); color:var(--color-neutral-5); display:inline-flex; align-items:center; gap:6px;}
+  @media (hover:none) and (max-width:720px){ .au-universe{display:none;} }
+
+  /* ── Fans to buyers ── */
+  .au-pairs{margin-bottom:var(--spacing-32);}
+  .au-eyebrow{display:flex; align-items:baseline; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
+  .au-eyebrow h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
+  .au-eyebrow span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-pairrow{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:var(--spacing-16);}
+  @media (min-width:1360px){ .au-pairrow{grid-template-columns:repeat(5, 1fr);} }
+  .au-pair{display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch; gap:var(--spacing-8); padding:var(--spacing-12); background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); cursor:pointer; text-align:left; font:inherit; color:inherit;
+    transition:box-shadow var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle);}
+  .au-pair:hover,.au-pair:focus-visible{box-shadow:var(--shadow-2); transform:translateY(-2px);}
+  .au-pair:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-half{display:flex; flex-direction:column; gap:6px; min-width:0;}
+  .au-half .pic{aspect-ratio:4/3; border-radius:var(--radius-sm); overflow:hidden; background:var(--au-bg); position:relative;}
+  .au-half .pic img{width:100%; height:100%; object-fit:cover; object-position:50% 20%; display:block;}
+  .au-half .pic::after{content:''; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--au-color);}
+  .au-half b{font-size:var(--text-body2-size); font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .au-half span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-half span em{font-style:normal; font-weight:700; color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
+  .au-pairarrow{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:var(--color-neutral-4); font-size:18px; padding-top:20px;}
+  .au-pairarrow small{font-size:10px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; font-weight:700; color:var(--color-neutral-5);}
+  .au-pair:hover .au-pairarrow{color:var(--color-neutral-9);}
+
+  /* ── Controls (the formats page's line, verbatim in behaviour) ── */
+  .au-controls{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
+  .au-linewrap{position:relative; flex:1; min-width:0;}
+  .au-linewrap::before,.au-linewrap::after{content:''; position:absolute; top:0; bottom:0; width:40px; pointer-events:none; opacity:0; z-index:2;
+    transition:opacity var(--duration-fast) var(--ease-standard);}
+  .au-linewrap::before{left:0; background:linear-gradient(to right, var(--color-canvas-warm), transparent);}
+  .au-linewrap::after{right:0; background:linear-gradient(to left, var(--color-canvas-warm), transparent);}
+  .au-linewrap.show-left::before{opacity:1;} .au-linewrap.show-right::after{opacity:1;}
+  .au-line{display:flex; flex-wrap:nowrap; align-items:center; gap:var(--spacing-8); overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; padding:2px;}
+  .au-line::-webkit-scrollbar{display:none;}
+  .au-line > *{flex:none;}
+  .au-chips{display:flex; flex-wrap:nowrap; gap:var(--spacing-8);}
+  .au-line .c-chip-filter{white-space:nowrap;}
+  .au-chips .c-chip-filter .dot{width:7px; height:7px; border-radius:50%; background:var(--au-color, var(--color-neutral-4)); display:inline-block; margin-right:6px;}
+  .au-chips .c-chip-filter.is-active .dot{background:var(--au-pastel, var(--color-neutral-3));}
+  .au-right{margin-left:auto; display:flex; align-items:center; gap:var(--spacing-8); flex:none;}
+  .au-select{height:32px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); background:var(--color-neutral-1);
+    font-family:inherit; font-size:var(--text-label2-size); font-weight:700; padding:0 var(--spacing-12); color:var(--color-neutral-9); cursor:pointer;}
+  .au-select:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-pill{position:relative;}
+  .au-pill .c-filter-panel{position:fixed; top:0; left:0; z-index:30;}
+  .au-pill .c-filter-option .label{display:flex; align-items:center; gap:6px; flex:1;}
+  .au-pill .c-filter-option .label .n{margin-left:auto; color:var(--color-neutral-4); font-variant-numeric:tabular-nums;}
+  .au-pill .c-filter-footer{justify-content:flex-end;}
+  #auFilterTray{margin-top:0; margin-bottom:var(--spacing-12);}
+  .au-count{margin:0 0 var(--spacing-16); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-count b{color:var(--color-neutral-9); font-weight:700;}
+
+  /* ── Cards ── */
+  .au-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:var(--spacing-20);}
+  .au-card{position:relative; display:flex; flex-direction:column; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; cursor:pointer;
+    transition:box-shadow var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle), border-color var(--duration-base) var(--ease-settle);}
+  .au-card:hover,.au-card.is-live{box-shadow:var(--shadow-2); transform:translateY(-2px);}
+  @media (prefers-reduced-motion:reduce){.au-card:hover{transform:none;}}
+  .au-card:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-card.is-tray{border-color:var(--color-obsidian); box-shadow:var(--shadow-2), 0 0 0 1px var(--color-obsidian);}
+  .au-portrait{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:3px solid var(--au-color);}
+  .au-portrait img{width:100%; height:100%; object-fit:cover; object-position:50% 18%; display:block; transition:transform var(--duration-reveal) var(--ease-flow);}
+  .au-card.is-live .au-portrait img{transform:scale(1.04);}
+  /* The arc over the portrait's corner: five rings on a translucent disc,
+     drawn in as the card goes live. */
+  .au-arcwrap{position:absolute; top:var(--spacing-12); right:var(--spacing-12); width:66px; height:66px; border-radius:50%; background:rgba(255,255,255,.9); box-shadow:var(--shadow-1); padding:5px; z-index:2;}
+  .au-arcwrap .am-arc{--am-color:var(--au-color); width:100%; height:100%;}
+  /* The six topics rise over the lower third of the portrait on hover. */
+  .au-topics{position:absolute; left:0; right:0; bottom:0; padding:var(--spacing-12); display:flex; flex-wrap:wrap; gap:4px; z-index:2;
+    background:linear-gradient(to top, rgba(255,255,255,.96) 55%, rgba(255,255,255,0)); opacity:0; transform:translateY(10px);
+    transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle);}
+  .au-card.is-live .au-topics{opacity:1; transform:none;}
+  .au-topics span{height:22px; padding:0 8px; border-radius:var(--radius-pill); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); font-size:11px; font-weight:700; display:inline-flex; align-items:center; white-space:nowrap;}
+  .au-ctl{position:absolute; top:var(--spacing-12); left:var(--spacing-12); display:flex; gap:6px; z-index:3;}
+  .au-ctl button,.au-rowadd{width:28px; height:28px; border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    color:var(--color-neutral-5); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; font-family:inherit;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .au-card:hover .au-ctl button:not(.is-on){border-color:var(--color-neutral-5); color:var(--color-neutral-9);}
+  .au-ctl button:hover:not(.is-on),.au-rowadd:hover:not(.is-on){background:var(--color-neutral-2);}
+  .au-ctl button.is-on,.au-table .sel .au-rowadd.is-on{background:var(--color-obsidian); color:var(--color-neutral-1); border-color:var(--color-obsidian);}
+  .au-ctl button:focus-visible,.au-rowadd:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-body{padding:var(--spacing-16) var(--spacing-20) var(--spacing-20); display:flex; flex-direction:column; gap:var(--spacing-8); flex:1;}
+  .au-titlerow{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-8);}
+  .au-titlerow h4{margin:0; font-size:var(--text-h5-size); font-weight:800; line-height:20px;}
+  .c-tag{white-space:nowrap; flex:none;}
+  .au-stat{display:flex; align-items:baseline; gap:6px;}
+  .au-stat b{font-size:22px; line-height:26px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+  .au-stat span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-channels{margin:auto 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .au-channels b{color:var(--color-neutral-9); font-weight:700; font-variant-numeric:tabular-nums;}
+
+  /* ── Table ── */
+  .au-tablewrap{overflow-x:auto; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1);}
+  .au-table{width:100%; border-collapse:collapse; font-size:var(--text-body2-size); min-width:960px;}
+  .au-table th{text-align:left; font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700;
+    padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-3); white-space:nowrap; background:var(--color-neutral-1); position:sticky; top:0; z-index:1;}
+  .au-table td{padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-2); vertical-align:middle; color:var(--color-neutral-9);}
+  .au-table tr:last-child td{border-bottom:0;}
+  .au-table tbody tr{cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .au-table tbody tr:hover td,.au-table tbody tr.is-peeking td{background:var(--color-neutral-2);}
+  .au-table .who{display:flex; align-items:center; gap:var(--spacing-12); white-space:nowrap;}
+  .au-table .who img{width:36px; height:36px; border-radius:var(--radius-sm); object-fit:cover; object-position:50% 20%; flex:none; background:var(--au-bg);}
+  .au-table .who b{display:block; font-weight:800;}
+  .au-table .who small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
+  .au-table .num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:700;}
+  .au-table .muted{color:var(--color-neutral-4); font-weight:400;}
+  .au-table .sel{width:44px; padding-right:0;}
+  .au-table tbody tr:hover .au-rowadd:not(.is-on){border-color:var(--color-neutral-5); color:var(--color-neutral-9);}
+  .au-props-mini{display:flex; flex-wrap:wrap; gap:3px;}
+  .au-props-mini span{font-size:11px; padding:1px 6px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5); white-space:nowrap;}
+  .au-topics-line{color:var(--color-neutral-5); font-size:var(--text-caption-size); max-width:260px;}
+  /* Hovering a row floats its portrait and arc beside the table. */
+  .au-rowpeek{position:fixed; width:220px; z-index:40; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4); overflow:hidden; opacity:0; pointer-events:none; transform:translateY(6px) scale(.98);
+    transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-slow) var(--ease-settle), top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
+  .au-rowpeek.is-visible{opacity:1; transform:none;}
+  .au-rowpeek.is-jumping{transition-property:opacity, transform;}
+  .au-rowpeek .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); border-bottom:3px solid var(--au-color); transition:opacity var(--duration-base) var(--ease-standard);}
+  .au-rowpeek .pic img{width:100%; height:100%; object-fit:cover; object-position:50% 18%; display:block;}
+  .au-rowpeek .au-arcwrap{width:56px; height:56px;}
+  .au-rowpeek.is-switching .pic,.au-rowpeek.is-switching .lbl{opacity:0; transition-duration:var(--duration-instant);}
+  .au-rowpeek .lbl{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size); font-weight:700; transition:opacity var(--duration-base) var(--ease-standard);}
+
+  .au-view{display:none;} .au-view.is-on{display:block;}
+  .au-empty{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);}
+  .au-empty[hidden]{display:none;}
+
+  /* ── Detail modal — the formats page's swing, ported. ── */
+  .au-cardmodal{position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; perspective:1200px;}
+  .au-cardmodal.is-open{display:flex;}
+  .au-cardmodal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .32s var(--ease-standard);}
+  .au-cardmodal.is-shown .au-cardmodal-backdrop{opacity:.88; transition-duration:.5s;}
+  .au-drawer{position:relative; display:flex; flex-direction:column; overflow:hidden;
+    width:min(820px, calc(100vw - var(--spacing-32))); max-height:min(820px, calc(100dvh - var(--spacing-60)));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left; opacity:0; transition:opacity .3s var(--ease-standard);}
+  .au-cardmodal.is-shown .au-drawer{opacity:1;}
+  .au-drawer.is-swinging-open,.au-cbox.is-swinging-open{animation:au-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .au-drawer.is-swinging-closed,.au-cbox.is-swinging-closed{animation:au-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes au-swing-open{
+    0%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--sw-dir, 1))) rotateZ(calc(-7deg * var(--sw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--sw-dir, 1))) rotateZ(calc(1deg * var(--sw-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes au-swing-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--sw-dir, 1))) rotateZ(calc(-6deg * var(--sw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.35;}
+  }
+  @media (prefers-reduced-motion:reduce){ .au-drawer.is-swinging-open,.au-drawer.is-swinging-closed,.au-cbox.is-swinging-open,.au-cbox.is-swinging-closed{animation:none;} }
+  .au-dhead{display:flex; align-items:center; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-bottom:1px solid var(--color-neutral-3);}
+  .au-dhead .crumbs{flex:1; font-size:var(--text-caption-size); color:var(--color-neutral-5); display:flex; align-items:center; gap:6px; min-width:0;}
+  .au-dhead .crumbs b{color:var(--color-neutral-9); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .au-dbody{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24) var(--spacing-24); display:grid; grid-template-columns:240px 1fr; gap:var(--spacing-24); align-items:start;}
+  .au-dside{position:sticky; top:0;}
+  .au-dpic{position:relative; aspect-ratio:3/4; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color);}
+  .au-dpic img{width:100%; height:100%; object-fit:cover; object-position:50% 15%; display:block;}
+  .au-dpic .au-arcwrap{width:96px; height:96px; padding:7px;}
+  .au-dsize{margin-top:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16); background:var(--color-canvas-warm-card); border-radius:var(--radius-md);}
+  .au-dsize b{display:block; font-size:26px; line-height:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+  .au-dsize span{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-dsize + .au-dsize{margin-top:var(--spacing-8);}
+  .au-dsize.addr{border:1px dashed var(--color-neutral-3); background:transparent;}
+  .au-dsize.addr b{font-size:20px; line-height:24px;}
+  .au-dsize.addr p{margin:6px 0 0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
+  .au-dtitle{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-12); margin-bottom:var(--spacing-8); flex-wrap:wrap;}
+  .au-dtitle h2{margin:0; font-size:var(--text-h3-size); line-height:var(--text-h3-lh); font-weight:800;}
+  .au-dtags{display:flex; gap:6px; flex-wrap:wrap;}
+  .au-ddesc{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-9); margin:0 0 var(--spacing-20);}
+  .au-section{margin-bottom:var(--spacing-20);}
+  .au-section h5{margin:0 0 var(--spacing-8); font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700;}
+  .au-lives{display:flex; flex-direction:column; gap:6px;}
+  .au-lives div{display:flex; gap:var(--spacing-12); align-items:baseline; font-size:var(--text-body2-size); line-height:18px;}
+  .au-lives b{flex:0 0 108px; font-weight:800;}
+  .au-lives span{color:var(--color-neutral-5); min-width:0;}
+  .au-chipset{display:flex; flex-wrap:wrap; gap:4px;}
+  .au-chipset .c-chip{height:24px; padding:0 8px; font-size:12px; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
+  /* Consumption as labelled bars: the arc's numbers, readable. */
+  .au-bars{display:flex; flex-direction:column; gap:6px;}
+  .au-bar{display:grid; grid-template-columns:120px 1fr 40px; align-items:center; gap:var(--spacing-12); font-size:var(--text-caption-size);}
+  .au-bar span:first-child{color:var(--color-neutral-5); font-weight:600;}
+  .au-bar i{display:block; height:6px; border-radius:3px; background:var(--color-neutral-2); overflow:hidden;}
+  .au-bar i b{display:block; height:100%; width:0; background:var(--au-color); border-radius:3px; transition:width var(--duration-reveal) var(--ease-flow) .1s;}
+  .au-bar span:last-child{text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
+  .au-related{display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--spacing-8);}
+  .au-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left; color:inherit;
+    transition:box-shadow var(--duration-fast) var(--ease-standard);}
+  .au-relcard:hover{box-shadow:var(--shadow-2);} .au-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-relcard .pic{aspect-ratio:16/10; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color);}
+  .au-relcard .pic img{width:100%; height:100%; object-fit:cover; object-position:50% 18%; display:block;}
+  .au-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .au-relcard span small{display:block; font-weight:600; color:var(--color-neutral-5);}
+  .au-dfoot{display:flex; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-3); flex-wrap:wrap; align-items:center;}
+  .au-dfoot .c-btn{text-decoration:none;}
+  .au-dfoot .spacer{flex:1;}
+
+  /* ── Reach tray and sheet ── */
+  .au-cbar{position:fixed; left:50%; bottom:var(--spacing-24); z-index:65; display:flex; align-items:center; gap:var(--spacing-12);
+    padding:var(--spacing-8) var(--spacing-8) var(--spacing-8) var(--spacing-16); background:var(--color-obsidian); color:var(--color-neutral-1);
+    border-radius:var(--radius-pill); box-shadow:var(--shadow-4); transform:translate(-50%, 140%); transition:transform var(--duration-morph) var(--ease-settle); max-width:calc(100vw - 32px);}
+  .au-cbar.is-open{transform:translate(-50%, 0);}
+  .au-cbar .lbl{font-size:var(--text-caption-size); font-weight:700; opacity:.7; white-space:nowrap;}
+  .au-cbar .reach{font-size:13px; font-weight:800; white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .au-cbar .reach small{font-weight:600; opacity:.7; margin-left:4px;}
+  .au-cbar .names{display:flex; gap:6px; flex-wrap:wrap;}
+  .au-cbar .names span{display:inline-flex; align-items:center; gap:4px; padding:2px 6px 2px 10px; border-radius:var(--radius-pill); background:rgba(255,255,255,.14); font-size:13px; font-weight:700; white-space:nowrap;}
+  .au-cbar .names button{border:0; background:transparent; color:inherit; cursor:pointer; padding:2px; display:flex; border-radius:50%; font-size:12px;}
+  .au-cbar .names button:hover{background:rgba(255,255,255,.18);}
+  .au-cbar .c-btn-primary{background:var(--color-neutral-1); color:var(--color-neutral-9);}
+  .au-cbar .c-btn-primary:hover{background:var(--color-neutral-2);}
+  .au-cbar .c-btn-ghost{color:var(--color-neutral-1);} .au-cbar .c-btn-ghost:hover{background:rgba(255,255,255,.12);}
+  .au-cmodal{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:var(--spacing-24); perspective:1200px;}
+  .au-cmodal.is-open{display:flex;}
+  .au-cmodal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .32s var(--ease-standard);}
+  .au-cmodal.is-shown .au-cmodal-backdrop{opacity:.88; transition-duration:.5s;}
+  .au-cbox{position:relative; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25); width:min(1120px, 100%); max-height:100%; display:flex; flex-direction:column; overflow:hidden;
+    transform-origin:top left; opacity:0; transition:opacity .3s var(--ease-standard);}
+  .au-cmodal.is-shown .au-cbox{opacity:1;}
+  .au-cbox .c-modal-head{border-bottom:1px solid var(--color-neutral-3);}
+  .au-cscroll{overflow:auto; flex:1; padding:var(--spacing-20) var(--spacing-24);}
+  .au-sheetcols{display:grid; grid-template-columns:repeat(var(--n, 3), minmax(160px, 1fr)); gap:var(--spacing-12); margin-bottom:var(--spacing-24);}
+  .au-sheetcol{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
+  .au-sheetcol .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); border-bottom:3px solid var(--au-color);}
+  .au-sheetcol .pic img{width:100%; height:100%; object-fit:cover; object-position:50% 18%; display:block;}
+  .au-sheetcol .pic .au-arcwrap{width:56px; height:56px;}
+  .au-sheetcol .txt{padding:var(--spacing-12);}
+  .au-sheetcol .txt b{display:block; font-weight:800; font-size:var(--text-body2-size);}
+  .au-sheetcol .txt small{display:block; color:var(--color-neutral-5); font-size:var(--text-caption-size);}
+  .au-sheetcol .txt .n{display:block; margin-top:6px; font-size:18px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .au-sheetgrid{display:grid; grid-template-columns:1.2fr 1fr; gap:var(--spacing-24);}
+  .au-maths{background:var(--color-canvas-warm-card); border-radius:var(--radius-md); padding:var(--spacing-16);}
+  .au-maths h5,.au-refine h5{margin:0 0 var(--spacing-12); font-size:11px; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); font-weight:700;}
+  .au-mrow{display:flex; justify-content:space-between; align-items:baseline; gap:var(--spacing-12); padding:6px 0; border-bottom:1px solid var(--color-neutral-3); font-size:var(--text-body2-size);}
+  .au-mrow:last-child{border-bottom:0;}
+  .au-mrow span{color:var(--color-neutral-5);}
+  .au-mrow b{font-variant-numeric:tabular-nums; font-weight:800; white-space:nowrap;}
+  .au-mrow.total b{font-size:22px;}
+  .au-mrow small{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5); font-weight:400;}
+  .au-refine .grid{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
+  .au-refine label{display:block; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); margin-bottom:4px;}
+  .au-refine select{width:100%; height:36px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:600; padding:0 var(--spacing-12); color:var(--color-neutral-9);}
+  .au-refine select:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .au-refine p{margin:var(--spacing-12) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .au-kbd{display:inline-block; padding:0 5px; border:1px solid var(--color-neutral-3); border-bottom-width:2px; border-radius:4px; font-size:11px; font-weight:700; line-height:16px; background:var(--color-neutral-1);}
+
+  @media (max-width:900px){
+    .au-dbody{grid-template-columns:1fr;}
+    .au-dside{position:static; display:grid; grid-template-columns:160px 1fr; gap:var(--spacing-16); align-items:start;}
+    .au-dsize{margin-top:0;}
+    .au-related{grid-template-columns:repeat(2, 1fr);}
+    .au-sheetgrid{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .c-shell .c-pageheader{padding-top:var(--spacing-24);}
+    .c-shell .c-pageheader-row{flex-direction:column; align-items:stretch; gap:var(--spacing-16);}
+    .c-shell .c-pageheader-actions{flex-wrap:wrap;}
+    .c-shell .c-pageheader-actions .c-btn{flex:1; justify-content:center;}
+    .au-controls{flex-wrap:wrap;}
+    .au-linewrap{flex:1 1 100%;}
+    .au-right{margin-left:0; width:100%;}
+    .au-cardmodal{padding:var(--spacing-8);}
+    .au-drawer{width:100%; max-height:calc(100dvh - var(--spacing-16));}
+    .au-dside{grid-template-columns:1fr;}
+    .au-cbar{bottom:var(--spacing-12);}
+    .au-cbar .names{display:none;}
+    .au-refine .grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department, Media" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live" style="display:none"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="Media" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <span class="c-badge c-badge-neutral c-sidebar-beta">Beta</span>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/water.svg" alt="Collab:Media" />
+      </div>
+      <a class="c-sidebar-item" href="campaigns.html"><i class="ph-fill ph-house"></i><span class="label">Home</span><span class="c-sidebar-hover-text">Home</span></a>
+      <div class="c-sidebar-section">Workspace</div>
+      <a class="c-sidebar-item" href="planner.html"><i class="ph-fill ph-compass-tool"></i><span class="label">New media plan</span><span class="c-sidebar-hover-text">New media plan</span></a>
+      <a class="c-sidebar-item" href="campaign-list.html"><i class="ph-fill ph-rows"></i><span class="label">My media plans</span><span class="c-sidebar-hover-text">My media plans</span></a>
+      <div class="c-sidebar-section">General</div>
+      <a class="c-sidebar-item" href="formats.html"><i class="ph-fill ph-frame-corners"></i><span class="label">Ad formats</span><span class="c-sidebar-hover-text">Ad formats</span></a>
+      <a class="c-sidebar-item active" href="audiences.html" aria-current="page"><i class="ph-fill ph-users-three"></i><span class="label">Audiences</span><span class="c-sidebar-hover-text">Audiences</span></a>
+      <div class="c-sidebar-section">System</div>
+      <a class="c-sidebar-item" href="https://app-shell-intro.vercel.app/pages/feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">ST</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Sarah Tan</span>
+            <span class="c-search-input-subtitle">Sales Planner</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content au-arriving" id="auContent">
+
+      <header class="c-pageheader">
+        <div class="c-pageheader-row">
+          <div class="c-pageheader-text">
+            <h1>Audiences</h1>
+            <p class="sub">Every segment Collabrium Digitals can reach, sized and grouped so you can see who sits next to whom. <span class="au-sub-hint" id="auHint"><i class="ph ph-cursor"></i>Hover any circle or card.</span></p>
+          </div>
+          <div class="c-pageheader-actions">
+            <button class="c-btn c-btn-secondary c-btn-md" type="button" id="auTrayBtn">
+              <i class="ph ph-users-three"></i> Reach tray <span class="au-badge-n" id="auTrayCount" hidden>0</span>
+            </button>
+            <a class="c-btn c-btn-primary c-btn-md" href="planner.html" style="text-decoration:none;">
+              <i class="ph ph-compass-tool"></i> Plan with these
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <hr class="au-divider" />
+
+      <section class="au-universe" aria-label="The audience universe">
+        <div class="au-uhead">
+          <h2>The universe</h2>
+          <span>Every segment, sized by audience, packed into its group.</span>
+          <div class="au-lens" id="auLens" role="radiogroup" aria-label="Lens"></div>
+        </div>
+        <div class="au-stagewrap">
+          <svg class="au-stage" id="auStage" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid meet" aria-label="Audience segments as circles"></svg>
+          <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
+        </div>
+        <div class="au-props" id="auProps"></div>
+      </section>
+
+      <section class="au-pairs" aria-label="Fans to buyers">
+        <div class="au-eyebrow"><h2>Fans to buyers</h2><span>Five interests and the in-market segment each one feeds. Pick a pair to see the buyer, with the fan alongside.</span></div>
+        <div class="au-pairrow" id="auPairs"></div>
+      </section>
+
+      <div class="au-controls">
+        <div class="au-linewrap" id="auLineWrap">
+          <div class="au-line" id="auLine">
+            <div class="c-filter-search">
+              <i class="ph ph-magnifying-glass icon-leading"></i>
+              <input type="text" id="auSearch" placeholder="Search segments, topics, properties" aria-label="Search audiences" />
+              <button class="c-filter-search-clear" id="auSearchClear" aria-label="Clear search" hidden><i class="ph ph-x"></i></button>
+            </div>
+            <span class="c-filter-search-divider" aria-hidden="true"></span>
+            <div class="au-chips" id="auChips" role="group" aria-label="Filter by group"></div>
+            <span class="c-filter-search-divider" aria-hidden="true"></span>
+            <div class="au-chips" id="auPills"></div>
+            <button class="c-btn c-btn-ghost c-btn-sm c-filter-clear-bar" id="auClearAll" type="button" hidden>Clear all</button>
+          </div>
+        </div>
+        <div class="au-right">
+          <select class="au-select" id="auSort" aria-label="Sort audiences">
+            <option value="size">Sort: Largest first</option>
+            <option value="sizeAsc">Sort: Smallest first</option>
+            <option value="group">Sort: Group</option>
+            <option value="az">Sort: A–Z</option>
+          </select>
+          <div class="c-segctl c-segctl-compact" role="radiogroup" aria-label="View">
+            <button class="c-seg" type="button" role="radio" aria-checked="true" data-view="cards" title="Cards"><i class="ph ph-squares-four"></i></button>
+            <button class="c-seg" type="button" role="radio" aria-checked="false" data-view="table" title="Table"><i class="ph ph-list-bullets"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="c-filter-tray" id="auFilterTray" hidden></div>
+      <p class="au-count" id="auCount"></p>
+
+      <div class="au-view is-on" id="auCardsView">
+        <div class="au-grid" id="auGrid"></div>
+      </div>
+
+      <div class="au-view" id="auTableView">
+        <div class="au-tablewrap">
+          <table class="au-table">
+            <thead>
+              <tr>
+                <th class="sel"><span class="sr-only">Reach tray</span></th>
+                <th>Segment</th><th>Group</th><th class="num">Audience</th><th class="num">Addressable</th>
+                <th>Top channel</th><th>Lives on</th><th>Reads about</th>
+              </tr>
+            </thead>
+            <tbody id="auRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="c-empty is-section au-empty" id="auEmpty" hidden>
+        <i class="ph ph-users-three"></i>
+        <h4>Nothing matched</h4>
+        <p>Try another word, or clear the group and property filters.</p>
+        <div class="c-empty-actions"><button class="c-btn c-btn-secondary c-btn-sm" type="button" id="auEmptyClear">Clear filters</button></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></button>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg" data-href="https://app-shell-intro.vercel.app/pages/landing-v3.html">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg" aria-disabled="true" title="No workspace deployed yet">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg" data-href="https://collab-sales-ui.vercel.app">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influence" data-dept="influence" data-name="Influence" data-logo="../collabrium-dls/logo-lockups/collabInfluence.svg" data-element-icon="../collabrium-dls/SVG/earth.svg" data-href="https://collab-influence.vercel.app/pages/influencers-v2.html">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluence.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg" aria-disabled="true" title="No workspace deployed yet">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<!-- Table view: the portrait that floats beside the hovered row -->
+<div class="au-rowpeek" id="auRowpeek" aria-hidden="true"><div class="pic"><img id="auRowpeekImg" alt="" /><div class="au-arcwrap"><div id="auRowpeekArc"></div></div></div><div class="lbl" id="auRowpeekLbl"></div></div>
+
+<!-- Detail modal: swings out of the card you clicked -->
+<div class="au-cardmodal" id="auModal">
+<div class="au-cardmodal-backdrop" id="auScrim"></div>
+<aside class="au-drawer" id="auDrawer" role="dialog" aria-modal="true" aria-labelledby="auDrawerTitle">
+  <div class="au-dhead">
+    <div class="crumbs"><span>Audiences</span><i class="ph ph-caret-right"></i><b id="auDrawerCrumb"></b></div>
+    <button class="c-icon-btn" type="button" id="auPrev" aria-label="Previous segment" title="Previous (←)"><i class="ph ph-arrow-left"></i></button>
+    <button class="c-icon-btn" type="button" id="auNext" aria-label="Next segment" title="Next (→)"><i class="ph ph-arrow-right"></i></button>
+    <button class="c-icon-btn" type="button" id="auDrawerClose" aria-label="Close"><i class="ph ph-x"></i></button>
+  </div>
+  <div class="au-dbody" id="auDrawerBody"></div>
+  <div class="au-dfoot" id="auDrawerFoot"></div>
+</aside>
+</div>
+
+<!-- Reach tray -->
+<div class="au-cbar" id="auCbar" role="region" aria-label="Segments in the reach tray">
+  <span class="lbl" id="auCbarLbl">Reach tray</span>
+  <span class="reach" id="auCbarReach"></span>
+  <div class="names" id="auCbarNames"></div>
+  <button class="c-btn c-btn-ghost c-btn-sm" type="button" id="auCbarClear">Clear</button>
+  <button class="c-btn c-btn-primary c-btn-sm" type="button" id="auCbarOpen"><i class="ph ph-users-three"></i> Open</button>
+</div>
+
+<!-- Reach sheet -->
+<div class="au-cmodal" id="auCmodal">
+  <div class="au-cmodal-backdrop" id="auCmodalBackdrop"></div>
+  <div class="au-cbox" id="auCbox" role="dialog" aria-modal="true" aria-labelledby="auCmodalTitle">
+    <div class="c-modal-head"><h4 id="auCmodalTitle">Reach tray</h4>
+      <button class="c-icon-btn" type="button" id="auCmodalClose" aria-label="Close"><i class="ph ph-x"></i></button></div>
+    <div class="au-cscroll" id="auSheet"></div>
+    <div class="c-modal-foot" style="justify-content:flex-start;">
+      <button class="c-btn c-btn-secondary c-btn-md" type="button" data-export="PDF"><i class="ph ph-file-pdf"></i> Export PDF</button>
+      <button class="c-btn c-btn-secondary c-btn-md" type="button" data-export="Excel"><i class="ph ph-file-xls"></i> Export Excel</button>
+      <span style="flex:1"></span>
+      <a class="c-btn c-btn-primary c-btn-md" id="auCmodalPlan" href="planner.html" style="text-decoration:none;"><i class="ph ph-compass-tool"></i> Send to a media plan</a>
+    </div>
+  </div>
+</div>
+
+<div class="c-toast-host" id="auToasts"></div>
+
+<script src="../shared/shell.js?v=0.9.52"></script>
+<script src="../shared/audiences-data.js?v=1"></script>
+<script src="../shared/audience-marks.js?v=1"></script>
+<script>
+(function () {
+  'use strict';
+  var A = window.AUDIENCES, M = window.AudienceMarks;
+  var E = function (id) { return document.getElementById(id); };
+  var TOUCH = window.matchMedia('(hover:none)').matches;
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  var byId = {}; A.forEach(function (s) { byId[s.id] = s; });
+  var GROUPS = window.AUDIENCE_GROUPS, LENSES = window.AUDIENCE_LENSES, PROPS = window.AUDIENCE_PROPERTIES, OVERLAP = window.AUDIENCE_OVERLAP;
+  var groupOf = {}; GROUPS.forEach(function (g) { groupOf[g.key] = g; });
+  var lensOf = {}; LENSES.forEach(function (l) { lensOf[l.key] = l; });
+  var propOf = {}; PROPS.forEach(function (p) { propOf[p.key] = p; });
+  var PROP_SHORT = { awani: 'Awani', gempak: 'Gempak', xuan: 'XUAN', syok: 'SYOK', stadium: 'Stadium', rasa: 'Rasa', hiburan: 'Hiburan', sooka: 'sooka', ulagam: 'Ulagam' };
+  var LENS_TAG = { who: 'c-tag-earth', love: 'c-tag-water', buying: 'c-tag-fire' };
+  var CH_SHORT = { video: 'video', audio: 'audio', tv: 'TV', podcast: 'podcast', social: 'social', games: 'games', communities: 'communities' };
+
+  function fmtM(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1e3) return Math.round(n / 1e3) + 'K';
+    return String(n);
+  }
+  function fmtK(n) { /* Karen's own formatter, for her numbers */
+    if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (n >= 1e3) return Math.round(n / 1e3) + 'K';
+    return String(n);
+  }
+  function fmtFull(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function lensClass(s) { return 'lens-' + s.lens; }
+  function groupTag(s) { return '<span class="c-tag ' + LENS_TAG[s.lens] + '"><i class="dot"></i>' + esc(groupOf[s.group].label) + '</span>'; }
+  function lensTag(s) { return '<span class="c-tag ' + LENS_TAG[s.lens] + '"><i class="dot"></i>' + esc(lensOf[s.lens].label) + '</span>'; }
+  function topChannels(s, n) {
+    return Object.keys(s.consumption).map(function (k) { return { k: k, v: s.consumption[k] }; })
+      .sort(function (a, b) { return b.v - a.v; }).slice(0, n || 2);
+  }
+  function hasProp(s, key) { return s.properties.some(function (p) { return p.key === key; }); }
+  if (TOUCH) E('auHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap a card to see more; tap again to open it.';
+
+  /* ── State ──────────────────────────────────────────────────────── */
+  var state = { q: '', groups: [], props: [], sort: 'size', view: 'cards', lens: 'all' };
+  function filtered() {
+    var q = state.q.trim().toLowerCase();
+    var rows = A.filter(function (s) {
+      if (state.groups.length && state.groups.indexOf(s.group) < 0) return false;
+      if (state.props.length && !state.props.every(function (k) { return hasProp(s, k); })) return false;
+      if (!q) return true;
+      var hay = [s.name, groupOf[s.group].label, lensOf[s.lens].label, s.desc, s.topics.join(' '),
+        s.properties.map(function (p) { return propOf[p.key].label + ' ' + p.note; }).join(' ')].join(' ').toLowerCase();
+      return hay.indexOf(q) > -1;
+    });
+    var gOrder = GROUPS.map(function (g) { return g.key; });
+    rows.sort(function (a, b) {
+      if (state.sort === 'az') return a.name.localeCompare(b.name);
+      if (state.sort === 'sizeAsc') return a.size - b.size || a.name.localeCompare(b.name);
+      if (state.sort === 'group') return gOrder.indexOf(a.group) - gOrder.indexOf(b.group) || b.size - a.size;
+      return b.size - a.size || a.name.localeCompare(b.name);
+    });
+    return rows;
+  }
+  var current = [];
+
+  /* ── Controls ───────────────────────────────────────────────────── */
+  function renderChips() {
+    var counts = {}; A.forEach(function (s) { counts[s.group] = (counts[s.group] || 0) + 1; });
+    E('auChips').innerHTML = '<button type="button" class="c-chip c-chip-filter' + (!state.groups.length ? ' is-active' : '') + '" data-group="">All <span class="count">' + A.length + '</span></button>' +
+      GROUPS.map(function (g) {
+        var on = state.groups.indexOf(g.key) > -1;
+        return '<button type="button" class="c-chip c-chip-filter lens-' + g.lens + (on ? ' is-active' : '') + '" data-group="' + g.key + '" aria-pressed="' + on + '"><i class="dot"></i>' + esc(g.label) + ' <span class="count">' + (counts[g.key] || 0) + '</span></button>';
+      }).join('');
+    fades();
+  }
+  E('auChips').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-group]'); if (!b) return;
+    if (!b.dataset.group) state.groups = [];
+    else { var i = state.groups.indexOf(b.dataset.group); if (i > -1) state.groups.splice(i, 1); else state.groups.push(b.dataset.group); }
+    renderChips(); render();
+  });
+  var openFacet = null;
+  function propOptions() {
+    var counts = {}; A.forEach(function (s) { s.properties.forEach(function (p) { counts[p.key] = (counts[p.key] || 0) + 1; }); });
+    return PROPS.map(function (p) { return { v: p.key, label: p.label, n: counts[p.key] || 0 }; }).sort(function (a, b) { return b.n - a.n; });
+  }
+  function renderPills() {
+    var n = state.props.length;
+    E('auPills').innerHTML = '<div class="au-pill" data-facet="props">' +
+      '<button class="c-filter-trigger' + (n ? ' active' : '') + (openFacet ? ' is-open' : '') + '" type="button" aria-haspopup="true" aria-expanded="' + !!openFacet + '">Lives on' + (n ? ' <span class="count">' + n + '</span>' : '') + ' <i class="ph ph-caret-down chev"></i></button>' +
+      '<div class="c-filter-panel' + (openFacet ? ' is-open' : '') + '">' +
+        propOptions().map(function (o) {
+          var on = state.props.indexOf(o.v) > -1;
+          return '<label class="c-filter-option" data-v="' + o.v + '">' +
+            '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+            '<span class="label">' + esc(o.label) + '<span class="n">' + o.n + '</span></span></label>';
+        }).join('') +
+        '<div class="c-filter-footer"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear="props">Clear</button></div>' +
+      '</div></div>';
+    placePanel(); fades();
+  }
+  function placePanel() {
+    var t = E('auPills').querySelector('.c-filter-trigger.is-open'); if (!t) return;
+    var p = t.parentNode.querySelector('.c-filter-panel'), r = t.getBoundingClientRect();
+    p.style.left = Math.max(8, Math.min(r.left, window.innerWidth - p.offsetWidth - 8)) + 'px';
+    var below = r.bottom + 6 + p.offsetHeight <= window.innerHeight - 8;
+    p.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - 6 - p.offsetHeight)) + 'px';
+  }
+  var line = E('auLine'), lineWrap = E('auLineWrap');
+  function fades() {
+    lineWrap.classList.toggle('show-left', line.scrollLeft > 2);
+    lineWrap.classList.toggle('show-right', line.scrollLeft + line.clientWidth < line.scrollWidth - 2);
+  }
+  line.addEventListener('scroll', function () { fades(); if (openFacet) { openFacet = null; renderPills(); } });
+  E('auPills').addEventListener('click', function (e) {
+    var t = e.target.closest('.c-filter-trigger');
+    if (t) { openFacet = openFacet ? null : 'props'; renderPills(); return; }
+    var o = e.target.closest('.c-filter-option');
+    if (o) {
+      e.preventDefault();
+      var i = state.props.indexOf(o.dataset.v);
+      if (i > -1) state.props.splice(i, 1); else state.props.push(o.dataset.v);
+      renderPills(); render(); return;
+    }
+    if (e.target.closest('[data-clear]')) { state.props = []; renderPills(); render(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (openFacet && !e.target.closest('.au-pill')) { openFacet = null; renderPills(); }
+  });
+  function renderTray() {
+    var chips = state.props.map(function (k) {
+      return '<span class="c-chip c-chip-input">Lives on: ' + esc(propOf[k].label) +
+        '<button class="c-chip-remove" type="button" data-v="' + k + '" aria-label="Remove ' + esc(propOf[k].label) + '"><i class="ph ph-x"></i></button></span>';
+    });
+    var tray = E('auFilterTray');
+    tray.innerHTML = chips.join('');
+    tray.hidden = !chips.length;
+    E('auClearAll').hidden = !chips.length && !state.groups.length;
+  }
+  E('auFilterTray').addEventListener('click', function (e) {
+    var r = e.target.closest('.c-chip-remove');
+    if (r) { state.props.splice(state.props.indexOf(r.dataset.v), 1); renderPills(); render(); }
+  });
+  function clearAll() {
+    state.q = ''; state.groups = []; state.props = [];
+    E('auSearch').value = ''; E('auSearchClear').hidden = true;
+    renderChips(); renderPills(); render();
+  }
+  E('auClearAll').addEventListener('click', clearAll);
+  E('auEmptyClear').addEventListener('click', clearAll);
+  E('auSearch').addEventListener('input', function () {
+    state.q = this.value; E('auSearchClear').hidden = !this.value; render();
+  });
+  E('auSearchClear').addEventListener('click', function () { E('auSearch').value = ''; state.q = ''; this.hidden = true; render(); E('auSearch').focus(); });
+  E('auSort').addEventListener('change', function () { state.sort = this.value; render(); });
+  document.querySelectorAll('.c-seg[data-view]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.view = b.dataset.view;
+      document.querySelectorAll('.c-seg[data-view]').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
+      E('auCardsView').classList.toggle('is-on', state.view === 'cards');
+      E('auTableView').classList.toggle('is-on', state.view === 'table');
+      hideRowpeek(true);
+      staggerIn(visibleItems());
+      try { sessionStorage.setItem('collab-audiences-view', state.view); } catch (e) {}
+    });
+  });
+  try { var sv = sessionStorage.getItem('collab-audiences-view'); if (sv === 'table') document.querySelector('.c-seg[data-view="table"]').click(); } catch (e) {}
+
+  /* ── Cards ──────────────────────────────────────────────────────── */
+  function addBtn(s, cls) {
+    var on = tray.indexOf(s.id) > -1, lbl = on ? 'Remove from reach tray' : 'Add to reach tray';
+    return '<button type="button" class="' + cls + (on ? ' is-on' : '') + '" data-add="' + s.id + '" aria-pressed="' + on + '" aria-label="' + lbl + '" title="' + lbl + '"><i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i></button>';
+  }
+  function cardHtml(s, i) {
+    var inTray = tray.indexOf(s.id) > -1, top = topChannels(s, 2);
+    return '<article class="au-card ' + lensClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
+      '<div class="au-portrait"><img src="' + s.portrait + '" alt="" loading="lazy" />' +
+        '<div class="au-arcwrap"><div data-arc></div></div>' +
+        '<div class="au-topics">' + s.topics.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
+        '<div class="au-ctl">' + addBtn(s, 'au-add') + '</div>' +
+      '</div>' +
+      '<div class="au-body">' +
+        '<div class="au-titlerow"><h4>' + esc(s.name) + '</h4>' + groupTag(s) + '</div>' +
+        '<div class="au-stat"><b>' + fmtM(s.size) + '</b><span>audience</span></div>' +
+        '<p class="au-channels">' + top.map(function (c) { return '<b>' + c.v + '%</b> ' + CH_SHORT[c.k]; }).join(' · ') + '</p>' +
+      '</div>' +
+    '</article>';
+  }
+  var FLIP_PAD = 240;
+  function visibleItems() {
+    return document.querySelectorAll(state.view === 'table' ? '#auRows tr[data-id]' : '#auGrid .au-card[data-id]');
+  }
+  function snapshotRects() {
+    if (REDUCED || document.hidden) return null;
+    var map = {}, vh = window.innerHeight, els = visibleItems();
+    for (var i = 0; i < els.length; i++) {
+      var rc = els[i].getBoundingClientRect();
+      if (rc.top > vh + FLIP_PAD) break;
+      if (rc.bottom < -FLIP_PAD) continue;
+      map[els[i].dataset.id] = rc;
+    }
+    return map;
+  }
+  function playMove(before) {
+    if (!before) return;
+    var hadAny = false; for (var k in before) { hadAny = true; break; }
+    if (!hadAny) return;
+    var moved = 0, appeared = 0, vh = window.innerHeight, els = visibleItems();
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], now = el.getBoundingClientRect();
+      if (now.top > vh + FLIP_PAD) break;
+      if (now.bottom < -FLIP_PAD) continue;
+      var was = before[el.dataset.id];
+      if (!was) {
+        el.animate([{ opacity: 0, transform: 'translateY(10px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+          { duration: 300, delay: Math.min(appeared * 14, 180), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+        appeared++; continue;
+      }
+      var dx = was.left - now.left, dy = was.top - now.top;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      el.animate([{ transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)' }, { transform: 'translate(0,0)' }],
+        { duration: 520, delay: Math.min(moved * 22, 220), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+      moved++;
+    }
+  }
+  function staggerIn(els) {
+    if (REDUCED || document.hidden) return;
+    var vh = window.innerHeight, n = 0;
+    for (var i = 0; i < els.length; i++) {
+      var r = els[i].getBoundingClientRect();
+      if (r.top > vh + FLIP_PAD) break;
+      els[i].animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 320, delay: Math.min(n * 24, 260), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+      n++;
+    }
+  }
+  function render(opts) {
+    var before = (opts && opts.flip === false) ? null : snapshotRects();
+    current = filtered();
+    var grid = E('auGrid');
+    grid.innerHTML = current.map(cardHtml).join('');
+    grid.querySelectorAll('.au-card').forEach(function (card) { M.arc(card.querySelector('[data-arc]'), byId[card.dataset.id]); });
+    E('auRows').innerHTML = current.map(rowHtml).join('');
+    var mapped = current.filter(function (s) { return s.addressable != null; }).length;
+    var total = current.reduce(function (t, s) { return t + s.size; }, 0);
+    E('auCount').innerHTML = '<b>' + current.length + '</b> of ' + A.length + ' segments · ' + mapped + ' with an addressable count from the planner' +
+      (state.sort === 'size' ? ' · largest first' : state.sort === 'sizeAsc' ? ' · smallest first' : state.sort === 'group' ? ' · by group' : ' · A to Z');
+    E('auEmpty').hidden = current.length > 0;
+    E('auCardsView').style.display = current.length ? '' : 'none';
+    E('auTableView').style.display = current.length ? '' : 'none';
+    renderTray();
+    syncUniverseFilter();
+    playMove(before);
+  }
+  function setLive(card, on) { if (card) card.classList.toggle('is-live', on); }
+  var grid = E('auGrid');
+  grid.addEventListener('mouseover', function (e) { var c = e.target.closest('.au-card'); if (c && !c.contains(e.relatedTarget) && !TOUCH) setLive(c, true); });
+  grid.addEventListener('mouseout', function (e) { var c = e.target.closest('.au-card'); if (c && !c.contains(e.relatedTarget) && !TOUCH) setLive(c, false); });
+  grid.addEventListener('focusin', function (e) { var c = e.target.closest('.au-card'); if (c && e.target === c) setLive(c, true); });
+  grid.addEventListener('focusout', function (e) { var c = e.target.closest('.au-card'); if (c && !c.contains(e.relatedTarget)) setLive(c, false); });
+  grid.addEventListener('click', function (e) {
+    var add = e.target.closest('[data-add]');
+    if (add) { e.stopPropagation(); toggleTray(add.dataset.add); return; }
+    var card = e.target.closest('.au-card'); if (!card) return;
+    if (TOUCH && !card.classList.contains('is-live')) {
+      grid.querySelectorAll('.au-card.is-live').forEach(function (c) { setLive(c, false); });
+      setLive(card, true); return;
+    }
+    openDrawer(card.dataset.id, false, card);
+  });
+  grid.addEventListener('keydown', function (e) {
+    var card = e.target.closest('.au-card'); if (!card || e.target !== card) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(card.dataset.id, false, card); }
+    if (e.key === 'r' || e.key === 'R') toggleTray(card.dataset.id);
+  });
+
+  /* ── Table ──────────────────────────────────────────────────────── */
+  function rowHtml(s) {
+    var top = topChannels(s, 1)[0];
+    return '<tr data-id="' + s.id + '" class="' + lensClass(s) + '">' +
+      '<td class="sel">' + addBtn(s, 'au-rowadd') + '</td>' +
+      '<td><div class="who"><img src="' + s.portrait + '" alt="" loading="lazy" /><div><b>' + esc(s.name) + '</b><small>' + esc(lensOf[s.lens].label) + '</small></div></div></td>' +
+      '<td>' + groupTag(s) + '</td>' +
+      '<td class="num">' + fmtM(s.size) + '</td>' +
+      '<td class="num">' + (s.addressable != null ? fmtK(s.addressable) : '<span class="muted">—</span>') + '</td>' +
+      '<td>' + (top ? '<b>' + top.v + '%</b> ' + esc(M.channelLabel(top.k)) : '<span class="muted">—</span>') + '</td>' +
+      '<td><div class="au-props-mini">' + s.properties.map(function (p) { return '<span>' + esc(PROP_SHORT[p.key]) + '</span>'; }).join('') + '</div></td>' +
+      '<td class="au-topics-line">' + s.topics.slice(0, 3).map(esc).join(' · ') + '</td>' +
+    '</tr>';
+  }
+  var rows = E('auRows'), peek = E('auRowpeek'), peekId = null, peekHideTimer = null, peekSwapTimer = null;
+  function showRowpeek(tr) {
+    var s = byId[tr.dataset.id]; if (!s) return;
+    clearTimeout(peekHideTimer);
+    var wasVisible = peek.classList.contains('is-visible');
+    if (peekId !== s.id) {
+      clearTimeout(peekSwapTimer);
+      peek.classList.add('is-switching');
+      peekId = s.id;
+      peekSwapTimer = setTimeout(function () {
+        peek.className = 'au-rowpeek is-visible is-switching ' + lensClass(s) + (wasVisible ? '' : ' is-jumping');
+        E('auRowpeekImg').src = s.portrait;
+        M.arc(E('auRowpeekArc'), s, { still: true });
+        E('auRowpeekLbl').textContent = s.name + ' · ' + fmtM(s.size);
+        peek.classList.remove('is-switching');
+      }, wasVisible ? 90 : 0);
+    }
+    var r = tr.getBoundingClientRect(), w = 220, h = 205;
+    var left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w - 24));
+    var top = Math.max(12, Math.min(window.innerHeight - h - 12, r.top + r.height / 2 - h / 2));
+    peek.classList.toggle('is-jumping', !wasVisible);
+    peek.style.left = left + 'px'; peek.style.top = top + 'px';
+    peek.classList.add('is-visible');
+    rows.querySelectorAll('tr.is-peeking').forEach(function (x) { if (x !== tr) x.classList.remove('is-peeking'); });
+    tr.classList.add('is-peeking');
+  }
+  function hideRowpeek(now) {
+    clearTimeout(peekHideTimer);
+    var go = function () {
+      peek.classList.remove('is-visible');
+      rows.querySelectorAll('tr.is-peeking').forEach(function (x) { x.classList.remove('is-peeking'); });
+    };
+    if (now) go(); else peekHideTimer = setTimeout(go, 140);
+  }
+  rows.addEventListener('mouseover', function (e) { var tr = e.target.closest('tr'); if (tr && !tr.contains(e.relatedTarget) && !TOUCH) showRowpeek(tr); });
+  rows.addEventListener('mouseout', function (e) { var tr = e.target.closest('tr'); if (tr && !tr.contains(e.relatedTarget)) hideRowpeek(); });
+  rows.addEventListener('click', function (e) {
+    var add = e.target.closest('[data-add]'); if (add) { toggleTray(add.dataset.add); return; }
+    var tr = e.target.closest('tr'); if (tr) { hideRowpeek(true); openDrawer(tr.dataset.id, false, tr); }
+  });
+  E('auTableView').querySelector('.au-tablewrap').addEventListener('scroll', function () { hideRowpeek(true); });
+  E('auContent').addEventListener('scroll', function () { if (peek.classList.contains('is-visible')) hideRowpeek(true); }, { passive: true });
+
+  /* ── The universe ───────────────────────────────────────────────── */
+  var SVG = 'http://www.w3.org/2000/svg', stage = E('auStage'), stageLbl = E('auStageLbl');
+  var nodes = {}, glabels = {}, layout = null, hotId = null, hotProp = null;
+  function renderLensChips() {
+    E('auLens').innerHTML = '<button type="button" role="radio" class="c-chip c-chip-filter' + (state.lens === 'all' ? ' is-active' : '') + '" data-lens="all" aria-checked="' + (state.lens === 'all') + '">All segments</button>' +
+      LENSES.map(function (l) {
+        var n = A.filter(function (s) { return s.lens === l.key; }).length;
+        return '<button type="button" role="radio" class="c-chip c-chip-filter lens-' + l.key + (state.lens === l.key ? ' is-active' : '') + '" data-lens="' + l.key + '" aria-checked="' + (state.lens === l.key) + '"><i class="dot"></i>' + esc(l.label) + ' <span class="count">' + n + '</span></button>';
+      }).join('');
+  }
+  E('auLens').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-lens]'); if (!b) return;
+    hotNode(null); state.lens = b.dataset.lens; renderLensChips(); renderUniverse();
+  });
+  function shortName(s, r) {
+    /* A label only where it fits: the whole name on one line, then on
+       two, then the first word, then nothing. The hover label always
+       carries the full name. */
+    var fs = Math.max(9, Math.min(13, r / 2.4)), fits = function (t) { return t.length * fs * 0.58 <= r * 1.85; };
+    if (r < 15) return null;
+    if (fits(s.name)) return { lines: [s.name], fs: fs };
+    var words = s.name.split(/\s+/), best = null;
+    for (var i = 1; i < words.length; i++) {
+      var a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+      if (fits(a) && fits(b) && (!best || Math.abs(a.length - b.length) < best.d)) best = { lines: [a, b], fs: fs, d: Math.abs(a.length - b.length) };
+    }
+    if (best && r >= 20) return best;
+    var first = words[0].replace(/[&,]$/, '');
+    if (fits(first)) return { lines: [first], fs: fs };
+    return null;
+  }
+  function buildUniverse() {
+    stage.innerHTML = '';
+    GROUPS.forEach(function (g) {
+      var t = document.createElementNS(SVG, 'text');
+      t.setAttribute('class', 'au-glabel'); t.textContent = g.label; t.setAttribute('x', 0); t.setAttribute('y', 0);
+      stage.appendChild(t); glabels[g.key] = t;
+    });
+    A.forEach(function (s) {
+      var g = document.createElementNS(SVG, 'g');
+      g.setAttribute('class', 'au-node ' + lensClass(s)); g.setAttribute('data-id', s.id);
+      g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details');
+      var c = document.createElementNS(SVG, 'circle'); c.setAttribute('r', 0);
+      var t = document.createElementNS(SVG, 'text');
+      g.appendChild(c); g.appendChild(t); stage.appendChild(g); nodes[s.id] = g;
+    });
+  }
+  function renderUniverse() {
+    var w = 1200, h = 420;
+    layout = M.layoutUniverse(A, state.lens, { w: w, h: h });
+    var seen = {};
+    layout.labels.forEach(function (l) {
+      var t = glabels[l.group]; seen[l.group] = true;
+      t.style.transform = 'translate(' + l.x.toFixed(1) + 'px,' + l.y.toFixed(1) + 'px)';
+      t.classList.remove('is-off');
+    });
+    GROUPS.forEach(function (g) { if (!seen[g.key]) glabels[g.key].classList.add('is-off'); });
+    layout.circles.forEach(function (c) {
+      var g = nodes[c.id], circ = g.firstChild, txt = g.lastChild, r = Math.max(4, c.r);
+      g.style.transform = 'translate(' + c.x.toFixed(1) + 'px,' + c.y.toFixed(1) + 'px)';
+      circ.style.r = r.toFixed(1) + 'px';
+      g.classList.toggle('is-out', c.out);
+      var lbl = c.out ? null : shortName(c.seg, r);
+      txt.textContent = '';
+      if (lbl) {
+        txt.setAttribute('font-size', lbl.fs.toFixed(1));
+        lbl.lines.forEach(function (line, i) {
+          var ts = document.createElementNS(SVG, 'tspan');
+          ts.setAttribute('x', 0); ts.setAttribute('dy', i === 0 ? ((1 - lbl.lines.length) * 0.55 + 0.0).toFixed(2) + 'em' : '1.1em');
+          ts.textContent = line; txt.appendChild(ts);
+        });
+      }
+    });
+    syncUniverseFilter();
+  }
+  function syncUniverseFilter() {
+    var keep = {}; current.forEach(function (s) { keep[s.id] = true; });
+    var filtering = current.length !== A.length;
+    A.forEach(function (s) { nodes[s.id].classList.toggle('is-off', filtering && !keep[s.id]); });
+  }
+  function stagePoint(x, y) {
+    /* viewBox → CSS pixels, honouring xMidYMid meet. */
+    var r = stage.getBoundingClientRect(), k = Math.min(r.width / 1200, r.height / 420);
+    return { x: (r.width - 1200 * k) / 2 + x * k, y: (r.height - 420 * k) / 2 + y * k, k: k };
+  }
+  function hotNode(id) {
+    if (!layout) return; /* nothing to light before the first layout */
+    hotId = id;
+    stage.classList.toggle('has-hot', !!id);
+    A.forEach(function (s) {
+      var g = nodes[s.id];
+      g.classList.toggle('is-hot', s.id === id);
+      /* Kin: the fans-to-buyers twin, and the rest of the group. */
+      var kin = id && s.id !== id && ((byId[id].pair && byId[id].pair.id === s.id) || s.group === byId[id].group);
+      g.classList.toggle('is-kin', !!kin);
+    });
+    if (!id) { stageLbl.classList.remove('is-on'); return; }
+    var c = null; layout.circles.forEach(function (x) { if (x.id === id) c = x; });
+    if (!c) return;
+    var s = byId[id], p = stagePoint(c.x, c.y - Math.max(4, c.r));
+    stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
+    stageLbl.innerHTML = '<b><i></i>' + esc(s.name) + '</b><span>' + fmtM(s.size) + ' · ' + esc(groupOf[s.group].label) + (s.pair ? ' · ' + (s.pair.role === 'fan' ? 'feeds ' : 'fed by ') + esc(byId[s.pair.id].name) : '') + '</span>';
+    stageLbl.style.left = p.x + 'px'; stageLbl.style.top = p.y + 'px';
+  }
+  function hotProperty(key) {
+    if (!layout) return;
+    hotProp = key;
+    stage.classList.toggle('has-hot', !!key);
+    A.forEach(function (s) {
+      var g = nodes[s.id];
+      g.classList.toggle('is-hot', false);
+      g.classList.toggle('is-kin', !!key && hasProp(s, key));
+    });
+    stageLbl.classList.remove('is-on');
+    E('auProps').querySelectorAll('.au-prop').forEach(function (b) { b.classList.toggle('is-on', b.dataset.prop === key); });
+  }
+  stage.addEventListener('mouseover', function (e) { var g = e.target.closest('.au-node'); if (g && !TOUCH) hotNode(g.dataset.id); });
+  stage.addEventListener('mouseout', function (e) { var g = e.target.closest('.au-node'); if (g && !g.contains(e.relatedTarget) && hotId === g.dataset.id) hotNode(null); });
+  stage.addEventListener('focusin', function (e) { var g = e.target.closest('.au-node'); if (g) hotNode(g.dataset.id); });
+  stage.addEventListener('focusout', function (e) { var g = e.target.closest('.au-node'); if (g && hotId === g.dataset.id) hotNode(null); });
+  stage.addEventListener('mouseleave', function () { if (hotId) hotNode(null); });
+  stage.addEventListener('click', function (e) {
+    var g = e.target.closest('.au-node'); if (!g) return;
+    if (TOUCH && hotId !== g.dataset.id) { hotNode(g.dataset.id); return; }
+    openDrawer(g.dataset.id, false, g);
+  });
+  stage.addEventListener('keydown', function (e) {
+    var g = e.target.closest('.au-node'); if (!g) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(g.dataset.id, false, g); }
+    if (e.key === 'r' || e.key === 'R') toggleTray(g.dataset.id);
+  });
+  function renderProps() {
+    var counts = {}; A.forEach(function (s) { s.properties.forEach(function (p) { counts[p.key] = (counts[p.key] || 0) + 1; }); });
+    E('auProps').innerHTML = '<span>Where they live</span>' + PROPS.slice().sort(function (a, b) { return (counts[b.key] || 0) - (counts[a.key] || 0); }).map(function (p) {
+      return '<button type="button" class="au-prop" data-prop="' + p.key + '" aria-label="' + esc(p.label) + ', ' + (counts[p.key] || 0) + ' segments">' + esc(p.label) + ' <span class="n">' + (counts[p.key] || 0) + '</span></button>';
+    }).join('') + '<span class="au-uhint"><i class="ph ph-cursor"></i>Hover a property to light up who lives there</span>';
+  }
+  E('auProps').addEventListener('mouseover', function (e) { var b = e.target.closest('.au-prop'); if (b && !TOUCH) hotProperty(b.dataset.prop); });
+  E('auProps').addEventListener('mouseout', function (e) { var b = e.target.closest('.au-prop'); if (b && !b.contains(e.relatedTarget) && !TOUCH) hotProperty(null); });
+  E('auProps').addEventListener('focusin', function (e) { var b = e.target.closest('.au-prop'); if (b) hotProperty(b.dataset.prop); });
+  E('auProps').addEventListener('focusout', function (e) { var b = e.target.closest('.au-prop'); if (b) hotProperty(null); });
+  E('auProps').addEventListener('click', function (e) {
+    /* A click turns the hover into a filter, so the cards below agree. */
+    var b = e.target.closest('.au-prop'); if (!b) return;
+    var i = state.props.indexOf(b.dataset.prop);
+    if (i > -1) state.props.splice(i, 1); else state.props.push(b.dataset.prop);
+    renderPills(); render();
+    if (TOUCH) hotProperty(hotProp === b.dataset.prop ? null : b.dataset.prop);
+  });
+
+  /* ── Fans to buyers ─────────────────────────────────────────────── */
+  function renderPairs() {
+    var fans = A.filter(function (s) { return s.pair && s.pair.role === 'fan'; });
+    E('auPairs').innerHTML = fans.map(function (f, i) {
+      var b = byId[f.pair.id];
+      var half = function (s, role) {
+        return '<div class="au-half ' + lensClass(s) + '"><div class="pic"><img src="' + s.portrait + '" alt="" loading="lazy" /></div>' +
+          '<b>' + esc(s.name) + '</b><span><em>' + fmtM(s.size) + '</em> · ' + role + '</span></div>';
+      };
+      return '<button class="au-pair" type="button" data-pair="' + b.id + '" data-fan="' + f.id + '" style="--k:' + i + '" aria-label="' + esc(f.name) + ' to ' + esc(b.name) + '">' +
+        half(f, 'interest') + '<div class="au-pairarrow"><i class="ph ph-arrow-right"></i><small>' + (b.size === f.size ? 'same' : (b.size > f.size ? '+' : '−') + fmtM(Math.abs(b.size - f.size))) + '</small></div>' + half(b, 'in market') +
+      '</button>';
+    }).join('');
+  }
+  E('auPairs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pair]'); if (b) openDrawer(b.dataset.pair, false, b, b.dataset.fan);
+  });
+
+  /* ── Drawer ─────────────────────────────────────────────────────── */
+  var modal = E('auModal'), drawer = E('auDrawer'), scrim = E('auScrim'), drawerId = null, returnTo = null;
+  var swingSrcEl = null, swingSrcRect = null, hideTimer = null;
+  function swingVarsFor(panel, srcEl, srcRect) {
+    panel.classList.remove('is-swinging-open', 'is-swinging-closed');
+    void panel.offsetWidth;
+    var from = (srcEl && srcEl.isConnected) ? srcEl.getBoundingClientRect() : srcRect;
+    if (!from || !from.width) return false;
+    var to = panel.getBoundingClientRect();
+    panel.style.setProperty('--sw-dx', (from.left - to.left).toFixed(1) + 'px');
+    panel.style.setProperty('--sw-dy', (from.top - to.top).toFixed(1) + 'px');
+    panel.style.setProperty('--sw-sx', (from.width / to.width).toFixed(4));
+    panel.style.setProperty('--sw-sy', (from.height / to.height).toFixed(4));
+    panel.style.setProperty('--sw-dir', (from.left + from.width / 2) <= window.innerWidth / 2 ? '1' : '-1');
+    return true;
+  }
+  function setSwingVars() { return swingVarsFor(drawer, swingSrcEl, swingSrcRect); }
+  function swingAnchor(el) {
+    if (!el) return null;
+    if (el.tagName === 'TR') return el.querySelector('td') || el;
+    return el;
+  }
+  function related(s, pinned) {
+    var out = [];
+    if (pinned && byId[pinned] && pinned !== s.id) out.push(byId[pinned]);
+    if (s.pair && out.indexOf(byId[s.pair.id]) < 0) out.push(byId[s.pair.id]);
+    A.filter(function (x) { return x.id !== s.id && x.group === s.group && out.indexOf(x) < 0; })
+      .sort(function (a, b) { return b.size - a.size; }).forEach(function (x) { if (out.length < 3) out.push(x); });
+    return out.slice(0, 3);
+  }
+  function relLabel(s, x) {
+    if (s.pair && s.pair.id === x.id) return s.pair.role === 'fan' ? 'The buyers these fans feed' : 'The fans who feed this';
+    return 'Same group';
+  }
+  function renderDrawer(s, pinned) {
+    E('auDrawerCrumb').textContent = s.name;
+    var rel = related(s, pinned);
+    var chans = M.CHANNELS.filter(function (c) { return s.consumption[c.key] != null; });
+    E('auDrawerBody').className = 'au-dbody ' + lensClass(s);
+    E('auDrawerBody').innerHTML =
+      '<div class="au-dside">' +
+        '<div class="au-dpic"><img src="' + s.portrait + '" alt="" /><div class="au-arcwrap"><div id="auDrawerArc"></div></div></div>' +
+        '<div><div class="au-dsize"><b>' + fmtM(s.size) + '</b><span>Audience size · published by KULT</span></div>' +
+        (s.addressable != null ? '<div class="au-dsize addr"><b>' + fmtK(s.addressable) + '</b><span>Addressable on KULT digital · planner count</span><p>' + esc(s.fit) + '</p></div>' : '') + '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="au-dtitle"><h2 id="auDrawerTitle">' + esc(s.name) + '</h2><div class="au-dtags">' + lensTag(s) + groupTag(s) + '</div></div>' +
+        '<p class="au-ddesc">' + esc(s.desc) + '</p>' +
+        '<div class="au-section"><h5>Media consumption</h5><div class="au-bars">' + chans.map(function (c) {
+          return '<div class="au-bar"><span>' + esc(c.label) + '</span><i><b data-w="' + s.consumption[c.key] + '"></b></i><span>' + s.consumption[c.key] + '%</span></div>';
+        }).join('') + '</div></div>' +
+        '<div class="au-section"><h5>Where they live</h5><div class="au-lives">' + s.properties.map(function (p) {
+          return '<div><b>' + esc(propOf[p.key].label) + '</b><span>' + esc(p.note) + '</span></div>';
+        }).join('') + '</div></div>' +
+        '<div class="au-section"><h5>What they read about</h5><div class="au-chipset">' + s.topics.map(function (t) { return '<span class="c-chip">' + esc(t) + '</span>'; }).join('') + '</div></div>' +
+        (rel.length ? '<div class="au-section"><h5>Also see</h5><div class="au-related">' + rel.map(function (x) {
+          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic"><img src="' + x.portrait + '" alt="" loading="lazy" /></div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(relLabel(s, x)) + '</small></span></button>';
+        }).join('') + '</div></div>' : '') +
+      '</div>';
+    var inTray = tray.indexOf(s.id) > -1;
+    E('auDrawerFoot').innerHTML =
+      '<a class="c-btn c-btn-primary c-btn-md" href="planner.html?audiences=' + encodeURIComponent(s.id) + '"><i class="ph ph-compass-tool"></i> Use in a media plan</a>' +
+      '<a class="c-btn c-btn-secondary c-btn-md" href="https://kult.my/audience/" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out"></i> On kult.my</a>' +
+      '<span class="spacer"></span>' +
+      '<button class="c-btn c-btn-ghost c-btn-md" type="button" id="auDrawerAdd"><i class="ph ' + (inTray ? 'ph-check' : 'ph-plus') + '"></i> ' + (inTray ? 'In the reach tray' : 'Add to reach tray') + '</button>';
+    M.arc(E('auDrawerArc'), s);
+    E('auDrawerBody').scrollTop = 0;
+    setTimeout(function () {
+      E('auDrawerBody').classList.add('is-live');
+      E('auDrawerBody').querySelectorAll('.au-bar b').forEach(function (b) { b.style.width = b.dataset.w + '%'; });
+    }, 30);
+  }
+  function openDrawer(id, fromNav, sourceEl, pinned) {
+    var s = byId[id]; if (!s) return;
+    clearTimeout(hideTimer);
+    var already = modal.classList.contains('is-open');
+    if (!fromNav) returnTo = document.activeElement;
+    drawerId = id; renderDrawer(s, pinned);
+    var home = grid.querySelector('.au-card[data-id="' + id + '"]');
+    swingSrcEl = swingAnchor(sourceEl) || (already ? swingSrcEl : null) || home;
+    swingSrcRect = swingSrcEl ? swingSrcEl.getBoundingClientRect() : null;
+    if (!already) {
+      modal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      if (!REDUCED && setSwingVars()) drawer.classList.add('is-swinging-open');
+      setTimeout(function () { modal.classList.add('is-shown'); }, 20);
+    }
+    try { history.replaceState(null, '', '?a=' + encodeURIComponent(id)); } catch (e) {}
+    E('auDrawerClose').focus();
+  }
+  function closeDrawer() {
+    if (!modal.classList.contains('is-open')) return;
+    var home = drawerId && grid.querySelector('.au-card[data-id="' + drawerId + '"]');
+    if (home && state.view === 'cards') { swingSrcEl = home; swingSrcRect = home.getBoundingClientRect(); }
+    var swung = !REDUCED && setSwingVars();
+    if (swung) drawer.classList.add('is-swinging-closed');
+    modal.classList.remove('is-shown');
+    document.body.style.overflow = '';
+    drawerId = null;
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () {
+      modal.classList.remove('is-open');
+      drawer.classList.remove('is-swinging-open', 'is-swinging-closed');
+    }, swung ? 560 : 320);
+    if (returnTo && returnTo.focus) returnTo.focus();
+  }
+  function stepDrawer(dir) {
+    if (!drawerId) return;
+    var ids = current.map(function (s) { return s.id; });
+    var i = ids.indexOf(drawerId); if (i < 0) { ids = A.map(function (s) { return s.id; }); i = ids.indexOf(drawerId); }
+    openDrawer(ids[(i + dir + ids.length) % ids.length], true);
+  }
+  E('auDrawerClose').addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  E('auPrev').addEventListener('click', function () { stepDrawer(-1); });
+  E('auNext').addEventListener('click', function () { stepDrawer(1); });
+  drawer.addEventListener('click', function (e) {
+    if (e.target.closest('#auDrawerAdd')) { toggleTray(drawerId); renderDrawer(byId[drawerId]); return; }
+    var rel = e.target.closest('[data-rel]'); if (rel) openDrawer(rel.dataset.rel, true);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (E('auCmodal').classList.contains('is-open')) { closeSheet(); return; }
+      if (modal.classList.contains('is-open')) { closeDrawer(); return; }
+      if (openFacet) { openFacet = null; renderPills(); }
+    }
+    if (modal.classList.contains('is-open') && !e.target.matches('input, textarea, select')) {
+      if (e.key === 'ArrowRight') stepDrawer(1);
+      if (e.key === 'ArrowLeft') stepDrawer(-1);
+    }
+  });
+
+  /* ── Reach tray — up to five, kept for the tab. ─────────────────── */
+  var tray = [], refine = {};
+  try { tray = JSON.parse(sessionStorage.getItem('collab-audiences-tray')) || []; } catch (e) { tray = []; }
+  tray = tray.filter(function (id) { return byId[id]; });
+  function saveTray() { try { sessionStorage.setItem('collab-audiences-tray', JSON.stringify(tray)); } catch (e) {} }
+  function toggleTray(id) {
+    var i = tray.indexOf(id);
+    if (i > -1) tray.splice(i, 1);
+    else if (tray.length >= 5) { toast('The tray holds five', 'Remove one to add ' + byId[id].name + '.'); return; }
+    else tray.push(id);
+    saveTray(); syncTrayUI();
+  }
+  function refineMult() {
+    var m = 1;
+    window.AUDIENCE_REFINE.forEach(function (d) {
+      var v = refine[d.id]; if (!v) return;
+      d.opts.forEach(function (o) { if (o[0] === v) m *= o[2]; });
+    });
+    return m;
+  }
+  /* Karen's overlap rule, verbatim: segments counted largest first, each
+     discounted by the highest overlap it has with anything already in. */
+  function reach(ids, mult) {
+    var picked = ids.map(function (id) { return byId[id]; }).sort(function (a, b) { return b.size - a.size; });
+    var raw = 0, uniq = 0, counted = [];
+    picked.forEach(function (s) {
+      raw += s.size;
+      var worst = 0;
+      counted.forEach(function (q) { worst = Math.max(worst, q.group === s.group ? OVERLAP.same : OVERLAP.cross); });
+      uniq += s.size * (1 - worst);
+      counted.push(s);
+    });
+    mult = mult == null ? 1 : mult;
+    return { raw: raw, uniq: Math.round(uniq), pct: raw ? Math.round((1 - uniq / raw) * 100) : 0, after: Math.round(uniq * mult), mult: mult };
+  }
+  function syncTrayUI() {
+    var setBtn = function (b, on) {
+      var lbl = on ? 'Remove from reach tray' : 'Add to reach tray';
+      b.classList.toggle('is-on', on); b.innerHTML = '<i class="ph ' + (on ? 'ph-check' : 'ph-plus') + '"></i>';
+      b.title = lbl; b.setAttribute('aria-label', lbl); b.setAttribute('aria-pressed', on);
+    };
+    document.querySelectorAll('.au-card').forEach(function (card) {
+      var on = tray.indexOf(card.dataset.id) > -1;
+      card.classList.toggle('is-tray', on);
+      var b = card.querySelector('[data-add]'); if (b) setBtn(b, on);
+    });
+    E('auRows').querySelectorAll('[data-add]').forEach(function (b) { setBtn(b, tray.indexOf(b.dataset.add) > -1); });
+    E('auCbarNames').innerHTML = tray.map(function (id) {
+      return '<span>' + esc(byId[id].name) + '<button type="button" data-untray="' + id + '" aria-label="Remove ' + esc(byId[id].name) + '"><i class="ph ph-x"></i></button></span>';
+    }).join('');
+    var r = reach(tray);
+    E('auCbarLbl').textContent = tray.length + ' of 5';
+    E('auCbarReach').innerHTML = tray.length ? fmtM(r.uniq) + '<small>unique · ' + fmtM(r.raw) + ' raw</small>' : '';
+    E('auCbar').classList.toggle('is-open', tray.length > 0);
+    E('auTrayCount').textContent = tray.length; E('auTrayCount').hidden = !tray.length;
+  }
+  E('auCbarNames').addEventListener('click', function (e) { var b = e.target.closest('[data-untray]'); if (b) toggleTray(b.dataset.untray); });
+  E('auCbarClear').addEventListener('click', function () { tray = []; saveTray(); syncTrayUI(); });
+  E('auCbarOpen').addEventListener('click', function () { openSheet(this); });
+  E('auTrayBtn').addEventListener('click', function () {
+    if (tray.length) openSheet(this);
+    else toast('Pick segments first', 'Use the + on any card, or press R on a circle, to build a reach of up to five segments.');
+  });
+  var cmodal = E('auCmodal'), cbox = E('auCbox'), cmpSrcEl = null, cmpSrcRect = null, cmpHideTimer = null;
+  function renderSheet() {
+    var list = tray.map(function (id) { return byId[id]; }), r = reach(tray, refineMult());
+    var groupsIn = {}; list.forEach(function (s) { groupsIn[s.group] = (groupsIn[s.group] || 0) + 1; });
+    var sameGroup = Object.keys(groupsIn).filter(function (k) { return groupsIn[k] > 1; }).map(function (k) { return groupOf[k].label; });
+    E('auSheet').innerHTML =
+      '<div class="au-sheetcols" style="--n:' + list.length + '">' + list.map(function (s) {
+        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live"><img src="' + s.portrait + '" alt="" /><div class="au-arcwrap"><div data-sheetarc="' + s.id + '"></div></div></div>' +
+          '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span></div></div>';
+      }).join('') + '</div>' +
+      '<div class="au-sheetgrid">' +
+        '<div class="au-maths"><h5>How the reach is worked out</h5>' +
+          '<div class="au-mrow"><span>Raw total<small>Every segment counted in full</small></span><b>' + fmtM(r.raw) + '</b></div>' +
+          '<div class="au-mrow"><span>Overlap taken out<small>' + (sameGroup.length ? 'Two or more from ' + esc(sameGroup.join(', ')) + ' overlap by 60%; ' : '') + 'segments from different groups overlap by 25%</small></span><b>−' + r.pct + '%</b></div>' +
+          '<div class="au-mrow"><span>Unique reach<small>Before any refinement</small></span><b>' + fmtM(r.uniq) + '</b></div>' +
+          '<div class="au-mrow total"><span>After refinement<small>' + (r.mult < 1 ? Math.round(r.mult * 100) + '% of the audience kept' : 'No refinement applied') + '</small></span><b>' + fmtM(r.after) + '</b></div>' +
+          '<p style="margin:12px 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);">An estimate from group membership, not a deduplicated device count. Treat it as directional, the way the planner does.</p>' +
+          (r.uniq > OVERLAP.malaysia ? '<p style="margin:8px 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-9);"><i class="ph ph-warning-circle" style="vertical-align:-2px; color:var(--color-amber);"></i> That is more than Malaysia\'s ' + fmtM(OVERLAP.malaysia) + ' people. KULT\'s published sizes are audience-scale figures across platforms, not unique people; the planner\'s addressable counts are the number to quote for a buy.</p>' : '') +
+        '</div>' +
+        '<div class="au-refine"><h5>Refine</h5><div class="grid">' + window.AUDIENCE_REFINE.map(function (d) {
+          return '<div><label for="auRef-' + d.id + '">' + esc(d.label) + '</label><select id="auRef-' + d.id + '" data-refine="' + d.id + '">' + d.opts.map(function (o) {
+            return '<option value="' + o[0] + '"' + (refine[d.id] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+          }).join('') + '</select></div>';
+        }).join('') + '</div><p>Narrows reach proportionally, with the planner\'s own population shares. Malaysia in full is ' + fmtM(OVERLAP.malaysia) + '.</p></div>' +
+      '</div>';
+    E('auSheet').querySelectorAll('[data-sheetarc]').forEach(function (el) { M.arc(el, byId[el.dataset.sheetarc], { still: true }); });
+    E('auCmodalPlan').href = 'planner.html?audiences=' + tray.map(encodeURIComponent).join(',');
+  }
+  function openSheet(sourceEl) {
+    clearTimeout(cmpHideTimer);
+    cmpSrcEl = sourceEl || cmpSrcEl; cmpSrcRect = cmpSrcEl ? cmpSrcEl.getBoundingClientRect() : null;
+    renderSheet();
+    cmodal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    if (!REDUCED && swingVarsFor(cbox, cmpSrcEl, cmpSrcRect)) cbox.classList.add('is-swinging-open');
+    setTimeout(function () { cmodal.classList.add('is-shown'); }, 30);
+    E('auCmodalClose').focus();
+  }
+  function closeSheet() {
+    if (!cmodal.classList.contains('is-open')) return;
+    var swung = !REDUCED && swingVarsFor(cbox, cmpSrcEl, cmpSrcRect);
+    if (swung) cbox.classList.add('is-swinging-closed');
+    cmodal.classList.remove('is-shown');
+    if (!modal.classList.contains('is-open')) document.body.style.overflow = '';
+    clearTimeout(cmpHideTimer);
+    cmpHideTimer = setTimeout(function () {
+      cmodal.classList.remove('is-open');
+      cbox.classList.remove('is-swinging-open', 'is-swinging-closed');
+    }, swung ? 560 : 320);
+  }
+  E('auCmodalClose').addEventListener('click', closeSheet);
+  cmodal.addEventListener('click', function (e) {
+    if (e.target === cmodal || e.target === E('auCmodalBackdrop')) { closeSheet(); return; }
+    var x = e.target.closest('[data-export]');
+    if (x) toast(x.dataset.export + ' export is next', 'This build shows the reach on screen. The export lands with the spec-sheet template.');
+  });
+  E('auSheet').addEventListener('change', function (e) {
+    var sel = e.target.closest('[data-refine]'); if (!sel) return;
+    refine[sel.dataset.refine] = sel.value;
+    var keep = document.activeElement && document.activeElement.id;
+    renderSheet();
+    if (keep) { var back = E(keep); if (back) back.focus(); }
+  });
+
+  /* ── Toast — the DS recipe. ─────────────────────────────────────── */
+  function toast(title, msg) {
+    var host = E('auToasts');
+    var el = document.createElement('div');
+    el.className = 'c-toast is-entering';
+    el.innerHTML = '<i class="ph-fill ph-info tone tone-neutral"></i><div class="body"><div class="title">' + esc(title) + '</div>' + (msg ? '<div class="message">' + esc(msg) + '</div>' : '') + '</div>';
+    host.appendChild(el);
+    requestAnimationFrame(function () { el.classList.remove('is-entering'); });
+    setTimeout(function () { el.classList.add('is-exiting'); setTimeout(function () { el.remove(); }, 260); }, 3200);
+  }
+
+  /* ── Resize: the stage label and the filter panel follow the layout. ── */
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { fades(); if (openFacet) placePanel(); if (hotId) hotNode(hotId); }, 80);
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) fades(); });
+
+  /* ── Boot: bones first, then the real page cascades in. ─────────── */
+  function skeleton() {
+    var sk = function (w, h, extra) { return '<span class="au-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
+    var dots = '';
+    [[180, 210, 70], [330, 150, 48], [420, 290, 60], [560, 200, 84], [700, 300, 40], [820, 170, 66], [960, 260, 58], [1080, 190, 44]].forEach(function (d) {
+      dots += '<circle class="au-sk-dot" cx="' + d[0] + '" cy="' + d[1] + '" r="' + d[2] + '"></circle>';
+    });
+    stage.innerHTML = dots;
+    E('auLens').innerHTML = [110, 120, 130, 150].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
+    E('auProps').innerHTML = '<span>Where they live</span>' + [90, 80, 70, 70, 100, 64, 110, 70, 76].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px; height:28px"></span>'; }).join('');
+    E('auPairs').innerHTML = [0, 1, 2, 3, 4].map(function (i) {
+      return '<div class="au-pair au-sk-card" style="--k:' + i + '" aria-hidden="true"><div class="au-half"><div class="au-sk-stage" style="border-radius:var(--radius-sm)"></div>' + sk(90, 12) + '</div><div class="au-pairarrow"></div><div class="au-half"><div class="au-sk-stage" style="border-radius:var(--radius-sm)"></div>' + sk(90, 12) + '</div></div>';
+    }).join('');
+    E('auChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106, 120].map(function (w) { return '<span class="au-sk au-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
+    E('auPills').innerHTML = '<span class="au-sk au-sk-pill" style="width:92px"></span>';
+    E('auCount').textContent = 'Loading audiences…';
+    E('auGrid').innerHTML = [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) {
+      return '<article class="au-card au-sk-card" style="--i:' + i + '" aria-hidden="true"><div class="au-sk-stage"></div>' +
+        '<div class="au-body"><div class="au-titlerow">' + sk(120, 16) + '<span class="au-sk au-sk-pill" style="width:74px; height:22px"></span></div>' +
+        sk(60, 22) + sk(0, 9, 'width:64%') + '</div></article>';
+    }).join('');
+    E('auRows').innerHTML = [0, 1, 2, 3, 4].map(function () {
+      var cells = '';
+      for (var c = 0; c < 7; c++) cells += '<td>' + sk(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
+      return '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
+    }).join('');
+  }
+  skeleton();
+  syncTrayUI();
+  setTimeout(function () {
+    if (document.hidden) E('auContent').classList.remove('au-arriving');
+    buildUniverse(); renderLensChips(); renderProps();
+    renderPairs();
+    renderChips(); renderPills(); render({ flip: false }); syncTrayUI();
+    /* The circles grow from nothing: r starts at 0 and transitions in. */
+    requestAnimationFrame(function () { renderUniverse(); });
+    setTimeout(function () { E('auContent').classList.remove('au-arriving'); }, 1200);
+    var deep = /[?&]a=([^&]+)/.exec(location.search);
+    if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 500);
+  }, REDUCED ? 0 : 1000);
+})();
+</script>
+</body>
+</html>

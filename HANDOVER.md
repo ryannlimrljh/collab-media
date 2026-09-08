@@ -35,6 +35,7 @@ see [Gotchas](#gotchas).
 | `campaign-list.html` | My media plans | Full listing: search, facet filters, sortable columns, A-Z rail, row actions |
 | `planner.html` | Media planner | The four-step wizard — Brief, Audience, Media mix, Summary — with a persistent right rail and a per-plan Collab AI thread |
 | `formats.html` | Ad formats (General) | The ad-format catalogue: 49 KULT units with a live sample on every card, objective/family/size/device filters, gallery and table views, a spec drawer, and a compare tray of up to four. Design note: `docs/superpowers/specs/2026-09-07-formats-catalogue-design.md` |
+| `audiences.html` | Audiences (General) | The audience catalogue: 51 KULT segments drawn as a packed-circle universe (three lenses over eight groups), a fans-to-buyers strip, portrait cards with a consumption arc, a table, a drawer, and a reach tray of up to five with Karen's overlap rule and refine filters. Design note: `docs/superpowers/specs/2026-09-08-audiences-catalogue-design.md` |
 
 `vercel.json` redirects `/` to `pages/campaigns.html`.
 
@@ -49,6 +50,14 @@ see [Gotchas](#gotchas).
 | `campaigns-data.js` | The seeded sample plans, plus `campaignBadge()` and `rmFmt()` |
 | `formats-data.js` | The format catalogue: specs transcribed from kult.my/gallery (2026-09-07) merged with the rate card's `bestFor` / `cpm` / `inventory`. The nine standard display units are catalogue defaults, flagged `source: "catalogue"` |
 | `format-previews.css` / `format-previews.js` | The live samples. `FormatPreviews.mount(el, format)` draws the miniature, `FormatPreviews.live(el, on)` plays it. Independent of the page so the planner can reuse it |
+| `audiences-data.js` | The audience catalogue: 51 segments read from kult.my/audience (2026-09-08) with size, portrait, properties, consumption and topics; Karen's addressable counts and fit notes on the ten that map by name; her refine dimensions and overlap rule |
+| `audience-marks.css` / `audience-marks.js` | The drawings: `AudienceMarks.arc(el, segment)` renders the consumption rings, `AudienceMarks.layoutUniverse(segments, lens, stage)` packs the circles. Pure functions, no DOM in the layout, so the planner's audience step can reuse them |
+
+### Assets (`assets/audiences/`)
+
+The 51 segment portraits from kult.my, resized to 720px on the long edge
+(6.8 MB). They are Astro group photography used inside an Astro group
+product; confirm rights before the page leaves the group.
 
 ### Design system (`collabrium-dls/`)
 
@@ -73,6 +82,8 @@ and per-machine — clearing site data resets the product to its seeded sample.
 | `collab.chats` | Assistant threads, shared across Home and the planner |
 | `collab-nav-collapsed` | Sidebar collapsed state, carried between pages |
 | `collab-logo-cache` | Resolved brand-logo URLs |
+| `collab-formats-compare` (session) | Ad formats in the compare tray |
+| `collab-audiences-tray` (session) | Segments in the reach tray |
 
 ---
 
@@ -106,7 +117,7 @@ If either URL changes, both ends need updating. The mothership half lives in
 **Cache-busting is manual.** Shared CSS and JS are linked with `?v=0.9.52`.
 Edit `shared/shell.js` or `shell.css` without bumping that number and browsers
 keep serving the old copy — the change simply will not appear, with no error.
-Bump it in all three pages together:
+Bump it in all five pages together:
 
 ```bash
 sed -i '' 's/shell\.css?v=[0-9.]*/shell.css?v=0.9.53/g; s/shell\.js?v=[0-9.]*/shell.js?v=0.9.53/g' pages/*.html
@@ -134,6 +145,11 @@ These look real and are not. Anything below needs a backend before it ships.
 - **Booking** locks the plan in the UI only; nothing is sent anywhere.
 - **Sample data** is a cleaned snapshot of the live KULT engine's plans, not a
   feed.
+- **Audience sizes** are KULT's published, audience-scale figures. Five of
+  them summed pass Malaysia's population; the reach sheet says so when it
+  happens. The planner's addressable counts are the number for a buy.
+- **Planner hand-offs** `?format=`, `?formats=` and `?audiences=` are links
+  the planner does not read yet.
 
 ---
 
