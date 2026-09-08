@@ -336,3 +336,16 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   comes from its own seed, except where the segment says who it is:
   New Mothers and Experienced Mothers are drawn as the women KULT
   describes them to be.
+- 2026-09-08, fifteenth pass: a finer pen (1.6 rather than 2), one prop a
+  scene turned into a block of colour, and postures that do something. The
+  drawing primitives now take their fill and stroke from the group above
+  them, so the first prop of every scene is wrapped in a tint chosen per
+  motif — an amber football, a turquoise mountain, a purple controller, a
+  salmon heart — and the handful of shapes that read on their own (heart,
+  star, leaf, plane, notes) drop the outline entirely and become flat
+  silhouettes, as in the reference. Five action poses joined the five
+  standing ones: run, jump, climb, kick and push, each with its own legs,
+  arms, lean into the movement and, for a jump, the ground left behind.
+  Adventure Seekers climbs, Wellness Explorers runs, the football fans
+  kick, Badminton and the concert-goers jump, and the parents and
+  shoppers push. Sitting now bends at the knee instead of lying flat.

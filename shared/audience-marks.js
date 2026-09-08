@@ -109,15 +109,15 @@
      hash, so a segment keeps its face); the props come from a small
      library below, placed per segment in SCENES. Ink only, on the
      card's own tint. Returns an SVG string, viewBox 0 0 160 120.     */
-  var INK = 'var(--color-neutral-9)', SW = 2;
-  function P(d, fill) { return '<path d="' + d + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round"/>'; }
-  function L(d) { return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  var INK = 'var(--color-neutral-9)', SW = 1.6, PS = 'var(--ps,' + INK + ')', PF = 'var(--pf,#fff)';
+  function P(d, fill) { return '<path d="' + d + '" fill="' + (fill || PF) + '" stroke="' + PS + '" stroke-width="' + SW + '" stroke-linejoin="round" stroke-linecap="round"/>'; }
+  function L(d) { return '<path d="' + d + '" fill="none" stroke="' + PS + '" stroke-width="' + SW + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
   /* A thinner pen for the details inside a shape, so the drawing has
      two weights the way a hand does. */
-  function LT(d, w) { return '<path d="' + d + '" fill="none" stroke="' + INK + '" stroke-width="' + (w || SW) + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
-  function C(cx, cy, r, fill) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (fill || '#fff') + '" stroke="' + INK + '" stroke-width="' + SW + '"/>'; }
-  function D(cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + INK + '"/>'; }
-  function T(x, y, str) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-weight="800" fill="' + INK + '" text-anchor="middle" font-family="inherit">' + str + '</text>'; }
+  function LT(d, w) { return '<path d="' + d + '" fill="none" stroke="' + PS + '" stroke-width="' + (w || SW) + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function C(cx, cy, r, fill) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (fill || PF) + '" stroke="' + PS + '" stroke-width="' + SW + '"/>'; }
+  function D(cx, cy, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + PS + '"/>'; }
+  function T(x, y, str) { return '<text x="' + x + '" y="' + y + '" font-size="8" font-weight="800" fill="' + PS + '" text-anchor="middle" font-family="inherit">' + str + '</text>'; }
   function G(x, y, sc, inner) { return '<g transform="translate(' + x + ' ' + y + ') scale(' + (sc || 1) + ')">' + inner + '</g>'; }
 
   /* ── Hand-drawn geometry ─────────────────────────────────────────
@@ -303,49 +303,113 @@
     var strength = (0.82 + R() * 0.18).toFixed(2);
     var fx = (R() - 0.5) * 6, fy = cy - bh * 0.1;
     /* Legs first, so they tuck under the body. */
-    var lx = w * 0.17, toe = -w / 2 - 11, legs;
-    if (sit) {
-      legs = L('M' + n1(-lx + 2) + ' -6 C' + n1(-lx - 10) + ' -3 ' + n1(toe + 10) + ' -2 ' + n1(toe) + ' -2 l-5 -3') +
-        L('M' + n1(lx + 2) + ' -4 C' + n1(-lx - 6) + ' -1 ' + n1(toe + 14) + ' 1 ' + n1(toe + 6) + ' 1 l-5 -3');
-    } else {
-      legs = L('M' + n1(-lx) + ' ' + n1(cy + bh / 2 - 4) + ' C' + n1(-lx - 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 1) + ' 0 l-5 0') +
-        L('M' + n1(lx) + ' ' + n1(cy + bh / 2 - 4) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' 0 l5 0');
-    }
-    var body = '<path d="' + squircle(0, cy, w, bh, R) + '" fill="var(--au-color)" fill-opacity="' + strength + '"/>';
-    var hair = HAIR[look.hair](cy - bh / 2, w / 2, bh) + (look.ear ? D(-w / 2 + 1.5, cy + 3, 2) + D(w / 2 - 1.5, cy + 3, 2) : '');
-    /* Arms are lines too; the hand is three short strokes at the end,
-       the way a stick figure's is. */
-    var sy = cy + bh * 0.12, ax = w / 2 - 3, arms;
+    /* ── Posture. A character that only ever stands is a diagram; the
+       pose is most of what says what this segment does. Each one sets
+       its own legs and arms, and may lean into the movement or leave
+       the ground altogether. ── */
+    var lx = w * 0.17, toe = -w / 2 - 11, hip = cy + bh / 2 - 4;
+    var sy = cy + bh * 0.12, ax = w / 2 - 3, legs, arms, lift = 0, lean = 0;
     function hand(hx, hy, rot) {
       return '<g transform="translate(' + n1(hx) + ' ' + n1(hy) + ') rotate(' + n1(rot || 0) + ')">' +
         L('M0 0 l0 4 M0 0 l-3.4 2.4 M0 0 l3.4 2.4') + '</g>';
     }
     function arm(d, hx, hy, rot) { return L(d) + hand(hx, hy, rot); }
-    if (pose === 'cheer') {
+    function leg(d) { return L(d); }
+    var standLegs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 1) + ' 0 l-5 0') +
+      leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 1) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 1.5) + ' ' + n1(-legLen * 0.25) + ' ' + n1(lx + 1) + ' 0 l5 0');
+    var armDownL = 'M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 9) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 4) + ' ' + n1(sy + 23);
+    var armDownR = 'M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 8) + ' ' + n1(ax + 9) + ' ' + n1(sy + 18) + ' ' + n1(ax + 4) + ' ' + n1(sy + 23);
+    if (sit) {
+      legs = leg('M' + n1(-lx + 1) + ' -7 C' + n1(-lx - 9) + ' -16 ' + n1(toe + 5) + ' -17 ' + n1(toe + 1) + ' -12 C' + n1(toe - 2) + ' -8 ' + n1(toe - 3) + ' -4 ' + n1(toe - 2) + ' 0 l-5 0') +
+        leg('M' + n1(lx + 1) + ' -5 C' + n1(-lx - 4) + ' -12 ' + n1(toe + 12) + ' -12 ' + n1(toe + 9) + ' -8 C' + n1(toe + 6) + ' -5 ' + n1(toe + 6) + ' -2 ' + n1(toe + 7) + ' 0 l-5 0');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 15) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 19), -ax - 3, sy + 19, 10) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy + 4) + ' ' + n1(ax + 16) + ' ' + n1(sy + 10) + ' ' + n1(ax + 18) + ' ' + n1(sy + 17), ax + 18, sy + 17, -20);
+    } else if (pose === 'run') {
+      /* Mid-stride: the front knee up, the back leg trailing, arms
+         swinging opposite, the whole body pitched into it. */
+      lean = 7;
+      legs = leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 7) + ' ' + n1(-legLen * 0.55) + ' ' + n1(lx + 14) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 17) + ' -1 l5 0') +
+        leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 13) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 19) + ' ' + n1(-legLen * 0.28) + ' l-5 3');
+      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy - 2) + ' ' + n1(ax + 17) + ' ' + n1(sy - 8) + ' ' + n1(ax + 19) + ' ' + n1(sy - 15), ax + 19, sy - 15, 230) +
+        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 11) + ' ' + n1(sy + 6) + ' ' + n1(-ax - 17) + ' ' + n1(sy + 12) + ' ' + n1(-ax - 20) + ' ' + n1(sy + 17), -ax - 20, sy + 17, 30);
+    } else if (pose === 'jump') {
+      /* Both feet off the ground, knees tucked, arms thrown up. */
+      lift = -13;
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(-lx - 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(-lx - 15) + ' ' + n1(-legLen * 0.24) + ' l-5 1') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 5) + ' ' + n1(-legLen * 0.5) + ' ' + n1(lx + 12) + ' ' + n1(-legLen * 0.42) + ' ' + n1(lx + 15) + ' ' + n1(-legLen * 0.24) + ' l5 1');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 14) + ' ' + n1(sy - 6) + ' ' + n1(-ax - 19) + ' ' + n1(sy - 20) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 31), -ax - 17, sy - 31, 150) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 14) + ' ' + n1(sy - 6) + ' ' + n1(ax + 19) + ' ' + n1(sy - 20) + ' ' + n1(ax + 17) + ' ' + n1(sy - 31), ax + 17, sy - 31, 210);
+    } else if (pose === 'climb') {
+      /* One arm reaching for the next hold, the opposite knee drawn up,
+         the body leaning into the rock. */
+      lean = -9;
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 3) + ' ' + n1(-legLen * 0.62) + ' ' + n1(-lx - 4) + ' ' + n1(-legLen * 0.26) + ' ' + n1(-lx - 3) + ' 0 l-5 0') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 11) + ' ' + n1(-legLen * 0.78) + ' ' + n1(lx + 18) + ' ' + n1(-legLen * 0.66) + ' ' + n1(lx + 14) + ' ' + n1(-legLen * 0.42) + ' l4 3');
+      arms = arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 9) + ' ' + n1(sy - 13) + ' ' + n1(ax + 11) + ' ' + n1(sy - 27) + ' ' + n1(ax + 8) + ' ' + n1(sy - 36), ax + 8, sy - 36, 200) +
+        arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy - 3) + ' ' + n1(-ax - 12) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 7) + ' ' + n1(sy + 15), -ax - 7, sy + 15, 20);
+    } else if (pose === 'kick') {
+      /* One foot planted, the other swung out at the ball. */
+      lean = -6;
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 2) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 3) + ' ' + n1(-legLen * 0.25) + ' ' + n1(-lx - 2) + ' 0 l-5 0') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 9) + ' ' + n1(-legLen * 0.95) + ' ' + n1(lx + 20) + ' ' + n1(-legLen * 0.86) + ' ' + n1(lx + 27) + ' ' + n1(-legLen * 0.62) + ' l4 -3');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 13) + ' ' + n1(sy - 4) + ' ' + n1(-ax - 18) + ' ' + n1(sy - 14) + ' ' + n1(-ax - 17) + ' ' + n1(sy - 22), -ax - 17, sy - 22, 150) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 7) + ' ' + n1(ax + 9) + ' ' + n1(sy + 16) + ' ' + n1(ax + 4) + ' ' + n1(sy + 22), ax + 4, sy + 22, -8);
+    } else if (pose === 'push') {
+      /* Both arms out at the handle, one foot ahead of the other. */
+      lean = 5;
+      legs = leg('M' + n1(-lx) + ' ' + n1(hip) + ' C' + n1(-lx - 4) + ' ' + n1(-legLen * 0.6) + ' ' + n1(-lx - 10) + ' ' + n1(-legLen * 0.3) + ' ' + n1(-lx - 12) + ' 0 l-5 0') +
+        leg('M' + n1(lx) + ' ' + n1(hip) + ' C' + n1(lx + 3) + ' ' + n1(-legLen * 0.6) + ' ' + n1(lx + 6) + ' ' + n1(-legLen * 0.28) + ' ' + n1(lx + 8) + ' 0 l5 0');
+      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax + 4) + ' ' + n1(sy + 8) + ' ' + n1(ax + 10) + ' ' + n1(sy + 12) + ' ' + n1(ax + 20) + ' ' + n1(sy + 12), ax + 20, sy + 12, 265) +
+        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 2) + ' ' + n1(ax + 18) + ' ' + n1(sy + 5) + ' ' + n1(ax + 24) + ' ' + n1(sy + 6), ax + 24, sy + 6, 265);
+    } else if (pose === 'cheer') {
+      legs = standLegs;
       arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 12) + ' ' + n1(sy - 8) + ' ' + n1(-ax - 14) + ' ' + n1(sy - 22) + ' ' + n1(-ax - 11) + ' ' + n1(sy - 31), -ax - 11, sy - 31, 160) +
         arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy - 8) + ' ' + n1(ax + 14) + ' ' + n1(sy - 22) + ' ' + n1(ax + 11) + ' ' + n1(sy - 31), ax + 11, sy - 31, 200);
     } else if (pose === 'wave') {
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 23), -ax - 3, sy + 23, 10) +
+      legs = standLegs;
+      arms = arm(armDownL, -ax - 4, sy + 23, 8) +
         arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 13) + ' ' + n1(sy - 4) + ' ' + n1(ax + 15) + ' ' + n1(sy - 18) + ' ' + n1(ax + 12) + ' ' + n1(sy - 27), ax + 12, sy - 27, 190);
     } else if (pose === 'hold') {
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 23), -ax - 3, sy + 23, 10) +
+      legs = standLegs;
+      arms = arm(armDownL, -ax - 4, sy + 23, 8) +
         arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 12) + ' ' + n1(sy + 2) + ' ' + n1(ax + 20) + ' ' + n1(sy + 4) + ' ' + n1(ax + 27) + ' ' + n1(sy + 2), ax + 27, sy + 2, 265);
-    } else if (sit) {
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 9) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 8) + ' ' + n1(sy + 15) + ' ' + n1(-ax - 3) + ' ' + n1(sy + 19), -ax - 3, sy + 19, 10) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 11) + ' ' + n1(sy + 4) + ' ' + n1(ax + 16) + ' ' + n1(sy + 10) + ' ' + n1(ax + 18) + ' ' + n1(sy + 17), ax + 18, sy + 17, -20);
     } else {
-      arms = arm('M' + n1(-ax) + ' ' + n1(sy) + ' C' + n1(-ax - 10) + ' ' + n1(sy + 8) + ' ' + n1(-ax - 9) + ' ' + n1(sy + 18) + ' ' + n1(-ax - 4) + ' ' + n1(sy + 23), -ax - 4, sy + 23, 8) +
-        arm('M' + n1(ax) + ' ' + n1(sy) + ' C' + n1(ax + 10) + ' ' + n1(sy + 8) + ' ' + n1(ax + 9) + ' ' + n1(sy + 18) + ' ' + n1(ax + 4) + ' ' + n1(sy + 23), ax + 4, sy + 23, -8);
+      legs = standLegs;
+      arms = arm(armDownL, -ax - 4, sy + 23, 8) + arm(armDownR, ax + 4, sy + 23, -8);
     }
-    return '<g transform="translate(' + x + ' ' + y + ') rotate(' + n1(tilt) + ') scale(' + (sc || 1) + ')">' +
+    var body = '<path d="' + squircle(0, cy, w, bh, R) + '" fill="var(--au-color)" fill-opacity="' + strength + '"/>';
+    var hair = HAIR[look.hair](cy - bh / 2, w / 2, bh) + (look.ear ? D(-w / 2 + 1.5, cy + 3, 2) + D(w / 2 - 1.5, cy + 3, 2) : '');
+    return '<g transform="translate(' + x + ' ' + n1(y + lift) + ') rotate(' + n1(tilt + lean) + ') scale(' + (sc || 1) + ')">' +
       legs + body + hair + face(fx, fy, h, look) + arms + '</g>';
+  }
+  var TINT = {
+    heart: ['salmon-pink', 1], star: ['amber', 1], leaf: ['turquoise', 1], notes: ['purple', 0], plane: ['turquoise', 1],
+    trophy: ['amber', 0], football: ['amber', 0], golf: ['salmon-pink', 0], racket: ['amber', 0], takraw: ['amber', 0],
+    shuttle: ['turquoise', 0], dumbbell: ['purple', 0], mountain: ['turquoise', 0], tent: ['amber', 0],
+    ketupat: ['turquoise', 0], lantern: ['amber', 0], diya: ['amber', 0], coffee: ['amber', 0], bowl: ['amber', 0],
+    apple: ['salmon-pink', 0], popcorn: ['salmon-pink', 0], gift: ['salmon-pink', 0], ticket: ['amber', 0],
+    rocket: ['salmon-pink', 0], planet: ['purple', 0], ghost: ['purple', 0], tv: ['purple', 0], clapper: ['purple', 0],
+    controller: ['purple', 0], mic: ['purple', 0], headset: ['purple', 0], phone: ['purple', 0], laptop: ['turquoise', 0],
+    books: ['turquoise', 0], graduation: ['amber', 0], pen: ['amber', 0], chart: ['amber', 0], coins: ['amber', 0],
+    house: ['amber', 0], key: ['amber', 0], car: ['salmon-pink', 0], suitcase: ['amber', 0], bag: ['purple', 0],
+    diamond: ['turquoise', 0], watch: ['purple', 0], lipstick: ['salmon-pink', 0], hanger: ['purple', 0],
+    cart: ['turquoise', 0], stroller: ['turquoise', 0], shop: ['salmon-pink', 0], briefcase: ['amber', 0],
+    newspaper: ['turquoise', 0], ring: ['amber', 0], scarf: ['salmon-pink', 0], club: ['amber', 0]
+  };
+  function tinted(name, inner) {
+    var t = TINT[name]; if (!t) return inner;
+    var c = 'var(--color-' + t[0] + ')';
+    return '<g style="--pf:' + c + (t[1] ? ';--ps:' + c : '') + '">' + inner + '</g>';
   }
   function scene(seg, pose, personX, props) {
     var out = person(seg, pose, personX == null ? 52 : personX, 112, 1);
     /* Two props at most. A third only ever repeated what the first
        two already said, and three drawings in one frame read as
        clutter rather than as a scene. */
-    (props || []).slice(0, 2).forEach(function (p) { out += G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4])); });
+    (props || []).slice(0, 2).forEach(function (p, i) {
+      var art = G(p[1], p[2], p[3] || 1, MOTIF[p[0]](p[4]));
+      out += i === 0 ? tinted(p[0], art) : art;
+    });
     return out;
   }
   /* Each segment's scene: pose, where the person stands, and props as
@@ -362,24 +426,24 @@
     'millennials': function (s) { return scene(s, 'sit', 44, [['laptop', 96, 92, 1], ['coffee', 132, 92, .9]]); },
     'gen-x': function (s) { return scene(s, 'hold', 46, [['briefcase', 92, 96, 1], ['coffee', 130, 92, .9], ['house', 130, 60, .6]]); },
     'baby-boomers': function (s) { return scene(s, 'sit', 44, [['newspaper', 98, 84, 1], ['coffee', 134, 94, .9]]); },
-    'young-working-adult': function (s) { return scene(s, 'hold', 46, [['laptop', 96, 96, .9], ['coffee', 128, 94, .8], ['chart', 130, 62, .7]]); },
+    'young-working-adult': function (s) { return scene(s, 'run', 46, [['laptop', 96, 96, .9], ['coffee', 128, 94, .8], ['chart', 130, 62, .7]]); },
     'student': function (s) { return scene(s, 'hold', 46, [['books', 94, 96, 1.1], ['graduation', 130, 74, 1.1]]); },
-    'solo-lifestylers': function (s) { return scene(s, 'stand', 60, [['coffee', 108, 94, 1], ['plane', 130, 56, .9], ['suitcase', 134, 96, .8]]); },
+    'solo-lifestylers': function (s) { return scene(s, 'wave', 60, [['coffee', 108, 94, 1], ['plane', 130, 56, .9], ['suitcase', 134, 96, .8]]); },
     'the-dynamic-duo': function (s) { return scene(s, 'wave', 44, [['ring', 100, 92, 1], ['house', 132, 92, .8]]); },
-    'young-families': function (s) { return scene(s, 'hold', 42, [['stroller', 96, 94, 1], ['kid', 132, 100, 1]]); },
-    'new-mothers': function (s) { return scene(s, 'hold', 46, [['baby', 82, 76, 1], ['stroller', 124, 94, 1]]); },
+    'young-families': function (s) { return scene(s, 'push', 42, [['stroller', 96, 94, 1], ['kid', 132, 100, 1]]); },
+    'new-mothers': function (s) { return scene(s, 'push', 46, [['baby', 82, 76, 1], ['stroller', 124, 94, 1]]); },
     'family-dynamic': function (s) { return scene(s, 'stand', 40, [['kid', 76, 100, 1], ['kid', 96, 100, .8], ['house', 134, 88, .9]]); },
     'experienced-mothers': function (s) { return scene(s, 'hold', 42, [['kid', 84, 100, 1], ['books', 118, 96, .9], ['apple', 140, 94, .8]]); },
-    'epl-fans': function (s) { return scene(s, 'cheer', 48, [['football', 100, 92, 1.1], ['scarf', 130, 74, 1], ['trophy', 134, 100, .8]]); },
-    'mfl-fans': function (s) { return scene(s, 'cheer', 48, [['football', 98, 94, 1], ['scarf', 130, 78, 1]]); },
+    'epl-fans': function (s) { return scene(s, 'kick', 48, [['football', 100, 92, 1.1], ['scarf', 130, 74, 1], ['trophy', 134, 100, .8]]); },
+    'mfl-fans': function (s) { return scene(s, 'kick', 48, [['football', 98, 94, 1], ['scarf', 130, 78, 1]]); },
     'golf-fans': function (s) { return scene(s, 'hold', 42, [['club', 78, 90, 1], ['golf', 116, 92, 1.1]]); },
-    'badminton-fans': function (s) { return scene(s, 'hold', 42, [['racket', 82, 76, 1], ['shuttle', 118, 64, 1], ['trophy', 134, 100, .8]]); },
-    'sepak-takraw-fans': function (s) { return scene(s, 'cheer', 48, [['takraw', 100, 70, 1.1], ['trophy', 134, 100, .8]]); },
+    'badminton-fans': function (s) { return scene(s, 'jump', 42, [['racket', 82, 76, 1], ['shuttle', 118, 64, 1], ['trophy', 134, 100, .8]]); },
+    'sepak-takraw-fans': function (s) { return scene(s, 'kick', 48, [['takraw', 100, 70, 1.1], ['trophy', 134, 100, .8]]); },
     'e-sports-fans': function (s) { return scene(s, 'sit', 42, [['controller', 98, 88, 1], ['headset', 134, 76, 1], ['trophy', 136, 104, .6]]); },
     'gadget-gurus': function (s) { return scene(s, 'hold', 44, [['phone', 82, 74, 1], ['watch', 112, 94, 1], ['headset', 140, 90, .9]]); },
     'automotive-fans': function (s) { return scene(s, 'wave', 40, [['car', 112, 92, 1.2]]); },
-    'wellness-explorers': function (s) { return scene(s, 'cheer', 48, [['dumbbell', 104, 96, 1], ['apple', 134, 92, .9], ['leaf', 132, 60, .8]]); },
-    'adventure-seekers': function (s) { return scene(s, 'wave', 44, [['mountain', 112, 90, 1.1], ['tent', 138, 100, .7]]); },
+    'wellness-explorers': function (s) { return scene(s, 'run', 48, [['dumbbell', 104, 96, 1], ['apple', 134, 92, .9], ['leaf', 132, 60, .8]]); },
+    'adventure-seekers': function (s) { return scene(s, 'climb', 44, [['mountain', 112, 90, 1.1], ['tent', 138, 100, .7]]); },
     'foodies': function (s) { return scene(s, 'sit', 44, [['bowl', 100, 92, 1], ['plate', 136, 94, .8]]); },
     'environmentalist': function (s) { return scene(s, 'hold', 46, [['leaf', 86, 70, 1], ['leaf', 116, 92, 1.2], ['mountain', 136, 100, .6]]); },
     'luxury-seekers': function (s) { return scene(s, 'stand', 46, [['diamond', 100, 82, 1], ['bag', 130, 96, 1], ['watch', 138, 66, .8]]); },
@@ -393,15 +457,15 @@
     'animation-fans': function (s) { return scene(s, 'sit', 44, [['tv', 104, 86, 1], ['star', 134, 66, 1], ['star', 142, 92, .7]]); },
     'sci-fi-fantasy-fans': function (s) { return scene(s, 'stand', 44, [['planet', 102, 66, 1.1], ['rocket', 136, 90, 1]]); },
     'horror-fans': function (s) { return scene(s, 'sit', 44, [['ghost', 100, 82, 1], ['popcorn', 134, 92, .9]]); },
-    'action-adventure-fans': function (s) { return scene(s, 'cheer', 46, [['clapper', 104, 92, 1], ['star', 134, 64, .8], ['ticket', 136, 96, .8]]); },
-    'music-concert-goers': function (s) { return scene(s, 'cheer', 46, [['mic', 100, 92, 1.1], ['notes', 132, 74, 1.1]]); },
-    'online-shoppers': function (s) { return scene(s, 'hold', 42, [['phone', 82, 74, .9], ['cart', 116, 90, 1], ['gift', 144, 96, .7]]); },
+    'action-adventure-fans': function (s) { return scene(s, 'jump', 46, [['clapper', 104, 92, 1], ['star', 134, 64, .8], ['ticket', 136, 96, .8]]); },
+    'music-concert-goers': function (s) { return scene(s, 'jump', 46, [['mic', 100, 92, 1.1], ['notes', 132, 74, 1.1]]); },
+    'online-shoppers': function (s) { return scene(s, 'push', 42, [['phone', 82, 74, .9], ['cart', 116, 90, 1], ['gift', 144, 96, .7]]); },
     'automotive-buyers': function (s) { return scene(s, 'hold', 40, [['key', 80, 76, 1], ['car', 116, 92, 1.1]]); },
     'home-buyers': function (s) { return scene(s, 'hold', 42, [['key', 82, 78, 1], ['house', 118, 90, 1.2]]); },
     'luxury-buyers': function (s) { return scene(s, 'hold', 44, [['bag', 86, 94, 1], ['diamond', 118, 78, 1], ['gift', 142, 96, .8]]); },
     'tech-gadget-buyers': function (s) { return scene(s, 'hold', 42, [['phone', 82, 74, .9], ['laptop', 118, 96, .9], ['headset', 144, 76, .8]]); },
     'health-wellness-buyers': function (s) { return scene(s, 'stand', 46, [['apple', 100, 92, 1], ['dumbbell', 130, 96, .9], ['leaf', 134, 64, .8]]); },
-    'travel-experience-seekers': function (s) { return scene(s, 'hold', 42, [['suitcase', 92, 96, 1], ['plane', 124, 60, 1], ['mountain', 136, 100, .6]]); }
+    'travel-experience-seekers': function (s) { return scene(s, 'run', 42, [['suitcase', 92, 96, 1], ['plane', 124, 60, 1], ['mountain', 136, 100, .6]]); }
   };
   function doodle(seg) {
     var draw = SCENES[seg.id] || function (x) { return scene(x, 'stand', 60, []); };
