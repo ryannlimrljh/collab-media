@@ -35,6 +35,26 @@
   /* ── Lens colours. Each lens owns one element: who → Earth, what they
      love → Water, what they're buying → Fire. Everything coloured on the
      page reads these three variables. ── */
+  /* Each category carries the colour its illustrations are drawn in —
+     sampled from the artwork itself, and every one of the eight landed
+     on a DLS colour. The tints below are the DLS rule for an elemental
+     surface: 8% of the colour on white, 16% for a layer above it. */
+  .au-cat{--au-bg:color-mix(in srgb, var(--au-color) 8%, #fff);
+    --au-strong:color-mix(in srgb, var(--au-color) 16%, #fff);
+    --au-pastel:color-mix(in srgb, var(--au-color) 45%, #fff);}
+  .cat-ethnicity{--au-color:var(--color-green);}
+  .cat-income{--au-color:var(--color-amber);}
+  .cat-life-stage{--au-color:var(--color-turquoise);}
+  .cat-sports{--au-color:var(--color-red);}
+  .cat-trendsetter{--au-color:var(--color-salmon-pink);}
+  .cat-business{--au-color:var(--color-navy);}
+  .cat-entertainment{--au-color:var(--color-purple);}
+  .cat-shopping{--au-color:var(--color-orange);}
+  /* The category tag, built the way the DLS builds an elemental one,
+     with the ink darkened so amber and turquoise stay readable. */
+  .c-tag.au-cattag{background:color-mix(in srgb, var(--au-color) 12%, #fff);
+    color:color-mix(in srgb, var(--au-color) 78%, var(--color-neutral-9));}
+  .c-tag.au-cattag .dot{background:var(--au-color);}
   .lens-who{--au-color:var(--color-green); --au-bg:var(--color-earth-bg); --au-strong:var(--color-earth-bg-strong); --au-pastel:var(--color-earth-pastel);}
   .lens-love{--au-color:var(--color-navy); --au-bg:var(--color-water-bg); --au-strong:var(--color-water-bg-strong); --au-pastel:var(--color-water-pastel);}
   .lens-buying{--au-color:var(--color-orange); --au-bg:var(--color-fire-bg); --au-strong:var(--color-fire-bg-strong); --au-pastel:var(--color-fire-pastel);}
@@ -307,7 +327,7 @@
   .au-dhead .crumbs b{color:var(--color-neutral-9); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-dbody{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24) var(--spacing-24); display:grid; grid-template-columns:240px 1fr; gap:var(--spacing-24); align-items:start;}
   .au-dside{position:sticky; top:0;}
-  .au-dpic{position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg); border-bottom:4px solid var(--au-color);}
+  .au-dpic{position:relative; aspect-ratio:4/3; border-radius:var(--radius-md); overflow:hidden; background:var(--au-bg);}
   .au-dpic .au-doodle{position:absolute; inset:0;}
   .au-dsize{margin-top:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16); background:var(--color-canvas-warm-card); border-radius:var(--radius-md);}
   .au-dsize b{display:block; font-size:26px; line-height:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
@@ -339,7 +359,7 @@
   .au-relcard{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; background:var(--color-neutral-1); padding:0; font:inherit; text-align:left; color:inherit;
     transition:box-shadow var(--duration-fast) var(--ease-standard);}
   .au-relcard:hover{box-shadow:var(--shadow-2);} .au-relcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .au-relcard .pic{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg); border-bottom:2px solid var(--au-color);}
+  .au-relcard .pic{position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--au-bg);}
   .au-relcard .pic .au-doodle{position:absolute; inset:0;}
   .au-relcard span{display:block; padding:6px 8px; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .au-relcard span small{display:block; font-weight:600; color:var(--color-neutral-5);}
@@ -376,7 +396,7 @@
      to the width of the sheet. */
   .au-sheetcols{display:grid; grid-template-columns:repeat(var(--n, 3), minmax(0, 210px)); gap:var(--spacing-12); margin-bottom:var(--spacing-24);}
   .au-sheetcol{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
-  .au-sheetcol .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg); border-bottom:3px solid var(--au-color);}
+  .au-sheetcol .pic{position:relative; aspect-ratio:4/3; background:var(--au-bg);}
   .au-sheetcol .pic .au-doodle{position:absolute; inset:0;}
   .au-sheetcol .txt{padding:var(--spacing-12);}
   .au-sheetcol .txt b{display:block; font-weight:800; font-size:var(--text-body2-size);}
@@ -666,6 +686,9 @@
   var propOf = {}; PROPS.forEach(function (p) { propOf[p.key] = p; });
   var PROP_SHORT = { awani: 'Awani', gempak: 'Gempak', xuan: 'XUAN', syok: 'SYOK', stadium: 'Stadium', rasa: 'Rasa', hiburan: 'Hiburan', sooka: 'sooka', ulagam: 'Ulagam' };
   var LENS_TAG = { who: 'c-tag-earth', love: 'c-tag-water', buying: 'c-tag-fire' };
+  /* Colour comes from the category, not the lens: the illustrations are
+     drawn that way, so the pills, the bars and the discs follow them. */
+  function catClass(s) { return 'au-cat cat-' + s.group; }
   var CH_SHORT = { video: 'video', audio: 'audio', tv: 'TV', podcast: 'podcast', social: 'social', games: 'games', communities: 'communities' };
 
   function fmtM(n) {
@@ -679,8 +702,7 @@
     return String(n);
   }
   function fmtFull(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-  function lensClass(s) { return 'lens-' + s.lens; }
-  function groupTag(s) { return '<span class="c-tag ' + LENS_TAG[s.lens] + '"><i class="dot"></i>' + esc(groupOf[s.group].label) + '</span>'; }
+  function groupTag(s) { return '<span class="c-tag au-cattag ' + catClass(s) + '"><i class="dot"></i>' + esc(groupOf[s.group].label) + '</span>'; }
   function lensTag(s) { return '<span class="c-tag ' + LENS_TAG[s.lens] + '"><i class="dot"></i>' + esc(lensOf[s.lens].label) + '</span>'; }
   function topChannels(s, n) {
     return Object.keys(s.consumption).map(function (k) { return { k: k, v: s.consumption[k] }; })
@@ -721,7 +743,7 @@
     E('auChips').innerHTML = '<button type="button" class="c-chip c-chip-filter' + (!state.groups.length ? ' is-active' : '') + '" data-group="">All <span class="count">' + A.length + '</span></button>' +
       GROUPS.map(function (g) {
         var on = state.groups.indexOf(g.key) > -1;
-        return '<button type="button" class="c-chip c-chip-filter lens-' + g.lens + (on ? ' is-active' : '') + '" data-group="' + g.key + '" aria-pressed="' + on + '"><i class="dot"></i>' + esc(g.label) + ' <span class="count">' + (counts[g.key] || 0) + '</span></button>';
+        return '<button type="button" class="c-chip c-chip-filter au-cat cat-' + g.key + (on ? ' is-active' : '') + '" data-group="' + g.key + '" aria-pressed="' + on + '"><i class="dot"></i>' + esc(g.label) + ' <span class="count">' + (counts[g.key] || 0) + '</span></button>';
       }).join('');
     fades();
   }
@@ -871,7 +893,7 @@
   }
   function cardHtml(s, i) {
     var inTray = tray.indexOf(s.id) > -1, top = topChannels(s, 1)[0];
-    return '<article class="au-card ' + lensClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
+    return '<article class="au-card ' + catClass(s) + (inTray ? ' is-tray' : '') + '" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + esc(s.name) + ', ' + esc(groupOf[s.group].label) + ', ' + fmtM(s.size) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
       '<div class="au-stage">' + art(s) +
         '<span class="au-touchhint"><i class="ph ph-play"></i>Tap to see</span>' +
         '<div class="au-ctl">' + addBtn(s, 'au-add') + '</div>' +
@@ -1013,7 +1035,7 @@
   /* ── Table ──────────────────────────────────────────────────────── */
   function rowHtml(s) {
     var top = topChannels(s, 1)[0];
-    return '<tr data-id="' + s.id + '" class="' + lensClass(s) + '">' +
+    return '<tr data-id="' + s.id + '" class="' + catClass(s) + '">' +
       '<td class="sel">' + addBtn(s, 'au-rowadd') + '</td>' +
       '<td><div class="who">' + art(s) + '<div><b>' + esc(s.name) + '</b><small>' + esc(lensOf[s.lens].label) + '</small></div></div></td>' +
       '<td>' + groupTag(s) + '</td>' +
@@ -1034,7 +1056,7 @@
       peek.classList.add('is-switching');
       peekId = s.id;
       peekSwapTimer = setTimeout(function () {
-        peek.className = 'au-rowpeek is-visible is-switching ' + lensClass(s) + (wasVisible ? '' : ' is-jumping');
+        peek.className = 'au-rowpeek is-visible is-switching ' + catClass(s) + (wasVisible ? '' : ' is-jumping');
         E('auRowpeekArt').src = '../assets/stills-web/' + s.id + '.jpg';
         var old = peek.querySelector('.au-clip'); if (old) old.remove();
         playClip(peek.querySelector('.pic'), s, true);
@@ -1117,7 +1139,7 @@
     world.innerHTML = ''; bubs = {};
     A.forEach(function (s) {
       var b = document.createElement('button');
-      b.type = 'button'; b.className = 'au-bub is-out lens-' + s.lens; b.dataset.id = s.id;
+      b.type = 'button'; b.className = 'au-bub is-out ' + catClass(s); b.dataset.id = s.id;
       b.setAttribute('aria-label', s.name + ', ' + fmtM(s.size) + ', ' + groupOf[s.group].label + '. Open details');
       b.innerHTML = '<span class="au-bub-vis"></span><span class="au-bub-txt"><b>' + esc(s.name) + '</b><small>' + fmtM(s.size) + '</small></span>';
       world.appendChild(b); bubs[s.id] = b;
@@ -1275,7 +1297,7 @@
     });
     if (!n) { stageLbl.classList.remove('is-on'); return; }
     var s = n.seg, top = topChannels(s, 1)[0];
-    stageLbl.className = 'au-stagelbl is-on ' + lensClass(s);
+    stageLbl.className = 'au-stagelbl is-on ' + catClass(s);
     stageLbl.innerHTML = '<div><b>' + esc(s.name) + '</b><span><i></i>' + esc(groupOf[s.group].label) + '</span>' +
       '<span><em>' + fmtM(s.size) + '</em> total audience</span>' + miniBars(s, true) + '</div>';
     placeLabel();
@@ -1334,7 +1356,7 @@
     E('auDrawerCrumb').textContent = s.name;
     var rel = related(s);
     var chans = M.CHANNELS.filter(function (c) { return s.consumption[c.key] != null; });
-    E('auDrawerBody').className = 'au-dbody ' + lensClass(s);
+    E('auDrawerBody').className = 'au-dbody ' + catClass(s);
     E('auDrawerBody').innerHTML =
       '<div class="au-dside">' +
         '<div class="au-dpic">' + art(s) + '</div>' +
@@ -1352,7 +1374,7 @@
         }).join('') + '</div></div>' +
         '<div class="au-section"><h5>What they read about</h5><div class="au-chipset">' + s.topics.map(function (t) { return '<span class="c-chip">' + esc(t) + '</span>'; }).join('') + '</div></div>' +
         (rel.length ? '<div class="au-section"><h5>Also see</h5><div class="au-related">' + rel.map(function (x) {
-          return '<button class="au-relcard ' + lensClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic">' + art(x) + '</div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(groupOf[x.group].label) + '</small></span></button>';
+          return '<button class="au-relcard ' + catClass(x) + '" type="button" data-rel="' + x.id + '"><div class="pic">' + art(x) + '</div><span>' + esc(x.name) + '<small>' + fmtM(x.size) + ' · ' + esc(groupOf[x.group].label) + '</small></span></button>';
         }).join('') + '</div></div>' : '') +
       '</div>';
     var inTray = tray.indexOf(s.id) > -1;
@@ -1416,6 +1438,12 @@
   scrim.addEventListener('click', closeDrawer);
   E('auPrev').addEventListener('click', function () { stepDrawer(-1); });
   E('auNext').addEventListener('click', function () { stepDrawer(1); });
+  drawer.addEventListener('mouseover', function (e) {
+    var r = e.target.closest('.au-relcard'); if (r && !r.contains(e.relatedTarget)) playClip(r.querySelector('.pic'), byId[r.dataset.rel], true);
+  });
+  drawer.addEventListener('mouseout', function (e) {
+    var r = e.target.closest('.au-relcard'); if (r && !r.contains(e.relatedTarget)) playClip(r.querySelector('.pic'), byId[r.dataset.rel], false);
+  });
   drawer.addEventListener('click', function (e) {
     if (e.target.closest('#auDrawerAdd')) { toggleTray(drawerId); renderDrawer(byId[drawerId]); return; }
     var rel = e.target.closest('[data-rel]'); if (rel) openDrawer(rel.dataset.rel, true);
@@ -1502,7 +1530,7 @@
     var sameGroup = Object.keys(groupsIn).filter(function (k) { return groupsIn[k] > 1; }).map(function (k) { return groupOf[k].label; });
     E('auSheet').innerHTML =
       '<div class="au-sheetcols" style="--n:' + list.length + '">' + list.map(function (s) {
-        return '<div class="au-sheetcol ' + lensClass(s) + '"><div class="pic is-live">' + art(s) + '</div>' +
+        return '<div class="au-sheetcol ' + catClass(s) + '" data-id="' + s.id + '"><div class="pic is-live">' + art(s) + '</div>' +
           '<div class="txt"><b>' + esc(s.name) + '</b><small>' + esc(groupOf[s.group].label) + '</small><span class="n">' + fmtM(s.size) + '</span>' + miniBars(s, true) + '</div></div>';
       }).join('') + '</div>' +
       '<div class="au-sheetgrid">' +
@@ -1521,6 +1549,14 @@
         }).join('') + '</div><p>Narrows reach proportionally, with the planner\'s own population shares. Malaysia in full is ' + fmtM(OVERLAP.malaysia) + '.</p></div>' +
       '</div>';
     E('auCmodalPlan').href = 'planner.html?audiences=' + tray.map(encodeURIComponent).join(',');
+    sheetClips(true);
+  }
+  /* Every segment in the comparison plays, so the tray reads the way
+     the cards do rather than as a row of frozen frames. */
+  function sheetClips(on) {
+    E('auSheet').querySelectorAll('.au-sheetcol').forEach(function (col) {
+      playClip(col.querySelector('.pic'), byId[col.dataset.id], on);
+    });
   }
   function openSheet(sourceEl) {
     clearTimeout(cmpHideTimer);
@@ -1534,6 +1570,7 @@
   }
   function closeSheet() {
     if (!cmodal.classList.contains('is-open')) return;
+    sheetClips(false);
     var swung = !REDUCED && swingVarsFor(cbox, cmpSrcEl, cmpSrcRect);
     if (swung) cbox.classList.add('is-swinging-closed');
     cmodal.classList.remove('is-shown');

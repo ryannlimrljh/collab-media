@@ -411,3 +411,20 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   list without the lens applied and lets `setLens` do the rest. The arc
   and its stylesheet came out with the rings, leaving the marks module at
   232 lines and its stylesheet at eight.
+- 2026-09-08, twentieth pass: colour follows the category, not the lens.
+  The illustrations are drawn one colour per category, so that is where
+  the page takes it from. Sampling the dominant saturated colour of all
+  51 artworks gave eight readings, one per category, each landing on a
+  DLS colour: Ethnicity green, Income amber, Life stage turquoise, Sports
+  red, Trendsetter salmon, Business navy, Entertainment purple, Shopping
+  orange. A `cat-<group>` class sets `--au-color` and the DLS derives the
+  tints from it (8% on white for a surface, 16% for a layer above), so
+  the pill, the bars, the group chip and the disc in the jar all follow
+  the picture. The category tag darkens its ink to 78% of the colour
+  mixed with the ink so amber and turquoise stay readable. The lens keeps
+  its own three colours, for the lens chips alone.
+- 2026-09-08, and after: the coloured rule under the pictures in both
+  modals came off — the pill and the bars already say which category it
+  is — and the reach tray's thumbnails play their clips like everything
+  else, stopping when the sheet closes. The drawer's "Also see"
+  thumbnails play as the pointer crosses them.
