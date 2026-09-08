@@ -532,3 +532,20 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   are published audience-scale figures that overlap heavily — all 51 add
   to 577.7M against an addressable universe of 16.15M, and the tray's
   deduplicated number remains the one to quote for a buy.
+- 2026-09-09, the headline, properly placed. Tucked in the top-left
+  corner at 44px it read as a stray caption. It now stands centred over
+  the jar as a stat block — an eyebrow line, then the figure at
+  clamp(52px, 7.2vw, 96px) in Mulish 900, the weight the font already
+  loads and the format previews already use. The label went above the
+  number rather than below it: the discs pile up from the floor, so the
+  lowest thing in the block is the one that has to survive meeting them,
+  and 96px of black reads over a pastel disc where an 11px caption does
+  not. Even so the headroom was not the page's to assume — it changes
+  with the reach tray, which lifts the pile 68px, and with the lens — so
+  the band is now the jar's ceiling: `padTop` is measured from the
+  headline's own height rather than fixed at 14, and the discs settle
+  under it. That left them starting their pour inside the jar, since the
+  pour began just above the ceiling; they now start above the canvas
+  instead, which the `inside` flag already allowed for. 87px of clearance
+  with the tray open or shut, 143px under a lens, and the discs are about
+  a tenth smaller for it.

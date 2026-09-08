@@ -135,16 +135,24 @@
   /* The jar's bones settle on the same floor the real discs settle on
      (their bases land at 81% of the jar's height), so the pile does not
      jump up the canvas when the real ones arrive. */
-  /* The jar's discs settle at the bottom, so the total stands in the
-     room they leave above them. It never takes the pointer, and it steps
-     back while a disc is telling its own story. */
-  .au-jartotal{position:absolute; left:28px; top:18px; margin:0; pointer-events:none; z-index:1;
+  /* The discs settle at the bottom of the jar, so the headline stands
+     centred in the room they leave above them — the label small over the
+     top, the figure as large as the space allows, the qualifier under.
+     It never takes the pointer, and it steps back while a disc is
+     telling its own story. */
+  .au-jartotal{position:absolute; left:50%; top:20px; transform:translateX(-50%); margin:0; z-index:1;
+    text-align:center; max-width:min(94%, 680px); pointer-events:none;
     transition:opacity var(--duration-base) var(--ease-standard);}
-  .au-jartotal b{display:block; font-size:44px; line-height:46px; font-weight:800; letter-spacing:-.03em;
-    color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
-  .au-jartotal span{display:block; margin-top:2px; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
-  .au-space.has-hot ~ .au-jartotal{opacity:.25;}
-  @media (max-width:900px){ .au-jartotal{left:16px; top:12px;} .au-jartotal b{font-size:32px; line-height:34px;} }
+  /* The label sits above the figure, not below it. The discs pile up
+     from the floor, so the lowest thing in this block is the one that
+     can afford to meet them: 96px of Mulish 900 reads over a pastel
+     disc, an 11px caption does not. */
+  .au-jartotal i{display:block; font-style:normal; font-size:11px; line-height:14px; font-weight:800;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .au-jartotal b{display:block; margin-top:8px; font-size:clamp(52px, 7.2vw, 96px); line-height:.88;
+    font-weight:900; letter-spacing:-.045em; color:var(--color-neutral-9); font-variant-numeric:tabular-nums;}
+  .au-space.has-hot ~ .au-jartotal{opacity:.2;}
+  @media (max-width:900px){ .au-jartotal{top:12px;} .au-jartotal i{font-size:10px;} .au-jartotal b{font-size:clamp(38px, 11vw, 60px); margin-top:6px;} }
   .au-sk-bub{position:absolute; bottom:19%; border-radius:50%; background:var(--color-neutral-3); transform:translate(-50%, 0);}
   @media (prefers-reduced-motion:reduce){ .au-bub,.au-bub-vis,.au-world{transition:none;} }
 
@@ -559,7 +567,7 @@
       <section class="au-panel" id="auPanelUniverse" role="tabpanel" aria-labelledby="auTabBtnUniverse" aria-label="The audience universe">
         <div class="au-jar" id="auJar">
           <div class="au-space" id="auSpace"><div class="au-world" id="auWorld"></div></div>
-          <p class="au-jartotal" id="auJarTotal"><b id="auJarTotalN">0</b><span id="auJarTotalS"></span></p>
+          <p class="au-jartotal" id="auJarTotal"><i id="auJarTotalS">Combined reach</i><b id="auJarTotalN">0</b></p>
           <div class="au-stagelbl" id="auStageLbl" aria-hidden="true"></div>
         </div>
       </section>
@@ -1019,8 +1027,8 @@
        figures that overlap heavily, and 51 of them add up to many times
        the country. The label has to say so — the tray's deduplicated
        number is the one to quote for a buy. */
-    E('auJarTotalS').textContent = n ? 'combined reach across ' + n + (n === 1 ? ' segment' : ' segments') + ' · sizes overlap'
-      : 'no segments match these filters';
+    E('auJarTotalS').textContent = n ? 'Combined reach · ' + n + (n === 1 ? ' segment' : ' segments') + ' · sizes overlap'
+      : 'Nothing matches these filters';
     if (REDUCED || document.hidden || from === to) { num.textContent = fmtM(to); return; }
     if (totalRAF) cancelAnimationFrame(totalRAF);
     var t0 = performance.now(), dur = 520;
@@ -1197,7 +1205,15 @@
   var space = E('auSpace'), world = E('auWorld'), stageLbl = E('auStageLbl');
   var bubs = {}, J = null, ballById = {}, layout = null, hotId = null, hotProp = null;
   var view = { k: 1, tx: 0, ty: 0 }; /* the jar does not pan or zoom; kept so the maths reads the same */
-  var PADX = 28, PADTOP = 14;
+  var PADX = 28;
+  /* The headline stands in the jar's upper band, so that band is the
+     jar's ceiling: the discs settle under it instead of climbing behind
+     the number. Measured rather than guessed, because the figure is
+     sized against the viewport. */
+  function padTop() {
+    var h = E('auJarTotal').offsetHeight;
+    return h ? Math.round(h + 30) : 14;
+  }
   function sizeCanvas() {
     var jarEl = E('auJar'), top = jarEl.getBoundingClientRect().top;
     jarEl.style.setProperty('--au-h', Math.max(440, Math.round(window.innerHeight - top - 28)) + 'px');
@@ -1252,7 +1268,7 @@
     var sz = stageSize();
     /* The chips float over the top of the jar and the reach tray over
        the bottom, so the jar is the space between. */
-    J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: PADTOP, padBottom: tray.length ? 84 : 16, padX: PADX });
+    J = M.jar.build(A, state.lens, { w: sz.w, h: sz.h, padTop: padTop(), padBottom: tray.length ? 84 : 16, padX: PADX });
     layout = { w: sz.w, h: sz.h };
     ballById = {}; J.balls.forEach(function (b) { ballById[b.id] = b; });
     /* The search and the chips decide which discs are in the jar at
@@ -1291,7 +1307,7 @@
     if (!J) return;
     sizeCanvas();
     var sz = stageSize();
-    M.jar.resize(J, { w: sz.w, h: sz.h, padTop: PADTOP, padBottom: tray.length ? 84 : 16, padX: PADX });
+    M.jar.resize(J, { w: sz.w, h: sz.h, padTop: padTop(), padBottom: tray.length ? 84 : 16, padX: PADX });
     layout = { w: sz.w, h: sz.h };
     if (REDUCED || document.hidden) { M.jar.settle(J, 400); }
     draw(); startMotion();
