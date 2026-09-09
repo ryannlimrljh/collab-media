@@ -287,3 +287,36 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   colour, 360ms for the dim — because a colour change is the answer to the
   pointer rather than a performance, and matching it to the demos would
   make hovering feel like the page was thinking.
+
+- 2026-09-09, the slots say something. The demo showed where a unit sits
+  and nothing else, which made the picture pretty but gave a planner little
+  reason to move the pointer across it. Hovering or focusing a slot now
+  floats a card beside it carrying what you need before you pick a slot:
+  the sizes it runs at, the devices it reaches, how many of the 49 fit it
+  and how many were built for it, the units sold for it by name, and the
+  line that says clicking filters the catalogue.
+
+  Three fields joined `FORMAT_PLACEMENTS` for it, derived in the data file
+  rather than the page. `sizes` comes from the size-to-slot map where a
+  slot has sizes of its own — those are the ones that define it, so
+  in-article reads 300×250 and 800×600 rather than every size its 29 units
+  happen to offer — and from the units built for it where it does not.
+  Composite labels like "Skinner + Masthead + MREC" name a bundle rather
+  than a size and are left out. `devices` and `leads` are the union and the
+  names across those same units.
+
+  The card takes no pointer events, so it can overlap the picture without
+  ever breaking the hover underneath it — verified that a pointer over the
+  card still reaches the phone's in-feed slot behind it. It sits beside the
+  slot where there is room and flips to the other side where there is not;
+  a slot that spans the frame, like the sticky footer, gets it above
+  instead, so the card never covers the thing it describes. A scroll
+  dismisses it, since it is fixed and would otherwise be stranded.
+
+  Nothing here is hover-only. The same facts are in each slot's accessible
+  name, focus opens the card as hover does, and below 760px the card is off
+  and the slot cards carry the sizes on their face.
+
+  No CTR figure. A benchmark belongs to a unit, not to a position on a
+  page, and averaging them per slot would imply a claim the data does not
+  support.

@@ -217,6 +217,37 @@
 
   /* The caption says what the picture cannot: what the slot is, how many
      units fit it, and how many were built for it. */
+  /* The slot's own card. A planner picking a slot wants the sizes it runs
+     at before anything else, then who it reaches, then what is sold for
+     it. It never takes the pointer, so it can overlap the picture without
+     ever breaking the hover underneath it. */
+  .fm-plcard{position:fixed; z-index:70; width:268px; padding:var(--spacing-16); pointer-events:none;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-3); opacity:0; visibility:hidden; transform:translateY(4px);
+    transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle),
+      visibility 0s linear var(--duration-base);}
+  .fm-plcard.is-on{opacity:1; visibility:visible; transform:none; transition-delay:0s;}
+  .fm-plcard .hd{display:flex; align-items:flex-start; gap:10px; margin-bottom:8px;}
+  .fm-plcard .hd > i{font-size:20px; color:var(--sl); flex:none; margin-top:1px;}
+  .fm-plcard .hd b{display:block; font-size:var(--text-body1-size); font-weight:800; line-height:1.25;}
+  .fm-plcard .hd em{display:block; font-style:normal; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-plcard .desc{margin:0 0 var(--spacing-12); font-size:var(--text-body2-size);
+    line-height:var(--text-body2-lh); color:var(--color-neutral-6);}
+  .fm-plcard dl{display:grid; grid-template-columns:auto 1fr; gap:6px var(--spacing-12); margin:0 0 var(--spacing-12);}
+  .fm-plcard dt{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); white-space:nowrap; padding-top:1px;}
+  .fm-plcard dd{margin:0; font-size:var(--text-body2-size); font-weight:600; color:var(--color-neutral-9);
+    font-variant-numeric:tabular-nums;}
+  .fm-plcard .fit{display:flex; align-items:baseline; gap:6px; padding-top:var(--spacing-12);
+    border-top:1px solid var(--color-neutral-2);}
+  .fm-plcard .fit b{font-size:20px; font-weight:900; line-height:1; color:var(--sl-ink);}
+  .fm-plcard .fit span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-plcard .leads{margin:6px 0 0; font-size:var(--text-caption-size); line-height:1.45; color:var(--color-neutral-6);}
+  .fm-plcard .cta{display:flex; align-items:center; gap:5px; margin-top:var(--spacing-12);
+    font-size:var(--text-caption-size); font-weight:700; color:var(--sl-ink);}
+  .fm-plcard .cta i{font-size:13px;}
+  @media (max-width:760px){ .fm-plcard{display:none;} }
+
   /* Below 760px the drawing steps aside, so the same eight slots stand in
      for it as cards. On a pointer screen the picture is the interface and
      these would only repeat it, so they are not drawn there. */
@@ -234,6 +265,9 @@
   .fm-pl-item .t{display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;}
   .fm-pl-item .t b{font-size:var(--text-body2-size); font-weight:700;}
   .fm-pl-item .t em{font-style:normal; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-pl-item .t u{text-decoration:none; font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    font-variant-numeric:tabular-nums;}
+  .fm-pl-item.is-hot .t u,.fm-pl-item[aria-pressed="true"] .t u{color:rgba(255,255,255,.86);}
   .fm-pl-item .c{font-size:var(--text-body2-size); font-weight:800; color:var(--sl-ink);
     background:var(--sl-bg); border-radius:var(--radius-pill); padding:2px 8px;}
 
@@ -766,6 +800,11 @@
 </div>
 
 <!-- Table view: the sample that floats beside the hovered row -->
+<!-- What a slot knows about itself. Floats beside whatever the pointer
+     or the keyboard is on, and never takes the pointer, so it can sit over
+     the picture without ever interrupting a hover. -->
+<div class="fm-plcard" id="fmPlCard" role="tooltip" aria-hidden="true"></div>
+
 <div class="fm-rowpeek" id="fmRowpeek" aria-hidden="true"><div class="fp-stage" id="fmRowpeekStage"></div><div class="lbl" id="fmRowpeekLbl"></div></div>
 
 <!-- Detail modal: swings out of the card you clicked -->
@@ -810,7 +849,7 @@
 <div class="c-toast-host" id="fmToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/formats-data.js?v=2"></script>
+<script src="../shared/formats-data.js?v=3"></script>
 <script src="../shared/format-previews.js?v=1"></script>
 <script>
 (function () {
@@ -1546,6 +1585,7 @@
   /* The rail folds itself shortly after load and hands the content its
      width without a window resize, so the filter line's edge fades and any
      open facet panel are re-measured when the page comes back into view. */
+  E('fmContent').addEventListener('scroll', function () { if (plHot) setHot(null); }, { passive: true });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { fitFold(); fades(); } });
   var resizeTimer = null;
   window.addEventListener('resize', function () {
@@ -1590,19 +1630,72 @@
 
   var plStage = E('fmPlStage'), plList = E('fmPlList'), plHot = null;
 
-  function setHot(k) {
-    if (k === plHot) return;
+  /* ── The slot's card ──────────────────────────────────────────────
+     The demo shows where a unit sits; the card says what it costs you to
+     know — the sizes it runs at, who it reaches, and what is sold for it.
+     Without it the picture is only pretty, and there is little reason to
+     move the pointer across it at all. ── */
+  var plCard = E('fmPlCard');
+  function cardHtmlFor(k) {
+    var pl = placeBy[k]; if (!pl) return '';
+    var n = fitCount(k), h = homeCount(k);
+    var sizes = pl.sizes.length ? pl.sizes.slice(0, 4).map(esc).join(' · ') +
+      (pl.sizes.length > 4 ? ' +' + (pl.sizes.length - 4) : '') : '—';
+    var leads = pl.leads.slice(0, 3).map(esc).join(', ') +
+      (pl.leads.length > 3 ? ' and ' + (pl.leads.length - 3) + ' more' : '');
+    return '<div class="hd"><i class="ph ' + pl.icon + '"></i><span><b>' + esc(pl.label) + '</b>' +
+        '<em>' + esc(pl.short) + '</em></span></div>' +
+      '<p class="desc">' + esc(pl.desc) + '</p>' +
+      '<dl><dt>Sizes</dt><dd>' + sizes + '</dd>' +
+        '<dt>Runs on</dt><dd>' + esc(pl.devices.join(' · ') || '—') + '</dd></dl>' +
+      '<div class="fit"><b>' + n + '</b><span>of ' + F.length + ' units fit here · ' + h + ' built for it</span></div>' +
+      '<p class="leads">' + leads + '</p>' +
+      '<p class="cta"><i class="ph ph-arrow-down"></i>Click to filter the catalogue</p>';
+  }
+  /* Beside the slot where there is room, flipped to the other side where
+     there is not, and clamped so it never leaves the window. */
+  function placeCard(el) {
+    var r = el.getBoundingClientRect(), w = plCard.offsetWidth, h = plCard.offsetHeight, gap = 14, pad = 12;
+    var fitsRight = r.right + gap + w <= window.innerWidth - pad;
+    var fitsLeft = r.left - gap - w >= pad;
+    var left, top;
+    if (fitsRight || fitsLeft) {
+      left = fitsRight ? r.right + gap : r.left - gap - w;
+      top = r.top + r.height / 2 - h / 2;
+    } else {
+      /* A slot that spans the frame leaves no room either side, so the
+         card stands clear above it instead of covering the thing it is
+         describing — below, when there is no room above. */
+      left = Math.min(Math.max(pad, r.left), window.innerWidth - w - pad);
+      top = r.top - gap - h;
+      if (top < pad) top = r.bottom + gap;
+    }
+    top = Math.max(pad, Math.min(top, window.innerHeight - h - pad));
+    plCard.style.left = Math.round(left) + 'px';
+    plCard.style.top = Math.round(top) + 'px';
+  }
+  function showCard(k, el) {
+    if (TOUCH || !k || !el) { plCard.classList.remove('is-on'); plCard.setAttribute('aria-hidden', 'true'); return; }
+    plCard.innerHTML = cardHtmlFor(k);
+    plCard.setAttribute('aria-hidden', 'false');
+    placeCard(el);           /* measured with the content in, before it shows */
+    plCard.classList.add('is-on');
+  }
+  function setHot(k, el) {
+    if (k === plHot) { if (el) placeCard(el); return; }
     plHot = k || null;
     if (plHot) plStage.setAttribute('data-hot', plHot); else plStage.removeAttribute('data-hot');
     plStage.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
     plList.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
+    showCard(plHot, el);
   }
   function renderPlacements() {
     /* The number on a slot means nothing on its own, so the accessible
        name says what it counts and what pressing it does. */
     function name(pl) {
-      return pl.label + ', ' + pl.short + '. ' + fitCount(pl.key) + ' of ' + F.length +
-        ' units fit here. Filters the catalogue to them.';
+      return pl.label + ', ' + pl.short + '. Runs at ' + (pl.sizes.join(', ') || 'no published size') +
+        ' on ' + pl.devices.join(' and ') + '. ' + fitCount(pl.key) + ' of ' + F.length +
+        ' units fit here, ' + homeCount(pl.key) + ' built for it. Filters the catalogue to them.';
     }
     plStage.querySelectorAll('[data-slot]').forEach(function (b) {
       var pl = placeBy[b.dataset.slot]; if (!pl) return;
@@ -1614,17 +1707,18 @@
     });
     plList.innerHTML = PLACES.map(function (pl) {
       return '<li><button class="fm-pl-item" type="button" data-slot="' + pl.key + '" aria-label="' + esc(name(pl)) + '">' +
-        '<i class="ph ' + pl.icon + '"></i><span class="t"><b>' + esc(pl.label) + '</b><em>' + esc(pl.short) + '</em></span>' +
+        '<i class="ph ' + pl.icon + '"></i><span class="t"><b>' + esc(pl.label) + '</b><em>' + esc(pl.short) + '</em>' +
+        '<u>' + esc(pl.sizes.slice(0, 3).join(' · ') || '—') + '</u></span>' +
         '<span class="c">' + fitCount(pl.key) + '</span></button></li>';
     }).join('');
   }
-  plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null); });
+  plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null, b); });
   plStage.addEventListener('mouseleave', function () { setHot(null); });
-  plList.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-slot]'); if (b && !TOUCH) setHot(b.dataset.slot); });
+  plList.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-slot]'); if (b && !TOUCH) setHot(b.dataset.slot, b); });
   plList.addEventListener('mouseleave', function () { setHot(null); });
   /* Focus plays the same demo as hover, so a keyboard reaches all of it. */
-  plStage.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
-  plList.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
+  plStage.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot, b); });
+  plList.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot, b); });
   /* Each device tips on its own. The pointer belongs to whichever frame
      it is over, and that frame alone takes the angle — a browser and a
      phone on a desk do not share a hinge. Seven degrees against the

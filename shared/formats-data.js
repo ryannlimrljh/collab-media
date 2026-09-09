@@ -1676,4 +1676,35 @@ window.FORMAT_PLACEMENTS = [
     set[f.home] = 1;
     f.placements = order.filter(function (k) { return set[k]; });
   });
+
+  /* What a planner needs to know about a slot before they pick it: what it
+     runs at, where it runs, and which units were sold for it. Sizes come
+     from the map above where a slot has sizes of its own — those are the
+     ones that define it — and from the units built for it where it does
+     not. Composite labels like "Skinner + Masthead + MREC" name a bundle
+     rather than a size, so they are left out. */
+  var bySlot = {};
+  Object.keys(BY_SIZE).forEach(function (sz) { (bySlot[BY_SIZE[sz]] = bySlot[BY_SIZE[sz]] || []).push(sz); });
+  function devicesOf(f) {
+    var d = (f.devices || '').toLowerCase(), out = [];
+    if (d.indexOf('desktop') > -1) out.push('Desktop');
+    if (d.indexOf('mobile') > -1) out.push('Mobile');
+    if (d.indexOf('tiktok') > -1) out.push('TikTok');
+    return out;
+  }
+  window.FORMAT_PLACEMENTS.forEach(function (pl) {
+    var homes = window.FORMATS.filter(function (f) { return f.home === pl.key; });
+    var seen = {}, sizes = bySlot[pl.key] ? bySlot[pl.key].slice() : [];
+    if (!sizes.length) {
+      homes.forEach(function (f) {
+        f.sizes.forEach(function (sz) { if (sz.indexOf(' + ') < 0 && !seen[sz]) { seen[sz] = 1; sizes.push(sz); } });
+      });
+    }
+    pl.sizes = sizes;
+    pl.leads = homes.map(function (f) { return f.name; }).sort();
+    pl.devices = homes.reduce(function (a, f) {
+      devicesOf(f).forEach(function (d) { if (a.indexOf(d) < 0) a.push(d); });
+      return a;
+    }, []);
+  });
 })();
