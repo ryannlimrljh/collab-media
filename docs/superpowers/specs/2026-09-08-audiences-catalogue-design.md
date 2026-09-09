@@ -603,3 +603,18 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   from but not where the work happens; it left two actions that both
   belong here, the media plan and the reach tray. The size still says
   where it was published.
+- 2026-09-09, clicking a disc never reached the disc. Everything the stir
+  needs was switched on at pointerdown rather than at the first real
+  movement: the discs were told to stop taking pointer events so the hand
+  could reach past them, the pointer was captured, and the hand itself
+  began pushing. Any one of those breaks a click. The discs going
+  pointer-transparent is the one that did it — the press landed on a disc
+  and the release landed on the jar behind it, so the browser reported
+  the click against their common ancestor, the world, and the handler's
+  `closest('.au-bub')` found nothing. All three now wait for the pointer
+  to travel its 4px, which is the same threshold that already decided
+  whether a gesture counted as a stir at all. A press opens the segment; a
+  drag stirs and opens nothing.
+  Worth recording how this was missed: it was verified with `el.click()`,
+  which dispatches straight at the element and never runs the pointer
+  sequence — it exercised a path a real click does not take, and passed.

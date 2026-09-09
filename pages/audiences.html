@@ -1377,7 +1377,12 @@
     motion.hvx += (hvx - motion.hvx) * 0.4; motion.hvy += (hvy - motion.hvy) * 0.4;
     motion.hx = wx; motion.hy = wy;
     var speed = Math.sqrt(motion.hvx * motion.hvx + motion.hvy * motion.hvy), hand = null;
-    if (stir) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54, on: true };
+    /* The hand waits for the gesture to become a stir. Pressing alone
+       used to shove the disc out from under the pointer, so the press
+       landed on a disc and the release landed on the jar behind it — and
+       a click reported to the pair's common ancestor, never the disc, so
+       nothing opened. */
+    if (stir && stir.moved) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 54, on: true };
     /* A pointer merely passing is a soft hand: the discs it brushes get
        a tick each, never the one it is hovering. */
     else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24, on: true, soft: true, skip: hotId };
@@ -1408,13 +1413,23 @@
   space.addEventListener('pointerdown', function (e) {
     if (e.button !== 0) return;
     var p = stageXY(e); motion.px = p.x; motion.py = p.y; motion.has = true;
-    stir = { x: e.clientX, y: e.clientY, moved: false };
-    space.setPointerCapture(e.pointerId);
-    hotNode(null); space.classList.add('is-stirring'); startMotion();
+    stir = { x: e.clientX, y: e.clientY, id: e.pointerId, moved: false };
+    hotNode(null); startMotion();
   });
   space.addEventListener('pointermove', function (e) {
     if (!stir) return;
-    if (!stir.moved && Math.abs(e.clientX - stir.x) + Math.abs(e.clientY - stir.y) > 4) stir.moved = true;
+    if (stir.moved || Math.abs(e.clientX - stir.x) + Math.abs(e.clientY - stir.y) <= 4) return;
+    stir.moved = true;
+    /* Everything the stir needs — the grabbing cursor, the discs letting
+       the pointer through to the hand, and the capture that keeps the
+       gesture alive outside the jar — starts here, at the first real
+       movement, and not on the press. On the press they broke clicking
+       outright: the discs stopped taking pointer events the moment the
+       button went down, so the release landed on the jar behind them and
+       the click was reported against their common ancestor. A click on a
+       disc never reached the disc. */
+    space.classList.add('is-stirring');
+    try { space.setPointerCapture(stir.id); } catch (err) {}
   });
   function endStir() {
     if (!stir) return;
@@ -1423,6 +1438,9 @@
     if (moved) { space.dataset.justPanned = '1'; setTimeout(function () { delete space.dataset.justPanned; }, 60); }
   }
   space.addEventListener('pointerup', endStir); space.addEventListener('pointercancel', endStir);
+  /* Without capture a drag can finish anywhere, so the gesture ends on
+     the window too. endStir does nothing if there is no gesture. */
+  window.addEventListener('pointerup', endStir); window.addEventListener('pointercancel', endStir);
 
   /* ── Hover, focus, click ── */
   function worldToStage(x, y) { return { x: x, y: y }; }
