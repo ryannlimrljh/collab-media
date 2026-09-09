@@ -347,9 +347,57 @@
      one side gone wrong rather than a margin. At 1.10 the ground shows on
      every side, a few pixels of it, and the browser bar the page is drawn
      inside stays where it can be seen. The wrap clips what runs past. */
-  .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle); transform-origin:center;}
+  .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle), background-color var(--duration-slow) var(--ease-flow); transform-origin:center;}
   .fm-card.is-live .fp-stage{transform:scale(1.10);}
   @media (prefers-reduced-motion:reduce){ .fm-card.is-live .fp-stage{transform:none;} }
+
+  /* -- The wash ------------------------------------------------------
+     The page stays quiet: at rest a card is white on warm canvas and
+     nothing here applies. Under the pointer it blooms, and the colour is
+     not invented -- each family takes its own DLS colour drawn toward its
+     neighbour on the wheel. Navy into purple, orange into amber, salmon
+     into orange, green into navy, amber into green, purple into salmon.
+     Every pair is adjacent, so six cards lit side by side read as one
+     family of light rather than six unrelated stains, and no two
+     families share a wash.
+
+     The colour is weighted to the top, where the sample is, and falls
+     away to near-white by the time it reaches the words. That is what
+     lets it be strong enough to read as a bloom without ever putting the
+     spec labels on a ground they cannot be read against: 36% at the top
+     corner, 6% at the bottom one.
+
+     It lives on a pseudo-element rather than the card's own background,
+     so it can cross-fade -- a gradient cannot transition from `none` --
+     and the stage goes transparent over it, which puts the wash in the
+     margin the enlarged sample leaves instead of leaving grey there. -- */
+  .fm-card{--fmg-a:var(--color-navy); --fmg-b:var(--color-purple);}
+  .fm-card[data-family="Gamification"]{--fmg-a:var(--color-orange); --fmg-b:var(--color-amber);}
+  .fm-card[data-family="Video"]{--fmg-a:var(--color-salmon-pink); --fmg-b:var(--color-orange);}
+  .fm-card[data-family="Social"]{--fmg-a:var(--color-green); --fmg-b:var(--color-navy);}
+  .fm-card[data-family="High impact"]{--fmg-a:var(--color-amber); --fmg-b:var(--color-green);}
+  .fm-card[data-family="Display"]{--fmg-a:var(--color-purple); --fmg-b:var(--color-salmon-pink);}
+  .fm-card::before{content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0;
+    background:linear-gradient(158deg,
+      color-mix(in srgb, var(--fmg-a) 36%, #fff) 0%,
+      color-mix(in srgb, var(--fmg-b) 30%, #fff) 44%,
+      color-mix(in srgb, var(--fmg-b) 14%, #fff) 72%,
+      color-mix(in srgb, var(--fmg-a) 6%, #fff) 100%);
+    background-size:100% 190%; background-position:50% 0%;
+    transition:opacity var(--duration-slow) var(--ease-flow);}
+  .fm-card.is-live::before{opacity:1;}
+  .fm-card > *{position:relative; z-index:1;}
+  .fm-card.is-live .fp-stage{background-color:transparent;}
+  .fm-card .fm-stagewrap{transition:border-color var(--duration-slow) var(--ease-flow);}
+  .fm-card.is-live .fm-stagewrap{border-bottom-color:color-mix(in srgb, var(--fmg-b) 30%, #fff);}
+  .fm-card.is-live{border-color:color-mix(in srgb, var(--fmg-b) 34%, #fff);}
+  /* The wash drifts while the sample plays, so the two are alive together
+     rather than one moving over something fixed. Only the card under the
+     pointer runs it. */
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes fm-wash{from{background-position:50% 0%;} to{background-position:50% 100%;}}
+    .fm-card.is-live::before{animation:fm-wash 9s var(--ease-standard) infinite alternate;}
+  }
   .fm-live{position:absolute; top:var(--spacing-16); right:var(--spacing-16); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
     opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
@@ -1063,7 +1111,7 @@
   /* ── Gallery ────────────────────────────────────────────────────── */
   function cardHtml(f, i) {
     var inCmp = compare.indexOf(f.id) > -1;
-    return '<article class="fm-card' + (inCmp ? ' is-compared' : '') + '" data-id="' + f.id + '" tabindex="0" role="button" aria-label="' + esc(f.name) + ', ' + esc(f.family) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
+    return '<article class="fm-card' + (inCmp ? ' is-compared' : '') + '" data-id="' + f.id + '" data-family="' + esc(f.family) + '" tabindex="0" role="button" aria-label="' + esc(f.name) + ', ' + esc(f.family) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
       '<div class="fm-stagewrap"><div class="fp-stage" data-stage></div>' +
         '<span class="fm-live"><i></i>Live sample</span>' +
         '<span class="fm-touchhint"><i class="ph ph-play"></i>Tap to play</span>' +
