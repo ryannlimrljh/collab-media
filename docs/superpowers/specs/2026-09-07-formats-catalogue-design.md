@@ -173,3 +173,28 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
 - Live demo stays, disabled. It was removed earlier the same day and put
   back at the user's request: present so nobody wonders where it went, but
   quiet and inert until the links are ready.
+
+- 2026-09-09, the slot fills. Pointed at, focused or chosen, a slot now
+  goes solid blue with white ink rather than deepening its wash. Every
+  other active control on the page fills — the compare plus, the objective
+  chips — so a slot that only tinted read as a different kind of thing.
+  The state is driven by five custom properties set on the button
+  (`--slot-bg`, `--slot-line`, `--slot-style`, `--slot-ink`, `--slot-ink2`)
+  and read inside `.in`, so one selector list covers box and ink together.
+
+  The fill is `color-mix(navy 88%, #000)` rather than the raw navy. White
+  on `--color-navy` measures 4.54:1, which passes AA with nothing to spare
+  at 10 and 11px; the deeper mix measures 5.60:1 for the label and 4.96 for
+  the count at 92% white. The chosen slot keeps the fill after the click
+  (`[aria-pressed="true"]`), so scrolling back up says which slot is
+  filtering. The small-screen cards follow the same rule.
+
+- And the results load. Choosing a placement changes the list wholesale
+  rather than by a few cards, so a straight swap read as a flicker. The
+  filtered section now shows bones first and the cards cascade in after
+  460ms, the way the page itself arrives. The bones are sized to the number
+  about to land, so the block does not jump, and the count and the applied
+  chip are written immediately — the number is known, only the drawing is
+  pending. `skeleton()` and the filter share one pair of bone builders,
+  `boneCards` and `boneRows`. Releasing a slot is not a load and goes
+  straight back to the full list. Reduced motion skips the beat.

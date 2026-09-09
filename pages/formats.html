@@ -60,7 +60,10 @@
     --sl-line:color-mix(in srgb, var(--color-navy) 32%, #fff);
     --sl-bg:color-mix(in srgb, var(--color-navy) 9%, #fff);
     --sl-bg2:color-mix(in srgb, var(--color-navy) 19%, #fff);
-    --sl-ink:color-mix(in srgb, var(--color-navy) 58%, #000);}
+    --sl-ink:color-mix(in srgb, var(--color-navy) 58%, #000);
+    /* The filled state. A touch deeper than the raw navy so white ink
+       clears 4.5:1 with room to spare at 10 and 11px. */
+    --sl-solid:color-mix(in srgb, var(--color-navy) 88%, #000);}
   .fm-pl-lede{max-width:66ch; margin-bottom:var(--spacing-20);}
   .fm-pl-lede h2{margin:0 0 4px; font-size:var(--text-h4-size); font-weight:800; letter-spacing:var(--text-h4-tracking);}
   .fm-pl-lede p{margin:0; color:var(--color-neutral-6); font-size:var(--text-body2-size); line-height:var(--text-body2-lh);}
@@ -104,15 +107,28 @@
      away, the pointer lands on the page behind it, the state clears, the
      slot snaps back, and the whole thing flickers. */
   .fm-slot{position:relative; display:block; padding:0; border:0; background:transparent;
-    border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; font-family:inherit; color:var(--sl-ink);}
+    border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; font-family:inherit;
+    --slot-bg:var(--sl-bg); --slot-line:var(--sl-line); --slot-style:dashed; --slot-shadow:none;
+    --slot-ink:var(--sl-ink); --slot-ink2:color-mix(in srgb, var(--color-navy) 44%, var(--color-neutral-7));
+    color:var(--slot-ink);}
   .fm-slot .in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:2px; border:1px dashed var(--sl-line); background:var(--sl-bg); border-radius:inherit; text-align:center;
+    gap:2px; border:1px var(--slot-style) var(--slot-line); background:var(--slot-bg); box-shadow:var(--slot-shadow);
+    border-radius:inherit; text-align:center; color:var(--slot-ink);
     transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard),
       opacity var(--duration-base) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);}
   .fm-slot .lb{font-size:11px; font-weight:800; line-height:1.15; padding:0 4px;}
-  .fm-slot .n{font-size:10px; font-weight:700; color:color-mix(in srgb, var(--color-navy) 44%, var(--color-neutral-7));}
+  .fm-slot .n{font-size:10px; font-weight:700; color:var(--slot-ink2);}
   .fm-slot .in > i{font-size:16px; opacity:.7;}
-  .fm-slot:hover .in,.fm-slot:focus-visible .in{background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-1);}
+  /* Pointed at, focused or chosen, a slot fills solid rather than tinting.
+     Every other active control on this page fills — the compare plus, the
+     objective chips — so a slot that only deepened its wash read as a
+     different kind of thing. One selector list drives box and ink both. */
+  .fm-slot:hover,.fm-slot:focus-visible,
+  .fm-pl-stage[data-hot] .fm-slot.is-hot,
+  .fm-slot[aria-pressed="true"]{
+    --slot-bg:var(--sl-solid); --slot-line:var(--sl-solid); --slot-style:solid;
+    --slot-shadow:var(--shadow-2); --slot-ink:#fff; --slot-ink2:rgba(255,255,255,.92);}
   .fm-slot:focus{outline:none;}
   .fm-slot:focus-visible{outline:2px solid var(--sl); outline-offset:2px;}
   .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0;}
@@ -140,7 +156,7 @@
   /* Hovering a slot dims the others, so the picture answers one question
      at a time. Colour and weight both carry it, never colour alone. */
   .fm-pl-stage[data-hot] .fm-slot .in{opacity:.3;}
-  .fm-pl-stage[data-hot] .fm-slot.is-hot .in{opacity:1; background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-2);}
+  .fm-pl-stage[data-hot] .fm-slot.is-hot .in{opacity:1;}
 
   /* The demo: each slot behaves the way it behaves on a real page.
      Keyframes rather than transitions, so a backgrounded tab still runs
@@ -179,7 +195,10 @@
     cursor:pointer; font-family:inherit; color:var(--color-neutral-9); box-shadow:none;
     transition:border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);}
   .fm-pl-item:hover,.fm-pl-item:focus-visible{border-color:var(--sl); background:var(--sl-bg);}
-  .fm-pl-item.is-hot{border-color:var(--sl); background:var(--sl-bg2);}
+  .fm-pl-item.is-hot,.fm-pl-item[aria-pressed="true"]{background:var(--sl-solid); border-color:var(--sl-solid); color:#fff;}
+  .fm-pl-item.is-hot > i,.fm-pl-item[aria-pressed="true"] > i{color:#fff;}
+  .fm-pl-item.is-hot .t em,.fm-pl-item[aria-pressed="true"] .t em{color:rgba(255,255,255,.86);}
+  .fm-pl-item.is-hot .c,.fm-pl-item[aria-pressed="true"] .c{background:rgba(255,255,255,.22); color:#fff;}
   .fm-pl-item > i{font-size:var(--icon-sm); color:var(--sl);}
   .fm-pl-item .t{display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;}
   .fm-pl-item .t b{font-size:var(--text-body2-size); font-weight:700;}
@@ -1034,16 +1053,50 @@
       n++;
     }
   }
+  /* Bones in the shape of a result. Used by the first paint and again
+     whenever a placement is chosen, where the list changes wholesale and
+     a straight swap reads as a flicker rather than as a fetch. */
+  function boneBar(w, h, extra) { return '<span class="fm-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; }
+  function boneCards(n) {
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      out += '<article class="fm-card fm-sk-card" style="--i:' + i + '" aria-hidden="true">' +
+        '<div class="fm-stagewrap"><div class="fm-sk-stage"></div></div>' +
+        '<div class="fm-body"><div class="fm-titlerow">' + boneBar(120, 16) + '<span class="fm-sk fm-sk-pill" style="width:74px; height:22px"></span></div>' +
+          boneBar(0, 9, 'width:92%') + boneBar(0, 9, 'width:64%') +
+          boneBar(0, 9, 'width:46%; margin-top:6px') + '</div></article>';
+    }
+    return out;
+  }
+  function boneRows(n) {
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      var cells = '';
+      for (var c = 0; c < 9; c++) cells += '<td>' + boneBar(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
+      out += '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
+    }
+    return out;
+  }
+
   function render(opts) {
-    var before = (opts && opts.flip === false) ? null : snapshotRects();
+    opts = opts || {};
+    var before = (opts.flip === false || opts.bones) ? null : snapshotRects();
     current = filtered();
     var grid = E('fmGrid');
     grid.querySelectorAll('[data-stage]').forEach(function (s) { P.live(s, false); });
-    grid.innerHTML = current.map(cardHtml).join('');
-    grid.querySelectorAll('.fm-card').forEach(function (card) {
-      P.mount(card.querySelector('[data-stage]'), byId[card.dataset.id]);
-    });
-    E('fmRows').innerHTML = current.map(rowHtml).join('');
+    if (opts.bones) {
+      /* Sized to what is about to arrive, so the block does not jump when
+         the real cards land. The count and the applied chip are written
+         straight away: the number is known, only the drawing is pending. */
+      grid.innerHTML = boneCards(Math.max(1, Math.min(current.length, 6)));
+      E('fmRows').innerHTML = boneRows(Math.max(1, Math.min(current.length, 5)));
+    } else {
+      grid.innerHTML = current.map(cardHtml).join('');
+      grid.querySelectorAll('.fm-card').forEach(function (card) {
+        P.mount(card.querySelector('[data-stage]'), byId[card.dataset.id]);
+      });
+      E('fmRows').innerHTML = current.map(rowHtml).join('');
+    }
     var demos = current.filter(function (f) { return f.demo; }).length;
     E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats' +
       (state.slot ? ' · ' + esc(placeShort(state.slot).toLowerCase()) : '') + ' · ' + demos + ' with a live demo on kult.my' +
@@ -1052,7 +1105,7 @@
     E('fmGalleryView').style.display = current.length ? '' : 'none';
     E('fmTableView').style.display = current.length ? '' : 'none';
     renderTray();
-    playMove(before);
+    if (!opts.bones) playMove(before);
   }
   function setLive(card, on) {
     if (!card) return;
@@ -1532,33 +1585,34 @@
       if (Math.abs(sc.scrollTop - from) < 2) a.scrollIntoView({ behavior: 'auto', block: 'start' });
     }, 240);
   }
+  var slotTimer = null;
   function setSlot(k) {
     var had = state.slot;
     state.slot = k === state.slot ? '' : k;
     syncSlotUI();
-    render({ flip: !state.slot && !had });
+    clearTimeout(slotTimer);
     try { history.replaceState(null, '', state.slot ? '?slot=' + state.slot : location.pathname); } catch (e) {}
-    if (state.slot) { setHot(null); gotoCatalogue(); toast(placeLabel(state.slot) + ': ' + current.length + ' units fit this slot'); }
+    if (!state.slot) { render({ flip: !had }); return; }
+    /* The list changes wholesale here, not by a few cards, so it arrives
+       the way the page arrives: bones first, then the cards cascade in.
+       Anyone who asked for less motion gets the cards at once. */
+    render({ bones: true });
+    setHot(null);
+    gotoCatalogue();
+    slotTimer = setTimeout(function () {
+      render({ flip: false });
+      staggerIn(visibleItems());
+      toast(placeLabel(state.slot) + ': ' + current.length + ' units fit this slot');
+    }, REDUCED ? 0 : 460);
   }
 
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
-    var sk = function (w, h, extra) { return '<span class="fm-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
     E('fmChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('fmPills').innerHTML = [82, 68, 80].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('fmCount').textContent = 'Loading formats…';
-    E('fmGrid').innerHTML = [0, 1, 2, 3, 4, 5].map(function (i) {
-      return '<article class="fm-card fm-sk-card" style="--i:' + i + '" aria-hidden="true">' +
-        '<div class="fm-stagewrap"><div class="fm-sk-stage"></div></div>' +
-        '<div class="fm-body"><div class="fm-titlerow">' + sk(120, 16) + '<span class="fm-sk fm-sk-pill" style="width:74px; height:22px"></span></div>' +
-          sk(0, 9, 'width:92%') + sk(0, 9, 'width:64%') +
-          sk(0, 9, 'width:46%; margin-top:6px') + '</div></article>';
-    }).join('');
-    E('fmRows').innerHTML = [0, 1, 2, 3, 4].map(function () {
-      var cells = '';
-      for (var c = 0; c < 9; c++) cells += '<td>' + sk(0, 10, 'width:' + (c === 0 ? 140 : 60 + (c * 17) % 50) + 'px') + '</td>';
-      return '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
-    }).join('');
+    E('fmGrid').innerHTML = boneCards(6);
+    E('fmRows').innerHTML = boneRows(5);
   }
   /* The picture is not fetched and not staged: it is the first thing on
      the page, so it is finished in the tick the document parses in. The
