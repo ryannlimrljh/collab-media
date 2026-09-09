@@ -440,3 +440,28 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   all still flat while the panel behind them had turned. Chrome stays flat
   by design: the CTA, the dots, the progress bars, and anything carrying
   white text or standing a couple of pixels wide.
+
+- 2026-09-09, three more on the samples.
+
+  **The black bars.** Every dark shape inside an ad was `--color-neutral-9`,
+  which next to a tinted panel reads as a hole punched in it rather than as
+  ink on it. There is an `--fp-ink` now — the family's own colour at 40% of
+  near-black — and the copy bars, the wheel's pointer, the countdown
+  digits, the mystery box lid, the shape-drop square, the falling piece,
+  the catcher, the arcade screen and the TikTok ground all take it. Still
+  near-black, but the family's near-black.
+
+  **The wheel.** It was the one focus component left flat, on the reasoning
+  that its conic gradient was drawing segments rather than colouring a
+  surface. That reasoning was wrong for the one sample where the wheel is
+  the whole point. Spinning, its three coloured segments become the
+  family's colour, the partner, and the blend between them.
+
+  **Data capture.** The form was six absolutely positioned pieces at fixed
+  em offsets, which left a hole between the checkbox and a button floating
+  at the bottom right. It is a flex column now: heading, a labelled name
+  field, a labelled email field, the consent line, and a full-width submit
+  at the foot, which is what a lead-gen unit actually looks like. The field
+  being typed into lights its border and shows a caret for three blinks,
+  so the sequence reads as someone filling it in rather than as text
+  appearing. Shared assets to `?v=8` and `?v=2`.

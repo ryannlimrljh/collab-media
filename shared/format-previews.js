@@ -183,9 +183,12 @@
     form: function () {
       return desk({ side: ad('fp-form',
         '<em class="fp-q">Get a free sample</em>' +
+        '<span class="fp-lbl">Name</span>' +
         '<div class="fp-field f1"><span class="fp-typed">Aisyah Rahman</span></div>' +
+        '<span class="fp-lbl">Email</span>' +
         '<div class="fp-field f2"><span class="fp-typed">aisyah@mail.com</span></div>' +
-        '<label class="fp-chk"><i></i>Keep me posted</label><span class="fp-cta">Submit</span>' +
+        '<label class="fp-chk"><i></i>Keep me posted</label>' +
+        '<span class="fp-cta">Submit</span>' +
         '<div class="fp-done"><strong>Thanks, Aisyah!</strong><em>Sample on its way</em></div>') });
     },
     calc: function () {
