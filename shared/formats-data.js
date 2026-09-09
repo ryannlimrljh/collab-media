@@ -22,6 +22,9 @@ window.FORMAT_FUNNEL = [
   { key: 'video',         label: 'Video' },
   { key: 'high-impact',   label: 'High impact' }
 ];
+/* KULT's five gallery highlights. Nothing renders these since the Recently
+   live wall came off the page on 2026-09-09; kept because the campaigns and
+   the units they ran on are transcribed fact, not layout. */
 window.FORMAT_SHOWCASES = [
   {
     "brand": "Marigold",

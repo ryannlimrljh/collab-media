@@ -152,3 +152,24 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   animation does not run in a backgrounded tab, so the request silently did
   nothing and the click filtered the list and appeared to go nowhere. The
   scroll now checks a beat later whether anything moved, and jumps if not.
+
+- 2026-09-09, Recently live comes off. The scattered wall of five brand
+  cards was the first thing under the header when the page was a list; with
+  the placement picture above it, it had become a second hero between the
+  question and the answer, and a visitor who had just chosen a slot still
+  had to scroll past five campaigns that ignored their choice.
+
+  Everything it owned went with it: the wall's scatter layout, its tilt and
+  drop tables, the peek-on-hover, the brand-logo lookup, the ResizeObserver
+  that watched its box, and its skeleton bones. The resize and
+  visibility handlers stay, since the filter line's edge fades and any open
+  facet panel still need re-measuring; they no longer lay out a wall. One
+  side effect worth noting: the page makes five fewer outbound requests,
+  because the brand marks were resolved through Google's favicon service.
+
+  `FORMAT_SHOWCASES` stays in `formats-data.js` with a note saying nothing
+  renders it. The campaigns and the units they ran on are transcribed fact.
+
+- Live demo stays, disabled. It was removed earlier the same day and put
+  back at the user's request: present so nobody wonders where it went, but
+  quiet and inert until the links are ready.

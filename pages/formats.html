@@ -33,13 +33,8 @@
   @keyframes fm-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
   .fm-arriving .fm-pl-lede,.fm-arriving .fm-pl-stage{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
   .fm-arriving .fm-pl-list{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:180ms;}
-  .fm-arriving .fm-show{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
   .fm-arriving .fm-controls,.fm-arriving .fm-count{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:300ms;}
   .fm-arriving .fm-card{animation:fm-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
-  /* The wall's cards own their transform (tilt, lift), so they arrive
-     by opacity alone rather than the rise the rest of the page uses. */
-  @keyframes fm-fade{from{opacity:0;} to{opacity:1;}}
-  .fm-arriving .fm-showcard{animation:fm-fade 420ms var(--ease-settle) both; animation-delay:calc(120ms + var(--k, 0) * 60ms);}
 
   /* ── Skeleton first paint — bones in the shape of the wall, the filter
      line and the cards, swapped for the real thing after a short beat so
@@ -47,12 +42,11 @@
   .fm-sk{display:inline-block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2); vertical-align:middle;}
   .fm-sk-pill{height:32px; border-radius:var(--radius-pill); flex:none;}
   .fm-sk-stage{aspect-ratio:16/10; background:var(--color-neutral-2);}
-  .fm-sk-ava{width:36px; height:36px; border-radius:var(--radius-sm); background:var(--color-neutral-3); flex:none;}
   .fm-sk-card{pointer-events:none; cursor:default;}
   .fm-sk-card .fm-body{gap:6px;}
   .fm-table .fm-sk{display:block;}
   @media (prefers-reduced-motion:no-preference){
-    .fm-sk,.fm-sk-stage,.fm-sk-ava{animation:fm-sk-pulse 1.4s var(--ease-standard) infinite;}
+    .fm-sk,.fm-sk-stage{animation:fm-sk-pulse 1.4s var(--ease-standard) infinite;}
     @keyframes fm-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
   }
 
@@ -212,37 +206,6 @@
      what a chosen slot scrolls to, and stops clear of the top of the frame. */
   .fm-divider-cat{margin:var(--spacing-32) 0 var(--spacing-24);}
   .fm-controls{scroll-margin-top:var(--spacing-20);}
-
-  /* ── Showcase — what KULT recently ran, brand by brand. ── */
-  .fm-show{margin-bottom:var(--spacing-32);}
-  .fm-eyebrow{display:flex; align-items:baseline; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
-  .fm-eyebrow h2{margin:0; font-size:var(--text-h5-size); font-weight:800;}
-  .fm-eyebrow span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  /* The wall: cards are placed, not flowed, the way the feedback board
-     places its notes. Each tucks under the one before it and carries
-     its own tilt; the one under the pointer squares up, lifts and comes
-     to the front. Absolute children do not size their parent, so the
-     height is written to --fm-h by the layout pass. */
-  .fm-wall{position:relative; min-height:var(--fm-h, 240px); transition:min-height var(--duration-slow) var(--ease-standard);}
-  .fm-showcard{position:absolute; left:0; top:0; width:var(--fm-w, 250px); --rot:var(--tilt, 0deg);
-    display:flex; flex-direction:column; background:var(--color-neutral-1);
-    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-2); overflow:hidden;
-    cursor:pointer; text-align:left; padding:0; font:inherit; color:inherit;
-    transform:translate3d(0, var(--lift, 0px), 0) rotate(var(--rot)) scale(var(--scale, 1));
-    transition:transform var(--duration-base) var(--ease-settle), box-shadow var(--duration-fast) var(--ease-standard),
-      left var(--duration-slow) var(--ease-standard), top var(--duration-slow) var(--ease-standard);}
-  .fm-showcard.is-peeked,.fm-showcard:focus-visible{--rot:0deg; --lift:-8px; --scale:1.04; box-shadow:var(--shadow-4); z-index:20 !important;}
-  .fm-showcard:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:3px;}
-  .fm-showcard .fp-stage{aspect-ratio:16/10; font-size:9px; transition:background-color var(--duration-slow) var(--ease-flow);}
-  .fm-showcard.is-peeked .fp-stage{background:var(--fp-tint);}
-  .fm-showbody{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16);}
-  .fm-brandmark{width:36px; height:36px; border-radius:var(--radius-sm); background:var(--color-neutral-2); flex:none;
-    display:flex; align-items:center; justify-content:center; overflow:hidden; font-weight:800; font-size:12px; color:var(--color-neutral-5);}
-  .fm-brandmark img{width:100%; height:100%; object-fit:contain; display:none;}
-  .fm-brandmark.has-logo img{display:block;} .fm-brandmark.has-logo span{display:none;}
-  .fm-showtext{min-width:0;}
-  .fm-showtext b{display:block; font-size:var(--text-body2-size); font-weight:800;}
-  .fm-showtext span{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 
   /* ── Controls ── */
   .fm-controls{display:flex; align-items:center; gap:var(--spacing-12); margin-bottom:var(--spacing-12);}
@@ -655,11 +618,6 @@
       </section>
 
       <hr class="fm-divider fm-divider-cat" />
-
-      <section class="fm-show" aria-label="Recently live">
-        <div class="fm-eyebrow"><h2>Recently live</h2><span>Campaigns KULT ran on these units — pick one to jump to its format.</span></div>
-        <div class="fm-wall" id="fmShowrow"></div>
-      </section>
 
       <div class="fm-controls" id="fmCatalogue">
         <div class="fm-linewrap" id="fmLineWrap">
@@ -1480,72 +1438,15 @@
     if (x) toast(x.dataset.export + ' export is next', 'This build shows the comparison on screen. The export lands with the spec-sheet template.');
   });
 
-  /* ── Showcase ───────────────────────────────────────────────────── */
-  function initials(s) { return s.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase(); }
-  function renderShowcase() {
-  E('fmShowrow').innerHTML = window.FORMAT_SHOWCASES.map(function (s) {
-    var f = byId[s.formats[0]];
-    return '<button class="fm-showcard" type="button" data-show="' + s.formats[0] + '" aria-label="' + esc(s.brand) + ': ' + esc(s.label) + '">' +
-      '<div class="fp-stage" data-showstage="' + f.id + '"></div>' +
-      '<div class="fm-showbody"><span class="fm-brandmark"><img alt="" data-brand="' + esc(s.brand) + '" data-domain="' + esc(s.domain) + '" /><span>' + initials(s.brand) + '</span></span>' +
-      '<div class="fm-showtext"><b>' + esc(s.brand) + '</b><span>' + esc(s.label) + ' · ' + s.formats.map(function (id) { return esc(byId[id].name); }).join(' + ') + '</span></div></div>' +
-    '</button>';
-  }).join('');
-  E('fmShowrow').querySelectorAll('[data-showstage]').forEach(function (s) { P.mount(s, byId[s.dataset.showstage]); });
-  E('fmShowrow').querySelectorAll('img[data-brand]').forEach(function (img) {
-    /* One lookup, against the brand's real domain. A 16px result is the
-       service's "unknown domain" globe, not a mark, and a failed lookup
-       leaves the initials — a wrong logo is worse than none. */
-    img.onload = function () { if (img.naturalWidth > 16) img.parentNode.classList.add('has-logo'); };
-    img.src = 'https://www.google.com/s2/favicons?domain=' + img.dataset.domain + '&sz=128';
-  });
-  layoutWall();
-  }
-  /* Placement. Cards run left to right, each tucked under the one before
-     it by OVER pixels and set down at its own height, so the row reads as
-     a handful of cards dropped on a desk rather than a strip. Below two
-     cards wide there is nothing to scatter into: one column, still tilted. */
-  var TILT = [-2.4, 1.8, -1.4, 2.6, -1.8], DROP = [0, 14, 4, 18, 8], OVER = 34;
-  function layoutWall() {
-    var wall = E('fmShowrow'), cards = wall.querySelectorAll('.fm-showcard'); if (!cards.length) return;
-    var W = wall.clientWidth || 900, n = cards.length, narrow = W < 560;
-    var w = narrow ? Math.min(W, 320) : Math.max(200, Math.min(260, Math.floor((W + OVER * (n - 1)) / n)));
-    wall.style.setProperty('--fm-w', w + 'px');
-    var bottom = 0, y = 0;
-    cards.forEach(function (c, i) {
-      var h = c.offsetHeight;
-      var left = narrow ? 0 : i * (w - OVER);
-      var top = narrow ? y : DROP[i % DROP.length];
-      y += h + 12;
-      c.style.left = left + 'px'; c.style.top = top + 'px'; c.style.zIndex = i + 1;
-      c.style.setProperty('--tilt', (narrow ? TILT[i % TILT.length] / 2 : TILT[i % TILT.length]) + 'deg');
-      c.style.setProperty('--k', i);
-      bottom = Math.max(bottom, top + h);
-    });
-    wall.style.setProperty('--fm-h', (bottom + 12) + 'px');
-  }
-  window.addEventListener('load', layoutWall);
-  /* The rail folds itself shortly after load and hands the canvas its
-     width without a window resize, so the wall watches its own box. */
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) { layoutWall(); fades(); } });
-  if (window.ResizeObserver) {
-    var wallTimer = null;
-    new ResizeObserver(function () { clearTimeout(wallTimer); wallTimer = setTimeout(layoutWall, 60); }).observe(E('fmShowrow'));
-  }
+  /* The rail folds itself shortly after load and hands the content its
+     width without a window resize, so the filter line's edge fades and any
+     open facet panel are re-measured when the page comes back into view. */
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) fades(); });
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { layoutWall(); fades(); if (openFacet) placePanel(); }, 80);
+    resizeTimer = setTimeout(function () { fades(); if (openFacet) placePanel(); }, 80);
   });
-  function peekCard(card, on) {
-    card.classList.toggle('is-peeked', on);
-    P.live(card.querySelector('.fp-stage'), on);
-  }
-  E('fmShowrow').addEventListener('mouseover', function (e) { var s = e.target.closest('.fm-showcard'); if (s && !s.contains(e.relatedTarget)) peekCard(s, true); });
-  E('fmShowrow').addEventListener('mouseout', function (e) { var s = e.target.closest('.fm-showcard'); if (s && !s.contains(e.relatedTarget)) peekCard(s, false); });
-  E('fmShowrow').addEventListener('focusin', function (e) { var s = e.target.closest('.fm-showcard'); if (s) peekCard(s, true); });
-  E('fmShowrow').addEventListener('focusout', function (e) { var s = e.target.closest('.fm-showcard'); if (s) peekCard(s, false); });
-  E('fmShowrow').addEventListener('click', function (e) { var s = e.target.closest('[data-show]'); if (s) openDrawer(s.dataset.show, false, s); });
 
   /* ── Toast — the DS recipe, same as the other pages. ────────────── */
   function toast(title, msg) {
@@ -1643,11 +1544,6 @@
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
     var sk = function (w, h, extra) { return '<span class="fm-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
-    E('fmShowrow').innerHTML = [0, 1, 2, 3, 4].map(function () {
-      return '<div class="fm-showcard fm-sk-card" aria-hidden="true"><div class="fm-sk-stage"></div>' +
-        '<div class="fm-showbody"><span class="fm-sk-ava"></span><div class="fm-showtext">' + sk(90, 12) + sk(140, 9, 'margin-top:6px') + '</div></div></div>';
-    }).join('');
-    layoutWall();
     E('fmChips').innerHTML = [56, 96, 118, 98, 88, 108, 72, 106].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('fmPills').innerHTML = [82, 68, 80].map(function (w) { return '<span class="fm-sk fm-sk-pill" style="width:' + w + 'px"></span>'; }).join('');
     E('fmCount').textContent = 'Loading formats…';
@@ -1676,7 +1572,6 @@
   syncCompareUI();
   setTimeout(function () {
     if (document.hidden) E('fmContent').classList.remove('fm-arriving');
-    renderShowcase();
     renderChips(); renderPills(); syncSlotUI(); render({ flip: false }); syncCompareUI();
     if (landOnCatalogue) setTimeout(gotoCatalogue, 60);
     setTimeout(function () { E('fmContent').classList.remove('fm-arriving'); }, 1100);
