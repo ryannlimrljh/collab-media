@@ -352,16 +352,8 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   that sweeps past. Nine gradients came out; three stayed.
 
   Going live used to wash the stage with `--fp-tint`, which said something
-  had happened without saying look here. It scales the stage instead, and
-  it has to land on a full frame: an enlarged sample with the grey ground
-  still showing round it reads as a mistake rather than a zoom.
-
-  A faux page sits 6% in either side and 8% down, so 1.14 closes the sides
-  and the transform origin on the bottom edge carries the top band off
-  screen with it; the bottom already ran past the frame. A phone is a fixed
-  38% of the stage at any card size, so the same 1.14 would leave it
-  stranded in the middle of the ground — it zooms to its own screen at 2.7,
-  where 1/0.38 = 2.63 is exactly frame-wide and the rest is overlap against
-  a rounding error, with the origin just above centre so the frame ends up
-  holding the ad rather than the bezel. Measured across all 49 samples:
-  none shows the ground when live. Reduced motion keeps them at rest size.
+  had happened without saying look here. It now scales the stage to 1.14,
+  which is what closes the 6% margin the faux page leaves either side, so
+  the sample grows to fill the frame and the wrap clips the overflow. The
+  ground behind it no longer changes colour at all. Reduced motion keeps
+  the sample at rest size.
