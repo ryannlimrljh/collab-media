@@ -31,11 +31,10 @@
   /* ── Arrival — the same family as My media plans: header, then the
      showcase, then the controls, then the cards cascade. ── */
   @keyframes fm-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
-  .fm-arriving .fm-tabs{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:40ms;}
-  .fm-arriving .fm-pl-lede,.fm-arriving .fm-pl-stage{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:100ms;}
-  .fm-arriving .fm-pl-cap,.fm-arriving .fm-pl-list{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
-  .fm-arriving .fm-show{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
-  .fm-arriving .fm-controls,.fm-arriving .fm-count{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
+  .fm-arriving .fm-pl-lede,.fm-arriving .fm-pl-stage{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
+  .fm-arriving .fm-pl-list{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:180ms;}
+  .fm-arriving .fm-show{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
+  .fm-arriving .fm-controls,.fm-arriving .fm-count{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:300ms;}
   .fm-arriving .fm-card{animation:fm-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
   /* The wall's cards own their transform (tilt, lift), so they arrive
      by opacity alone rather than the rise the rest of the page uses. */
@@ -63,10 +62,6 @@
      kind of ad, and the two must never be confused. Each slot carries
      its own count at rest, so nothing here is hover-only; hovering adds
      the demo, and clicking is the action. ── */
-  .fm-tabs{margin-bottom:var(--spacing-20);}
-  .fm-tabs .c-tab .n{margin-left:6px; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-4);}
-  .fm-tabs .c-tab.active .n{color:var(--color-neutral-5);}
-
   .fm-places{--sl:var(--color-navy);
     --sl-line:color-mix(in srgb, var(--color-navy) 32%, #fff);
     --sl-bg:color-mix(in srgb, var(--color-navy) 9%, #fff);
@@ -181,21 +176,10 @@
 
   /* The caption says what the picture cannot: what the slot is, how many
      units fit it, and how many were built for it. */
-  .fm-pl-cap{display:flex; align-items:center; gap:var(--spacing-16); margin-top:var(--spacing-16); min-height:68px;
-    padding:var(--spacing-12) var(--spacing-16); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-md); background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
-  .fm-pl-cap > i{font-size:22px; color:var(--sl); flex:none;}
-  .fm-pl-cap .tx{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;}
-  .fm-pl-cap .tx b{font-size:var(--text-body1-size); font-weight:800;}
-  .fm-pl-cap .tx span{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-6);}
-  .fm-pl-cap .fig{flex:none; text-align:right; display:flex; flex-direction:column; gap:1px;}
-  .fm-pl-cap .fig b{font-size:24px; font-weight:900; line-height:1; color:var(--sl-ink);}
-  .fm-pl-cap .fig span{font-size:var(--text-caption-size); color:var(--color-neutral-5); white-space:nowrap;}
-  .fm-pl-cap .c-btn{flex:none;}
-
-  /* The same eight slots as a list: the keyboard path, the small-screen
-     interface, and the legend for the drawing. */
-  .fm-pl-list{display:flex; flex-wrap:wrap; gap:8px; margin:var(--spacing-12) 0 0; padding:0; list-style:none;}
+  /* Below 760px the drawing steps aside, so the same eight slots stand in
+     for it as cards. On a pointer screen the picture is the interface and
+     these would only repeat it, so they are not drawn there. */
+  .fm-pl-list{display:none; margin:var(--spacing-12) 0 0; padding:0; list-style:none;}
   .fm-pl-item{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:6px var(--spacing-12);
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); background:var(--color-neutral-1);
     cursor:pointer; font-family:inherit; color:var(--color-neutral-9); box-shadow:none;
@@ -218,11 +202,16 @@
   /* Under 760px the drawing steps aside and the list is the interface,
      the same rule the audiences universe follows. */
   @media (max-width:760px){
-    .fm-pl-stage,.fm-pl-cap{display:none;}
+    .fm-pl-stage{display:none;}
     .fm-pl-list{display:grid; grid-template-columns:1fr; gap:8px;}
     .fm-pl-item{width:100%; border-radius:var(--radius-md); justify-content:flex-start;}
     .fm-pl-item .c{margin-left:auto;}
   }
+
+  /* The rule separates the picture from the catalogue; the filter line is
+     what a chosen slot scrolls to, and stops clear of the top of the frame. */
+  .fm-divider-cat{margin:var(--spacing-32) 0 var(--spacing-24);}
+  .fm-controls{scroll-margin-top:var(--spacing-20);}
 
   /* ── Showcase — what KULT recently ran, brand by brand. ── */
   .fm-show{margin-bottom:var(--spacing-32);}
@@ -606,17 +595,14 @@
 
       <hr class="fm-divider" />
 
-      <div class="c-tabs fm-tabs" role="tablist" aria-label="Ad format views">
-        <button class="c-tab active" type="button" role="tab" aria-selected="true" data-tab="places" id="fmTabPlaces"><i class="ph ph-browser"></i>Placements</button>
-        <button class="c-tab" type="button" role="tab" aria-selected="false" data-tab="catalogue" id="fmTabCat"><i class="ph ph-squares-four"></i>Catalogue<span class="n" id="fmTabCount"></span></button>
-      </div>
-
       <!-- The page as a picture. A planner arrives with a slot already
-           bought, so the catalogue's first question is where, not what. -->
-      <section class="fm-places" id="fmPanelPlaces" aria-label="Placements">
+           bought, so the catalogue's first question is where, not what.
+           It sits above the catalogue rather than beside it in a tab: a
+           slot is how you enter the list, not a separate place to be. -->
+      <section class="fm-places" id="fmPlaces" aria-label="Ad placements">
         <div class="fm-pl-lede">
           <h2>Start with the slot you have</h2>
-          <p>Every position an ad can take, drawn where it really sits. Point at one to watch it behave, then open the units that fit it.</p>
+          <p id="fmPlLede">Every position an ad can take, drawn where it really sits. Point at one to watch it behave. Click it to filter the catalogue below.</p>
         </div>
 
         <div class="fm-pl-stage" id="fmPlStage">
@@ -665,17 +651,17 @@
 
         </div>
 
-        <div class="fm-pl-cap" id="fmPlCap" aria-live="polite"></div>
         <ul class="fm-pl-list" id="fmPlList"></ul>
       </section>
 
-      <div id="fmPanelCatalogue" hidden>
+      <hr class="fm-divider fm-divider-cat" />
+
       <section class="fm-show" aria-label="Recently live">
         <div class="fm-eyebrow"><h2>Recently live</h2><span>Campaigns KULT ran on these units — pick one to jump to its format.</span></div>
         <div class="fm-wall" id="fmShowrow"></div>
       </section>
 
-      <div class="fm-controls">
+      <div class="fm-controls" id="fmCatalogue">
         <div class="fm-linewrap" id="fmLineWrap">
           <div class="fm-line" id="fmLine">
             <div class="c-filter-search">
@@ -731,7 +717,6 @@
         <p>Try another word, or clear the objective and family filters.</p>
         <div class="c-empty-actions"><button class="c-btn c-btn-secondary c-btn-sm" type="button" id="fmEmptyClear">Clear filters</button></div>
       </div>
-      </div><!-- /#fmPanelCatalogue -->
 
     </div>
   </div>
@@ -847,10 +832,13 @@
     if (d.indexOf('tiktok') > -1) out.push('TikTok');
     return out;
   }
-  if (TOUCH) E('fmHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap any card to play its sample.';
+  if (TOUCH) {
+    E('fmHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap a slot, or any card to play its sample.';
+    E('fmPlLede').textContent = 'Every position an ad can take on a page. Tap one to filter the catalogue below to the units that fit it.';
+  }
 
   /* ── State ──────────────────────────────────────────────────────── */
-  var state = { q: '', funnel: '', family: [], size: [], device: [], slot: '', sort: 'family', view: 'gallery', tab: 'places' };
+  var state = { q: '', funnel: '', family: [], size: [], device: [], slot: '', sort: 'family', view: 'gallery' };
   var FACETS = [
     { key: 'family', label: 'Family', of: function (f) { return [f.family]; }, order: window.FORMAT_FAMILIES },
     /* Only real W×H sizes are offered; "16:9 in-content" is a shape, not a slot. */
@@ -1102,7 +1090,6 @@
     E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats' +
       (state.slot ? ' · ' + esc(placeShort(state.slot).toLowerCase()) : '') + ' · ' + demos + ' with a live demo on kult.my' +
       (state.sort === 'bench' ? ' · sorted by published CTR benchmark, highest first' : state.sort === 'cpm' ? ' · sorted by rate on file' : '');
-    E('fmTabCount').textContent = current.length;
     E('fmEmpty').hidden = current.length > 0;
     E('fmGalleryView').style.display = current.length ? '' : 'none';
     E('fmTableView').style.display = current.length ? '' : 'none';
@@ -1583,46 +1570,35 @@
   function fitCount(k) { return F.filter(function (f) { return f.placements.indexOf(k) > -1; }).length; }
   function homeCount(k) { return F.filter(function (f) { return f.home === k; }).length; }
 
-  var plStage = E('fmPlStage'), plCap = E('fmPlCap'), plList = E('fmPlList'), plHot = null;
+  var plStage = E('fmPlStage'), plList = E('fmPlList'), plHot = null;
 
-  function capHtml(k) {
-    if (!k) {
-      return '<i class="ph ph-cursor-click"></i><div class="tx">' +
-        '<b>' + PLACES.length + ' slots, ' + F.length + ' units.</b>' +
-        '<span>Point at a slot to watch it behave on the page. Pick one and the catalogue shows only what fits it.</span></div>';
-    }
-    var pl = placeBy[k], n = fitCount(k), h = homeCount(k);
-    return '<i class="ph ' + pl.icon + '"></i><div class="tx">' +
-      '<b>' + esc(pl.label) + ' · ' + esc(pl.short) + '</b><span>' + esc(pl.desc) + '</span></div>' +
-      '<div class="fig"><b>' + n + '</b><span>of ' + F.length + ' fit · ' + h + ' built for it</span></div>' +
-      '<button class="c-btn c-btn-primary c-btn-sm" type="button" data-go="' + pl.key + '">Show the ' + n + '</button>';
-  }
   function setHot(k) {
     if (k === plHot) return;
     plHot = k || null;
     if (plHot) plStage.setAttribute('data-hot', plHot); else plStage.removeAttribute('data-hot');
     plStage.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
     plList.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
-    plCap.innerHTML = capHtml(plHot);
   }
   function renderPlacements() {
+    /* The number on a slot means nothing on its own, so the accessible
+       name says what it counts and what pressing it does. */
+    function name(pl) {
+      return pl.label + ', ' + pl.short + '. ' + fitCount(pl.key) + ' of ' + F.length +
+        ' units fit here. Filters the catalogue to them.';
+    }
     plStage.querySelectorAll('[data-slot]').forEach(function (b) {
-      var k = b.dataset.slot, pl = placeBy[k]; if (!pl) return;
-      var n = fitCount(k), nEl = b.querySelector('.n');
+      var pl = placeBy[b.dataset.slot]; if (!pl) return;
+      var n = fitCount(pl.key), nEl = b.querySelector('.n');
       if (nEl) nEl.textContent = n;
       b.style.setProperty('--j', pl.i);
-      /* The number means nothing on its own, so the accessible name says
-         what it counts. */
-      var lbl = pl.label + ', ' + pl.short + '. ' + n + ' of ' + F.length + ' units fit here.';
-      b.setAttribute('aria-label', lbl); b.title = pl.label + ' · ' + n + ' units';
+      b.setAttribute('aria-label', name(pl));
+      b.title = pl.label + ' · ' + pl.desc;
     });
     plList.innerHTML = PLACES.map(function (pl) {
-      return '<li><button class="fm-pl-item" type="button" data-slot="' + pl.key + '" ' +
-        'aria-label="' + esc(pl.label + ', ' + pl.short + '. ' + fitCount(pl.key) + ' units fit here.') + '">' +
+      return '<li><button class="fm-pl-item" type="button" data-slot="' + pl.key + '" aria-label="' + esc(name(pl)) + '">' +
         '<i class="ph ' + pl.icon + '"></i><span class="t"><b>' + esc(pl.label) + '</b><em>' + esc(pl.short) + '</em></span>' +
         '<span class="c">' + fitCount(pl.key) + '</span></button></li>';
     }).join('');
-    plCap.innerHTML = capHtml(null);
   }
   plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null); });
   plStage.addEventListener('mouseleave', function () { setHot(null); });
@@ -1634,50 +1610,34 @@
   function slotClick(e) { var b = e.target.closest('[data-slot]'); if (b) setSlot(b.dataset.slot); }
   plStage.addEventListener('click', slotClick);
   plList.addEventListener('click', slotClick);
-  plCap.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) setSlot(b.dataset.go); });
 
-  /* ── Tabs ────────────────────────────────────────────────────────
-     paintTab says which panel is on show; setTab adds what happens when
-     it goes on show, so the first paint can pick a panel without running
-     the work that belongs to arriving at one. ── */
-  function paintTab(tab) {
-    state.tab = tab;
-    document.querySelectorAll('.fm-tabs [data-tab]').forEach(function (b) {
-      var on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
-    });
-    E('fmPanelPlaces').hidden = tab !== 'places';
-    E('fmPanelCatalogue').hidden = tab !== 'catalogue';
-    E('fmHint').innerHTML = tab === 'places'
-      ? '<i class="ph ph-cursor"></i>' + (TOUCH ? 'Tap a slot to see what fits it.' : 'Hover a slot to see it behave.')
-      : '<i class="ph ' + (TOUCH ? 'ph-hand-tap' : 'ph-cursor') + '"></i>' + (TOUCH ? 'Tap any card to play its sample.' : 'Hover any sample to play it.');
-  }
-  function setTab(tab, silent) {
-    paintTab(tab);
-    if (tab === 'catalogue') { hideRowpeek(true); layoutWall(); staggerIn(visibleItems()); }
-    else { setHot(null); hideRowpeek(true); }
-    if (!silent) try {
-      history.replaceState(null, '', tab === 'catalogue'
-        ? '?tab=catalogue' + (state.slot ? '&slot=' + state.slot : '') : location.pathname);
-    } catch (e) {}
-  }
-  document.querySelector('.fm-tabs').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab);
-  });
   function syncSlotUI() {
+    plStage.querySelectorAll('[data-slot]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.slot === state.slot)); });
     plList.querySelectorAll('[data-slot]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.slot === state.slot)); });
   }
-  /* Choosing a slot is a navigation: it fills the filter and hands the
-     visitor to the catalogue, which is where the answer lives. */
+  /* The catalogue is on the same page as the picture, so choosing a slot
+     is a move down it rather than a change of view: the filter lands and
+     the rule above the catalogue comes to the top of the frame. Clicking
+     the slot again lets it go, and stays where it is. */
+  function gotoCatalogue() {
+    var a = E('fmCatalogue'), sc = a.closest('.c-shell-content') || document.scrollingElement;
+    var from = sc ? sc.scrollTop : 0;
+    try { a.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }); }
+    catch (e) { a.scrollIntoView(); }
+    /* A smooth scroll is an animation, and an animation does not run in a
+       backgrounded tab. If nothing has moved a beat later, go there now,
+       so the click never filters the list and then appears to do nothing. */
+    if (!REDUCED && sc) setTimeout(function () {
+      if (Math.abs(sc.scrollTop - from) < 2) a.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }, 240);
+  }
   function setSlot(k) {
+    var had = state.slot;
     state.slot = k === state.slot ? '' : k;
     syncSlotUI();
-    if (state.slot) { setTab('catalogue', true); render({ flip: false }); }
-    else render();
-    try {
-      history.replaceState(null, '', state.tab === 'catalogue'
-        ? '?tab=catalogue' + (state.slot ? '&slot=' + state.slot : '') : location.pathname);
-    } catch (e) {}
-    if (state.slot) toast(placeLabel(state.slot) + ': ' + current.length + ' units fit this slot');
+    render({ flip: !state.slot && !had });
+    try { history.replaceState(null, '', state.slot ? '?slot=' + state.slot : location.pathname); } catch (e) {}
+    if (state.slot) { setHot(null); gotoCatalogue(); toast(placeLabel(state.slot) + ': ' + current.length + ' units fit this slot'); }
   }
 
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
@@ -1711,14 +1671,14 @@
   var wantSlot = /[?&]slot=([a-z]+)/.exec(location.search);
   if (wantSlot && placeBy[wantSlot[1]]) state.slot = wantSlot[1];
   var deepF = /[?&]f=([^&]+)/.exec(location.search);
-  paintTab((/[?&]tab=catalogue/.test(location.search) || state.slot || (deepF && byId[decodeURIComponent(deepF[1])])) ? 'catalogue' : 'places');
+  var landOnCatalogue = /[?&]tab=catalogue/.test(location.search) || !!state.slot;
   skeleton();
   syncCompareUI();
   setTimeout(function () {
     if (document.hidden) E('fmContent').classList.remove('fm-arriving');
     renderShowcase();
     renderChips(); renderPills(); syncSlotUI(); render({ flip: false }); syncCompareUI();
-    if (state.tab === 'catalogue') layoutWall();
+    if (landOnCatalogue) setTimeout(gotoCatalogue, 60);
     setTimeout(function () { E('fmContent').classList.remove('fm-arriving'); }, 1100);
     if (deepF && byId[decodeURIComponent(deepF[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deepF[1])); }, 400);
   /* The data is inline, so this beat is staged rather than real: the same

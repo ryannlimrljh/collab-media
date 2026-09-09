@@ -130,3 +130,25 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   rectangle is identical at rest and mid-demo, and the pointer at a slot's
   centre still lands on that slot while its animation plays. It is the same
   lesson the audiences universe learned from its glass bubbles.
+
+- 2026-09-09, the two tabs became one page. A slot is how you enter the
+  catalogue, not a separate place to be, so putting the two behind a tab
+  strip made the visitor choose between the question and the answer. The
+  picture now sits at the top of the page, a rule separates it from the
+  catalogue, and clicking a slot filters the list and scrolls to the filter
+  line — where the visitor lands on their own "Placement: …" chip, the
+  count, and the first row of cards, rather than on the Recently-live wall.
+  Clicking the same slot again lets it go and stays put. The URL is
+  `?slot=<key>`; `?tab=catalogue` still works and lands on the catalogue.
+
+  Two things came off with the tabs. The caption strip under the drawing
+  went, because every slot already carries its own count and the drawing
+  says the rest; its "Show the N" button is now just the slot itself. And
+  the row of placement pills went from pointer screens, where it only
+  repeated the picture. The pills remain below 760px, where the drawing
+  steps aside and they are the whole interface.
+
+  One thing had to be defended. A smooth scroll is an animation, and an
+  animation does not run in a backgrounded tab, so the request silently did
+  nothing and the click filtered the list and appeared to go nowhere. The
+  scroll now checks a beat later whether anything moved, and jumps if not.
