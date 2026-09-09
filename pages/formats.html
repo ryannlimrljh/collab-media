@@ -1767,28 +1767,31 @@
     plStage.style.setProperty('--fm-phoneh', Math.min(PHONE_MAX, h) + 'px');
   }
 
-  var FRAME_TILT = 7, tiltFrame = null, tiltFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
+  /* hotFrame, not tiltFrame: the catalogue card's own tilt already owns
+     a function of that name in this scope, and a var of the same name
+     silently overwrote it — the cards stopped tilting and nothing threw. */
+  var FRAME_TILT = 7, hotFrame = null, hotFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
   function frameTiltFrame() {
-    if (!tiltFrame || !tiltFrameRect) return;
-    var px = Math.max(0, Math.min(1, (frameX - tiltFrameRect.left) / tiltFrameRect.width));
-    var py = Math.max(0, Math.min(1, (frameY - tiltFrameRect.top) / tiltFrameRect.height));
-    tiltFrame.style.transform = 'rotateX(' + (-(py - 0.5) * 2 * FRAME_TILT).toFixed(2) +
+    if (!hotFrame || !hotFrameRect) return;
+    var px = Math.max(0, Math.min(1, (frameX - hotFrameRect.left) / hotFrameRect.width));
+    var py = Math.max(0, Math.min(1, (frameY - hotFrameRect.top) / hotFrameRect.height));
+    hotFrame.style.transform = 'rotateX(' + (-(py - 0.5) * 2 * FRAME_TILT).toFixed(2) +
       'deg) rotateY(' + ((px - 0.5) * 2 * FRAME_TILT).toFixed(2) + 'deg)';
   }
   function untiltFrame() {
     if (frameRAF) { cancelAnimationFrame(frameRAF); frameRAF = 0; }
-    if (!tiltFrame) return;
-    tiltFrame.classList.remove('is-tilting');
-    tiltFrame.style.transform = '';
-    tiltFrame = null; tiltFrameRect = null;
+    if (!hotFrame) return;
+    hotFrame.classList.remove('is-tilting');
+    hotFrame.style.transform = '';
+    hotFrame = null; hotFrameRect = null;
   }
   plStage.addEventListener('pointerover', function (e) {
     if (REDUCED || e.pointerType !== 'mouse') return;
     var f = e.target.closest('.fm-pl-frame');
-    if (f === tiltFrame) return;
+    if (f === hotFrame) return;
     untiltFrame();
     if (!f) return;
-    tiltFrame = f; tiltFrameRect = f.getBoundingClientRect(); f.classList.add('is-tilting');
+    hotFrame = f; hotFrameRect = f.getBoundingClientRect(); f.classList.add('is-tilting');
   });
   function stageFrame() {
     frameRAF = 0;
@@ -1807,7 +1810,7 @@
     if (!frameRAF) frameRAF = requestAnimationFrame(stageFrame);
   });
   plStage.addEventListener('pointerout', function (e) {
-    if (tiltFrame && !tiltFrame.contains(e.relatedTarget)) untiltFrame();
+    if (hotFrame && !hotFrame.contains(e.relatedTarget)) untiltFrame();
   });
   plStage.addEventListener('pointerleave', untiltFrame);
 

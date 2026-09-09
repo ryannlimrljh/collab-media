@@ -367,3 +367,17 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   the top, measured — the browser bar keeps its full 15px, and the sample
   still visibly grows. A margin on four sides is a frame; a margin on one
   is a mistake.
+
+- 2026-09-09, the card tilt came back from the dead. The catalogue cards
+  stopped tilting under the pointer and nothing threw. The frame tilt added
+  for the placement picture declared `var tiltFrame = null` in the same
+  scope as the card tilt's own `function tiltFrame()`, further down the
+  file, so the assignment quietly overwrote the hoisted function and
+  `requestAnimationFrame(tiltFrame)` was handed null from then on. Every
+  visible symptom pointed elsewhere — the class was applied, the handlers
+  fired, the transition was in place, only the inline transform was never
+  written. The variable is `hotFrame` now, with a note saying why.
+
+  Worth recording as a shape: one long IIFE holding every behaviour on the
+  page means a name taken twice is not a redeclaration error, it is a
+  feature going missing.
