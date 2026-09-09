@@ -20,13 +20,13 @@
   --fp-brand:var(--color-navy); --fp-tint:var(--color-water-bg); --fp-tint-strong:var(--color-water-bg-strong);
   --fp-brand2:var(--color-purple);}
 .fp-stage[data-family="Gamification"]{--fp-brand:var(--color-orange); --fp-tint:var(--color-fire-bg); --fp-tint-strong:var(--color-fire-bg-strong); --fp-brand2:var(--color-amber);}
-.fp-stage[data-family="Video"]{--fp-brand:var(--color-salmon-pink); --fp-tint:var(--color-wood-bg); --fp-tint-strong:var(--color-wood-bg-strong); --fp-brand2:var(--color-orange);}
+.fp-stage[data-family="Video"]{--fp-brand:var(--color-salmon-pink); --fp-tint:var(--color-wood-bg); --fp-tint-strong:var(--color-wood-bg-strong); --fp-brand2:var(--color-purple);}
 .fp-stage[data-family="Social"]{--fp-brand:var(--color-green); --fp-tint:var(--color-earth-bg); --fp-tint-strong:var(--color-earth-bg-strong); --fp-brand2:var(--color-navy);}
-.fp-stage[data-family="High impact"]{--fp-brand:var(--color-amber); --fp-tint:var(--color-gold-bg); --fp-tint-strong:var(--color-gold-bg-strong); --fp-brand2:var(--color-green);}
+.fp-stage[data-family="High impact"]{--fp-brand:var(--color-amber); --fp-tint:var(--color-gold-bg); --fp-tint-strong:var(--color-gold-bg-strong); --fp-brand2:var(--color-salmon-pink);}
 /* Display takes the DLS secondary accent: the five elements are spoken
    for, and a neutral sample read as muted beside the coloured ones. Its
    tints are the same 8% / 16% mix the elemental -bg pairs use. */
-.fp-stage[data-family="Display"]{--fp-brand:var(--color-purple); --fp-tint:color-mix(in srgb, var(--color-purple) 8%, #fff); --fp-tint-strong:color-mix(in srgb, var(--color-purple) 16%, #fff); --fp-brand2:var(--color-salmon-pink);}
+.fp-stage[data-family="Display"]{--fp-brand:var(--color-purple); --fp-tint:color-mix(in srgb, var(--color-purple) 8%, #fff); --fp-tint-strong:color-mix(in srgb, var(--color-purple) 16%, #fff); --fp-brand2:var(--color-navy);}
 .fp-stage *{box-sizing:border-box;}
 .fp-stage i,.fp-stage b,.fp-stage em,.fp-stage strong{font-style:normal;}
 
@@ -535,20 +535,30 @@
 /* ── Coming alive ────────────────────────────────────────────────────
    A sample at rest is flat, so a grid of forty is quiet. A sample that
    is playing takes colour: every creative surface in it turns from its
-   flat fill into a gradient, running from the family's own colour to
-   its neighbour on the wheel — navy into purple, orange into amber,
-   salmon into orange, green into navy, amber into green, purple into
-   salmon. Every pair is adjacent, so the six read as one family of
-   light rather than six unrelated stains, and no two families share a
-   ramp.
+   flat fill into a gradient, running from the family's own colour to a
+   partner chosen to sit well beside it — navy into purple, orange into
+   amber, salmon into purple, green into navy, amber into salmon,
+   purple into navy.
 
-   Panels take the pale ramp and solids take the full one. The CTA is
-   deliberately left flat: it is the one place in a sample carrying
-   white text, and a ramp under three-pixel type is a legibility
-   problem rather than a flourish.                                     */
+   These were picked by eye, not by rule. A first pass walked the colour
+   wheel and paired each family with its literal neighbour, which gave
+   amber into green: that pair is 117 degrees apart and the ramp spends
+   its middle in yellow-green, which is the one part of the wheel that
+   reads as dirty at any lightness. Amber goes to salmon instead, a
+   sunset. Video went from orange to purple for the same reason in the
+   dark: salmon darkened toward orange is rust, salmon darkened toward
+   violet is plum.
+
+   Three ramps. Panels take the pale one, solids and the main object of
+   a sample take the full one, and dark surfaces take two dark colours
+   rather than one colour mixed into black — that mix is where the
+   dirtiness came from. Chrome stays flat: the CTA, the dots, the
+   progress bars and anything else carrying white text or standing a
+   couple of pixels wide, where a ramp is a legibility problem rather
+   than a flourish.                                                    */
 .fp-stage{--fp-ramp-soft:linear-gradient(140deg, var(--fp-tint-strong) 0%, color-mix(in srgb, var(--fp-brand2) 30%, #fff) 100%);
   --fp-ramp-bold:linear-gradient(145deg, var(--fp-brand) 0%, var(--fp-brand2) 100%);
-  --fp-ramp-dark:linear-gradient(150deg, var(--color-neutral-8) 0%, color-mix(in srgb, var(--fp-brand2) 42%, var(--color-neutral-9)) 100%);}
+  --fp-ramp-dark:linear-gradient(150deg, color-mix(in srgb, var(--fp-brand2) 52%, var(--color-neutral-9)) 0%, color-mix(in srgb, var(--fp-brand) 46%, var(--color-neutral-9)) 100%);}
 
 /* Panels — the creative behind the words. */
 .is-live .fp-hero,
@@ -556,10 +566,19 @@
 .is-live .fp-inter,
 .is-live .fp-expand,
 .is-live .fp-balloon-full{background:var(--fp-ramp-soft);}
-/* Solids — the product shape, the balloon, the page skin. */
+/* Solids — whatever a sample's eye lands on first. Every shape that is
+   the subject of its own miniature, not just the product blob. */
 .is-live .fp-prod,
 .is-live .fp-balloon,
-.is-live .fp-skin{background:var(--fp-ramp-bold);}
+.is-live .fp-skin,
+.is-live .fp-box,
+.is-live .fp-logo,
+.is-live .fp-sh:not(.p),
+.is-live .fp-fall,
+.is-live .fp-cube .f3,
+.is-live .fp-aliens i,
+.is-live .fp-dyn,
+.is-live .fp-pz i:nth-child(5){background:var(--fp-ramp-bold);}
 /* Video surfaces keep their dark, and take the family's colour into it. */
 .is-live .fp-vid,
 .is-live .fp-vidbig,

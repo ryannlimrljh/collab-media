@@ -413,3 +413,30 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   The CTA is deliberately left flat. It is the one place in a sample
   carrying white text, and a ramp under three-pixel type is a legibility
   problem rather than a flourish. Shared assets to `?v=6`.
+
+- 2026-09-09, the ramps get picked by eye rather than by rule. Walking the
+  colour wheel and pairing each family with its literal neighbour is what
+  produced amber into green: those two are 117 degrees apart, and the ramp
+  spends its middle in yellow-green, the one stretch of the wheel that
+  reads as dirty at any lightness. It was the only pair on the wheel with
+  a gap that size, and it looked it.
+
+  Amber goes to salmon now, a sunset. Video went from orange to purple for
+  the same reason in the dark: salmon darkened toward orange is rust,
+  salmon darkened toward violet is plum. Display took navy so it is not
+  simply Video's ramp reversed. The six read: navy into purple, orange into
+  amber, salmon into purple, green into navy, amber into salmon, purple
+  into navy.
+
+  The dark ramp was the second complaint and had the same root. It ran
+  neutral-8 into a mix of the partner and near-black, and a warm hue mixed
+  into black desaturates to brown — the video surfaces came out looking
+  soiled rather than dark. It is two dark colours now, the partner at 52%
+  and the family at 46% of near-black, so both ends keep their chroma.
+
+  And the bold ramp reaches every subject rather than only the product
+  blob. The mystery box, the logo mark, the falling shapes, the cube face,
+  the invaders, the dynamic video card and the puzzle's centre piece were
+  all still flat while the panel behind them had turned. Chrome stays flat
+  by design: the CTA, the dots, the progress bars, and anything carrying
+  white text or standing a couple of pixels wide.
