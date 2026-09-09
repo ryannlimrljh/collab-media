@@ -117,3 +117,16 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
 
 - **Cache.** `formats-data.js` moved to `?v=2` with the placement fields.
   Bump the query whenever a shared file changes.
+
+- 2026-09-09, and the hover that fought itself. Every demo animated the
+  slot button, so the hit box travelled under the pointer: hovering the
+  masthead sent it up and out from under the cursor, the pointer landed on
+  the page behind it, the state cleared, the slot snapped back, and the
+  cycle repeated. The sticky bar and the page skin were worse, since one
+  drops out of the frame entirely and the other collapses to nothing.
+  The button is now a hit box that never moves and never paints; everything
+  visible lives in a `.in` span inside it, which is what the demos animate
+  and what the dim applies to. Measured on all eight slots: the button's
+  rectangle is identical at rest and mid-demo, and the pointer at a slot's
+  centre still lands on that slot while its animation plays. It is the same
+  lesson the audiences universe learned from its glass bubbles.

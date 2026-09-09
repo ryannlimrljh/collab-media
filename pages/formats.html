@@ -109,29 +109,37 @@
   .fm-post i{grid-area:i; height:6px; border-radius:3px; background:var(--color-neutral-3); align-self:center;}
   .fm-post u{grid-area:u; height:34px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
 
-  /* The slots. */
-  .fm-slot{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    border:1px dashed var(--sl-line); background:var(--sl-bg); border-radius:var(--radius-sm);
-    cursor:pointer; font-family:inherit; padding:0; overflow:hidden; color:var(--sl-ink); text-align:center;
+  /* The slots. The button is the hit box and never moves; everything you
+     can see lives in .in, which is what the demos animate. A hit box that
+     travels under the pointer makes hover fight itself — the slot jumps
+     away, the pointer lands on the page behind it, the state clears, the
+     slot snaps back, and the whole thing flickers. */
+  .fm-slot{position:relative; display:block; padding:0; border:0; background:transparent;
+    border-radius:var(--radius-sm); overflow:hidden; cursor:pointer; font-family:inherit; color:var(--sl-ink);}
+  .fm-slot .in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; border:1px dashed var(--sl-line); background:var(--sl-bg); border-radius:inherit; text-align:center;
     transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard),
       opacity var(--duration-base) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);}
   .fm-slot .lb{font-size:11px; font-weight:800; line-height:1.15; padding:0 4px;}
   .fm-slot .n{font-size:10px; font-weight:700; color:color-mix(in srgb, var(--color-navy) 44%, var(--color-neutral-7));}
-  .fm-slot > i{font-size:16px; opacity:.7;}
-  .fm-slot:hover,.fm-slot:focus-visible{background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-1);}
-  .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0; border-top:0; border-bottom:0;}
+  .fm-slot .in > i{font-size:16px; opacity:.7;}
+  .fm-slot:hover .in,.fm-slot:focus-visible .in{background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-1);}
+  .fm-slot:focus{outline:none;}
+  .fm-slot:focus-visible{outline:2px solid var(--sl); outline-offset:2px;}
+  .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0;}
+  .fm-slot.sk-l .in,.fm-slot.sk-r .in{border-top:0; border-bottom:0;}
+  .fm-slot.sk-l .in{border-left:0;} .fm-slot.sk-r .in{border-right:0;}
   .fm-slot.sk-l .lb{writing-mode:vertical-rl; transform:rotate(180deg); padding:6px 0;}
-  .fm-slot.sk-l{border-left:0;} .fm-slot.sk-r{border-right:0;}
   .fm-slot.sl-mh{height:54px; margin:10px 0 0; flex:none;}
   .fm-slot.sl-ia{height:88px; margin:3px 0 11px; width:100%;}
   .fm-slot.sl-iv{height:72px; margin:3px 0 11px; width:100%;}
   .fm-slot.sl-sb{height:194px; margin-bottom:11px; width:100%;}
-  .fm-slot.sl-st{position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:0; border-bottom:0;
-    flex-direction:row; gap:6px; z-index:3;}
-  .fm-slot.sl-ov{position:absolute; left:10px; right:10px; bottom:40px; height:38px;
-    flex-direction:row; gap:6px; z-index:3; border-style:solid; box-shadow:var(--shadow-2);}
+  .fm-slot.sl-st{position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:0; z-index:3;}
+  .fm-slot.sl-st .in,.fm-slot.sl-pst .in{flex-direction:row; gap:6px; border-bottom:0;}
   .fm-slot.sl-fd{height:96px; flex:none;}
-  .fm-slot.sl-pst{position:absolute; left:0; right:0; bottom:0; height:30px; border-radius:0; border-bottom:0; z-index:3;}
+  .fm-slot.sl-ov{position:absolute; left:10px; right:10px; bottom:40px; height:38px; z-index:3;}
+  .fm-slot.sl-ov .in{flex-direction:row; gap:6px; border-style:solid; box-shadow:var(--shadow-2);}
+  .fm-slot.sl-pst{position:absolute; left:0; right:0; bottom:0; height:30px; border-radius:0; z-index:3;}
   /* The sheet is deliberately translucent: a full-screen unit covers the
      page, and you should be able to see the page it is covering. */
   .fm-ovsheet{position:absolute; inset:0; z-index:4; opacity:0; pointer-events:none; display:flex;
@@ -142,9 +150,8 @@
 
   /* Hovering a slot dims the others, so the picture answers one question
      at a time. Colour and weight both carry it, never colour alone. */
-  .fm-pl-stage[data-hot] .fm-slot{opacity:.3;}
-  .fm-pl-stage[data-hot] .fm-slot.is-hot{opacity:1; background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-2);}
-  .fm-pl-stage[data-hot] .fm-slot.is-hot .lb{color:var(--sl-ink);}
+  .fm-pl-stage[data-hot] .fm-slot .in{opacity:.3;}
+  .fm-pl-stage[data-hot] .fm-slot.is-hot .in{opacity:1; background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-2);}
 
   /* The demo: each slot behaves the way it behaves on a real page.
      Keyframes rather than transitions, so a backgrounded tab still runs
@@ -156,19 +163,19 @@
     @keyframes fm-slot-wipe{from{opacity:0; transform:scale(.94);} to{opacity:1; transform:none;}}
     @keyframes fm-slot-inl{from{transform:scaleX(0);} to{transform:none;}}
     @keyframes fm-slot-inr{from{transform:translateX(45%); opacity:0;} to{transform:none; opacity:1;}}
-    .fm-pl-stage[data-hot="masthead"] .fm-slot.sl-mh{animation:fm-slot-drop 380ms var(--ease-settle) both;}
-    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-l{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:left;}
-    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:right;}
-    .fm-pl-stage[data-hot="sidebar"] .fm-slot.sl-sb{animation:fm-slot-inr 380ms var(--ease-settle) both;}
-    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-st,
-    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-pst{animation:fm-slot-rise 400ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="masthead"] .fm-slot.sl-mh .in{animation:fm-slot-drop 380ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-l .in{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:left;}
+    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r .in{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:right;}
+    .fm-pl-stage[data-hot="sidebar"] .fm-slot.sl-sb .in{animation:fm-slot-inr 380ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-st .in,
+    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-pst .in{animation:fm-slot-rise 400ms var(--ease-settle) both;}
     .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{animation:fm-slot-wipe 340ms var(--ease-settle) both;}
-    .fm-pl-stage[data-hot="inarticle"] .fm-slot.sl-ia,
-    .fm-pl-stage[data-hot="invideo"] .fm-slot.sl-iv,
-    .fm-pl-stage[data-hot="feed"] .fm-slot.sl-fd{animation:fm-slot-pop 340ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="inarticle"] .fm-slot.sl-ia .in,
+    .fm-pl-stage[data-hot="invideo"] .fm-slot.sl-iv .in,
+    .fm-pl-stage[data-hot="feed"] .fm-slot.sl-fd .in{animation:fm-slot-pop 340ms var(--ease-settle) both;}
     /* On arrival the slots land one after another, so the picture builds
        itself rather than appearing finished. */
-    .fm-arriving .fm-slot{animation:fm-slot-pop 400ms var(--ease-settle) both; animation-delay:calc(240ms + var(--j, 0) * 70ms);}
+    .fm-arriving .fm-slot .in{animation:fm-slot-pop 400ms var(--ease-settle) both; animation-delay:calc(240ms + var(--j, 0) * 70ms);}
   }
   .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{opacity:1;}
 
@@ -617,27 +624,27 @@
           <div class="fm-pl-frame fm-pl-desk">
             <div class="fm-brow"><i></i><i></i><i></i><u></u></div>
             <div class="fm-page">
-              <button class="fm-slot sk-l" data-slot="skin" type="button"><span class="lb">Page skin</span><span class="n"></span></button>
+              <button class="fm-slot sk-l" data-slot="skin" type="button"><span class="in"><span class="lb">Page skin</span><span class="n"></span></span></button>
               <div class="fm-inner">
-                <button class="fm-slot sl-mh" data-slot="masthead" type="button"><span class="lb">Masthead</span><span class="n"></span></button>
+                <button class="fm-slot sl-mh" data-slot="masthead" type="button"><span class="in"><span class="lb">Masthead</span><span class="n"></span></span></button>
                 <div class="fm-navrow"><b></b><s></s><s></s><s></s></div>
                 <div class="fm-cols">
                   <div class="fm-art">
                     <div class="fm-hl"></div><div class="fm-by"></div>
                     <p class="fm-tx"></p><p class="fm-tx"></p><p class="fm-tx sh"></p>
-                    <button class="fm-slot sl-ia" data-slot="inarticle" type="button"><span class="lb">In the article</span><span class="n"></span></button>
+                    <button class="fm-slot sl-ia" data-slot="inarticle" type="button"><span class="in"><span class="lb">In the article</span><span class="n"></span></span></button>
                     <p class="fm-tx"></p><p class="fm-tx sh"></p>
-                    <button class="fm-slot sl-iv" data-slot="invideo" type="button"><i class="ph ph-play-circle"></i><span class="lb">In the player</span><span class="n"></span></button>
+                    <button class="fm-slot sl-iv" data-slot="invideo" type="button"><span class="in"><i class="ph ph-play-circle"></i><span class="lb">In the player</span><span class="n"></span></span></button>
                     <p class="fm-tx"></p><p class="fm-tx sh"></p>
                   </div>
                   <aside class="fm-rail">
-                    <button class="fm-slot sl-sb" data-slot="sidebar" type="button"><span class="lb">Side rail</span><span class="n"></span></button>
+                    <button class="fm-slot sl-sb" data-slot="sidebar" type="button"><span class="in"><span class="lb">Side rail</span><span class="n"></span></span></button>
                     <p class="fm-tx"></p><p class="fm-tx sh"></p><p class="fm-tx"></p>
                   </aside>
                 </div>
               </div>
-              <button class="fm-slot sk-r" data-slot="skin" type="button" tabindex="-1" aria-hidden="true"></button>
-              <button class="fm-slot sl-st" data-slot="sticky" type="button"><span class="lb">Sticky footer</span><span class="n"></span></button>
+              <button class="fm-slot sk-r" data-slot="skin" type="button" tabindex="-1" aria-hidden="true"><span class="in"></span></button>
+              <button class="fm-slot sl-st" data-slot="sticky" type="button"><span class="in"><span class="lb">Sticky footer</span><span class="n"></span></span></button>
               <div class="fm-ovsheet" aria-hidden="true"><span>Covers everything</span></div>
             </div>
           </div>
@@ -647,11 +654,11 @@
             <div class="fm-page">
               <div class="fm-feed">
                 <div class="fm-post"><span class="av"></span><i></i><u></u></div>
-                <button class="fm-slot sl-fd" data-slot="feed" type="button"><span class="lb">In the feed</span><span class="n"></span></button>
+                <button class="fm-slot sl-fd" data-slot="feed" type="button"><span class="in"><span class="lb">In the feed</span><span class="n"></span></span></button>
                 <div class="fm-post"><span class="av"></span><i></i><u></u></div>
               </div>
-              <button class="fm-slot sl-ov" data-slot="overlay" type="button"><span class="lb">Full screen</span><span class="n"></span></button>
-              <button class="fm-slot sl-pst" data-slot="sticky" type="button" tabindex="-1" aria-hidden="true"></button>
+              <button class="fm-slot sl-ov" data-slot="overlay" type="button"><span class="in"><span class="lb">Full screen</span><span class="n"></span></span></button>
+              <button class="fm-slot sl-pst" data-slot="sticky" type="button" tabindex="-1" aria-hidden="true"><span class="in"></span></button>
               <div class="fm-ovsheet" aria-hidden="true"><span>Covers everything</span></div>
             </div>
           </div>
