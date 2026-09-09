@@ -390,32 +390,3 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   shape says phone; the weight does not have to. The same mismatch in the
   placement picture, where the phone frame was 2px against the browser's 1,
   went with it. Shared assets to `?v=5`.
-
-- 2026-09-09, the card blooms. The page was called plain next to
-  kult.my/gallery, which is dark and saturated and full of real brand
-  creative. Rather than answer that with a redesign, the quiet stays and
-  the hover carries the colour: at rest a card is white on warm canvas and
-  none of this applies; under the pointer a wash comes up behind the
-  sample while the sample plays.
-
-  The colour is not invented. Each family takes its own DLS colour drawn
-  toward its neighbour on the wheel — navy into purple, orange into amber,
-  salmon into orange, green into navy, amber into green, purple into
-  salmon. Every pair is adjacent, so six lit cards read as one family of
-  light rather than six unrelated stains, and no two families share a
-  wash.
-
-  It is weighted to the top, where the sample is, and falls to near-white
-  by the words: 36% at the top corner, 6% at the bottom. That is what lets
-  it be strong enough to see without putting the spec labels on a ground
-  they cannot be read against — measured across all six families, the
-  labels sit between 4.57 and 5.60 against the strongest ground the body
-  can meet, and the values between 13.3 and 16.3.
-
-  Two mechanics worth keeping. The wash lives on a pseudo-element rather
-  than the card's own background, because a gradient cannot transition
-  from `none` and it has to cross-fade. And the stage goes transparent
-  over it, which means the margin the enlarged sample leaves is filled
-  with the wash instead of the grey that was there before. The wash drifts
-  slowly while the sample plays, so the two are alive together; only the
-  card under the pointer runs it, and reduced motion holds it still.
