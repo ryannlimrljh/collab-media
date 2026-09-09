@@ -198,3 +198,37 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   pending. `skeleton()` and the filter share one pair of bone builders,
   `boneCards` and `boneRows`. Releasing a slot is not a load and goes
   straight back to the full list. Reduced motion skips the beat.
+
+- 2026-09-09, four interaction notes.
+
+  **The picture tips.** The browser and the phone tilt together under the
+  pointer, one angle taken from where it sits across the whole stage and
+  written to both frames, so they read as one plane rather than two cards.
+  Seven degrees against the catalogue cards' four: a 450px picture needs
+  more than four to register at all. Nothing inside the frames is measured
+  for it, so the slots keep their own hit boxes; verified that all ten stay
+  reachable at both tilt extremes. The first attempt tilted each slot box
+  instead, which was the wrong object — the user wanted the whole device.
+
+  **The page skin pushes in.** It used to unroll from the margins with a
+  scaleX, which said nothing about what a skin is. Hovering it now widens
+  both gutters from 42 to 88px and the story column gives way, 934 to
+  842px, which is exactly what a page skin does to a page. It needs no
+  reveal of its own, so `fm-slot-inl` came out.
+
+  **A catalogue filter lets the placement go.** Holding a placement and a
+  catalogue filter at once quietly shrinks the answer, and a planner who
+  has scrolled past the picture cannot see why. Reaching for search, an
+  objective chip, or a facet now drops the slot: the applied chip, the
+  count, the URL and the filled slot all say so. Clearing a filter does
+  not, since that is not a new question.
+
+  **Every filter re-sorts, not just the sort.** `snapshotRects` measured
+  only what was on screen, so any card arriving from below the fold read as
+  new and popped in — a filter looked like the grid had been thrown away
+  and drawn again. It now measures every card. Playback stays culled, since
+  animating a card nobody can see is waste, and a card that would streak
+  more than a viewport height arrives from the edge it came from instead of
+  travelling. The stagger widens from 14/22ms to 38ms, which is what makes
+  a reshuffle read as a re-sort. Measured: filtering 49 to 44 moves eleven
+  cards and pops none, where before every card below the fold popped.
