@@ -342,11 +342,24 @@
      the body below, where the tagline and chips were. */
   /* Going live zooms the sample instead of washing the ground behind it.
      Tinting the stage said "something happened"; scaling it says "look
-     here", and 1.14 is what closes the 6% margin the faux page leaves
-     either side, so the sample fills the frame. The wrap already clips. */
-  .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle); transform-origin:center;}
+     here". It has to land on a full frame, though — an enlarged sample
+     with the grey ground still showing round it reads as a mistake.
+
+     A faux page sits 6% in either side and 8% down from the top, so 1.14
+     closes the sides and the origin sits on the bottom edge to carry the
+     top band off screen with it. The bottom already runs past the frame. */
+  .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle); transform-origin:50% 100%;}
   .fm-card.is-live .fp-stage{transform:scale(1.14);}
-  @media (prefers-reduced-motion:reduce){ .fm-card.is-live .fp-stage{transform:none;} }
+  /* A phone is 38% of the frame, so the same 1.14 would leave it stranded
+     in the middle of the ground with grey either side. It zooms to its own
+     screen instead. The phone is a fixed 38% of the stage at any size, so
+     1/0.38 = 2.63 is the scale that makes it exactly as wide as the frame,
+     whatever column the card is in; 2.7 buys a little overlap so a
+     rounding error cannot put a grey hairline back. The origin sits just
+     above centre so the ad, not the bezel, is what the frame holds. */
+  .fm-card .fp-stage.on-phone{transform-origin:50% 44%;}
+  .fm-card.is-live .fp-stage.on-phone{transform:scale(2.7);}
+  @media (prefers-reduced-motion:reduce){ .fm-card.is-live .fp-stage,.fm-card.is-live .fp-stage.on-phone{transform:none;} }
   .fm-live{position:absolute; top:var(--spacing-16); right:var(--spacing-16); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
     opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
@@ -1061,7 +1074,7 @@
   function cardHtml(f, i) {
     var inCmp = compare.indexOf(f.id) > -1;
     return '<article class="fm-card' + (inCmp ? ' is-compared' : '') + '" data-id="' + f.id + '" tabindex="0" role="button" aria-label="' + esc(f.name) + ', ' + esc(f.family) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
-      '<div class="fm-stagewrap"><div class="fp-stage" data-stage></div>' +
+      '<div class="fm-stagewrap"><div class="fp-stage' + (f.mobile ? ' on-phone' : '') + '" data-stage></div>' +
         '<span class="fm-live"><i></i>Live sample</span>' +
         '<span class="fm-touchhint"><i class="ph ph-play"></i>Tap to play</span>' +
         (state.slot && f.home === state.slot ? '<span class="fm-native"><i class="ph ph-push-pin"></i>Built for this slot</span>' : '') +
