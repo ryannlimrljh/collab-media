@@ -296,14 +296,16 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   and how many were built for it, the units sold for it by name, and the
   line that says clicking filters the catalogue.
 
-  Three fields joined `FORMAT_PLACEMENTS` for it, derived in the data file
+  Two fields joined `FORMAT_PLACEMENTS` for it, derived in the data file
   rather than the page. `sizes` comes from the size-to-slot map where a
   slot has sizes of its own — those are the ones that define it, so
   in-article reads 300×250 and 800×600 rather than every size its 29 units
   happen to offer — and from the units built for it where it does not.
   Composite labels like "Skinner + Masthead + MREC" name a bundle rather
-  than a size and are left out. `devices` and `leads` are the union and the
-  names across those same units.
+  than a size and are left out. `devices` is the union across those same
+  units. A `leads` field named them too, and came out the same day: the
+  card is a decision about a slot, and a list of unit names is the answer
+  the catalogue below gives once the slot is chosen.
 
   The card takes no pointer events, so it can overlap the picture without
   ever breaking the hover underneath it — verified that a pointer over the

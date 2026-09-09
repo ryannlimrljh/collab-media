@@ -242,7 +242,6 @@
     border-top:1px solid var(--color-neutral-2);}
   .fm-plcard .fit b{font-size:20px; font-weight:900; line-height:1; color:var(--sl-ink);}
   .fm-plcard .fit span{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .fm-plcard .leads{margin:6px 0 0; font-size:var(--text-caption-size); line-height:1.45; color:var(--color-neutral-6);}
   .fm-plcard .cta{display:flex; align-items:center; gap:5px; margin-top:var(--spacing-12);
     font-size:var(--text-caption-size); font-weight:700; color:var(--sl-ink);}
   .fm-plcard .cta i{font-size:13px;}
@@ -849,7 +848,7 @@
 <div class="c-toast-host" id="fmToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/formats-data.js?v=3"></script>
+<script src="../shared/formats-data.js?v=4"></script>
 <script src="../shared/format-previews.js?v=1"></script>
 <script>
 (function () {
@@ -1641,15 +1640,12 @@
     var n = fitCount(k), h = homeCount(k);
     var sizes = pl.sizes.length ? pl.sizes.slice(0, 4).map(esc).join(' · ') +
       (pl.sizes.length > 4 ? ' +' + (pl.sizes.length - 4) : '') : '—';
-    var leads = pl.leads.slice(0, 3).map(esc).join(', ') +
-      (pl.leads.length > 3 ? ' and ' + (pl.leads.length - 3) + ' more' : '');
     return '<div class="hd"><i class="ph ' + pl.icon + '"></i><span><b>' + esc(pl.label) + '</b>' +
         '<em>' + esc(pl.short) + '</em></span></div>' +
       '<p class="desc">' + esc(pl.desc) + '</p>' +
       '<dl><dt>Sizes</dt><dd>' + sizes + '</dd>' +
         '<dt>Runs on</dt><dd>' + esc(pl.devices.join(' · ') || '—') + '</dd></dl>' +
       '<div class="fit"><b>' + n + '</b><span>of ' + F.length + ' units fit here · ' + h + ' built for it</span></div>' +
-      '<p class="leads">' + leads + '</p>' +
       '<p class="cta"><i class="ph ph-arrow-down"></i>Click to filter the catalogue</p>';
   }
   /* The card rides the pointer. A slot can be 270px tall and the whole

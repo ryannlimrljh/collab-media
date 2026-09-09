@@ -1678,7 +1678,7 @@ window.FORMAT_PLACEMENTS = [
   });
 
   /* What a planner needs to know about a slot before they pick it: what it
-     runs at, where it runs, and which units were sold for it. Sizes come
+     runs at and where it runs. Sizes come
      from the map above where a slot has sizes of its own — those are the
      ones that define it — and from the units built for it where it does
      not. Composite labels like "Skinner + Masthead + MREC" name a bundle
@@ -1701,7 +1701,6 @@ window.FORMAT_PLACEMENTS = [
       });
     }
     pl.sizes = sizes;
-    pl.leads = homes.map(function (f) { return f.name; }).sort();
     pl.devices = homes.reduce(function (a, f) {
       devicesOf(f).forEach(function (d) { if (a.indexOf(d) < 0) a.push(d); });
       return a;
