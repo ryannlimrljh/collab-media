@@ -232,3 +232,19 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   travelling. The stagger widens from 14/22ms to 38ms, which is what makes
   a reshuffle read as a re-sort. Measured: filtering 49 to 44 moves eleven
   cards and pops none, where before every card below the fold popped.
+
+- 2026-09-09, and per device. The tilt was one angle across both frames,
+  which made them read as a single sheet. They are two devices, so they
+  tip on their own axes now: the pointer belongs to whichever frame it is
+  over and that frame alone takes the angle, the other easing back to flat.
+  A browser and a phone on a desk do not share a hinge.
+
+  The desktop frame grew from 452 to 568px and keeps the extra for its
+  slots — the in-article box to 112, the in-player to 92, the rail to 268 —
+  with more of the story drawn around them. The phone stays at 452 and
+  aligns to the bottom, so the two stand on the same floor rather than
+  being stretched to match. The skin pushes deeper on hover as well: the
+  gutters go 42 to 124px and the story column gives way from 934 to 770.
+
+  Checked again after the geometry changed: all ten slots stay reachable
+  at both tilt extremes and flat.

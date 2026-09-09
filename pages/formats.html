@@ -68,20 +68,21 @@
   .fm-pl-lede h2{margin:0 0 4px; font-size:var(--text-h4-size); font-weight:800; letter-spacing:var(--text-h4-tracking);}
   .fm-pl-lede p{margin:0; color:var(--color-neutral-6); font-size:var(--text-body2-size); line-height:var(--text-body2-lh);}
 
-  /* The two frames are one plane, and the pointer tips it. The cards use
-     four degrees; a picture this size needs more to read at all, so it
-     takes seven. Both frames take the same angle rather than one each, so
-     the browser and the phone stay in the same room. */
-  .fm-pl-stage{display:flex; gap:var(--spacing-20); align-items:stretch; perspective:1600px;}
-  .fm-pl-frame{position:relative; height:452px; border-radius:var(--radius-lg); overflow:hidden;
+  /* Each device tips on its own axis: the pointer belongs to whichever
+     frame it is over, and the other stays flat. The cards use four
+     degrees; a picture this size needs seven to read at all. The two are
+     different heights and stand on the same floor, the way a laptop and a
+     phone do on a desk. */
+  .fm-pl-stage{display:flex; gap:var(--spacing-20); align-items:flex-end; perspective:1600px;}
+  .fm-pl-frame{position:relative; border-radius:var(--radius-lg); overflow:hidden;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); box-shadow:var(--shadow-1);
     transition:transform var(--duration-slow) var(--ease-settle), box-shadow var(--duration-base) var(--ease-standard);}
-  /* The angle tracks the pointer live; the ease is for the journey back
-     to flat once it leaves. */
-  .fm-pl-stage.is-tilting .fm-pl-frame{transition:box-shadow var(--duration-base) var(--ease-standard);}
-  .fm-pl-stage.is-tilting .fm-pl-frame{box-shadow:var(--shadow-3);}
-  .fm-pl-desk{flex:1 1 auto; min-width:0;}
-  .fm-pl-phone{flex:0 0 clamp(146px, 19vw, 208px); border-radius:24px; border-width:2px;}
+  /* The angle tracks the pointer live, so the frame under it drops the
+     transform transition; the ease is for the journey back to flat. */
+  .fm-pl-frame.is-tilting{transition:box-shadow var(--duration-base) var(--ease-standard); box-shadow:var(--shadow-3);}
+  .fm-pl-desk{flex:1 1 auto; min-width:0; height:568px;}
+  .fm-pl-phone{flex:0 0 clamp(146px, 19vw, 208px); height:452px; align-self:flex-end;
+    border-radius:24px; border-width:2px;}
   .fm-brow{height:28px; display:flex; align-items:center; gap:5px; padding:0 10px;
     background:var(--color-neutral-2); border-bottom:1px solid var(--color-neutral-3);}
   .fm-brow i{width:7px; height:7px; border-radius:50%; background:var(--color-neutral-4); flex:none;}
@@ -146,14 +147,14 @@
   .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0;
     transition:flex-basis var(--duration-base) var(--ease-settle);}
   .fm-pl-stage[data-hot="skin"] .fm-slot.sk-l,
-  .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r{flex-basis:88px;}
+  .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r{flex-basis:124px;}
   .fm-slot.sk-l .in,.fm-slot.sk-r .in{border-top:0; border-bottom:0;}
   .fm-slot.sk-l .in{border-left:0;} .fm-slot.sk-r .in{border-right:0;}
   .fm-slot.sk-l .lb{writing-mode:vertical-rl; transform:rotate(180deg); padding:6px 0;}
   .fm-slot.sl-mh{height:54px; margin:10px 0 0; flex:none;}
-  .fm-slot.sl-ia{height:88px; margin:3px 0 11px; width:100%;}
-  .fm-slot.sl-iv{height:72px; margin:3px 0 11px; width:100%;}
-  .fm-slot.sl-sb{height:194px; margin-bottom:11px; width:100%;}
+  .fm-slot.sl-ia{height:112px; margin:3px 0 12px; width:100%;}
+  .fm-slot.sl-iv{height:92px; margin:3px 0 12px; width:100%;}
+  .fm-slot.sl-sb{height:268px; margin-bottom:12px; width:100%;}
   .fm-slot.sl-st{position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:0; z-index:3;}
   .fm-slot.sl-st .in,.fm-slot.sl-pst .in{flex-direction:row; gap:6px; border-bottom:0;}
   .fm-slot.sl-fd{height:96px; flex:none;}
@@ -618,11 +619,11 @@
                     <button class="fm-slot sl-ia" data-slot="inarticle" type="button"><span class="in"><span class="lb">In the article</span><span class="n"></span></span></button>
                     <p class="fm-tx"></p><p class="fm-tx sh"></p>
                     <button class="fm-slot sl-iv" data-slot="invideo" type="button"><span class="in"><i class="ph ph-play-circle"></i><span class="lb">In the player</span><span class="n"></span></span></button>
-                    <p class="fm-tx"></p><p class="fm-tx sh"></p>
+                    <p class="fm-tx"></p><p class="fm-tx"></p><p class="fm-tx"></p><p class="fm-tx sh"></p>
                   </div>
                   <aside class="fm-rail">
                     <button class="fm-slot sl-sb" data-slot="sidebar" type="button"><span class="in"><span class="lb">Side rail</span><span class="n"></span></span></button>
-                    <p class="fm-tx"></p><p class="fm-tx sh"></p><p class="fm-tx"></p>
+                    <p class="fm-tx"></p><p class="fm-tx sh"></p><p class="fm-tx"></p><p class="fm-tx"></p><p class="fm-tx sh"></p>
                   </aside>
                 </div>
               </div>
@@ -1596,39 +1597,44 @@
   /* Focus plays the same demo as hover, so a keyboard reaches all of it. */
   plStage.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
   plList.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
-  /* The picture tips toward the pointer: one angle, taken from where the
-     pointer sits across the whole stage, written to both frames so the
-     browser and the phone stay on the same plane. Seven degrees against
-     the cards' four, because a 450px picture needs more to read at all.
-     Nothing inside the frames is measured for this, so the slots keep
-     their own hit boxes and the hover logic is untouched. */
-  var STAGE_TILT = 7, stageRect = null, stageRAF = 0, stageX = 0, stageY = 0;
-  var frames = plStage.querySelectorAll('.fm-pl-frame');
-  function stageTiltFrame() {
-    stageRAF = 0; if (!stageRect) return;
-    var px = Math.max(0, Math.min(1, (stageX - stageRect.left) / stageRect.width));
-    var py = Math.max(0, Math.min(1, (stageY - stageRect.top) / stageRect.height));
-    var t = 'rotateX(' + (-(py - 0.5) * 2 * STAGE_TILT).toFixed(2) + 'deg) rotateY(' +
-      ((px - 0.5) * 2 * STAGE_TILT).toFixed(2) + 'deg)';
-    for (var i = 0; i < frames.length; i++) frames[i].style.transform = t;
+  /* Each device tips on its own. The pointer belongs to whichever frame
+     it is over, and that frame alone takes the angle — a browser and a
+     phone on a desk do not share a hinge. Seven degrees against the
+     catalogue cards' four, because a picture this size needs it to read.
+     Nothing inside a frame is measured for this, so the slots keep their
+     own hit boxes and the hover logic is untouched. */
+  var FRAME_TILT = 7, tiltFrame = null, tiltFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
+  function frameTiltFrame() {
+    frameRAF = 0; if (!tiltFrame || !tiltFrameRect) return;
+    var px = Math.max(0, Math.min(1, (frameX - tiltFrameRect.left) / tiltFrameRect.width));
+    var py = Math.max(0, Math.min(1, (frameY - tiltFrameRect.top) / tiltFrameRect.height));
+    tiltFrame.style.transform = 'rotateX(' + (-(py - 0.5) * 2 * FRAME_TILT).toFixed(2) +
+      'deg) rotateY(' + ((px - 0.5) * 2 * FRAME_TILT).toFixed(2) + 'deg)';
   }
-  function untiltStage() {
-    if (stageRAF) { cancelAnimationFrame(stageRAF); stageRAF = 0; }
-    plStage.classList.remove('is-tilting');
-    for (var i = 0; i < frames.length; i++) frames[i].style.transform = '';
-    stageRect = null;
+  function untiltFrame() {
+    if (frameRAF) { cancelAnimationFrame(frameRAF); frameRAF = 0; }
+    if (!tiltFrame) return;
+    tiltFrame.classList.remove('is-tilting');
+    tiltFrame.style.transform = '';
+    tiltFrame = null; tiltFrameRect = null;
   }
-  plStage.addEventListener('pointerenter', function (e) {
+  plStage.addEventListener('pointerover', function (e) {
     if (REDUCED || e.pointerType !== 'mouse') return;
-    stageRect = plStage.getBoundingClientRect();
-    plStage.classList.add('is-tilting');
+    var f = e.target.closest('.fm-pl-frame');
+    if (f === tiltFrame) return;
+    untiltFrame();
+    if (!f) return;
+    tiltFrame = f; tiltFrameRect = f.getBoundingClientRect(); f.classList.add('is-tilting');
   });
   plStage.addEventListener('pointermove', function (e) {
-    if (!stageRect) return;
-    stageX = e.clientX; stageY = e.clientY;
-    if (!stageRAF) stageRAF = requestAnimationFrame(stageTiltFrame);
+    if (!tiltFrame) return;
+    frameX = e.clientX; frameY = e.clientY;
+    if (!frameRAF) frameRAF = requestAnimationFrame(frameTiltFrame);
   });
-  plStage.addEventListener('pointerleave', untiltStage);
+  plStage.addEventListener('pointerout', function (e) {
+    if (tiltFrame && !tiltFrame.contains(e.relatedTarget)) untiltFrame();
+  });
+  plStage.addEventListener('pointerleave', untiltFrame);
 
   function slotClick(e) { var b = e.target.closest('[data-slot]'); if (b) setSlot(b.dataset.slot); }
   plStage.addEventListener('click', slotClick);
