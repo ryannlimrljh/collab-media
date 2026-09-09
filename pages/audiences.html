@@ -1388,8 +1388,15 @@
     else if (motion.has && speed > 25) hand = { x: wx, y: wy, vx: motion.hvx, vy: motion.hvy, r: 24, on: true, soft: true, skip: hotId };
     var pouring = J.balls.some(function (b) { return !b.out && J.time < b.release + 0.5; });
     /* Settled means every disc is still — not the average, or one disc
-       rolling on its own would be frozen mid-roll. */
-    var settled = !pouring && !J.growing && J.maxSpeed != null && J.maxSpeed < 4;
+       rolling on its own would be frozen mid-roll. The growing test is
+       taken fresh rather than read off J.growing, which only the physics
+       writes: a lens hands the discs new sizes without stepping, so a
+       settled jar was still calling itself settled and never started.
+       The discs only moved once the pointer travelled far enough to
+       become a hand, which forced a step by another route — the lens
+       looked like it did nothing until you moved the mouse away. */
+    var growing = J.balls.some(function (b) { return !b.out && b.rt != null && Math.abs(b.r - b.rt) > 0.05; });
+    var settled = !pouring && !growing && J.maxSpeed != null && J.maxSpeed < 4;
     if (!settled || hand) { for (var k = 0; k < steps; k++) M.jar.step(J, STEP, hand); if (steps) draw(); }
     /* The jar has gone quiet: whatever the count still had outstanding
        has landed by definition, and no more frames will be drawn to

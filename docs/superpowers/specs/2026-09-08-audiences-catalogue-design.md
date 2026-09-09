@@ -618,3 +618,15 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   Worth recording how this was missed: it was verified with `el.click()`,
   which dispatches straight at the element and never runs the pointer
   sequence — it exercised a path a real click does not take, and passed.
+- 2026-09-09, the lens waited for the mouse. Choosing a lens looked like
+  it had done nothing until the pointer moved away, and then the discs
+  resized all at once. The loop skips stepping while it judges the jar
+  settled, and that judgement read `J.growing` — a flag only the physics
+  writes. A lens hands every disc a new target size without stepping, so
+  a jar at rest kept calling itself settled and never started; moving the
+  pointer far enough to become a hand forced a step by another route,
+  which set the flag, which started the animation. The test now asks the
+  discs directly whether any is away from its target. Measured on a jar
+  settled to a maxSpeed of 0.46: after `setLens` all 51 discs need
+  resizing while `J.growing` still reads false — the old test called that
+  settled, the new one does not.
