@@ -357,3 +357,13 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   the sample grows to fill the frame and the wrap clips the overflow. The
   ground behind it no longer changes colour at all. Reduced motion keeps
   the sample at rest size.
+
+- 2026-09-09, and the zoom settles at 1.10. Two passes got here. Pushing
+  the sample to fill the frame edge to edge cropped the faux browser bar
+  off the top, which is the thing that says a page is a page, so that came
+  out. The plain 1.14 that remained closed the sides exactly and left a 5px
+  band along the top, which read as one side gone wrong rather than as a
+  margin. At 1.10 the ground shows on every side — 6px at the sides, 8px at
+  the top, measured — the browser bar keeps its full 15px, and the sample
+  still visibly grows. A margin on four sides is a frame; a margin on one
+  is a mistake.
