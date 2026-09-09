@@ -31,6 +31,9 @@
   /* ── Arrival — the same family as My media plans: header, then the
      showcase, then the controls, then the cards cascade. ── */
   @keyframes fm-arrive{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  .fm-arriving .fm-tabs{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:40ms;}
+  .fm-arriving .fm-pl-lede,.fm-arriving .fm-pl-stage{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:100ms;}
+  .fm-arriving .fm-pl-cap,.fm-arriving .fm-pl-list{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:220ms;}
   .fm-arriving .fm-show{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:60ms;}
   .fm-arriving .fm-controls,.fm-arriving .fm-count{animation:fm-arrive 420ms var(--ease-settle) both; animation-delay:160ms;}
   .fm-arriving .fm-card{animation:fm-arrive 380ms var(--ease-settle) both; animation-delay:calc(260ms + var(--i, 0) * 40ms);}
@@ -52,6 +55,166 @@
   @media (prefers-reduced-motion:no-preference){
     .fm-sk,.fm-sk-stage,.fm-sk-ava{animation:fm-sk-pulse 1.4s var(--ease-standard) infinite;}
     @keyframes fm-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
+
+  /* ── Placements — the page drawn as a picture. ─────────────────────
+     Water is Collab:Media's element, so every slot is drawn in navy
+     rather than a family colour: a slot is a position on a page, not a
+     kind of ad, and the two must never be confused. Each slot carries
+     its own count at rest, so nothing here is hover-only; hovering adds
+     the demo, and clicking is the action. ── */
+  .fm-tabs{margin-bottom:var(--spacing-20);}
+  .fm-tabs .c-tab .n{margin-left:6px; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-4);}
+  .fm-tabs .c-tab.active .n{color:var(--color-neutral-5);}
+
+  .fm-places{--sl:var(--color-navy);
+    --sl-line:color-mix(in srgb, var(--color-navy) 32%, #fff);
+    --sl-bg:color-mix(in srgb, var(--color-navy) 9%, #fff);
+    --sl-bg2:color-mix(in srgb, var(--color-navy) 19%, #fff);
+    --sl-ink:color-mix(in srgb, var(--color-navy) 58%, #000);}
+  .fm-pl-lede{max-width:66ch; margin-bottom:var(--spacing-20);}
+  .fm-pl-lede h2{margin:0 0 4px; font-size:var(--text-h4-size); font-weight:800; letter-spacing:var(--text-h4-tracking);}
+  .fm-pl-lede p{margin:0; color:var(--color-neutral-6); font-size:var(--text-body2-size); line-height:var(--text-body2-lh);}
+
+  .fm-pl-stage{display:flex; gap:var(--spacing-20); align-items:stretch;}
+  .fm-pl-frame{position:relative; height:452px; border-radius:var(--radius-lg); overflow:hidden;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); box-shadow:var(--shadow-1);}
+  .fm-pl-desk{flex:1 1 auto; min-width:0;}
+  .fm-pl-phone{flex:0 0 clamp(146px, 19vw, 208px); border-radius:24px; border-width:2px;}
+  .fm-brow{height:28px; display:flex; align-items:center; gap:5px; padding:0 10px;
+    background:var(--color-neutral-2); border-bottom:1px solid var(--color-neutral-3);}
+  .fm-brow i{width:7px; height:7px; border-radius:50%; background:var(--color-neutral-4); flex:none;}
+  .fm-brow u{flex:1; height:11px; margin-left:8px; border-radius:var(--radius-pill); background:var(--color-neutral-1);}
+  .fm-notch{height:22px; display:flex; justify-content:center;}
+  .fm-notch::after{content:""; width:58px; height:11px; border-radius:0 0 8px 8px; background:var(--color-neutral-3);}
+  .fm-pl-desk .fm-page{position:absolute; inset:28px 0 0; display:flex;}
+  .fm-pl-phone .fm-page{position:absolute; inset:22px 0 0; display:flex; flex-direction:column;}
+
+  /* Page furniture — grey bars standing in for a real story. */
+  .fm-inner{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; padding:0 10px;}
+  .fm-navrow{display:flex; align-items:center; gap:8px; padding:9px 2px; border-bottom:1px solid var(--color-neutral-2);}
+  .fm-navrow b{width:42px; height:9px; border-radius:3px; background:var(--color-neutral-4);}
+  .fm-navrow s{width:28px; height:6px; border-radius:3px; background:var(--color-neutral-3);}
+  .fm-cols{flex:1 1 auto; display:flex; gap:12px; padding-top:10px; min-height:0; overflow:hidden;}
+  .fm-art{flex:1 1 auto; min-width:0;}
+  .fm-rail{flex:0 0 100px;}
+  .fm-hl{height:13px; width:72%; border-radius:4px; background:var(--color-neutral-4); margin-bottom:7px;}
+  .fm-by{height:7px; width:36%; border-radius:3px; background:var(--color-neutral-3); margin-bottom:11px;}
+  .fm-tx{height:6px; border-radius:3px; background:var(--color-neutral-2); margin:0 0 7px;}
+  .fm-tx.sh{width:70%;}
+  .fm-feed{flex:1 1 auto; min-height:0; overflow:hidden; padding:8px; display:flex; flex-direction:column; gap:8px;}
+  .fm-post{border:1px solid var(--color-neutral-2); border-radius:var(--radius-sm); padding:7px; display:grid;
+    grid-template-columns:16px 1fr; grid-template-areas:"a i" "u u"; gap:5px 6px;}
+  .fm-post .av{grid-area:a; width:16px; height:16px; border-radius:50%; background:var(--color-neutral-3);}
+  .fm-post i{grid-area:i; height:6px; border-radius:3px; background:var(--color-neutral-3); align-self:center;}
+  .fm-post u{grid-area:u; height:34px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
+
+  /* The slots. */
+  .fm-slot{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    border:1px dashed var(--sl-line); background:var(--sl-bg); border-radius:var(--radius-sm);
+    cursor:pointer; font-family:inherit; padding:0; overflow:hidden; color:var(--sl-ink); text-align:center;
+    transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard),
+      opacity var(--duration-base) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);}
+  .fm-slot .lb{font-size:11px; font-weight:800; line-height:1.15; padding:0 4px;}
+  .fm-slot .n{font-size:10px; font-weight:700; color:color-mix(in srgb, var(--color-navy) 44%, var(--color-neutral-7));}
+  .fm-slot > i{font-size:16px; opacity:.7;}
+  .fm-slot:hover,.fm-slot:focus-visible{background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-1);}
+  .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0; border-top:0; border-bottom:0;}
+  .fm-slot.sk-l .lb{writing-mode:vertical-rl; transform:rotate(180deg); padding:6px 0;}
+  .fm-slot.sk-l{border-left:0;} .fm-slot.sk-r{border-right:0;}
+  .fm-slot.sl-mh{height:54px; margin:10px 0 0; flex:none;}
+  .fm-slot.sl-ia{height:88px; margin:3px 0 11px; width:100%;}
+  .fm-slot.sl-iv{height:72px; margin:3px 0 11px; width:100%;}
+  .fm-slot.sl-sb{height:194px; margin-bottom:11px; width:100%;}
+  .fm-slot.sl-st{position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:0; border-bottom:0;
+    flex-direction:row; gap:6px; z-index:3;}
+  .fm-slot.sl-ov{position:absolute; left:10px; right:10px; bottom:40px; height:38px;
+    flex-direction:row; gap:6px; z-index:3; border-style:solid; box-shadow:var(--shadow-2);}
+  .fm-slot.sl-fd{height:96px; flex:none;}
+  .fm-slot.sl-pst{position:absolute; left:0; right:0; bottom:0; height:30px; border-radius:0; border-bottom:0; z-index:3;}
+  /* The sheet is deliberately translucent: a full-screen unit covers the
+     page, and you should be able to see the page it is covering. */
+  .fm-ovsheet{position:absolute; inset:0; z-index:4; opacity:0; pointer-events:none; display:flex;
+    align-items:center; justify-content:center; background:color-mix(in srgb, var(--color-navy) 26%, transparent);
+    border:2px solid var(--sl);}
+  .fm-ovsheet span{font-size:12px; font-weight:800; color:var(--sl-ink); background:var(--color-neutral-1);
+    padding:5px 12px; border-radius:var(--radius-pill); box-shadow:var(--shadow-1);}
+
+  /* Hovering a slot dims the others, so the picture answers one question
+     at a time. Colour and weight both carry it, never colour alone. */
+  .fm-pl-stage[data-hot] .fm-slot{opacity:.3;}
+  .fm-pl-stage[data-hot] .fm-slot.is-hot{opacity:1; background:var(--sl-bg2); border-style:solid; border-color:var(--sl); box-shadow:var(--shadow-2);}
+  .fm-pl-stage[data-hot] .fm-slot.is-hot .lb{color:var(--sl-ink);}
+
+  /* The demo: each slot behaves the way it behaves on a real page.
+     Keyframes rather than transitions, so a backgrounded tab still runs
+     them when it comes back. */
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes fm-slot-pop{from{opacity:0; transform:scale(.9);} to{opacity:1; transform:none;}}
+    @keyframes fm-slot-drop{from{opacity:0; transform:translateY(-110%);} to{opacity:1; transform:none;}}
+    @keyframes fm-slot-rise{from{transform:translateY(110%);} to{transform:none;}}
+    @keyframes fm-slot-wipe{from{opacity:0; transform:scale(.94);} to{opacity:1; transform:none;}}
+    @keyframes fm-slot-inl{from{transform:scaleX(0);} to{transform:none;}}
+    @keyframes fm-slot-inr{from{transform:translateX(45%); opacity:0;} to{transform:none; opacity:1;}}
+    .fm-pl-stage[data-hot="masthead"] .fm-slot.sl-mh{animation:fm-slot-drop 380ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-l{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:left;}
+    .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r{animation:fm-slot-inl 340ms var(--ease-settle) both; transform-origin:right;}
+    .fm-pl-stage[data-hot="sidebar"] .fm-slot.sl-sb{animation:fm-slot-inr 380ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-st,
+    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-pst{animation:fm-slot-rise 400ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{animation:fm-slot-wipe 340ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="inarticle"] .fm-slot.sl-ia,
+    .fm-pl-stage[data-hot="invideo"] .fm-slot.sl-iv,
+    .fm-pl-stage[data-hot="feed"] .fm-slot.sl-fd{animation:fm-slot-pop 340ms var(--ease-settle) both;}
+    /* On arrival the slots land one after another, so the picture builds
+       itself rather than appearing finished. */
+    .fm-arriving .fm-slot{animation:fm-slot-pop 400ms var(--ease-settle) both; animation-delay:calc(240ms + var(--j, 0) * 70ms);}
+  }
+  .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{opacity:1;}
+
+  /* The caption says what the picture cannot: what the slot is, how many
+     units fit it, and how many were built for it. */
+  .fm-pl-cap{display:flex; align-items:center; gap:var(--spacing-16); margin-top:var(--spacing-16); min-height:68px;
+    padding:var(--spacing-12) var(--spacing-16); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
+  .fm-pl-cap > i{font-size:22px; color:var(--sl); flex:none;}
+  .fm-pl-cap .tx{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;}
+  .fm-pl-cap .tx b{font-size:var(--text-body1-size); font-weight:800;}
+  .fm-pl-cap .tx span{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-6);}
+  .fm-pl-cap .fig{flex:none; text-align:right; display:flex; flex-direction:column; gap:1px;}
+  .fm-pl-cap .fig b{font-size:24px; font-weight:900; line-height:1; color:var(--sl-ink);}
+  .fm-pl-cap .fig span{font-size:var(--text-caption-size); color:var(--color-neutral-5); white-space:nowrap;}
+  .fm-pl-cap .c-btn{flex:none;}
+
+  /* The same eight slots as a list: the keyboard path, the small-screen
+     interface, and the legend for the drawing. */
+  .fm-pl-list{display:flex; flex-wrap:wrap; gap:8px; margin:var(--spacing-12) 0 0; padding:0; list-style:none;}
+  .fm-pl-item{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:6px var(--spacing-12);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill); background:var(--color-neutral-1);
+    cursor:pointer; font-family:inherit; color:var(--color-neutral-9); box-shadow:none;
+    transition:border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);}
+  .fm-pl-item:hover,.fm-pl-item:focus-visible{border-color:var(--sl); background:var(--sl-bg);}
+  .fm-pl-item.is-hot{border-color:var(--sl); background:var(--sl-bg2);}
+  .fm-pl-item > i{font-size:var(--icon-sm); color:var(--sl);}
+  .fm-pl-item .t{display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;}
+  .fm-pl-item .t b{font-size:var(--text-body2-size); font-weight:700;}
+  .fm-pl-item .t em{font-style:normal; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fm-pl-item .c{font-size:var(--text-body2-size); font-weight:800; color:var(--sl-ink);
+    background:var(--sl-bg); border-radius:var(--radius-pill); padding:2px 8px;}
+
+  /* A unit sold for this exact slot, marked while a slot filter is on. */
+  .fm-native{position:absolute; left:16px; bottom:16px; z-index:2; display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:var(--radius-pill); background:color-mix(in srgb, var(--color-navy) 72%, #000); color:#fff;
+    font-size:11px; font-weight:800; letter-spacing:.01em;}
+  .fm-native i{font-size:11px;}
+
+  /* Under 760px the drawing steps aside and the list is the interface,
+     the same rule the audiences universe follows. */
+  @media (max-width:760px){
+    .fm-pl-stage,.fm-pl-cap{display:none;}
+    .fm-pl-list{display:grid; grid-template-columns:1fr; gap:8px;}
+    .fm-pl-item{width:100%; border-radius:var(--radius-md); justify-content:flex-start;}
+    .fm-pl-item .c{margin-left:auto;}
   }
 
   /* ── Showcase — what KULT recently ran, brand by brand. ── */
@@ -436,6 +599,70 @@
 
       <hr class="fm-divider" />
 
+      <div class="c-tabs fm-tabs" role="tablist" aria-label="Ad format views">
+        <button class="c-tab active" type="button" role="tab" aria-selected="true" data-tab="places" id="fmTabPlaces"><i class="ph ph-browser"></i>Placements</button>
+        <button class="c-tab" type="button" role="tab" aria-selected="false" data-tab="catalogue" id="fmTabCat"><i class="ph ph-squares-four"></i>Catalogue<span class="n" id="fmTabCount"></span></button>
+      </div>
+
+      <!-- The page as a picture. A planner arrives with a slot already
+           bought, so the catalogue's first question is where, not what. -->
+      <section class="fm-places" id="fmPanelPlaces" aria-label="Placements">
+        <div class="fm-pl-lede">
+          <h2>Start with the slot you have</h2>
+          <p>Every position an ad can take, drawn where it really sits. Point at one to watch it behave, then open the units that fit it.</p>
+        </div>
+
+        <div class="fm-pl-stage" id="fmPlStage">
+
+          <div class="fm-pl-frame fm-pl-desk">
+            <div class="fm-brow"><i></i><i></i><i></i><u></u></div>
+            <div class="fm-page">
+              <button class="fm-slot sk-l" data-slot="skin" type="button"><span class="lb">Page skin</span><span class="n"></span></button>
+              <div class="fm-inner">
+                <button class="fm-slot sl-mh" data-slot="masthead" type="button"><span class="lb">Masthead</span><span class="n"></span></button>
+                <div class="fm-navrow"><b></b><s></s><s></s><s></s></div>
+                <div class="fm-cols">
+                  <div class="fm-art">
+                    <div class="fm-hl"></div><div class="fm-by"></div>
+                    <p class="fm-tx"></p><p class="fm-tx"></p><p class="fm-tx sh"></p>
+                    <button class="fm-slot sl-ia" data-slot="inarticle" type="button"><span class="lb">In the article</span><span class="n"></span></button>
+                    <p class="fm-tx"></p><p class="fm-tx sh"></p>
+                    <button class="fm-slot sl-iv" data-slot="invideo" type="button"><i class="ph ph-play-circle"></i><span class="lb">In the player</span><span class="n"></span></button>
+                    <p class="fm-tx"></p><p class="fm-tx sh"></p>
+                  </div>
+                  <aside class="fm-rail">
+                    <button class="fm-slot sl-sb" data-slot="sidebar" type="button"><span class="lb">Side rail</span><span class="n"></span></button>
+                    <p class="fm-tx"></p><p class="fm-tx sh"></p><p class="fm-tx"></p>
+                  </aside>
+                </div>
+              </div>
+              <button class="fm-slot sk-r" data-slot="skin" type="button" tabindex="-1" aria-hidden="true"></button>
+              <button class="fm-slot sl-st" data-slot="sticky" type="button"><span class="lb">Sticky footer</span><span class="n"></span></button>
+              <div class="fm-ovsheet" aria-hidden="true"><span>Covers everything</span></div>
+            </div>
+          </div>
+
+          <div class="fm-pl-frame fm-pl-phone">
+            <div class="fm-notch"></div>
+            <div class="fm-page">
+              <div class="fm-feed">
+                <div class="fm-post"><span class="av"></span><i></i><u></u></div>
+                <button class="fm-slot sl-fd" data-slot="feed" type="button"><span class="lb">In the feed</span><span class="n"></span></button>
+                <div class="fm-post"><span class="av"></span><i></i><u></u></div>
+              </div>
+              <button class="fm-slot sl-ov" data-slot="overlay" type="button"><span class="lb">Full screen</span><span class="n"></span></button>
+              <button class="fm-slot sl-pst" data-slot="sticky" type="button" tabindex="-1" aria-hidden="true"></button>
+              <div class="fm-ovsheet" aria-hidden="true"><span>Covers everything</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="fm-pl-cap" id="fmPlCap" aria-live="polite"></div>
+        <ul class="fm-pl-list" id="fmPlList"></ul>
+      </section>
+
+      <div id="fmPanelCatalogue" hidden>
       <section class="fm-show" aria-label="Recently live">
         <div class="fm-eyebrow"><h2>Recently live</h2><span>Campaigns KULT ran on these units — pick one to jump to its format.</span></div>
         <div class="fm-wall" id="fmShowrow"></div>
@@ -497,6 +724,7 @@
         <p>Try another word, or clear the objective and family filters.</p>
         <div class="c-empty-actions"><button class="c-btn c-btn-secondary c-btn-sm" type="button" id="fmEmptyClear">Clear filters</button></div>
       </div>
+      </div><!-- /#fmPanelCatalogue -->
 
     </div>
   </div>
@@ -581,7 +809,7 @@
 <div class="c-toast-host" id="fmToasts"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
-<script src="../shared/formats-data.js?v=1"></script>
+<script src="../shared/formats-data.js?v=2"></script>
 <script src="../shared/format-previews.js?v=1"></script>
 <script>
 (function () {
@@ -615,7 +843,7 @@
   if (TOUCH) E('fmHint').innerHTML = '<i class="ph ph-hand-tap"></i>Tap any card to play its sample.';
 
   /* ── State ──────────────────────────────────────────────────────── */
-  var state = { q: '', funnel: '', family: [], size: [], device: [], sort: 'family', view: 'gallery' };
+  var state = { q: '', funnel: '', family: [], size: [], device: [], slot: '', sort: 'family', view: 'gallery', tab: 'places' };
   var FACETS = [
     { key: 'family', label: 'Family', of: function (f) { return [f.family]; }, order: window.FORMAT_FAMILIES },
     /* Only real W×H sizes are offered; "16:9 in-content" is a shape, not a slot. */
@@ -638,12 +866,16 @@
       if (state.family.length && state.family.indexOf(f.family) < 0) return false;
       if (state.size.length && !f.sizes.some(function (s) { return state.size.indexOf(s.replace(/\s+/g, ' ')) > -1; })) return false;
       if (state.device.length && !deviceKeys(f).some(function (d) { return state.device.indexOf(d) > -1; })) return false;
+      if (state.slot && f.placements.indexOf(state.slot) < 0) return false;
       if (!q) return true;
-      var hay = [f.name, f.family, f.objective, f.tagline, f.desc, f.bestFor, f.industries.join(' '), f.funnel.map(function (k) { return FUNNEL_LABEL[k]; }).join(' '), f.sizes.join(' ')].join(' ').toLowerCase();
+      var hay = [f.name, f.family, f.objective, f.tagline, f.desc, f.bestFor, f.industries.join(' '), f.funnel.map(function (k) { return FUNNEL_LABEL[k]; }).join(' '), f.sizes.join(' '), placeLabel(f.home)].join(' ').toLowerCase();
       return hay.indexOf(q) > -1;
     });
     var famOrder = window.FORMAT_FAMILIES;
     rows.sort(function (a, b) {
+      /* With a slot chosen, the units sold for that slot lead the list;
+         everything else that fits follows in the chosen order. */
+      if (state.slot) { var ha = a.home === state.slot ? 0 : 1, hb = b.home === state.slot ? 0 : 1; if (ha !== hb) return ha - hb; }
       if (state.sort === 'az') return a.name.localeCompare(b.name);
       if (state.sort === 'bench') { var ca = ctr(a), cb = ctr(b); if (ca == null && cb == null) return a.name.localeCompare(b.name); if (ca == null) return 1; if (cb == null) return -1; return cb - ca || a.name.localeCompare(b.name); }
       if (state.sort === 'cpm') { if (a.cpm == null && b.cpm == null) return a.name.localeCompare(b.name); if (a.cpm == null) return 1; if (b.cpm == null) return -1; return b.cpm - a.cpm || a.name.localeCompare(b.name); }
@@ -720,6 +952,8 @@
      nothing on their own once three facets can contribute. */
   function renderTray() {
     var chips = [];
+    if (state.slot) chips.push('<span class="c-chip c-chip-input">Placement: ' + esc(placeLabel(state.slot)) +
+      '<button class="c-chip-remove" type="button" data-slotclear="1" aria-label="Remove placement filter"><i class="ph ph-x"></i></button></span>');
     FACETS.forEach(function (fc) {
       state[fc.key].forEach(function (v) {
         chips.push('<span class="c-chip c-chip-input">' + esc(fc.label) + ': ' + esc(v) +
@@ -732,15 +966,17 @@
     E('fmClearAll').hidden = !chips.length;
   }
   E('fmTray').addEventListener('click', function (e) {
-    var r = e.target.closest('.c-chip-remove');
-    if (r) { var arr = state[r.dataset.facet]; arr.splice(arr.indexOf(r.dataset.v), 1); renderPills(); render(); }
+    var r = e.target.closest('.c-chip-remove'); if (!r) return;
+    if (r.dataset.slotclear) { setSlot(''); return; }
+    var arr = state[r.dataset.facet]; arr.splice(arr.indexOf(r.dataset.v), 1); renderPills(); render();
   });
   E('fmClearAll').addEventListener('click', function () {
     FACETS.forEach(function (fc) { state[fc.key] = []; });
+    state.slot = ''; syncSlotUI();
     renderPills(); render();
   });
   function clearAll() {
-    state.q = ''; state.funnel = ''; state.family = []; state.size = []; state.device = [];
+    state.q = ''; state.funnel = ''; state.family = []; state.size = []; state.device = []; state.slot = ''; syncSlotUI();
     E('fmSearch').value = ''; E('fmSearchClear').hidden = true;
     renderChips(); renderPills(); render();
   }
@@ -770,6 +1006,7 @@
       '<div class="fm-stagewrap"><div class="fp-stage" data-stage></div>' +
         '<span class="fm-live"><i></i>Live sample</span>' +
         '<span class="fm-touchhint"><i class="ph ph-play"></i>Tap to play</span>' +
+        (state.slot && f.home === state.slot ? '<span class="fm-native"><i class="ph ph-push-pin"></i>Built for this slot</span>' : '') +
         '<div class="fm-ctl">' +
           '<button type="button" class="fm-cmp' + (inCmp ? ' is-on' : '') + '" data-cmp="' + f.id + '" aria-label="' + (inCmp ? 'Remove from compare' : 'Add to compare') + '" title="' + (inCmp ? 'Remove from compare' : 'Add to compare') + '"><i class="ph ' + (inCmp ? 'ph-check' : 'ph-plus') + '"></i></button>' +
         '</div>' +
@@ -855,8 +1092,10 @@
     });
     E('fmRows').innerHTML = current.map(rowHtml).join('');
     var demos = current.filter(function (f) { return f.demo; }).length;
-    E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats · ' + demos + ' with a live demo on kult.my' +
+    E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats' +
+      (state.slot ? ' · ' + esc(placeShort(state.slot).toLowerCase()) : '') + ' · ' + demos + ' with a live demo on kult.my' +
       (state.sort === 'bench' ? ' · sorted by published CTR benchmark, highest first' : state.sort === 'cpm' ? ' · sorted by rate on file' : '');
+    E('fmTabCount').textContent = current.length;
     E('fmEmpty').hidden = current.length > 0;
     E('fmGalleryView').style.display = current.length ? '' : 'none';
     E('fmTableView').style.display = current.length ? '' : 'none';
@@ -1325,6 +1564,115 @@
     setTimeout(function () { el.classList.add('is-exiting'); setTimeout(function () { el.remove(); }, 260); }, 3200);
   }
 
+  /* ── Placements: the page as a picture ───────────────────────────
+     The catalogue's first question is where, not what: a planner arrives
+     with a slot already bought. Every slot in the drawing carries its own
+     count at rest, so the picture reads without a pointer; hovering adds
+     the demo, and a click hands the slot to the catalogue. ── */
+  var PLACES = window.FORMAT_PLACEMENTS || [], placeBy = {};
+  PLACES.forEach(function (pl, i) { placeBy[pl.key] = pl; pl.i = i; });
+  function placeLabel(k) { return placeBy[k] ? placeBy[k].label : k; }
+  function placeShort(k) { return placeBy[k] ? placeBy[k].short : k; }
+  function fitCount(k) { return F.filter(function (f) { return f.placements.indexOf(k) > -1; }).length; }
+  function homeCount(k) { return F.filter(function (f) { return f.home === k; }).length; }
+
+  var plStage = E('fmPlStage'), plCap = E('fmPlCap'), plList = E('fmPlList'), plHot = null;
+
+  function capHtml(k) {
+    if (!k) {
+      return '<i class="ph ph-cursor-click"></i><div class="tx">' +
+        '<b>' + PLACES.length + ' slots, ' + F.length + ' units.</b>' +
+        '<span>Point at a slot to watch it behave on the page. Pick one and the catalogue shows only what fits it.</span></div>';
+    }
+    var pl = placeBy[k], n = fitCount(k), h = homeCount(k);
+    return '<i class="ph ' + pl.icon + '"></i><div class="tx">' +
+      '<b>' + esc(pl.label) + ' · ' + esc(pl.short) + '</b><span>' + esc(pl.desc) + '</span></div>' +
+      '<div class="fig"><b>' + n + '</b><span>of ' + F.length + ' fit · ' + h + ' built for it</span></div>' +
+      '<button class="c-btn c-btn-primary c-btn-sm" type="button" data-go="' + pl.key + '">Show the ' + n + '</button>';
+  }
+  function setHot(k) {
+    if (k === plHot) return;
+    plHot = k || null;
+    if (plHot) plStage.setAttribute('data-hot', plHot); else plStage.removeAttribute('data-hot');
+    plStage.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
+    plList.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
+    plCap.innerHTML = capHtml(plHot);
+  }
+  function renderPlacements() {
+    plStage.querySelectorAll('[data-slot]').forEach(function (b) {
+      var k = b.dataset.slot, pl = placeBy[k]; if (!pl) return;
+      var n = fitCount(k), nEl = b.querySelector('.n');
+      if (nEl) nEl.textContent = n;
+      b.style.setProperty('--j', pl.i);
+      /* The number means nothing on its own, so the accessible name says
+         what it counts. */
+      var lbl = pl.label + ', ' + pl.short + '. ' + n + ' of ' + F.length + ' units fit here.';
+      b.setAttribute('aria-label', lbl); b.title = pl.label + ' · ' + n + ' units';
+    });
+    plList.innerHTML = PLACES.map(function (pl) {
+      return '<li><button class="fm-pl-item" type="button" data-slot="' + pl.key + '" ' +
+        'aria-label="' + esc(pl.label + ', ' + pl.short + '. ' + fitCount(pl.key) + ' units fit here.') + '">' +
+        '<i class="ph ' + pl.icon + '"></i><span class="t"><b>' + esc(pl.label) + '</b><em>' + esc(pl.short) + '</em></span>' +
+        '<span class="c">' + fitCount(pl.key) + '</span></button></li>';
+    }).join('');
+    plCap.innerHTML = capHtml(null);
+  }
+  plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null); });
+  plStage.addEventListener('mouseleave', function () { setHot(null); });
+  plList.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-slot]'); if (b && !TOUCH) setHot(b.dataset.slot); });
+  plList.addEventListener('mouseleave', function () { setHot(null); });
+  /* Focus plays the same demo as hover, so a keyboard reaches all of it. */
+  plStage.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
+  plList.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot); });
+  function slotClick(e) { var b = e.target.closest('[data-slot]'); if (b) setSlot(b.dataset.slot); }
+  plStage.addEventListener('click', slotClick);
+  plList.addEventListener('click', slotClick);
+  plCap.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) setSlot(b.dataset.go); });
+
+  /* ── Tabs ────────────────────────────────────────────────────────
+     paintTab says which panel is on show; setTab adds what happens when
+     it goes on show, so the first paint can pick a panel without running
+     the work that belongs to arriving at one. ── */
+  function paintTab(tab) {
+    state.tab = tab;
+    document.querySelectorAll('.fm-tabs [data-tab]').forEach(function (b) {
+      var on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
+    });
+    E('fmPanelPlaces').hidden = tab !== 'places';
+    E('fmPanelCatalogue').hidden = tab !== 'catalogue';
+    E('fmHint').innerHTML = tab === 'places'
+      ? '<i class="ph ph-cursor"></i>' + (TOUCH ? 'Tap a slot to see what fits it.' : 'Hover a slot to see it behave.')
+      : '<i class="ph ' + (TOUCH ? 'ph-hand-tap' : 'ph-cursor') + '"></i>' + (TOUCH ? 'Tap any card to play its sample.' : 'Hover any sample to play it.');
+  }
+  function setTab(tab, silent) {
+    paintTab(tab);
+    if (tab === 'catalogue') { hideRowpeek(true); layoutWall(); staggerIn(visibleItems()); }
+    else { setHot(null); hideRowpeek(true); }
+    if (!silent) try {
+      history.replaceState(null, '', tab === 'catalogue'
+        ? '?tab=catalogue' + (state.slot ? '&slot=' + state.slot : '') : location.pathname);
+    } catch (e) {}
+  }
+  document.querySelector('.fm-tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab);
+  });
+  function syncSlotUI() {
+    plList.querySelectorAll('[data-slot]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.slot === state.slot)); });
+  }
+  /* Choosing a slot is a navigation: it fills the filter and hands the
+     visitor to the catalogue, which is where the answer lives. */
+  function setSlot(k) {
+    state.slot = k === state.slot ? '' : k;
+    syncSlotUI();
+    if (state.slot) { setTab('catalogue', true); render({ flip: false }); }
+    else render();
+    try {
+      history.replaceState(null, '', state.tab === 'catalogue'
+        ? '?tab=catalogue' + (state.slot ? '&slot=' + state.slot : '') : location.pathname);
+    } catch (e) {}
+    if (state.slot) toast(placeLabel(state.slot) + ': ' + current.length + ' units fit this slot');
+  }
+
   /* ── Boot: bones first, then the real page cascades in. ─────────── */
   function skeleton() {
     var sk = function (w, h, extra) { return '<span class="fm-sk" style="width:' + w + 'px; height:' + (h || 12) + 'px;' + (extra || '') + '"></span>'; };
@@ -1349,15 +1697,23 @@
       return '<tr aria-hidden="true"><td class="sel"></td>' + cells + '</tr>';
     }).join('');
   }
+  /* The picture is not fetched and not staged: it is the first thing on
+     the page, so it is finished in the tick the document parses in. The
+     catalogue behind it keeps its bones. */
+  renderPlacements();
+  var wantSlot = /[?&]slot=([a-z]+)/.exec(location.search);
+  if (wantSlot && placeBy[wantSlot[1]]) state.slot = wantSlot[1];
+  var deepF = /[?&]f=([^&]+)/.exec(location.search);
+  paintTab((/[?&]tab=catalogue/.test(location.search) || state.slot || (deepF && byId[decodeURIComponent(deepF[1])])) ? 'catalogue' : 'places');
   skeleton();
   syncCompareUI();
   setTimeout(function () {
     if (document.hidden) E('fmContent').classList.remove('fm-arriving');
     renderShowcase();
-    renderChips(); renderPills(); render({ flip: false }); syncCompareUI();
+    renderChips(); renderPills(); syncSlotUI(); render({ flip: false }); syncCompareUI();
+    if (state.tab === 'catalogue') layoutWall();
     setTimeout(function () { E('fmContent').classList.remove('fm-arriving'); }, 1100);
-    var deep = /[?&]f=([^&]+)/.exec(location.search);
-    if (deep && byId[decodeURIComponent(deep[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deep[1])); }, 400);
+    if (deepF && byId[decodeURIComponent(deepF[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deepF[1])); }, 400);
   /* The data is inline, so this beat is staged rather than real: the same
      1000ms the roster and campaigns pages hold, long enough for the bones
      to register as a considered loading state instead of a flicker. */

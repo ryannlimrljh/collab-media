@@ -55,3 +55,65 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
 - Export PDF/Excel is a toast.
 - No thumbnails or video from kult.my are embedded; the "Live demo" links open the real page in a new tab.
 - Standard display unit specs need a rate-card check before they are quoted.
+
+## Changed after build
+
+- 2026-09-09: the page opens on a picture. The catalogue used to begin with
+  a strip of five brands and then forty-nine cards, so a planner met a list
+  before they met an idea. It now has two tabs, **Placements** and
+  **Catalogue**, and Placements is what a fresh visit lands on.
+
+  **The drawing.** A desktop browser and a phone side by side, drawn as
+  wireframe furniture — a masthead, a nav, a headline, body copy, a rail, a
+  feed — with every ad slot marked where it really sits. Eight of them:
+  masthead, page skin, side rail, in the article, in the player, sticky
+  footer, full screen, in the feed. Each is a button carrying its own count
+  at rest, so the picture reads with no pointer on it.
+
+  **Hovering demonstrates.** A slot does on hover what it does on a real
+  page: the masthead drops in from above, the skin unrolls from both
+  margins, the rail slides in from the right, the sticky bar rises from the
+  bottom edge of both frames, and full screen wipes a translucent sheet over
+  the desktop page and the phone at once. Everything else dims to 30%. A
+  caption under the drawing names the slot, says what it is, and gives two
+  numbers: how many of the 49 fit it, and how many were built for it.
+  Keyframes rather than transitions, so a backgrounded tab still plays them,
+  and every demo sits inside `prefers-reduced-motion: no-preference`.
+
+  **Clicking navigates.** A slot hands itself to the catalogue: the tab
+  switches, the list filters to what fits, the units sold for that slot lead
+  and wear a "Built for this slot" badge, the applied-filter tray gains a
+  removable "Placement: …" chip and the URL becomes `?tab=catalogue&slot=…`.
+
+  Slots are drawn in navy rather than a family colour. A slot is a position
+  on a page and a family is a kind of ad; the two must never read as the
+  same axis. Navy is Collab:Media's own element, which the favicon already
+  uses.
+
+  Under 760px the drawing steps aside and the eight slots become full-width
+  cards, the same rule the audiences universe follows. The cards are the
+  keyboard path and the legend at every width, so nothing here is
+  hover-only.
+
+- **Where the placement data comes from.** It is a curation, not a KULT
+  field. `shared/formats-data.js` derives it at load from the sizes each
+  unit is sold in — 970×250 and 728×90 are masthead, 300×250 and 800×600 are
+  in-article, 300×600 is the rail, 320×50 and 320×100 are the sticky bar,
+  320×480 is full screen — with the fifteen units whose size string does not
+  say where they go written out by hand. Two fields land on every record:
+  `placements`, every slot it can fill, and `home`, the one slot it was
+  designed for.
+
+  The counts are lopsided and that is the finding, not a fault: 33 units fit
+  an in-article box and 5 fit a sticky footer, because most of KULT's
+  interactive work is a creative treatment that drops into a standard slot.
+  So the picture is an entry point and a fact about the inventory, not a
+  narrow filter. The `home` field is what keeps it useful — it is what puts
+  Catfish Ad at the top of the sticky list rather than Calculator Ad.
+
+- **Search** matches a unit's home slot only. Typing "masthead" returns the
+  three units sold for the masthead, not the twenty-eight that merely fit
+  it; the picture is how you ask what fits.
+
+- **Cache.** `formats-data.js` moved to `?v=2` with the placement fields.
+  Bump the query whenever a shared file changes.

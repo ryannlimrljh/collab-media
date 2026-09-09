@@ -1607,3 +1607,70 @@ window.FORMATS = [
   "mobile": true
  }
 ];
+
+/* ── Placements ───────────────────────────────────────────────────────
+   Where on a page each unit actually sits. This is a curation, not a
+   KULT-published field: it is derived from the sizes each format is sold
+   in, with the handful of units whose size string does not say where they
+   go written out by hand below. Two things are recorded per format —
+   `placements`, every slot it can fill, and `home`, the one slot it was
+   designed for. A planner arrives with a slot already bought, so the
+   placement view asks that question first and the catalogue answers it. */
+window.FORMAT_PLACEMENTS = [
+  { key: 'masthead',  label: 'Masthead',      short: 'Across the top',      icon: 'ph-rows',
+    desc: 'The strip above the story. The first thing on the page, and the last thing a reader can miss.' },
+  { key: 'skin',      label: 'Page skin',     short: 'Wraps the page',      icon: 'ph-selection-background',
+    desc: 'Dresses the margins either side of the story, so the whole page reads as the ad.' },
+  { key: 'sidebar',   label: 'Side rail',     short: 'Beside the story',    icon: 'ph-sidebar',
+    desc: 'The tall unit down the right. In view for most of the scroll, which is why the games live here.' },
+  { key: 'inarticle', label: 'In the article', short: 'Inside the story',   icon: 'ph-article',
+    desc: 'The box set into the body copy, where the reader already has their eyes. The workhorse slot.' },
+  { key: 'invideo',   label: 'In the player',  short: 'Inside the video',   icon: 'ph-play-circle',
+    desc: 'Runs inside the video player, either in the break or in the content itself.' },
+  { key: 'sticky',    label: 'Sticky footer',  short: 'Pinned to the bottom', icon: 'ph-arrow-line-down',
+    desc: 'Clings to the bottom edge and stays there while the page moves underneath it.' },
+  { key: 'overlay',   label: 'Full screen',    short: 'Covers everything',  icon: 'ph-frame-corners',
+    desc: 'Takes the entire screen for a beat, then hands the page back. The loudest thing on the rate card.' },
+  { key: 'feed',      label: 'In the feed',    short: 'Between the posts',  icon: 'ph-device-mobile',
+    desc: 'Sits in a social feed and behaves like the posts either side of it.' }
+];
+(function () {
+  /* A size says where a unit goes, most of the time. */
+  var BY_SIZE = {
+    '970×250': 'masthead', '1920×250': 'masthead', '728×90': 'masthead', '970×90': 'masthead',
+    '300×250': 'inarticle', '800×600': 'inarticle',
+    '300×600': 'sidebar',
+    '320×480': 'overlay',
+    '320×50': 'sticky', '320×100': 'sticky'
+  };
+  /* And where it does not, it is written down. */
+  var EXTRA = {
+    'skinner': ['skin'], 'site-takeover': ['skin', 'masthead', 'inarticle'],
+    'in-read-video': ['invideo'], 'video-everywhere': ['invideo'],
+    'social-display-ad': ['feed'], '3d-social-video': ['feed'], 'tiktok-display-card': ['feed'],
+    'interstitial': ['overlay'], 'balloon-ad': ['overlay'], 'fullscreen-expandable': ['overlay', 'sticky'],
+    'catfish-ad': ['sticky'], 'mobile-banner': ['sticky'], 'mobile-leaderboard': ['sticky'],
+    'large-mobile-banner': ['sticky']
+  };
+  /* The slot each unit was built for. Anything not named here is an
+     in-article unit: the 300×250 is where the interactive work runs. */
+  var HOME = {
+    'masthead': 'masthead', 'leaderboard': 'masthead',
+    'skinner': 'skin', 'site-takeover': 'skin',
+    'half-page': 'sidebar', 'mini-game': 'sidebar', 'product-collector': 'sidebar', 'space-invader': 'sidebar',
+    'in-read-video': 'invideo', 'video-everywhere': 'invideo',
+    'catfish-ad': 'sticky', 'mobile-banner': 'sticky', 'mobile-leaderboard': 'sticky',
+    'large-mobile-banner': 'sticky', 'fullscreen-expandable': 'sticky',
+    'interstitial': 'overlay', 'balloon-ad': 'overlay',
+    'social-display-ad': 'feed', '3d-social-video': 'feed', 'tiktok-display-card': 'feed'
+  };
+  var order = window.FORMAT_PLACEMENTS.map(function (p) { return p.key; });
+  window.FORMATS.forEach(function (f) {
+    var set = {};
+    f.sizes.forEach(function (s) { var z = BY_SIZE[s.replace(/\s+/g, ' ').trim()]; if (z) set[z] = 1; });
+    (EXTRA[f.id] || []).forEach(function (z) { set[z] = 1; });
+    f.home = HOME[f.id] || 'inarticle';
+    set[f.home] = 1;
+    f.placements = order.filter(function (k) { return set[k]; });
+  });
+})();
