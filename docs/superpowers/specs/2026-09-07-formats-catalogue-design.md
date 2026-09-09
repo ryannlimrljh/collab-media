@@ -381,3 +381,12 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   Worth recording as a shape: one long IIFE holding every behaviour on the
   page means a name taken twice is not a redeclaration error, it is a
   feature going missing.
+
+- 2026-09-09, one pen for both devices. The phone in the samples wore a
+  .3em bezel in `--color-neutral-8` while the page beside it wore a 1px
+  hairline in `--color-neutral-3`, so a mobile sample read as a heavier
+  drawing than a desktop one in the same grid — and being em-based, the
+  bezel got heavier again at drawer size. Both are 1px neutral-3 now. The
+  shape says phone; the weight does not have to. The same mismatch in the
+  placement picture, where the phone frame was 2px against the browser's 1,
+  went with it. Shared assets to `?v=5`.

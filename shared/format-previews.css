@@ -44,7 +44,7 @@
 .fp-side .fp-ad{width:100%; aspect-ratio:6/5;}
 
 .fp-phone{position:absolute; left:50%; top:9%; transform:translateX(-50%); width:38%; height:110%;
-  background:#fff; border:.3em solid var(--color-neutral-8); border-bottom:0; border-radius:1.6em 1.6em 0 0; overflow:hidden;}
+  background:#fff; border:1px solid var(--color-neutral-3); border-bottom:0; border-radius:1.6em 1.6em 0 0; overflow:hidden;}
 .fp-phone .fp-bar{height:1.4em; justify-content:center; border-bottom:0;}
 .fp-phone .fp-bar i{width:2.4em; height:.4em; border-radius:.2em;}
 .fp-phone .fp-lines{position:absolute; top:2em; left:.6em; right:.6em;}
