@@ -76,7 +76,7 @@
   .fm-pl-stage{display:flex; gap:var(--spacing-20); align-items:flex-end; perspective:1600px;}
   .fm-pl-frame{position:relative; border-radius:var(--radius-lg); overflow:hidden;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); box-shadow:var(--shadow-1);
-    transition:transform var(--duration-slow) var(--ease-settle), box-shadow var(--duration-base) var(--ease-standard);}
+    transition:transform var(--duration-reveal) var(--ease-reveal), box-shadow var(--duration-base) var(--ease-standard);}
   /* The angle tracks the pointer live, so the frame under it drops the
      transform transition; the ease is for the journey back to flat. */
   .fm-pl-frame.is-tilting{transition:box-shadow var(--duration-base) var(--ease-standard); box-shadow:var(--shadow-3);}
@@ -129,9 +129,9 @@
   .fm-slot .in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:2px; border:1px var(--slot-style) var(--slot-line); background:var(--slot-bg); box-shadow:var(--slot-shadow);
     border-radius:inherit; text-align:center; color:var(--slot-ink);
-    transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard),
-      color var(--duration-fast) var(--ease-standard),
-      opacity var(--duration-base) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);}
+    transition:background-color var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard),
+      opacity var(--duration-slow) var(--ease-standard), box-shadow var(--duration-base) var(--ease-standard);}
   .fm-slot .lb{font-size:11px; font-weight:800; line-height:1.15; padding:0 4px;}
   .fm-slot .n{font-size:10px; font-weight:700; color:var(--slot-ink2);}
   .fm-slot .in > i{font-size:16px; opacity:.7;}
@@ -150,7 +150,7 @@
      the gutters push in and the column between them gives way. That is
      the skin's demo — it needs no reveal of its own. */
   .fm-slot.sk-l,.fm-slot.sk-r{flex:0 0 42px; border-radius:0;
-    transition:flex-basis var(--duration-base) var(--ease-settle);}
+    transition:flex-basis var(--duration-reveal) var(--ease-reveal);}
   .fm-pl-stage[data-hot="skin"] .fm-slot.sk-l,
   .fm-pl-stage[data-hot="skin"] .fm-slot.sk-r{flex-basis:124px;}
   .fm-slot.sk-l .in,.fm-slot.sk-r .in{border-top:0; border-bottom:0;}
@@ -179,9 +179,11 @@
   .fm-pl-stage[data-hot] .fm-slot .in{opacity:.3;}
   .fm-pl-stage[data-hot] .fm-slot.is-hot .in{opacity:1;}
 
-  /* The demo: each slot behaves the way it behaves on a real page.
-     Keyframes rather than transitions, so a backgrounded tab still runs
-     them when it comes back. */
+  /* The demo: each slot behaves the way it behaves on a real page. These
+     take the DLS's reveal pair — 550ms on --ease-reveal — because a slot
+     is demonstrating a placement, not acknowledging a click, and wants
+     time to be read. Keyframes rather than transitions, so a backgrounded
+     tab still runs them when it comes back. */
   @media (prefers-reduced-motion:no-preference){
     /* These animate `scale` and `translate` rather than `transform`, which
        leaves `transform` free for anything a slot may want to compose on
@@ -191,14 +193,14 @@
     @keyframes fm-slot-rise{from{translate:0 110%;} to{translate:0 0;}}
     @keyframes fm-slot-wipe{from{opacity:0; scale:.94;} to{opacity:1; scale:1;}}
     @keyframes fm-slot-inr{from{translate:45% 0; opacity:0;} to{translate:0 0; opacity:1;}}
-    .fm-pl-stage[data-hot="masthead"] .fm-slot.sl-mh .in{animation:fm-slot-drop 380ms var(--ease-settle) both;}
-    .fm-pl-stage[data-hot="sidebar"] .fm-slot.sl-sb .in{animation:fm-slot-inr 380ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="masthead"] .fm-slot.sl-mh .in{animation:fm-slot-drop var(--duration-reveal) var(--ease-reveal) both;}
+    .fm-pl-stage[data-hot="sidebar"] .fm-slot.sl-sb .in{animation:fm-slot-inr var(--duration-reveal) var(--ease-reveal) both;}
     .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-st .in,
-    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-pst .in{animation:fm-slot-rise 400ms var(--ease-settle) both;}
-    .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{animation:fm-slot-wipe 340ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="sticky"] .fm-slot.sl-pst .in{animation:fm-slot-rise var(--duration-reveal) var(--ease-reveal) both;}
+    .fm-pl-stage[data-hot="overlay"] .fm-ovsheet{animation:fm-slot-wipe var(--duration-reveal) var(--ease-reveal) both;}
     .fm-pl-stage[data-hot="inarticle"] .fm-slot.sl-ia .in,
     .fm-pl-stage[data-hot="invideo"] .fm-slot.sl-iv .in,
-    .fm-pl-stage[data-hot="feed"] .fm-slot.sl-fd .in{animation:fm-slot-pop 340ms var(--ease-settle) both;}
+    .fm-pl-stage[data-hot="feed"] .fm-slot.sl-fd .in{animation:fm-slot-pop var(--duration-reveal) var(--ease-reveal) both;}
     /* On arrival the slots land one after another, so the picture builds
        itself rather than appearing finished. */
     .fm-arriving .fm-slot .in{animation:fm-slot-pop 400ms var(--ease-settle) both; animation-delay:calc(240ms + var(--j, 0) * 70ms);}

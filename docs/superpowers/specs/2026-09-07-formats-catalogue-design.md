@@ -274,3 +274,16 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   before the rail has taken its width back; without it the picture opened
   12px short. Measured at a 760px viewport: desk 482 with a 24px gap to the
   fold, and all ten slots still reachable flat and tilted.
+
+- 2026-09-09, the demos slow down. They ran at 340–400ms on `--ease-settle`,
+  which is the speed of an acknowledgement; a slot is demonstrating a
+  placement and wants time to be read. They now take the DLS's own reveal
+  pair, `--duration-reveal` at 550ms on `--ease-reveal`, which the tokens
+  file describes as the beat for entrance reveals more deliberate than
+  `--duration-slow`. The skin's push takes it too, being the heaviest move
+  in the picture, and so does a frame settling back to flat after the tilt.
+
+  The fill and the dim stay quicker — 220ms for background, border and
+  colour, 360ms for the dim — because a colour change is the answer to the
+  pointer rather than a performance, and matching it to the demos would
+  make hovering feel like the page was thinking.
