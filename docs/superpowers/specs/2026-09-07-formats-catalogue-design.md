@@ -390,3 +390,26 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   shape says phone; the weight does not have to. The same mismatch in the
   placement picture, where the phone frame was 2px against the browser's 1,
   went with it. Shared assets to `?v=5`.
+
+- 2026-09-09, the samples come alive. The card wash tried in the previous
+  pass was the wrong object — it coloured the box around the sample. The
+  colour belongs to the sample's own creative.
+
+  Flat is now the resting state rather than the whole answer. A sample
+  sitting still keeps the two flat fills, so a grid of forty stays quiet.
+  The moment one plays, every creative surface in it turns from flat into
+  a gradient running from the family's own colour to its neighbour on the
+  wheel: navy into purple, orange into amber, salmon into orange, green
+  into navy, amber into green, purple into salmon. Adjacent pairs, so the
+  six read as one family of light and no two families share a ramp.
+
+  Three ramps, matched to what they fill. Panels — the hero, the masthead,
+  the interstitial, the expandable, the balloon's full state — take a pale
+  ramp from `--fp-tint-strong` into 30% of the neighbour. Solids — the
+  product shape, the balloon, the page skin — take the full one, brand to
+  neighbour. Video surfaces keep their dark and take 42% of the neighbour
+  into `--color-neutral-9`.
+
+  The CTA is deliberately left flat. It is the one place in a sample
+  carrying white text, and a ramp under three-pixel type is a legibility
+  problem rather than a flourish. Shared assets to `?v=6`.

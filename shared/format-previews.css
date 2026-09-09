@@ -17,15 +17,16 @@
   background:var(--color-neutral-2); font-size:10px; line-height:1.2;
   font-family:var(--font-primary); color:var(--color-neutral-9);
   user-select:none; pointer-events:none; contain:layout paint;
-  --fp-brand:var(--color-navy); --fp-tint:var(--color-water-bg); --fp-tint-strong:var(--color-water-bg-strong);}
-.fp-stage[data-family="Gamification"]{--fp-brand:var(--color-orange); --fp-tint:var(--color-fire-bg); --fp-tint-strong:var(--color-fire-bg-strong);}
-.fp-stage[data-family="Video"]{--fp-brand:var(--color-salmon-pink); --fp-tint:var(--color-wood-bg); --fp-tint-strong:var(--color-wood-bg-strong);}
-.fp-stage[data-family="Social"]{--fp-brand:var(--color-green); --fp-tint:var(--color-earth-bg); --fp-tint-strong:var(--color-earth-bg-strong);}
-.fp-stage[data-family="High impact"]{--fp-brand:var(--color-amber); --fp-tint:var(--color-gold-bg); --fp-tint-strong:var(--color-gold-bg-strong);}
+  --fp-brand:var(--color-navy); --fp-tint:var(--color-water-bg); --fp-tint-strong:var(--color-water-bg-strong);
+  --fp-brand2:var(--color-purple);}
+.fp-stage[data-family="Gamification"]{--fp-brand:var(--color-orange); --fp-tint:var(--color-fire-bg); --fp-tint-strong:var(--color-fire-bg-strong); --fp-brand2:var(--color-amber);}
+.fp-stage[data-family="Video"]{--fp-brand:var(--color-salmon-pink); --fp-tint:var(--color-wood-bg); --fp-tint-strong:var(--color-wood-bg-strong); --fp-brand2:var(--color-orange);}
+.fp-stage[data-family="Social"]{--fp-brand:var(--color-green); --fp-tint:var(--color-earth-bg); --fp-tint-strong:var(--color-earth-bg-strong); --fp-brand2:var(--color-navy);}
+.fp-stage[data-family="High impact"]{--fp-brand:var(--color-amber); --fp-tint:var(--color-gold-bg); --fp-tint-strong:var(--color-gold-bg-strong); --fp-brand2:var(--color-green);}
 /* Display takes the DLS secondary accent: the five elements are spoken
    for, and a neutral sample read as muted beside the coloured ones. Its
    tints are the same 8% / 16% mix the elemental -bg pairs use. */
-.fp-stage[data-family="Display"]{--fp-brand:var(--color-purple); --fp-tint:color-mix(in srgb, var(--color-purple) 8%, #fff); --fp-tint-strong:color-mix(in srgb, var(--color-purple) 16%, #fff);}
+.fp-stage[data-family="Display"]{--fp-brand:var(--color-purple); --fp-tint:color-mix(in srgb, var(--color-purple) 8%, #fff); --fp-tint-strong:color-mix(in srgb, var(--color-purple) 16%, #fff); --fp-brand2:var(--color-salmon-pink);}
 .fp-stage *{box-sizing:border-box;}
 .fp-stage i,.fp-stage b,.fp-stage em,.fp-stage strong{font-style:normal;}
 
@@ -52,11 +53,14 @@
 
 /* ── Ad anatomy ──────────────────────────────────────────────────────
    Two surfaces, two fills, and no third answer. A creative panel is a
-   flat --fp-tint-strong; a video surface is a flat neutral-8. Gradients
-   are left only where one is drawing a thing rather than colouring it:
-   the close cross, the wheel's segments, the sheen sweeping past. The
-   samples used to mix flat and graded panels, which read as two design
-   systems in one grid.                                                  */
+   flat --fp-tint-strong; a video surface is a flat neutral-8. That is
+   how forty of these sit still together without any one of them
+   shouting, and it is what a sample looks like at rest.
+
+   The moment a sample plays, every one of those surfaces takes a
+   gradient — see "Coming alive" at the foot of this file. Flat is the
+   resting state, not the whole answer: the page stays quiet and the
+   thing under the pointer is the only thing with colour in it.        */
 .fp-ad{position:relative; background:#fff; border:1px solid var(--color-neutral-3); border-radius:.6em;
   overflow:hidden; box-shadow:var(--shadow-1); font-size:1em; color:var(--color-neutral-9);}
 .fp-hero{position:absolute; inset:0; background:var(--fp-tint-strong);}
@@ -526,3 +530,37 @@
   .fp-stage *{animation-duration:.01ms !important; animation-delay:0s !important; animation-iteration-count:1 !important;
     transition-duration:.01ms !important; transition-delay:0s !important;}
 }
+
+
+/* ── Coming alive ────────────────────────────────────────────────────
+   A sample at rest is flat, so a grid of forty is quiet. A sample that
+   is playing takes colour: every creative surface in it turns from its
+   flat fill into a gradient, running from the family's own colour to
+   its neighbour on the wheel — navy into purple, orange into amber,
+   salmon into orange, green into navy, amber into green, purple into
+   salmon. Every pair is adjacent, so the six read as one family of
+   light rather than six unrelated stains, and no two families share a
+   ramp.
+
+   Panels take the pale ramp and solids take the full one. The CTA is
+   deliberately left flat: it is the one place in a sample carrying
+   white text, and a ramp under three-pixel type is a legibility
+   problem rather than a flourish.                                     */
+.fp-stage{--fp-ramp-soft:linear-gradient(140deg, var(--fp-tint-strong) 0%, color-mix(in srgb, var(--fp-brand2) 30%, #fff) 100%);
+  --fp-ramp-bold:linear-gradient(145deg, var(--fp-brand) 0%, var(--fp-brand2) 100%);
+  --fp-ramp-dark:linear-gradient(150deg, var(--color-neutral-8) 0%, color-mix(in srgb, var(--fp-brand2) 42%, var(--color-neutral-9)) 100%);}
+
+/* Panels — the creative behind the words. */
+.is-live .fp-hero,
+.is-live .fp-mast,
+.is-live .fp-inter,
+.is-live .fp-expand,
+.is-live .fp-balloon-full{background:var(--fp-ramp-soft);}
+/* Solids — the product shape, the balloon, the page skin. */
+.is-live .fp-prod,
+.is-live .fp-balloon,
+.is-live .fp-skin{background:var(--fp-ramp-bold);}
+/* Video surfaces keep their dark, and take the family's colour into it. */
+.is-live .fp-vid,
+.is-live .fp-vidbig,
+.is-live .fp-ttvid{background:var(--fp-ramp-dark);}
