@@ -50,10 +50,16 @@
 .fp-phone .fp-lines{position:absolute; top:2em; left:.6em; right:.6em;}
 .fp-phone .fp-ad{position:absolute; left:.4em; right:.4em; top:2.4em; bottom:.6em; border-radius:.5em;}
 
-/* ── Ad anatomy ──────────────────────────────────────────────────── */
+/* ── Ad anatomy ──────────────────────────────────────────────────────
+   Two surfaces, two fills, and no third answer. A creative panel is a
+   flat --fp-tint-strong; a video surface is a flat neutral-8. Gradients
+   are left only where one is drawing a thing rather than colouring it:
+   the close cross, the wheel's segments, the sheen sweeping past. The
+   samples used to mix flat and graded panels, which read as two design
+   systems in one grid.                                                  */
 .fp-ad{position:relative; background:#fff; border:1px solid var(--color-neutral-3); border-radius:.6em;
   overflow:hidden; box-shadow:var(--shadow-1); font-size:1em; color:var(--color-neutral-9);}
-.fp-hero{position:absolute; inset:0; background:linear-gradient(135deg, var(--fp-tint), var(--fp-tint-strong));}
+.fp-hero{position:absolute; inset:0; background:var(--fp-tint-strong);}
 .fp-prod{position:absolute; width:34%; aspect-ratio:1; left:33%; top:18%;
   border-radius:24% 24% 42% 42%; background:var(--fp-brand); opacity:.88;}
 .fp-cta{position:absolute; height:1.3em; padding:0 .7em; border-radius:.65em; background:var(--fp-brand);
@@ -63,7 +69,7 @@
 .fp-logo{position:absolute; width:1.4em; height:1.4em; border-radius:.4em; background:var(--fp-brand);}
 .fp-play{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:0; height:0;
   border-top:.5em solid transparent; border-bottom:.5em solid transparent; border-left:.8em solid #fff;}
-.fp-vidbig{position:absolute; inset:0; background:linear-gradient(160deg, var(--color-neutral-7), var(--fp-brand));}
+.fp-vidbig{position:absolute; inset:0; background:var(--color-neutral-8);}
 .fp-prog{position:absolute; left:0; bottom:0; height:.2em; width:0; background:#fff;}
 .fp-q{position:absolute; top:.6em; left:.6em; right:.6em; font-weight:800; font-size:.7em;}
 .fp-x{position:absolute; top:.3em; right:.4em; width:.6em; height:.6em; opacity:.5;
@@ -147,19 +153,19 @@
 .fp-catfish{top:auto; bottom:0; left:0; right:0; height:30%; border-radius:.8em .8em 0 0; border-left:0; border-right:0; border-bottom:0;
   transform:translateY(105%); display:flex; align-items:center; gap:.5em; padding:.5em; background:#fff;}
 .is-live .fp-catfish{animation:fp-wave .6s var(--ease-flow) .35s forwards;}
-.fp-vid{position:relative; width:40%; height:100%; background:linear-gradient(135deg, var(--fp-brand), var(--color-neutral-8)); border-radius:.4em; flex:none;}
+.fp-vid{position:relative; width:40%; height:100%; background:var(--color-neutral-8); border-radius:.4em; flex:none;}
 .fp-catfish .fp-copy{position:static; flex:1;} .fp-catfish .fp-cta{position:static;}
 
 /* ── Skinner / Site takeover ─────────────────────────────────────── */
 .fp-skin{position:absolute; top:0; bottom:0; width:0; z-index:1; overflow:hidden;
-  background:linear-gradient(180deg, var(--fp-brand), var(--fp-tint-strong));}
+  background:var(--fp-brand);}
 .fp-skin.l{left:0;} .fp-skin.r{right:0;}
 .is-live .fp-skin{animation:fp-skin .7s var(--ease-flow) .2s forwards;}
 .is-live .fp-skinner .fp-cols{animation:fp-skincols .7s var(--ease-flow) .2s forwards;}
 @keyframes fp-skin{to{width:24%}}
 @keyframes fp-skincols{to{margin-left:24%; margin-right:24%}}
 .fp-skin .fp-logo{left:50%; top:1.2em; translate:-50% 0;} .fp-skin .fp-cta{left:50%; top:1.6em; translate:-50% 0;}
-.fp-mast{position:relative; height:0; margin:0 .8em; background:linear-gradient(90deg, var(--fp-tint), var(--fp-tint-strong)); border-radius:.4em; overflow:hidden;}
+.fp-mast{position:relative; height:0; margin:0 .8em; background:var(--fp-tint-strong); border-radius:.4em; overflow:hidden;}
 .is-live .fp-mast{animation:fp-mast .5s var(--ease-flow) .7s forwards;}
 @keyframes fp-mast{to{height:3em; margin-top:.6em}}
 .fp-mast .fp-logo{left:.6em; top:.8em;} .fp-mast .fp-copy{left:2.8em; top:.9em; width:40%;} .fp-mast .fp-cta{right:.6em; top:.85em;}
@@ -170,7 +176,7 @@
 .is-live .fp-takeover .fp-side .fp-ad{animation:fp-pop .4s var(--ease-settle) 1.2s forwards;}
 
 /* ── Interstitial (phone, full overlay) ──────────────────────────── */
-.fp-inter{position:absolute; inset:0; z-index:2; background:linear-gradient(160deg, var(--fp-tint), var(--fp-tint-strong));
+.fp-inter{position:absolute; inset:0; z-index:2; background:var(--fp-tint-strong);
   opacity:0; transform:scale(.92);}
 .is-live .fp-inter{animation:fp-rise .45s var(--ease-flow) .3s forwards;}
 .fp-inter .fp-logo{left:.8em; top:1em;} .fp-inter .fp-prod{left:30%; top:24%; width:40%;}
@@ -179,7 +185,7 @@
 .fp-inter em{position:absolute; right:.6em; top:1em; font-size:.5em; color:var(--color-neutral-5);}
 
 /* ── Fullscreen expandable (phone, teaser grows) ─────────────────── */
-.fp-expand{top:2.2em; bottom:auto; height:22%; background:var(--fp-tint); z-index:2; overflow:hidden;
+.fp-expand{top:2.2em; bottom:auto; height:22%; background:var(--fp-tint-strong); z-index:2; overflow:hidden;
 }
 .is-live .fp-expand{animation:fp-expand .6s var(--ease-flow) .35s forwards;}
 @keyframes fp-expand{to{top:0; height:100%; border-radius:0}}
@@ -197,7 +203,7 @@
 .is-live .fp-balloon{animation:fp-float 1.8s var(--ease-flare) forwards, fp-sway 1.2s ease-in-out 1.8s infinite alternate;}
 @keyframes fp-float{to{bottom:38%}}
 @keyframes fp-sway{from{transform:rotate(-6deg)} to{transform:rotate(6deg)}}
-.fp-balloon-full{position:absolute; inset:0; z-index:3; background:linear-gradient(160deg, var(--fp-tint), var(--fp-tint-strong)); opacity:0;}
+.fp-balloon-full{position:absolute; inset:0; z-index:3; background:var(--fp-tint-strong); opacity:0;}
 .is-live .fp-balloon-full{animation:fp-fadein .5s var(--ease-flow) 2.7s forwards;}
 .fp-balloon-full .fp-prod{left:12%; top:26%; width:22%;} .fp-balloon-full strong{position:absolute; left:40%; top:32%; font-size:1em; font-weight:900;} .fp-balloon-full .fp-cta{left:40%; top:52%;}
 
@@ -450,7 +456,7 @@
 
 /* ── TikTok display card (phone) ─────────────────────────────────── */
 .fp-tt{position:absolute; inset:0; background:var(--color-neutral-9);}
-.fp-ttvid{position:absolute; inset:0; background:linear-gradient(200deg, var(--fp-brand), var(--color-neutral-9) 72%);}
+.fp-ttvid{position:absolute; inset:0; background:var(--color-neutral-8);}
 .fp-ttside{position:absolute; right:.5em; bottom:32%; display:flex; flex-direction:column; gap:.6em;}
 .fp-ttside i{width:.8em; height:.8em; border-radius:50%; background:rgba(255,255,255,.7);}
 .fp-ttcard{position:absolute; left:.6em; right:2em; bottom:1em; background:#fff; border-radius:.6em; padding:.5em; display:flex; align-items:center; gap:.4em;

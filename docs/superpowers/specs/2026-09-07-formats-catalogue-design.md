@@ -337,3 +337,23 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   the keyboard path: a keyboard has no cursor, so focus anchors the card
   beside the slot, flipped where there is no room and set above a slot that
   spans the frame.
+
+- 2026-09-09, the samples get one fill rule, and hover zooms them.
+
+  Half the miniatures painted their creative as a flat colour and half as
+  a gradient, which read as two design systems sharing a grid. There are
+  two surfaces now and no third answer: a creative panel is a flat
+  `--fp-tint-strong` (the hero, the masthead, the interstitial, the
+  expandable, the balloon's full state) and a video surface is a flat
+  `--color-neutral-8` (the in-banner video, the big player, the TikTok
+  card). The page skin, which had been a brand-to-tint gradient, is a flat
+  `--fp-brand`. Gradients survive only where one is drawing a thing rather
+  than colouring it: the close cross, the wheel's segments, and the sheen
+  that sweeps past. Nine gradients came out; three stayed.
+
+  Going live used to wash the stage with `--fp-tint`, which said something
+  had happened without saying look here. It now scales the stage to 1.14,
+  which is what closes the 6% margin the faux page leaves either side, so
+  the sample grows to fill the frame and the wrap clips the overflow. The
+  ground behind it no longer changes colour at all. Reduced motion keeps
+  the sample at rest size.

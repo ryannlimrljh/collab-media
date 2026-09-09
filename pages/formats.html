@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
-<link rel="stylesheet" href="../shared/format-previews.css?v=3" />
+<link rel="stylesheet" href="../shared/format-previews.css?v=4" />
 <style>
   /* Page-local. Composes tokens only — no new colours, radii or spacing.
 
@@ -340,8 +340,13 @@
   /* Nothing covers the sample: it is the reason the card exists. While it
      plays, the stage takes the family's tint and the details come up in
      the body below, where the tagline and chips were. */
-  .fm-card .fp-stage{transition:background-color var(--duration-slow) var(--ease-flow);}
-  .fm-card.is-live .fp-stage{background:var(--fp-tint);}
+  /* Going live zooms the sample instead of washing the ground behind it.
+     Tinting the stage said "something happened"; scaling it says "look
+     here", and 1.14 is what closes the 6% margin the faux page leaves
+     either side, so the sample fills the frame. The wrap already clips. */
+  .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle); transform-origin:center;}
+  .fm-card.is-live .fp-stage{transform:scale(1.14);}
+  @media (prefers-reduced-motion:reduce){ .fm-card.is-live .fp-stage{transform:none;} }
   .fm-live{position:absolute; top:var(--spacing-16); right:var(--spacing-16); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
     opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
