@@ -320,3 +320,18 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   No CTR figure. A benchmark belongs to a unit, not to a position on a
   page, and averaging them per slot would imply a claim the data does not
   support.
+
+- 2026-09-09, and the card rides the pointer. Anchored to the middle of a
+  slot it could sit a long way from where the visitor was looking: the side
+  rail is 270px tall and the page skin runs the whole height of the frame.
+  It now sits 18px off the cursor and follows it, flipping to the other
+  side or the other corner rather than leaving the window. The pointer is
+  read once per painted frame, in the same loop that drives the frame tilt,
+  rather than once per move event.
+
+  Following the cursor means it does overlap the slot it describes, which
+  is what a cursor tooltip does and is not a problem while it takes no
+  pointer events. The earlier rule against covering the slot still governs
+  the keyboard path: a keyboard has no cursor, so focus anchors the card
+  beside the slot, flipped where there is no room and set above a slot that
+  spans the frame.

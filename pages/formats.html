@@ -1652,9 +1652,24 @@
       '<p class="leads">' + leads + '</p>' +
       '<p class="cta"><i class="ph ph-arrow-down"></i>Click to filter the catalogue</p>';
   }
-  /* Beside the slot where there is room, flipped to the other side where
-     there is not, and clamped so it never leaves the window. */
-  function placeCard(el) {
+  /* The card rides the pointer. A slot can be 270px tall and the whole
+     height of the frame, so anchoring to its middle put the card a long
+     way from where the visitor was looking; it now sits just off the
+     cursor and flips side or corner rather than leaving the window. */
+  var cardMode = null, cardEl = null, cardX = 0, cardY = 0;
+  function placeCardAt(x, y) {
+    var w = plCard.offsetWidth, h = plCard.offsetHeight, off = 18, pad = 12;
+    var left = x + off;
+    if (left + w > window.innerWidth - pad) left = x - off - w;
+    var top = y + off;
+    if (top + h > window.innerHeight - pad) top = y - off - h;
+    plCard.style.left = Math.round(Math.max(pad, Math.min(left, window.innerWidth - w - pad))) + 'px';
+    plCard.style.top = Math.round(Math.max(pad, Math.min(top, window.innerHeight - h - pad))) + 'px';
+  }
+  /* A keyboard has no cursor, so focus anchors the card to the slot
+     itself: beside it where there is room, flipped where there is not,
+     and above a slot that spans the frame so it never covers it. */
+  function placeCardBy(el) {
     var r = el.getBoundingClientRect(), w = plCard.offsetWidth, h = plCard.offsetHeight, gap = 14, pad = 12;
     var fitsRight = r.right + gap + w <= window.innerWidth - pad;
     var fitsLeft = r.left - gap - w >= pad;
@@ -1663,9 +1678,6 @@
       left = fitsRight ? r.right + gap : r.left - gap - w;
       top = r.top + r.height / 2 - h / 2;
     } else {
-      /* A slot that spans the frame leaves no room either side, so the
-         card stands clear above it instead of covering the thing it is
-         describing — below, when there is no room above. */
       left = Math.min(Math.max(pad, r.left), window.innerWidth - w - pad);
       top = r.top - gap - h;
       if (top < pad) top = r.bottom + gap;
@@ -1674,20 +1686,30 @@
     plCard.style.left = Math.round(left) + 'px';
     plCard.style.top = Math.round(top) + 'px';
   }
-  function showCard(k, el) {
-    if (TOUCH || !k || !el) { plCard.classList.remove('is-on'); plCard.setAttribute('aria-hidden', 'true'); return; }
+  function positionCard() {
+    if (!plCard.classList.contains('is-on')) return;
+    if (cardMode === 'pointer') placeCardAt(cardX, cardY);
+    else if (cardEl) placeCardBy(cardEl);
+  }
+  function showCard(k, anchor) {
+    if (TOUCH || !k || !anchor) { plCard.classList.remove('is-on'); plCard.setAttribute('aria-hidden', 'true'); cardMode = null; cardEl = null; return; }
+    if (anchor.nodeType) { cardMode = 'el'; cardEl = anchor; }
+    else { cardMode = 'pointer'; cardEl = null; cardX = anchor.x; cardY = anchor.y; }
     plCard.innerHTML = cardHtmlFor(k);
     plCard.setAttribute('aria-hidden', 'false');
-    placeCard(el);           /* measured with the content in, before it shows */
     plCard.classList.add('is-on');
+    positionCard();          /* measured with the content in and laid out */
   }
-  function setHot(k, el) {
-    if (k === plHot) { if (el) placeCard(el); return; }
+  function setHot(k, anchor) {
+    if (k === plHot) {
+      if (anchor && !anchor.nodeType) { cardMode = 'pointer'; cardX = anchor.x; cardY = anchor.y; positionCard(); }
+      return;
+    }
     plHot = k || null;
     if (plHot) plStage.setAttribute('data-hot', plHot); else plStage.removeAttribute('data-hot');
     plStage.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
     plList.querySelectorAll('[data-slot]').forEach(function (b) { b.classList.toggle('is-hot', b.dataset.slot === plHot); });
-    showCard(plHot, el);
+    showCard(plHot, anchor);
   }
   function renderPlacements() {
     /* The number on a slot means nothing on its own, so the accessible
@@ -1712,9 +1734,9 @@
         '<span class="c">' + fitCount(pl.key) + '</span></button></li>';
     }).join('');
   }
-  plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null, b); });
+  plStage.addEventListener('mouseover', function (e) { if (TOUCH) return; var b = e.target.closest('[data-slot]'); setHot(b ? b.dataset.slot : null, b && { x: e.clientX, y: e.clientY }); });
   plStage.addEventListener('mouseleave', function () { setHot(null); });
-  plList.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-slot]'); if (b && !TOUCH) setHot(b.dataset.slot, b); });
+  plList.addEventListener('mouseover', function (e) { var b = e.target.closest('[data-slot]'); if (b && !TOUCH) setHot(b.dataset.slot, { x: e.clientX, y: e.clientY }); });
   plList.addEventListener('mouseleave', function () { setHot(null); });
   /* Focus plays the same demo as hover, so a keyboard reaches all of it. */
   plStage.addEventListener('focusin', function (e) { var b = e.target.closest('[data-slot]'); if (b) setHot(b.dataset.slot, b); });
@@ -1743,7 +1765,7 @@
 
   var FRAME_TILT = 7, tiltFrame = null, tiltFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
   function frameTiltFrame() {
-    frameRAF = 0; if (!tiltFrame || !tiltFrameRect) return;
+    if (!tiltFrame || !tiltFrameRect) return;
     var px = Math.max(0, Math.min(1, (frameX - tiltFrameRect.left) / tiltFrameRect.width));
     var py = Math.max(0, Math.min(1, (frameY - tiltFrameRect.top) / tiltFrameRect.height));
     tiltFrame.style.transform = 'rotateX(' + (-(py - 0.5) * 2 * FRAME_TILT).toFixed(2) +
@@ -1764,10 +1786,21 @@
     if (!f) return;
     tiltFrame = f; tiltFrameRect = f.getBoundingClientRect(); f.classList.add('is-tilting');
   });
+  function stageFrame() {
+    frameRAF = 0;
+    frameTiltFrame();
+    if (cardMode === 'pointer') positionCard();
+  }
   plStage.addEventListener('pointermove', function (e) {
-    if (!tiltFrame) return;
+    if (TOUCH) return;
     frameX = e.clientX; frameY = e.clientY;
-    if (!frameRAF) frameRAF = requestAnimationFrame(frameTiltFrame);
+    if (cardMode === 'pointer') { cardX = e.clientX; cardY = e.clientY; }
+    if (!frameRAF) frameRAF = requestAnimationFrame(stageFrame);
+  });
+  plList.addEventListener('pointermove', function (e) {
+    if (TOUCH || cardMode !== 'pointer') return;
+    cardX = e.clientX; cardY = e.clientY;
+    if (!frameRAF) frameRAF = requestAnimationFrame(stageFrame);
   });
   plStage.addEventListener('pointerout', function (e) {
     if (tiltFrame && !tiltFrame.contains(e.relatedTarget)) untiltFrame();
