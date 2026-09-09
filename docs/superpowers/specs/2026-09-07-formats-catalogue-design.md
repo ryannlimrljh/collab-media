@@ -53,7 +53,7 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
 
 - Planner does not yet consume `?format=` / `?formats=`.
 - Export PDF/Excel is a toast.
-- No thumbnails or video from kult.my are embedded; the "Live demo" links open the real page in a new tab.
+- No thumbnails or video from kult.my are embedded. Nothing on the page links out to kult.my either; see the Live demo note below.
 - Standard display unit specs need a rate-card check before they are quoted.
 
 ## Changed after build
@@ -152,3 +152,15 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   animation does not run in a backgrounded tab, so the request silently did
   nothing and the click filtered the list and appeared to go nowhere. The
   scroll now checks a beat later whether anything moved, and jumps if not.
+
+- 2026-09-09, Live demo is gone. It had been switched off rather than
+  removed — an inert ghost button in the drawer footer, on the theory that
+  a visitor would wonder where it went. Nobody wondered. The button, its
+  disabled style, the "N with a live demo on kult.my" clause in the count
+  line and the two click guards that existed only to let a press reach the
+  link have all come out, which leaves the drawer footer as two live
+  actions: use it in a media plan, or add it to a comparison.
+
+  The `demo` field stays in `formats-data.js`. It is the kult.my page each
+  unit's specs were transcribed from, so it is provenance now rather than a
+  link, and it is what the `source: "kult"` flag is checked against.
