@@ -80,8 +80,12 @@
   /* The angle tracks the pointer live, so the frame under it drops the
      transform transition; the ease is for the journey back to flat. */
   .fm-pl-frame.is-tilting{transition:box-shadow var(--duration-base) var(--ease-standard); box-shadow:var(--shadow-3);}
-  .fm-pl-desk{flex:1 1 auto; min-width:0; height:568px;}
-  .fm-pl-phone{flex:0 0 clamp(146px, 19vw, 208px); height:452px; align-self:flex-end;
+  /* The picture is the first thing on the page, so it takes the first
+     screenful: the browser is sized by fitFold() to end at the fold, and
+     the phone never stands taller than the browser beside it. The literals
+     are the fallback for the tick before the first measurement. */
+  .fm-pl-desk{flex:1 1 auto; min-width:0; height:var(--fm-deskh, 568px);}
+  .fm-pl-phone{flex:0 0 clamp(146px, 19vw, 208px); height:var(--fm-phoneh, 452px); align-self:flex-end;
     border-radius:24px; border-width:2px;}
   .fm-brow{height:28px; display:flex; align-items:center; gap:5px; padding:0 10px;
     background:var(--color-neutral-2); border-bottom:1px solid var(--color-neutral-3);}
@@ -98,8 +102,9 @@
   .fm-navrow b{width:42px; height:9px; border-radius:3px; background:var(--color-neutral-4);}
   .fm-navrow s{width:28px; height:6px; border-radius:3px; background:var(--color-neutral-3);}
   .fm-cols{flex:1 1 auto; display:flex; gap:12px; padding-top:10px; min-height:0; overflow:hidden;}
-  .fm-art{flex:1 1 auto; min-width:0;}
-  .fm-rail{flex:0 0 100px;}
+  .fm-art{flex:1 1 auto; min-width:0; min-height:0; display:flex; flex-direction:column;}
+  .fm-rail{flex:0 0 100px; min-height:0; display:flex; flex-direction:column;}
+  .fm-art > .fm-hl,.fm-art > .fm-by,.fm-art > .fm-tx,.fm-rail > .fm-tx{flex:none;}
   .fm-hl{height:13px; width:72%; border-radius:4px; background:var(--color-neutral-4); margin-bottom:7px;}
   .fm-by{height:7px; width:36%; border-radius:3px; background:var(--color-neutral-3); margin-bottom:11px;}
   .fm-tx{height:6px; border-radius:3px; background:var(--color-neutral-2); margin:0 0 7px;}
@@ -152,9 +157,9 @@
   .fm-slot.sk-l .in{border-left:0;} .fm-slot.sk-r .in{border-right:0;}
   .fm-slot.sk-l .lb{writing-mode:vertical-rl; transform:rotate(180deg); padding:6px 0;}
   .fm-slot.sl-mh{height:54px; margin:10px 0 0; flex:none;}
-  .fm-slot.sl-ia{height:112px; margin:3px 0 12px; width:100%;}
-  .fm-slot.sl-iv{height:92px; margin:3px 0 12px; width:100%;}
-  .fm-slot.sl-sb{height:268px; margin-bottom:12px; width:100%;}
+  .fm-slot.sl-ia{flex:2 1 112px; min-height:92px; margin:3px 0 12px; width:100%;}
+  .fm-slot.sl-iv{flex:1.3 1 92px; min-height:76px; margin:3px 0 12px; width:100%;}
+  .fm-slot.sl-sb{flex:1 1 268px; min-height:190px; margin-bottom:12px; width:100%;}
   .fm-slot.sl-st{position:absolute; left:0; right:0; bottom:0; height:34px; border-radius:0; z-index:3;}
   .fm-slot.sl-st .in,.fm-slot.sl-pst .in{flex-direction:row; gap:6px; border-bottom:0;}
   .fm-slot.sl-fd{height:96px; flex:none;}
@@ -1530,12 +1535,24 @@
   /* The rail folds itself shortly after load and hands the content its
      width without a window resize, so the filter line's edge fades and any
      open facet panel are re-measured when the page comes back into view. */
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) fades(); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { fitFold(); fades(); } });
   var resizeTimer = null;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () { fades(); if (openFacet) placePanel(); }, 80);
+    resizeTimer = setTimeout(function () { fitFold(); fades(); if (openFacet) placePanel(); }, 80);
   });
+  /* #fmContent is the scrolling box, so its own height is the fold and
+     its width is what the rail takes when it folds itself shortly after
+     load — neither arrives as a window resize. Watching it covers both.
+     Its height is set by the layout rather than by the content, so sizing
+     the picture inside it cannot feed back into this. */
+  if (window.ResizeObserver) {
+    var foldTimer = null;
+    new ResizeObserver(function () {
+      clearTimeout(foldTimer);
+      foldTimer = setTimeout(function () { fitFold(); fades(); }, 60);
+    }).observe(E('fmContent'));
+  }
 
   /* ── Toast — the DS recipe, same as the other pages. ────────────── */
   function toast(title, msg) {
@@ -1603,6 +1620,22 @@
      catalogue cards' four, because a picture this size needs it to read.
      Nothing inside a frame is measured for this, so the slots keep their
      own hit boxes and the hover logic is untouched. */
+  /* The browser ends where the fold does. Its height is whatever is left
+     of the scroll container under the header and the lede, clamped so a
+     short laptop still gets a usable picture and a tall monitor does not
+     get an absurd one. The phone never stands taller than the browser
+     beside it, so on a short screen the two shrink together. */
+  var FOLD_GAP = 24, DESK_MIN = 430, DESK_MAX = 760, PHONE_MAX = 452;
+  function fitFold() {
+    var sc = plStage.closest('.c-shell-content'); if (!sc || !sc.clientHeight) return;
+    /* Measured in the container's own content space, so it is the same
+       answer whether or not the visitor has scrolled. */
+    var top = plStage.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    var h = Math.round(Math.max(DESK_MIN, Math.min(DESK_MAX, sc.clientHeight - top - FOLD_GAP)));
+    plStage.style.setProperty('--fm-deskh', h + 'px');
+    plStage.style.setProperty('--fm-phoneh', Math.min(PHONE_MAX, h) + 'px');
+  }
+
   var FRAME_TILT = 7, tiltFrame = null, tiltFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
   function frameTiltFrame() {
     frameRAF = 0; if (!tiltFrame || !tiltFrameRect) return;
@@ -1693,6 +1726,7 @@
      the page, so it is finished in the tick the document parses in. The
      catalogue behind it keeps its bones. */
   renderPlacements();
+  fitFold();
   var wantSlot = /[?&]slot=([a-z]+)/.exec(location.search);
   if (wantSlot && placeBy[wantSlot[1]]) state.slot = wantSlot[1];
   var deepF = /[?&]f=([^&]+)/.exec(location.search);
@@ -1702,6 +1736,9 @@
   setTimeout(function () {
     if (document.hidden) E('fmContent').classList.remove('fm-arriving');
     renderChips(); renderPills(); syncSlotUI(); render({ flip: false }); syncCompareUI();
+    /* The first measurement runs at parse time, before the rail has
+       folded and taken its width back; this is the corrected one. */
+    fitFold();
     if (landOnCatalogue) setTimeout(gotoCatalogue, 60);
     setTimeout(function () { E('fmContent').classList.remove('fm-arriving'); }, 1100);
     if (deepF && byId[decodeURIComponent(deepF[1])]) setTimeout(function () { openDrawer(decodeURIComponent(deepF[1])); }, 400);

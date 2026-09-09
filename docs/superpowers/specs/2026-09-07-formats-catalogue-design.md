@@ -248,3 +248,29 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
 
   Checked again after the geometry changed: all ten slots stay reachable
   at both tilt extremes and flat.
+
+- 2026-09-09, the browser takes the first fold. Its height was a literal,
+  which meant it ended wherever it happened to end. `fitFold()` now sizes
+  it to whatever is left of the scrolling box under the header and the
+  lede, less a 24px gap, clamped to 430–760 so a short laptop still gets a
+  usable picture and a tall monitor does not get an absurd one. The offset
+  is measured in the container's own content space, so the answer is the
+  same whether or not the visitor has scrolled. The phone is capped at the
+  browser's height, so on a short screen the two shrink together and on a
+  tall one the phone stays a phone.
+
+  The extra height goes into the ad slots rather than into a gap above the
+  sticky bar: the article and the rail are flex columns now and the
+  in-article box, the in-player and the side rail grow proportionally, with
+  minimums so they never collapse. A taller browser window really does mean
+  bigger units.
+
+  It re-fits on window resize and through a ResizeObserver on `#fmContent`,
+  which is the scrolling box itself — the rail folds shortly after load and
+  changes the width without a window resize, and the box's height is the
+  fold. Its height comes from the layout rather than from the content, so
+  sizing the picture inside it cannot feed back. One more `fitFold()` runs
+  after the boot beat, because the first measurement happens at parse time
+  before the rail has taken its width back; without it the picture opened
+  12px short. Measured at a 760px viewport: desk 482 with a 24px gap to the
+  fold, and all ten slots still reachable flat and tilted.
