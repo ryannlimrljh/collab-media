@@ -67,10 +67,19 @@
          a small canvas. */
       var J = { balls: [], W: W, H: H, top: top, bottom: bottom, padX: padX, time: 0, lens: 'all' };
       var scale = jar.scaleFor(J, list.length, list.reduce(function (t, s) { var r = unitR(s); return t + Math.PI * r * r; }, 0));
+      /* Every pour gets its own seed. The physics is deterministic, so
+         without one each disc left the same spot at the same moment and
+         the pile landed identically every visit — the same jar, poured
+         from the same jug. The seed only moves where a disc starts and
+         by how long it waits; which disc, and how big, are untouched,
+         and the lens-then-group order still decides who lands first. */
+      var seed = ':' + Math.random().toString(36).slice(2, 9);
+      J.seed = seed;
       J.balls = list.map(function (s, i) {
-        var u = unitR(s), r = u * scale, h = hash(s.id + ':pour');
+        var u = unitR(s), r = u * scale, h = hash(s.id + ':pour' + seed);
         return { id: s.id, seg: s, lens: s.lens, group: s.group, u: u, r: r, rt: r, dim: false, t: Math.pow(Math.min(1, s.size / MAX_SIZE), 0.9),
-          x: padX + r + 8 + h * (W - 2 * padX - 2 * r - 16), y: -r - 10 - i * 22, release: i * 0.02, inside: false, out: false };
+          x: padX + r + 8 + h * (W - 2 * padX - 2 * r - 16), y: -r - 10 - i * 22,
+          release: i * 0.02 + hash(s.id + ':when' + seed) * 0.015, inside: false, out: false };
       });
       J.scale = scale;
       if (lens && lens !== 'all') jar.setLens(J, lens, true);
@@ -128,7 +137,7 @@
         if (was && !is) { b.out = true; }
         else if (!was && is) {
           b.out = false; b.inside = false; b.release = J.time + (i % 7) * 0.05;
-          b.x = (J.padX || 0) + b.r + 8 + hash(b.id + J.time) * (J.W - 2 * (J.padX || 0) - 2 * b.r - 16); b.y = -b.r - 10; b.px = b.x; b.py = b.y;
+          b.x = (J.padX || 0) + b.r + 8 + hash(b.id + J.time + (J.seed || '')) * (J.W - 2 * (J.padX || 0) - 2 * b.r - 16); b.y = -b.r - 10; b.px = b.x; b.py = b.y;
         }
       });
       J.energy = 1;

@@ -630,3 +630,13 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   settled to a maxSpeed of 0.46: after `setLens` all 51 discs need
   resizing while `J.growing` still reads false — the old test called that
   settled, the new one does not.
+- 2026-09-09, no two pours alike. The physics is deterministic, so with
+  each disc leaving the same spot at the same moment the pile landed in
+  exactly the same arrangement on every visit — the same jar, poured from
+  the same jug. Each pour now takes its own seed, which moves only where
+  a disc starts across the width and by how long it waits. Sizes are
+  untouched, and the wait is kept under the 20ms that separates one disc
+  from the next so the lens-then-group order still decides who lands
+  first and like still settles near like. Across three pours no disc
+  landed within a pixel of where it had before, the median disc moving
+  some 300px, with the radii identical throughout.
