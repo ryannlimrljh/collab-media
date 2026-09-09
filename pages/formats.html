@@ -343,6 +343,10 @@
   .fm-tag-purple{background:color-mix(in srgb, var(--color-purple) 8%, #fff); color:var(--color-purple);}
   .fm-tag-purple .dot{background:var(--color-purple);}
   .c-tag{white-space:nowrap; flex:none;}
+  /* Live demo is switched off for now: present, so nobody wonders where
+     it went, but quiet and inert. The ghost recipe's disabled state. */
+  .fm-demo-off{background:transparent !important; color:var(--color-neutral-4) !important; border-color:transparent !important; cursor:not-allowed !important; box-shadow:none !important;}
+
   /* ── Table ── */
   .fm-tablewrap{overflow-x:auto; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1);}
   .fm-table{width:100%; border-collapse:collapse; font-size:var(--text-body2-size); min-width:900px;}
@@ -1082,8 +1086,9 @@
       P.mount(card.querySelector('[data-stage]'), byId[card.dataset.id]);
     });
     E('fmRows').innerHTML = current.map(rowHtml).join('');
+    var demos = current.filter(function (f) { return f.demo; }).length;
     E('fmCount').innerHTML = '<b>' + current.length + '</b> of ' + F.length + ' formats' +
-      (state.slot ? ' · ' + esc(placeShort(state.slot).toLowerCase()) : '') +
+      (state.slot ? ' · ' + esc(placeShort(state.slot).toLowerCase()) : '') + ' · ' + demos + ' with a live demo on kult.my' +
       (state.sort === 'bench' ? ' · sorted by published CTR benchmark, highest first' : state.sort === 'cpm' ? ' · sorted by rate on file' : '');
     E('fmEmpty').hidden = current.length > 0;
     E('fmGalleryView').style.display = current.length ? '' : 'none';
@@ -1139,6 +1144,7 @@
   grid.addEventListener('click', function (e) {
     var cmp = e.target.closest('[data-cmp]');
     if (cmp) { e.stopPropagation(); toggleCompare(cmp.dataset.cmp); return; }
+    if (e.target.closest('[data-demo]')) { e.stopPropagation(); return; }
     var open = e.target.closest('[data-open]');
     if (open) { e.stopPropagation(); openDrawer(open.dataset.open, false, open.closest('.fm-card')); return; }
     var card = e.target.closest('.fm-card'); if (!card) return;
@@ -1216,6 +1222,7 @@
   rows.addEventListener('mouseout', function (e) { var tr = e.target.closest('tr'); if (tr && !tr.contains(e.relatedTarget)) hideRowpeek(); });
   rows.addEventListener('click', function (e) {
     var cmp = e.target.closest('[data-cmp]'); if (cmp) { toggleCompare(cmp.dataset.cmp); return; }
+    if (e.target.closest('[data-demo]')) return;
     var tr = e.target.closest('tr'); if (tr) { hideRowpeek(true); openDrawer(tr.dataset.id, false, tr); }
   });
   E('fmTableView').querySelector('.fm-tablewrap').addEventListener('scroll', function () { hideRowpeek(true); });
@@ -1298,6 +1305,7 @@
     var inCmp = compare.indexOf(f.id) > -1;
     E('fmDrawerFoot').innerHTML =
       '<a class="c-btn c-btn-primary c-btn-md" href="planner.html?format=' + encodeURIComponent(f.id) + '"><i class="ph ph-compass-tool"></i> Use in a media plan</a>' +
+      (f.demo ? '<button class="c-btn c-btn-secondary c-btn-md fm-demo-off" type="button" disabled title="Live demos are switched off in this build"><i class="ph ph-arrow-square-out"></i> Live demo</button>' : '') +
       '<span class="spacer"></span>' +
       '<button class="c-btn c-btn-ghost c-btn-md" type="button" id="fmDrawerCmp"><i class="ph ' + (inCmp ? 'ph-check' : 'ph-plus') + '"></i> ' + (inCmp ? 'In compare' : 'Compare') + '</button>';
     drawerStage = E('fmDrawerStage');
