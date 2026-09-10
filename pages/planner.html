@@ -4009,7 +4009,6 @@
     renderAll();
     go(Math.min(st.step || 1, 4), true);
     toast('neutral', 'Plan reopened', 'Picked up where you left it. Everything is editable.');
-    document.body.dataset.resumed = '1';
     return true;
   }
 
@@ -4479,30 +4478,10 @@ function start() {
   show(0, 1);
 }
 
+/* Asked for, never volunteered: the tour only runs when someone picks
+   "Show me around" from the account menu. Nothing starts it on load. */
 var replay = document.getElementById('tourReplay');
 if (replay) replay.addEventListener('click', function () { setTimeout(start, 60); });
-
-/* New plan crafting only: a reopened or in-progress plan, a hand-off
-   or a deep link stays quiet, since that is someone already working.
-   Checked again at fire time, because hydration and the autosave URL
-   rewrite can land after this script first looks. The tour waits for
-   step 1 to finish folding open before it steps in front. */
-(function auto() {
-  function resuming() {
-    return document.body.dataset.resumed === '1' ||
-      /[?&](plan|brief|step)=/.test(window.location.search);
-  }
-  if (resuming()) return;
-  var s1 = document.getElementById('step1'), t0 = Date.now();
-  (function wait() {
-    if (resuming()) return;
-    if ((s1 && s1.classList.contains('is-settled')) || Date.now() - t0 > 6000) {
-      setTimeout(function () { if (!resuming()) start(); }, 900);
-      return;
-    }
-    setTimeout(wait, 250);
-  })();
-})();
 
 })();
 </script>
