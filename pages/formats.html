@@ -356,12 +356,6 @@
   .fm-card .fp-stage{transition:transform var(--duration-slow) var(--ease-settle); transform-origin:center;}
   .fm-card.is-live .fp-stage{transform:scale(1.10);}
   @media (prefers-reduced-motion:reduce){ .fm-card.is-live .fp-stage{transform:none;} }
-  .fm-live{position:absolute; top:var(--spacing-16); right:var(--spacing-16); display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px;
-    border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:11px; font-weight:800; color:var(--color-neutral-9);
-    opacity:0; transition:opacity var(--duration-fast) var(--ease-standard); box-shadow:var(--shadow-1); pointer-events:none;}
-  .fm-live i{width:6px; height:6px; border-radius:50%; background:var(--color-green); animation:fm-blink 1.1s ease-in-out infinite;}
-  .fm-card.is-live .fm-live{opacity:1;}
-  @keyframes fm-blink{50%{opacity:.25}}
   .fm-touchhint{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:none; align-items:center; gap:6px; height:28px; padding:0 12px;
     border-radius:var(--radius-pill); background:rgba(255,255,255,.94); font-size:12px; font-weight:800; box-shadow:var(--shadow-2); pointer-events:none;}
   @media (hover:none){ .fm-touchhint{display:inline-flex;} .fm-card.is-live .fm-touchhint{display:none;} }
@@ -1071,7 +1065,6 @@
     var inCmp = compare.indexOf(f.id) > -1;
     return '<article class="fm-card' + (inCmp ? ' is-compared' : '') + '" data-id="' + f.id + '" tabindex="0" role="button" aria-label="' + esc(f.name) + ', ' + esc(f.family) + '. Open details" style="--i:' + Math.min(i, 14) + '">' +
       '<div class="fm-stagewrap"><div class="fp-stage" data-stage></div>' +
-        '<span class="fm-live"><i></i>Live sample</span>' +
         '<span class="fm-touchhint"><i class="ph ph-play"></i>Tap to play</span>' +
         (state.slot && f.home === state.slot ? '<span class="fm-native"><i class="ph ph-push-pin"></i>Built for this slot</span>' : '') +
         '<div class="fm-ctl">' +
