@@ -465,3 +465,16 @@ Every stage is a faux desktop page or phone with the unit where it really sits. 
   being typed into lights its border and shows a caret for three blinks,
   so the sequence reads as someone filling it in rather than as text
   appearing. Shared assets to `?v=8` and `?v=2`.
+
+- 2026-09-10, the frames stop lurching. Seven degrees was chosen on the
+  reasoning that a picture this size needs more angle to register than a
+  card does. The opposite is true. A catalogue card is a thumbnail and can
+  lean; the placement picture is a thing you aim at, with eight slots in
+  it and some of them only a few pixels tall, and the same angle that
+  flatters a thumbnail slides a target out from under a still pointer.
+
+  Three degrees now, under the cards' four, with the perspective taken
+  from 1600 to 2400 so the far edge stops stretching as well. Measured on
+  the worst slot, the page skin: at seven degrees a corner of it travelled
+  26px between flat and full tilt, and at three it travels 7. All ten
+  stay reachable flat and tilted.

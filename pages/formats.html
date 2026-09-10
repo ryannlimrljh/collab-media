@@ -69,11 +69,17 @@
   .fm-pl-lede p{margin:0; color:var(--color-neutral-6); font-size:var(--text-body2-size); line-height:var(--text-body2-lh);}
 
   /* Each device tips on its own axis: the pointer belongs to whichever
-     frame it is over, and the other stays flat. The cards use four
-     degrees; a picture this size needs seven to read at all. The two are
-     different heights and stand on the same floor, the way a laptop and a
-     phone do on a desk. */
-  .fm-pl-stage{display:flex; gap:var(--spacing-40); align-items:flex-end; perspective:1600px;}
+     frame it is over, and the other stays flat. Three degrees, under the
+     catalogue cards' four. Seven was tried first, on the reasoning that a
+     picture this size needs more angle to register than a card does; the
+     opposite turned out to be true. A card is a thumbnail and can lean.
+     This is a thing you aim at — eight slots, some of them a few pixels
+     tall — and the same angle that flatters a thumbnail slides a target
+     out from under the pointer. The perspective is longer too, 2400
+     against 1600, which is what keeps the far edge from stretching. The
+     two frames are different heights and stand on the same floor, the way
+     a laptop and a phone do on a desk. */
+  .fm-pl-stage{display:flex; gap:var(--spacing-40); align-items:flex-end; perspective:2400px;}
   .fm-pl-frame{position:relative; border-radius:var(--radius-lg); overflow:hidden;
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); box-shadow:var(--shadow-1);
     transition:transform var(--duration-reveal) var(--ease-reveal), box-shadow var(--duration-base) var(--ease-standard);}
@@ -1770,7 +1776,10 @@
   /* hotFrame, not tiltFrame: the catalogue card's own tilt already owns
      a function of that name in this scope, and a var of the same name
      silently overwrote it — the cards stopped tilting and nothing threw. */
-  var FRAME_TILT = 7, hotFrame = null, hotFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
+  /* Three, not the seven this started at: the frames are something to
+     aim at rather than something to admire, and a big angle moves a
+     slot further under a still pointer than a card's lean ever could. */
+  var FRAME_TILT = 3, hotFrame = null, hotFrameRect = null, frameRAF = 0, frameX = 0, frameY = 0;
   function frameTiltFrame() {
     if (!hotFrame || !hotFrameRect) return;
     var px = Math.max(0, Math.min(1, (frameX - hotFrameRect.left) / hotFrameRect.width));
