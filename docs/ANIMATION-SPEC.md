@@ -464,7 +464,7 @@ and transition in over 220ms with a 160ms delay once the overlay has
 `is-shown`, so text never smears through the 3D swing. The veil fades on
 its own clock.
 
-The first-run tour's coach card uses the same grammar at smaller scale
+The tour's coach card uses the same grammar at smaller scale
 (`tw-swing-open` 0.6s / `tw-swing-close` 0.45s) and folds, on dismissal,
 into the account button that holds "Show me around", so the exit gesture
 points at the way back.
