@@ -740,8 +740,7 @@ plain digits, so records stay comparable.
 A sub-box inside a step is always the same object: `--color-neutral-1`
 on the off-white canvas, `1px solid --color-neutral-3`, `--radius-md`.
 That covers the Add context drawers, the targeting-basis cards, the
-step-3 channel blocks, the goal's measure group and the review's
-evidence tiles. No filled wells, no borderless groups, and nothing
+step-3 channel blocks and the review's evidence tiles. No filled wells, no borderless groups, and nothing
 left transparent so the canvas shows through a frame its siblings
 paint white. The DLS Stat card keeps its own `--radius-lg`; it is the
 system's component, not a page-local box.
@@ -760,13 +759,13 @@ advance widths untouched, so the two layers wrap identically however
 long the line (a real 700 weight is wider and would drift). Rebuilt on
 input, on open, and after either starter button.
 
-**The goal reads top down.** Users said the objective is the decision
-they care about and that KPI, target and unit were guesswork, so the
-section is no longer four equal fields. The objective stands alone
-(max 420px) under "What should this campaign do?", each option
-carrying a plain-words description in its dropdown row
-(`.p-dd-desc`). Below it, a Neutral-2 well holds the measure as one
-three-field sentence: what we count, how many, counted in. Picking an
+**The goal reads in two columns**, the same `.p-sect-cols` split as
+the ask above it — equal halves, dotted rule between. Left, under
+"The goal": the objective alone, asked as "What should this campaign
+do?", each option carrying a plain-words description in its dropdown
+row (`.p-dd-desc`). Right, under "How we will know it worked": the
+measure, with what we count spanning the half and how many / counted
+in sharing the row beneath (one per row under 900px). Picking an
 objective fills the KPI and unit from `GOAL_MEASURE` (the same map the
 AI fill uses) and shows a "Set from your objective" badge; picking a
 KPI sets its own unit from `KPI_UNIT`. The moment anyone sets a KPI or

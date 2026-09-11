@@ -237,19 +237,13 @@
   .p-grid3{display:grid; grid-template-columns:2fr 1fr 1fr; gap:var(--spacing-12);}
   /* The goal reads top down: the objective alone on its line, then the
      measure it implies as one three-field sentence in a quiet well. */
-  .p-goal{display:flex; flex-direction:column; gap:var(--spacing-16);}
-  .p-goal-obj{max-width:420px;}
-  /* Every sub-box inside a step wears one frame: Neutral-1 on the
-     off-white canvas, 1px Neutral-3, radius-md. Same as the Add
-     context drawer, the targeting cards, the channel blocks and the
-     review tiles — no filled wells, no unframed strays. */
-  .p-goal-measure{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-md); padding:var(--spacing-16);}
-  .p-goal-measure-head{display:flex; align-items:center; gap:var(--spacing-8);
-    margin-bottom:var(--spacing-12); flex-wrap:wrap;}
-  .p-goal-row{display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:var(--spacing-12);}
-  .p-goal-measure .p-note{margin-top:var(--spacing-12);}
-  @media (max-width:760px){ .p-goal-row{grid-template-columns:1fr;} }
+  /* The goal sits in the same two columns as the ask above it, split
+     by the same dotted rule: the objective on the left, the measure it
+     implies on the right. Inside that half, what we count takes the
+     full width and the number and its unit share the row below. */
+  .p-goal-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
+  .p-goal-row .p-goal-kpi{grid-column:1 / -1;}
+  @media (max-width:900px){ .p-goal-row{grid-template-columns:1fr;} }
   /* A dropdown row may carry a plain-words description under its label. */
   .c-dropdown-row-label .p-dd-desc{display:block; font-size:var(--text-caption-size);
     line-height:var(--text-caption-lh); font-weight:400; color:var(--color-neutral-5); margin-top:1px;}
@@ -1342,10 +1336,10 @@
                 </div>
               </div>
 
-              <div class="p-sect">
-                <span class="c-stat-label">The goal</span>
-                <div class="p-goal">
-                  <div class="c-field c-dropdown-field p-goal-obj" data-dd="b-obj"><label for="b-obj">What should this campaign do?</label>
+              <div class="p-sect-cols">
+                <div class="p-sect">
+                  <span class="c-stat-label">The goal</span>
+                  <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">What should this campaign do?</label>
                     <div class="input-wrap has-trailing-icon">
                       <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
                       <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
@@ -1353,31 +1347,31 @@
                     </div>
                     <span class="c-helper">The one choice that shapes everything after it: which formats lead, and how the budget splits.</span>
                   </div>
-                  <div class="p-goal-measure">
-                    <div class="p-goal-measure-head">
-                      <span class="c-stat-label" style="margin:0;">How we will know it worked</span>
-                      <span class="c-badge c-badge-neutral" id="kpiAuto" hidden>Set from your objective</span>
-                    </div>
-                    <div class="p-goal-row">
-                      <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">What we count</label>
-                        <div class="input-wrap has-trailing-icon">
-                          <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Pick an objective first" readonly />
-                          <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                          <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
-                        </div>
-                      </div>
-                      <div class="c-field"><label for="b-target">How many</label>
-                        <input id="b-target" type="text" inputmode="numeric" autocomplete="off" placeholder="0" /></div>
-                      <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Counted in</label>
-                        <div class="input-wrap has-trailing-icon">
-                          <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
-                          <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                          <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
-                        </div>
-                      </div>
-                    </div>
-                    <p class="p-note" id="goalEcho">Pick an objective and the rest follows.</p>
+                </div>
+                <div class="p-sect">
+                  <div class="p-sect-labelrow">
+                    <span class="c-stat-label">How we will know it worked</span>
+                    <span class="c-badge c-badge-neutral" id="kpiAuto" hidden>Set from your objective</span>
                   </div>
+                  <div class="p-goal-row">
+                    <div class="c-field c-dropdown-field p-goal-kpi" data-dd="b-kpi"><label for="b-kpi">What we count</label>
+                      <div class="input-wrap has-trailing-icon">
+                        <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Pick an objective first" readonly />
+                        <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                        <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                      </div>
+                    </div>
+                    <div class="c-field"><label for="b-target">How many</label>
+                      <input id="b-target" type="text" inputmode="numeric" autocomplete="off" placeholder="0" /></div>
+                    <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Counted in</label>
+                      <div class="input-wrap has-trailing-icon">
+                        <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
+                        <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                        <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="p-note" id="goalEcho">Pick an objective and the rest follows.</p>
                 </div>
               </div>
 
