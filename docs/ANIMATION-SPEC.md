@@ -675,7 +675,11 @@ Reduced motion removes the transition. The card is `role="dialog"`,
 non-modal, with `aria-labelledby` on its title.
 
 **In the review step** the same three reasonings stand as a ledger
-in a "Why this plan" block: one full-width band per step (brief,
+in a "Why this plan" block. Its header wears the AI signature: a
+radius-lg frame with the pastel sweep as a 14% wash and a 1px
+gradient rim (the badge's two layers, drifting on the 6s
+`c-prompt-bar-glow-move`, static under reduced motion) and a 28px
+Obsidian sparkle disc; the ledger beneath stays plain. The ledger is one full-width band per step (brief,
 audience, mix), dotted rules between them, each band a two-column
 grid. Left, up to 300px: title, one-line outcome, source badge (AI
 draft or You), the inputs as chips, the rule paragraph, the foot

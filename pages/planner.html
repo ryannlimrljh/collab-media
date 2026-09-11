@@ -550,6 +550,24 @@
      verdict on the left (title, outcome, source, inputs, rule) and the
      evidence on the right as a grid of tiles that fills the width. No
      boxes of unequal height; each band is as tall as its own content. */
+  /* The review's reasoning header wears the page's AI signature: the
+     pastel sweep as a faint wash under the text and a 1px gradient
+     rim, the same layers as the AI badges and the step-1 invite, plus
+     the sparkle mark. The ledger under it stays plain. */
+  .p-why-head{position:relative; z-index:0; display:flex; gap:var(--spacing-12); align-items:flex-start;
+    padding:var(--spacing-16); border-radius:var(--radius-lg); border:1px solid transparent; overflow:hidden;}
+  .p-why-head::before, .p-why-head::after{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background-image:linear-gradient(90deg,var(--color-fire-pastel) 0%,var(--color-wood-pastel) 20%,var(--color-earth-pastel) 40%,var(--color-water-pastel) 60%,var(--color-gold-pastel) 80%,var(--color-fire-pastel) 100%);
+    background-size:200% 100%; animation:c-prompt-bar-glow-move 6s linear infinite;}
+  .p-why-head::before{z-index:-1; opacity:.14;}
+  .p-why-head::after{z-index:1; padding:1px;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;}
+  .p-why-mark{flex:none; width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    background:var(--color-neutral-9); color:var(--color-neutral-1); font-size:14px; margin-top:1px;}
+  .p-why-head-text{flex:1; min-width:0;}
+  .p-why-head-text h4{font-size:var(--text-h5-size);}
+  @media (prefers-reduced-motion:reduce){ .p-why-head::before, .p-why-head::after{animation:none;} }
   .p-whyledger{margin-top:var(--spacing-16);}
   .p-whysec{display:grid; grid-template-columns:minmax(220px, 300px) 1fr; gap:var(--spacing-24);
     padding:var(--spacing-20) 0;}
@@ -1628,11 +1646,16 @@
             </div>
 
             <div class="p-block">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>Why this plan</h4>
-                <span class="p-picker-sub">The reasoning behind each step, side by side</span>
+              <div class="p-why-head">
+                <span class="p-why-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+                <div class="p-why-head-text">
+                  <div style="display:flex; justify-content:space-between; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap;">
+                    <h4 style="margin:0;">Why this plan</h4>
+                    <span class="p-picker-sub">Collab AI's reasoning behind each step, side by side</span>
+                  </div>
+                  <p style="margin:var(--spacing-4) 0 0;">What was read, the rule applied, and the evidence behind each pick. Where you overrode Collab AI, the same evidence is shown for your choice.</p>
+                </div>
               </div>
-              <p>What was read, the rule applied, and the evidence behind each pick. Where you overrode Collab AI, the same evidence is shown for your choice.</p>
               <div class="p-whyledger" id="summaryWhy"></div>
             </div>
 
