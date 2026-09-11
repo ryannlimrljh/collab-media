@@ -561,6 +561,24 @@
   .p-mixhead{display:flex; justify-content:space-between; align-items:baseline;
     gap:var(--spacing-12); margin:var(--spacing-8) 0 var(--spacing-4);}
   .p-mixhead .c-stat-label{margin:0;}
+  /* After an AI fill lands and the page settles on the footer, the
+     Next button beacons: three Obsidian rings breathe out of it (the
+     step indicator's own pulse recipe) and its arrow nods twice. Any
+     hover, focus or click ends it; so does seven seconds. */
+  @keyframes p-cta-beacon{
+    0%{box-shadow:0 0 0 0 rgba(8, 8, 8, .32);}
+    70%{box-shadow:0 0 0 12px rgba(8, 8, 8, 0);}
+    100%{box-shadow:0 0 0 0 rgba(8, 8, 8, 0);}
+  }
+  @keyframes p-cta-nod{
+    0%, 60%, 100%{transform:none;}
+    30%{transform:translateY(3px);}
+  }
+  .c-btn.is-beacon{animation:p-cta-beacon 1.4s var(--ease-standard) 3;}
+  .c-btn.is-beacon i{display:inline-block; animation:p-cta-nod 1.4s var(--ease-standard) 3;}
+  @media (prefers-reduced-motion:reduce){
+    .c-btn.is-beacon, .c-btn.is-beacon i{animation:none;}
+  }
   /* v2 funnel: one block per kept channel, holding its rows, its
      add-chips and the sites it runs on, so a choice up top visibly
      opens the things it governs. */
@@ -3501,7 +3519,27 @@
         scroller.scrollTop - scroller.clientHeight + 24;
       scroller.scrollTo({top: Math.max(0, target),
         behavior: (reduced || document.hidden) ? 'auto' : 'smooth'});
+      setTimeout(beaconNext, (reduced || document.hidden) ? 0 : 650);
     }, 1000);
+  }
+  /* The beacon is a one-shot: it ends on the first sign of attention. */
+  var beaconTimer = null;
+  function beaconNext(){
+    var b = document.querySelector('#view1 [data-next="2"]');
+    if (!b || step !== 1) return;
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || document.hidden) return;
+    function stop(){
+      clearTimeout(beaconTimer);
+      b.classList.remove('is-beacon');
+      ['pointerenter', 'focus', 'click'].forEach(function(ev){ b.removeEventListener(ev, stop); });
+    }
+    b.classList.remove('is-beacon');
+    void b.offsetWidth;
+    b.classList.add('is-beacon');
+    ['pointerenter', 'focus', 'click'].forEach(function(ev){ b.addEventListener(ev, stop); });
+    clearTimeout(beaconTimer);
+    beaconTimer = setTimeout(stop, 7000);
   }
 
   /* Staggered AI fill — fields land one by one: text types in, numbers
