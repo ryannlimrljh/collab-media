@@ -493,6 +493,18 @@
   /* v2: the long list splits in two. The mix keeps full rows because
      they carry the dials; everything else waits on a shelf of chips,
      grouped by channel, eight per group before an overflow count. */
+  /* v2 channels: filter chips, all active by default, each counting
+     the formats it has in the mix. Selected reads as selected. */
+  .p-chanrow{gap:var(--spacing-8);}
+  .p-chanrow .c-chip-filter .count{margin-left:2px;}
+  .p-chanrow .c-chip-filter.is-active .count{color:rgba(255,255,255,.72);}
+  .p-chanrow .c-chip-filter .dot{width:6px; height:6px; border-radius:50%;
+    background:var(--color-green); margin-left:2px;}
+  .p-chan-note{margin:var(--spacing-8) 0 0;}
+  .p-chan-reset{display:inline-flex; align-items:center; height:32px; background:transparent;
+    border:0; padding:0 var(--spacing-4); font-family:inherit; font-size:var(--text-label2-size);
+    font-weight:var(--text-label2-weight); color:var(--color-neutral-9); text-decoration:underline;
+    text-underline-offset:3px; cursor:pointer;}
   .p-mixhead{display:flex; justify-content:space-between; align-items:baseline;
     gap:var(--spacing-12); margin:var(--spacing-8) 0 var(--spacing-4);}
   .p-mixhead .c-stat-label{margin:0;}
@@ -1204,7 +1216,8 @@
                   <span class="c-stat-label">Channels</span>
                   <span class="p-picker-sub" id="channelSummary">All channels</span>
                 </div>
-                <div class="p-choices" id="channelRow"></div>
+                <div class="c-chip-group p-chanrow" id="channelRow"></div>
+                <p class="p-note p-chan-note" id="channelNote">Every channel is in play until you switch one off. Its formats step out of the mix, and step back in when you switch it on again.</p>
               </div>
 
               <div class="p-sect">
@@ -1637,7 +1650,8 @@
   /* ═══ State ═══ */
   var step = 1, maxVisited = 1;
   var mode = 'personas', selected = [], filterState = {}, personaSource = null, mixSource = 'ai';
-  var chanOn = [];
+  var chanOn = CHANNELS.slice();   /* v2: all in play until switched off */
+  var chanMemory = {};             /* formats a switched-off channel had in the mix */
   var split = {}, splitTouched = false;
   var booked = false;
 
@@ -1654,7 +1668,8 @@
   function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
   function budget(){ return parseInt($('b-budget').value, 10) || 0; }
   function onFormats(){ return FORMATS.filter(function(f){ return f.on; }); }
-  function chanAllows(c){ return !chanOn.length || chanOn.indexOf(c) > -1; }
+  function chanAllows(c){ return chanOn.indexOf(c) > -1; }
+  function allChannels(){ return chanOn.length === CHANNELS.length; }
 
   function toast(tone, title, msg){
     var host = $('toastHost');
@@ -2640,26 +2655,62 @@
     var row = $('channelRow'); row.innerHTML = '';
     CHANNELS.forEach(function(c){
       var on = chanOn.indexOf(c) > -1;
-      var lab = document.createElement('label');
-      lab.className = 'c-choice';
-      lab.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + c + '" />' +
-        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-        '<span class="text"><span class="label">' + c + '</span></span>';
-      lab.querySelector('input').addEventListener('change', function(){
+      var inMix = FORMATS.filter(function(f){ return f.on && f.ch === c; }).length;
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'c-chip c-chip-filter' + (on ? ' is-active' : '');
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      chip.setAttribute('aria-label', c + (on ? ', in play, ' + inMix + ' in the mix' : ', switched off'));
+      chip.innerHTML = c + (on && inMix ? ' <span class="count">' + inMix + '</span>' : '');
+      chip.addEventListener('click', function(){
         mixSource = 'user';
         var i = chanOn.indexOf(c);
-        if (i > -1) chanOn.splice(i, 1); else chanOn.push(c);
-        FORMATS.forEach(function(f){ if (!chanAllows(f.ch)) f.on = false; });
+        if (i > -1){
+          if (chanOn.length === 1){
+            toast('neutral', null, 'Keep at least one channel in play.');
+            return;
+          }
+          /* Park this channel's formats so switching it back restores them. */
+          chanMemory[c] = FORMATS.filter(function(f){ return f.on && f.ch === c; }).map(function(f){ return f.id; });
+          chanOn.splice(i, 1);
+          FORMATS.forEach(function(f){ if (f.ch === c) f.on = false; });
+        } else {
+          chanOn.push(c);
+          var back = chanMemory[c] || [];
+          FORMATS.forEach(function(f){ if (f.ch === c && back.indexOf(f.id) > -1) f.on = true; });
+        }
         if (!onFormats().length){
           var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
           if (first) first.on = true;
         }
         resetSplit();
         renderAll();
+        markSaved();
       });
-      row.appendChild(lab);
+      row.appendChild(chip);
     });
-    $('channelSummary').textContent = chanOn.length ? chanOn.join(', ') : 'All channels';
+    if (!allChannels()){
+      var reset = document.createElement('button');
+      reset.type = 'button';
+      reset.className = 'p-chan-reset';
+      reset.textContent = 'All channels';
+      reset.addEventListener('click', function(){
+        mixSource = 'user';
+        CHANNELS.forEach(function(c){
+          if (chanOn.indexOf(c) > -1) return;
+          chanOn.push(c);
+          var back = chanMemory[c] || [];
+          FORMATS.forEach(function(f){ if (f.ch === c && back.indexOf(f.id) > -1) f.on = true; });
+        });
+        resetSplit();
+        renderAll();
+        markSaved();
+      });
+      row.appendChild(reset);
+    }
+    $('channelSummary').textContent = allChannels()
+      ? 'All ' + CHANNELS.length + ' in play'
+      : chanOn.length + ' of ' + CHANNELS.length + ' in play';
   }
 
   /* Formats and split are one thing: ticking a format gives it a live
@@ -3006,7 +3057,7 @@
     var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
       : selected.map(function(id){ return byId(id).name; }).join(', ') || '–';
     var refOn = FILTERS.filter(function(f){ return filterState[f.id]; }).length;
-    var chTxt = chanOn.length ? chanOn.join(', ') : 'All channels';
+    var chTxt = allChannels() ? 'All channels' : chanOn.join(', ');
     var fmts = onFormats();
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
@@ -3016,7 +3067,7 @@
       ['Languages', langTxt, 'Brief'],
       ['Audience', audTxt, personaSource === 'ai' ? 'AI draft' : 'You'],
       ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '–'],
-      ['Channels', chTxt, chanOn.length ? 'You' : 'AI draft'],
+      ['Channels', chTxt, allChannels() ? 'AI draft' : 'You'],
       ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', splitTouched ? 'You' : 'AI draft'],
       ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
     ];
@@ -4452,7 +4503,8 @@
     });
     $('f-intent').value = st.intent || '';
     $('f-ex').value = st.exclude || '';
-    chanOn = st.chanOn || [];
+    /* older records saved [] to mean "all channels" */
+    chanOn = (st.chanOn && st.chanOn.length) ? st.chanOn.slice() : CHANNELS.slice();
     FORMATS.forEach(function(f){ f.on = (st.formats || []).indexOf(f.id) > -1; });
     split = st.split || {};
     splitTouched = !!st.splitTouched;
