@@ -506,12 +506,12 @@ on a ghost button at opacity .14, rising to .26 on hover.
 When an AI fill finishes on step 1, `revealNextCta()` scrolls the
 footer into view (1000ms after the fill, smooth) and then, 650ms
 later, arms `beaconNext()`. The primary Next button gets `is-beacon`:
-three Obsidian rings breathe out of it over 1.4s each (the step
+six Obsidian rings breathe out of it over 1.4s each (8.4s in all) (the step
 indicator's own `p-ind-pulse` recipe: `box-shadow` from
 `0 0 0 0 rgba(8,8,8,.32)` to `0 0 0 12px` transparent) while its arrow
 icon nods down 3px at the 30% mark of each cycle. The beacon is a
 one-shot: the first `pointerenter`, `focus` or `click` on the button
-ends it, and so does a 7s timer. Reduced motion and hidden tabs skip
+ends it, and so does a 9s timer, set just past the last ring. Reduced motion and hidden tabs skip
 it entirely.
 
 ## 9b. v2 media mix: toggle choreography and the three shapes
