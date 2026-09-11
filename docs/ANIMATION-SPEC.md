@@ -759,13 +759,16 @@ advance widths untouched, so the two layers wrap identically however
 long the line (a real 700 weight is wider and would drift). Rebuilt on
 input, on open, and after either starter button.
 
-**The goal reads in two columns**, the same `.p-sect-cols` split as
-the ask above it — equal halves, dotted rule between. Left, under
-"The goal": the objective alone, asked as "What should this campaign
-do?", each option carrying a plain-words description in its dropdown
-row (`.p-dd-desc`). Right, under "How we will know it worked": the
-measure, with what we count spanning the half and how many / counted
-in sharing the row beneath (one per row under 900px). Picking an
+**The goal is one section in two columns.** It lands on the same
+grid as the ask above it (equal halves, spacing-32 apart) but carries
+**no dotted rule**: a vertical rule marks two independent groups, and
+the measure only exists because of the objective. So one section
+label, "The goal", spans both. Left: the objective, asked as "What
+should this campaign do?", each option carrying a plain-words
+description in its dropdown row (`.p-dd-desc`). Right, under a
+label-weight heading "How we will know it worked": the measure, with
+what we count spanning the half and how many / counted in sharing the
+row beneath. Under 900px the columns stack. Picking an
 objective fills the KPI and unit from `GOAL_MEASURE` (the same map the
 AI fill uses) and shows a "Set from your objective" badge; picking a
 KPI sets its own unit from `KPI_UNIT`. The moment anyone sets a KPI or
