@@ -691,8 +691,16 @@ The review also opens with a headline strip of five DLS stat cards
 reach against the target in green or red, Impressions with blended
 CPM and frequency, Audience with persona count and overlap), the plan
 table carries campaign, dates, refiner values, intent and exclusions
-and must-buys, and the budget table closes with a total row and a
-channel-share chip row. None of it moves.
+and must-buys, and the budget table closes with a total row and a budget-by-channel
+chart: one stacked horizontal bar on the DLS chart rules (series walk
+the department colours in channel order, OTT Fire, Social Wood, Web
+Earth, TV Water, Radio Gold; 20px tall with pill ends; hairline
+Neutral-1 dividers; the share printed inside any segment 9% or
+wider; hover darkens 15%), with a bottom-left legend of 10px round
+swatches in caption Neutral-5 giving share, spend and format count.
+The segments grow in from zero on first render (`--duration-slow`
+`--ease-flow`, 60ms stagger) and only re-render when the shares
+change. Nothing else on the review moves.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
