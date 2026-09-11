@@ -526,7 +526,8 @@
   .p-why .rule{margin:0; padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
     font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
   .p-why .rule b{font-weight:700;}
-  .p-why .rule .lead{display:block;}
+  .p-why .rule .lead{display:block; color:var(--color-neutral-9);}
+  .p-why .rulelist li{font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
   .p-why .rulelist{margin:var(--spacing-4) 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px;}
   .p-why .rulelist li{position:relative; padding-left:14px;}
   .p-why .rulelist li::before{content:''; position:absolute; left:0; top:7px; width:5px; height:5px;
@@ -3105,8 +3106,11 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       chips.map(function(c){ return '<span class="c-chip c-chip-input">' + esc(c) + '</span>'; }).join('') + '</div>';
   }
   function whyRule(lead, points){
-    return '<p class="rule"><b class="lead">' + lead + '</b>' +
-      (points && points.length ? '<ul class="rulelist">' + points.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') + '</p>';
+    /* A div, not a p: a list cannot live inside a paragraph, and the
+       browser would close the p early and drop the bullets out of the
+       rule's caption type. */
+    return '<div class="rule"><b class="lead">' + lead + '</b>' +
+      (points && points.length ? '<ul class="rulelist">' + points.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') + '</div>';
   }
   function whyRow(k, ev, r){
     return '<div class="row"><div class="k">' + esc(k) + (ev ? '<span class="ev">' + esc(ev) + '</span>' : '') + '</div>' +
