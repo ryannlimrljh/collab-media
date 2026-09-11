@@ -724,6 +724,17 @@ so a number reads the same wherever it appears and lines up with
 number rather than a display string. Tabular figures
 (`font-variant-numeric:tabular-nums`) keep the columns aligned.
 
+The two amount fields group as you type. `#b-budget` and `#b-target`
+are `type="text" inputmode="numeric"`, because a number input cannot
+hold a separator. Nothing reads `.value` directly: `numVal(el)` takes
+the digits, `setNum(el, n)` writes the grouped string, and
+`groupAsTyped(el)` regroups on every keystroke, counting the digits
+before the caret and putting it back after the same count. Every
+writer goes through `setNum` — the budget dial, the AI fill's
+count-up, the URL parameter, and hydration, which regroups a plan
+saved before this (plain digits) on the way in. The snapshot stores
+plain digits, so records stay comparable.
+
 ## 9e2. One frame for every sub-box
 
 A sub-box inside a step is always the same object: `--color-neutral-1`

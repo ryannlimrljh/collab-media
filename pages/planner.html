@@ -1334,7 +1334,7 @@
                           <div class="c-slider-track"><div class="c-slider-fill" id="budgetDialFill" style="width:0%;"></div></div>
                           <input class="c-slider-input" id="b-budget-dial" type="range" min="0" max="500000" step="5000" value="0" aria-label="Working media budget dial" />
                         </div></div>
-                        <input id="b-budget" type="number" step="1000" placeholder="0" />
+                        <input id="b-budget" type="text" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="Working media budget in ringgit" />
                       </div>
                       <span class="c-helper">Dial up to RM 500K, or type any amount.</span>
                     </div>
@@ -1367,7 +1367,7 @@
                         </div>
                       </div>
                       <div class="c-field"><label for="b-target">How many</label>
-                        <input id="b-target" type="number" placeholder="0" /></div>
+                        <input id="b-target" type="text" inputmode="numeric" autocomplete="off" placeholder="0" /></div>
                       <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Counted in</label>
                         <div class="input-wrap has-trailing-icon">
                           <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
@@ -2071,7 +2071,28 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   /* Rate-card CPMs carry sen where the card does (Video 3.26, Audio 6.61). */
   function cpmFmt(n){ return 'RM ' + (Number.isInteger(n) ? n.toLocaleString('en-MY') : n.toFixed(2)); }
   function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
-  function budget(){ return parseInt($('b-budget').value, 10) || 0; }
+  /* The amount fields carry separators, so they are text inputs: read
+     them through numVal (digits only) and write them through setNum,
+     never straight off .value. Typing regroups live and the caret is
+     kept where the digits left it. */
+  function numVal(el){
+    var d = String((el && el.value) || '').replace(/[^\d]/g, '');
+    return d ? parseInt(d, 10) : 0;
+  }
+  function setNum(el, n){
+    if (!el) return;
+    var d = String(n == null ? '' : n).replace(/[^\d]/g, '');
+    el.value = d ? parseInt(d, 10).toLocaleString('en-MY') : '';
+  }
+  function groupAsTyped(el){
+    var before = el.value.slice(0, el.selectionStart || 0).replace(/[^\d]/g, '').length;
+    setNum(el, el.value);
+    /* Put the caret back after the same count of digits. */
+    var i = 0, seen = 0;
+    while (i < el.value.length && seen < before){ if (/\d/.test(el.value[i])) seen++; i++; }
+    try { el.setSelectionRange(i, i); } catch (e) {}
+  }
+  function budget(){ return numVal($('b-budget')); }
   function onFormats(){ return FORMATS.filter(function(f){ return f.on; }); }
   function chanAllows(c){ return chanOn.indexOf(c) > -1; }
   function allChannels(){ return chanOn.length === CHANNELS.length; }
@@ -2105,7 +2126,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       fields: {
         name: $('b-name').value, brand: $('b-brand').value, prod: $('b-prod').value,
         start: $('b-start').value, end: $('b-end').value,
-        budget: $('b-budget').value, target: $('b-target').value
+        budget: String(budget() || ''), target: String(numVal($('b-target')) || '')
       },
       dd: {obj: ddVal('b-obj'), kpi: $('b-kpi').value, unit: $('b-unit').value},
       langOn: langOn.slice(),
@@ -2217,8 +2238,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       var s = $('b-start').value, e = $('b-end').value;
       add(!!(s && e && e > s), false, (s && e && e > s) ? 'Campaign dates are set' : 'Set campaign dates, with the end after the start', 'b-start');
       add(budget() > 0, false, budget() > 0 ? 'Budget is set' : 'Set a working media budget', 'b-budget');
-      add((parseInt($('b-target').value,10) || 0) > 0, false,
-        (parseInt($('b-target').value,10) || 0) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
+      add((numVal($('b-target'))) > 0, false,
+        (numVal($('b-target'))) > 0 ? 'KPI has a number' : 'Give the KPI a target number', 'b-target');
       add(langOn.length > 0, false, langOn.length ? 'At least one language picked' : 'Pick at least one language', 'langRow');
       var goalSet = !!ddVal('b-obj') && !!$('b-kpi').value;
       add(goalSet, true, goalSet ? 'Objective and KPI picked' : 'Pick an objective and KPI', 'b-obj');
@@ -2868,7 +2889,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     $('railFlight').textContent = days ? days + ' days' : '–';
     $('railDaily').textContent = days && budget() ? rm(budget() / days) + ' per day' : 'Set dates and budget';
     $('railBudget1').textContent = rm(budget());
-    var target = parseInt($('b-target').value, 10) || 0;
+    var target = numVal($('b-target'));
     $('railKpi').textContent = target && budget() ? rm(budget() / target) + ' per target ' +
       ($('b-unit').value === 'people' ? 'attendee' : ($('b-unit').value || 'unit').replace(/s$/,'')) : 'Set a KPI target';
     $('sumFlightLabel').textContent = flight;
@@ -2876,7 +2897,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     /* The goal, read back as one sentence, so the three measure fields
        add up to something a person can check. */
     var gObj = ddVal('b-obj'), gKpi = $('b-kpi').value, gUnit = $('b-unit').value;
-    var gTarget = parseInt($('b-target').value, 10) || 0;
+    var gTarget = numVal($('b-target'));
     var echo = $('goalEcho');
     if (echo){
       echo.textContent = !gObj
@@ -2895,6 +2916,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
 
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
     $(id).addEventListener('input', function(){ briefEdited(); renderAll(); });
+  });
+  ['b-budget','b-target'].forEach(function(id){
+    $(id).addEventListener('input', function(){ groupAsTyped(this); });
   });
   var lastBrief = null, briefAi = false;
   function briefEdited(){
@@ -2934,7 +2958,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     $('budgetDialFill').style.width = Math.min(100, v / max * 100) + '%';
   }
   $('b-budget-dial').addEventListener('input', function(){
-    $('b-budget').value = this.value;
+    setNum($('b-budget'), this.value);
     budgetFollowSplit();
     renderAll();
   });
@@ -3220,7 +3244,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var o = ddVal('b-obj'); if (o) chips.push(objWord(o));
     if (budget() > 0) chips.push(rm(budget()));
     var d = campaignDays(); if (d) chips.push(d + ' days');
-    var t = parseInt($('b-target').value, 10);
+    var t = numVal($('b-target'));
     if (t > 0) chips.push(fmt(t) + ' ' + ($('b-unit').value || 'people') + ($('b-kpi').value ? ' · ' + $('b-kpi').value : ''));
     if (langOn.length) chips.push(langOn.map(function(l){ return l === 'Bahasa Malaysia' ? 'BM' : l; }).join(', '));
     (extra || []).forEach(function(x){ chips.push(x); });
@@ -3303,7 +3327,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       var ev = fmt(p.users) + ' addressable' + (c.video ? ' · video ' + c.video + '%' : '') + (c.social ? ' · social ' + c.social + '%' : '');
       rows += whyRow(p.name, ev, esc(why.join(' ')));
     });
-    var t = parseInt($('b-target').value, 10) || 0;
+    var t = numVal($('b-target'));
     var together = 'Together ' + fmt(r.uniq) + ' unique reach after ' + r.pct + '% overlap across ' + Object.keys(cats).length + ' categor' + (Object.keys(cats).length > 1 ? 'ies' : 'y') +
       (t && $('b-kpi').value === 'Net reach' ? (r.uniq >= t ? ', which clears your ' + fmt(t) + ' target.' : ', short of your ' + fmt(t) + ' target; widen or add a segment.') : '.');
     return {title: own ? 'The audience' : 'Why these personas', sub: picked.length ? together : 'No personas picked.', own: own,
@@ -4182,7 +4206,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
     var days = campaignDays();
-    var target = parseInt($('b-target').value, 10) || 0;
+    var target = numVal($('b-target'));
     var refTxt = FILTERS.filter(function(f){ return filterState[f.id]; }).map(function(f){
       var o = f.opts.filter(function(x){ return x[0] === filterState[f.id]; })[0];
       return o ? o[1] : filterState[f.id];
@@ -4646,7 +4670,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
           k += 1;
           var eased = 1 - Math.pow(1 - k / ticks, 3);
           var v = Math.round(target * eased / 500) * 500;
-          st.el.value = v;
+          setNum(st.el, v);
           renderBrief();
           if (k >= ticks){
             clearInterval(count);
@@ -4678,11 +4702,11 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     if (got.start) steps.push({el: $('b-start'), apply: function(){ $('b-start').value = got.start; }});
     if (got.end) steps.push({el: $('b-end'), apply: function(){ $('b-end').value = got.end; }});
     if (got.budget) steps.push({el: $('b-budget'), countTo: got.budget,
-      apply: function(){ $('b-budget').value = got.budget; }});
+      apply: function(){ setNum($('b-budget'), got.budget); }});
     if (got.obj) steps.push({el: $('b-obj'), apply: function(){ setDD('b-obj', got.obj); }});
     if (got.kpi) steps.push({el: $('b-kpi'), apply: function(){ setDD('b-kpi', got.kpi); }});
     if (got.target) steps.push({el: $('b-target'), countTo: got.target,
-      apply: function(){ $('b-target').value = got.target; }});
+      apply: function(){ setNum($('b-target'), got.target); }});
     if (got.unit) steps.push({el: $('b-unit'), apply: function(){ setDD('b-unit', got.unit); }});
     if (got.langs && got.langs.length) steps.push({el: $('langRow'), apply: function(){
       langOn = got.langs.slice(); renderLangs();
@@ -4715,14 +4739,14 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       unitForTarget = pick[1];
       defaults.push(pick[0] + ' as the KPI');
     }
-    if (!got.target && !(parseInt($('b-target').value, 10) > 0)){
+    if (!got.target && !(numVal($('b-target')) > 0)){
       var bud = got.budget || budget();
       if (bud > 0){
         var tgt = unitForTarget === 'views' ? Math.round(bud * 3 / 1000) * 1000
           : unitForTarget === 'sign-ups' ? Math.round(bud / 75 / 100) * 100
           : Math.round(bud / 30 / 100) * 100;
         steps.push({el: $('b-target'), countTo: tgt,
-          apply: function(){ $('b-target').value = tgt; }});
+          apply: function(){ setNum($('b-target'), tgt); }});
         defaults.push(fmt(tgt) + ' as the target');
       }
     }
@@ -5068,7 +5092,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     /* Budget-only edit: an instruction about the budget with an amount. */
     if (amount && /budget/.test(q) && editVerb && !isQuestion){
       aiFillSequence([{el: $('b-budget'), countTo: amount,
-        apply: function(){ $('b-budget').value = amount; }}], function(){
+        apply: function(){ setNum($('b-budget'), amount); }}], function(){
         resetSplit(); renderAll(); markSaved();
         askShow('Budget set to ' + rm(amount) + ', and the split re-allocated to match.');
       });
@@ -5284,10 +5308,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       {el: $('b-prod'), typeText: b.prod, apply: function(){ $('b-prod').value = b.prod; }},
       {el: $('b-start'), apply: function(){ $('b-start').value = iso(s); }},
       {el: $('b-end'), apply: function(){ $('b-end').value = iso(e); }},
-      {el: $('b-budget'), countTo: b.budget, apply: function(){ $('b-budget').value = b.budget; }},
+      {el: $('b-budget'), countTo: b.budget, apply: function(){ setNum($('b-budget'), b.budget); }},
       {el: $('b-obj'), apply: function(){ setDD('b-obj', b.obj); }},
       {el: $('b-kpi'), apply: function(){ setDD('b-kpi', b.kpi); }},
-      {el: $('b-target'), countTo: b.target, apply: function(){ $('b-target').value = b.target; }},
+      {el: $('b-target'), countTo: b.target, apply: function(){ setNum($('b-target'), b.target); }},
       {el: $('b-unit'), apply: function(){ setDD('b-unit', b.unit); }},
       {el: $('langRow'), apply: function(){ langOn = b.langs.slice(); renderLangs(); }}
     ];
@@ -5717,7 +5741,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var got = false;
     if (param('name')){ $('b-name').value = param('name'); got = true; }
     if (param('brand')){ $('b-brand').value = param('brand'); got = true; }
-    if (param('budget')){ $('b-budget').value = parseInt(param('budget'), 10) || ''; got = true; }
+    if (param('budget')){ setNum($('b-budget'), parseInt(param('budget'), 10) || ''); got = true; }
     if (param('start')){ $('b-start').value = param('start'); got = true; }
     if (param('end')){ $('b-end').value = param('end'); got = true; }
     if (param('obj')){
@@ -5757,8 +5781,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     $('b-prod').value = st.fields.prod || '';
     $('b-start').value = st.fields.start || '';
     $('b-end').value = st.fields.end || '';
-    $('b-budget').value = st.fields.budget || '';
-    $('b-target').value = st.fields.target || '';
+    setNum($('b-budget'), st.fields.budget);
+    setNum($('b-target'), st.fields.target);
     var setDD = function(id, v){
       if (!v) return;
       var f = document.querySelector('[data-dd="' + id + '"]');
