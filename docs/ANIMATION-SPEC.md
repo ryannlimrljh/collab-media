@@ -652,8 +652,9 @@ placed, blended CPM, impressions, reach, frequency; for personas:
 unique reach, overlap, and whether it clears the target), then a
 scrolling body of three parts. *Read from your plan*: input chips
 (objective, budget, days, KPI target, languages, persona count).
-*Rule*: one paragraph stating the rule that turned those inputs into
-the pick. *Rows*: one per pick, name in 700 with an evidence line in
+*Rule*: a bold lead line and two to four short bullets (5px
+Neutral-4 dots) stating the rule that turned those inputs into the
+pick, never a paragraph. *Rows*: one per pick, name in 700 with an evidence line in
 Neutral-5 tabular figures (addressable size and video/social
 consumption from the audience catalogue; share of budget and
 impressions for a format), and the reason in plain sentences. The
@@ -687,20 +688,27 @@ line reads "Your pick" / "Your mix"; mass targeting and a
 hand-entered brief get a one-line "Your choice" rule and no tiles.
 
 The review also opens with a headline strip of five DLS stat cards
-(Budget and its unallocated state, Campaign days and dates, Forecast
-reach against the target in green or red, Impressions with blended
+in one fixed row of five (three, then two, on narrow screens), padded
+spacing-12 with an h4 value and a footer that may wrap but never
+truncates (Budget and its unallocated state, Campaign days and dates,
+Forecast reach against the target in green or red, Impressions with
 CPM and frequency, Audience with persona count and overlap), the plan
 table carries campaign, dates, refiner values, intent and exclusions
-and must-buys, and the budget table closes with a total row and a budget-by-channel
-chart: one stacked horizontal bar on the DLS chart rules (series walk
-the department colours in channel order, OTT Fire, Social Wood, Web
-Earth, TV Water, Radio Gold; 20px tall with pill ends; hairline
-Neutral-1 dividers; the share printed inside any segment 9% or
-wider; hover darkens 15%), with a bottom-left legend of 10px round
-swatches in caption Neutral-5 giving share, spend and format count.
-The segments grow in from zero on first render (`--duration-slow`
-`--ease-flow`, 60ms stagger) and only re-render when the shares
-change. Nothing else on the review moves.
+and must-buys, and the budget table closes with a total row and a budget-by-format
+bar built the audience pull bar's way: one stacked horizontal bar
+(20px, pill ends, hairline Neutral-1 dividers) with one slice per
+format in table order, sized to its share of the budget, coloured by
+its channel on the DLS chart series (OTT Fire, Social Wood, Web
+Earth, TV Water, Radio Gold), the share printed inside any slice 9%
+or wider, unallocated budget left as bare Neutral-3 track. Each table
+row carries a 10px dot in its channel colour. Hovering a row lights
+its slice and drops the others to 30% opacity; hovering a slice
+highlights its row (Neutral-2). The legend beneath is by channel
+(10px round swatches, caption Neutral-5: share, spend, format count)
+plus an Unallocated entry when there is any. Slices grow in from zero
+on first render (`--duration-slow` `--ease-flow`, 60ms stagger) and
+the bar only re-renders when a share changes. Nothing else on the
+review moves.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 

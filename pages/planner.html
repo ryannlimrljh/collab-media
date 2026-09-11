@@ -526,6 +526,11 @@
   .p-why .rule{margin:0; padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
     font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
   .p-why .rule b{font-weight:700;}
+  .p-why .rule .lead{display:block;}
+  .p-why .rulelist{margin:var(--spacing-4) 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:2px;}
+  .p-why .rulelist li{position:relative; padding-left:14px;}
+  .p-why .rulelist li::before{content:''; position:absolute; left:0; top:7px; width:5px; height:5px;
+    border-radius:50%; background:var(--color-neutral-4);}
   .p-why .row{display:grid; grid-template-columns:132px 1fr; gap:var(--spacing-12);
     padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);}
   .p-why .row .k{font-size:var(--text-caption-size); font-weight:700; line-height:var(--text-caption-lh);}
@@ -552,7 +557,8 @@
   .p-whysec .head .c-badge{flex:none;}
   .p-whysec .inputs{padding:var(--spacing-12) 0 0;}
   .p-whysec .rule{padding:var(--spacing-12) 0 0; border-top:0;}
-  .p-whysec .foot{padding:var(--spacing-8) 0 0; border-top:0;}
+  .p-whysec .foot{padding:var(--spacing-12) 0 0; border-top:0;}
+  .p-whytiles .row .r{margin-top:var(--spacing-4);}
   .p-whytiles{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:var(--spacing-12);
     align-content:start;}
   .p-whytiles .row{display:block; padding:var(--spacing-12); border:1px solid var(--color-neutral-3);
@@ -562,9 +568,14 @@
   .p-whytiles .rule{grid-column:1 / -1; padding:0; border-top:0;}
   @media (max-width:760px){ .p-whysec{grid-template-columns:1fr;} }
   /* Headline strip on the review: the DLS stat cards, compact. */
-  .p-sumstats .c-stat{gap:var(--spacing-4); box-shadow:none;}
-  .p-sumstats .c-stat-value{font-size:var(--text-h3-size); font-variant-numeric:tabular-nums;}
-  .p-sumstats .c-stat-footer{margin-top:var(--spacing-4);}
+  .p-sumstats{grid-template-columns:repeat(5, minmax(0, 1fr)); gap:var(--spacing-8);}
+  .p-sumstats .c-stat{gap:2px; box-shadow:none; padding:var(--spacing-12); min-width:0;}
+  .p-sumstats .c-stat-label{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .p-sumstats .c-stat-value{font-size:var(--text-h4-size, 22px); line-height:1.2; font-variant-numeric:tabular-nums;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .p-sumstats .c-stat-footer{margin-top:var(--spacing-4); padding-top:var(--spacing-8);}
+  @media (max-width:980px){ .p-sumstats{grid-template-columns:repeat(3, minmax(0, 1fr));} }
+  @media (max-width:600px){ .p-sumstats{grid-template-columns:repeat(2, minmax(0, 1fr));} }
   .p-sumstats .c-stat-footer.p-ok{color:var(--color-green);}
   .p-sumstats .c-stat-footer.p-over{color:var(--color-red);}
   /* Budget by channel: a stacked horizontal bar on the DLS chart rules.
@@ -580,6 +591,13 @@
   .p-chanbar.is-live .seg{width:var(--w);}
   .p-chanbar .seg + .seg{box-shadow:inset 1px 0 var(--color-neutral-1);}
   .p-chanbar .seg:hover{filter:brightness(.85);}
+  /* Row and slice light each other, the audience pull bar's move. */
+  .p-chanbar.is-dim .seg:not(.is-hot){opacity:.3;}
+  .p-chanbar .seg{transition:width var(--duration-slow) var(--ease-flow), filter var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);}
+  #summaryBudget tr{transition:background-color var(--duration-fast) var(--ease-standard);}
+  #summaryBudget tr.is-hot{background:var(--color-neutral-2);}
+  #summaryBudget tr .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:var(--spacing-8); vertical-align:-1px;}
   .p-chanbar .seg .c-progress-fill-label{font-size:11px;}
   .p-chanbar .seg.is-slim .c-progress-fill-label{display:none;}
   .p-chanlegend{display:flex; flex-wrap:wrap; gap:var(--spacing-8) var(--spacing-16); margin-top:var(--spacing-8);
@@ -587,9 +605,11 @@
   .p-chanlegend .it{display:inline-flex; align-items:center; gap:var(--spacing-8);}
   .p-chanlegend .sw{width:10px; height:10px; border-radius:50%; flex:none;}
   .p-chanlegend b{color:var(--color-neutral-9); font-weight:700;}
-  .p-sumchan .tone-fire{background:var(--color-orange);} .p-sumchan .tone-wood{background:var(--color-salmon-pink);}
-  .p-sumchan .tone-earth{background:var(--color-green);} .p-sumchan .tone-water{background:var(--color-navy);}
-  .p-sumchan .tone-gold{background:var(--color-amber);}
+  .p-sumchan .tone-fire, #summaryBudget .tone-fire{background:var(--color-orange);}
+  .p-sumchan .tone-wood, #summaryBudget .tone-wood{background:var(--color-salmon-pink);}
+  .p-sumchan .tone-earth, #summaryBudget .tone-earth{background:var(--color-green);}
+  .p-sumchan .tone-water, #summaryBudget .tone-water{background:var(--color-navy);}
+  .p-sumchan .tone-gold, #summaryBudget .tone-gold{background:var(--color-amber);}
   @media (prefers-reduced-motion:reduce){ .p-chanbar .seg{transition:none;} }
   .c-table tfoot td{font-weight:700; border-top:2px solid var(--color-neutral-3);}
   .p-persona-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);
@@ -3084,6 +3104,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     return '<div class="inputs"><span class="lab">Read from your plan</span>' +
       chips.map(function(c){ return '<span class="c-chip c-chip-input">' + esc(c) + '</span>'; }).join('') + '</div>';
   }
+  function whyRule(lead, points){
+    return '<p class="rule"><b class="lead">' + lead + '</b>' +
+      (points && points.length ? '<ul class="rulelist">' + points.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') + '</p>';
+  }
   function whyRow(k, ev, r){
     return '<div class="row"><div class="k">' + esc(k) + (ev ? '<span class="ev">' + esc(ev) + '</span>' : '') + '</div>' +
       '<p class="r">' + r + '</p></div>';
@@ -3108,23 +3132,22 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     field('Target', g.target ? fmt(g.target) + ' ' + (g.unit || '') : '', 'target',
       g.kpi ? 'The unit sets the KPI: ' + g.kpi + '.' : '');
     field('Languages', g.langs && g.langs.length ? g.langs.join(', ') : '', 'langs');
-    var defs = (g._defaults || []).map(function(d){ return '<li>' + esc(d) + '</li>'; }).join('');
+    var defs = (g._defaults || []).length;
     var own = !lastBrief || !briefAi;
     return {
       title: own ? 'The brief' : 'Why these fields',
       sub: own ? 'Entered by hand.' : 'Each value and the line of your notes it came from.',
       own: own,
-      body: (own ? whyInputs() + '<p class="rule"><b>Your words.</b> Nothing here was inferred; the audience and mix reasoning below reads from these values.</p>' : rows) +
-        (defs ? '<p class="rule"><b>Starting points, not read from your notes.</b> Where the notes said nothing, the planner filled a default so the brief is complete: ' +
-          '<ul style="margin:var(--spacing-4) 0 0; padding-left:18px;">' + defs + '</ul>' +
-          'Dates default to a three-week run starting in two weeks. A target is sized from the budget at RM 30 per person reached, RM 1 per three views, or RM 75 per sign-up.</p>' : ''),
+      body: (own ? whyInputs() + whyRule('Your words', ['Nothing inferred; audience and mix read from these values']) : rows) +
+        (defs ? whyRule('Starting points, not from your notes', (g._defaults || []).map(esc).concat(
+          ['Sized at RM 30 a person, RM 1 per three views, RM 75 a sign-up'])) : ''),
       foot: own ? '' : '<span>Edit any field and the badge steps aside.</span>'
     };
   }
   function partsPersonas(){
     if (mode === 'mass'){
       return {title:'The audience', sub:'Mass targeting: entire Malaysia, ' + fmt(audienceReach()) + ' after refiners.', own:true,
-        body: whyInputs() + '<p class="rule"><b>Your choice.</b> The whole footprint with no persona modelling; refiners are the only narrowing.</p>', foot:''};
+        body: whyInputs() + whyRule('Your choice: mass targeting', ['Whole footprint, no persona modelling', 'Refiners are the only narrowing']), foot:''};
     }
     var own = personaSource !== 'ai';
     var picked = selected.map(byId);
@@ -3137,11 +3160,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var r = reach();
     var cats = {}; picked.forEach(function(p){ cats[p.cat] = 1; });
     var rule = own
-      ? '<b>Your pick.</b> The figures are the catalogue\'s, so the same evidence applies to whoever chose.' +
-        (broad ? '' : ' ' + objWord(o) + ' usually wants intent; an intent segment such as Automotive intent strengthens a response goal.')
+      ? whyRule('Your pick', ['Evidence below is the catalogue\'s, whoever chose'].concat(broad ? [] : [objWord(o) + ' usually wants intent; add Automotive intent for a response goal']))
       : broad
-      ? '<b>Rule.</b> ' + objWord(o) + ' asks for reach, so the pick favours broad entertainment and lifestyle segments over intent segments, and mixes categories so the audiences overlap as little as possible.'
-      : '<b>Rule.</b> ' + objWord(o) + ' usually wants intent. These three are reach segments; add an intent segment such as Automotive intent or Finance & investing if the goal is a response.';
+      ? whyRule(objWord(o) + ' asks for reach', ['Broad entertainment and lifestyle over intent segments', 'Categories mixed so audiences overlap little'])
+      : whyRule(objWord(o) + ' usually wants intent', ['These three are reach segments', 'Add Automotive intent or Finance & investing for a response goal']);
     var rows = '';
     picked.forEach(function(p){
       var sg = segs[p.id] || {}, c = sg.consumption || {};
@@ -3158,7 +3180,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var together = 'Together ' + fmt(r.uniq) + ' unique reach after ' + r.pct + '% overlap across ' + Object.keys(cats).length + ' categor' + (Object.keys(cats).length > 1 ? 'ies' : 'y') +
       (t && $('b-kpi').value === 'Net reach' ? (r.uniq >= t ? ', which clears your ' + fmt(t) + ' target.' : ', short of your ' + fmt(t) + ' target; widen or add a segment.') : '.');
     return {title: own ? 'The audience' : 'Why these personas', sub: picked.length ? together : 'No personas picked.', own: own,
-      body: whyInputs() + '<p class="rule">' + rule + '</p>' + rows,
+      body: whyInputs() + rule + rows,
       foot: (own ? '<span>Your pick, kept as is.</span>' : '<span>Swap any of them; your pick is kept.</span>') +
         '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button>'};
   }
@@ -3172,11 +3194,12 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var avg = function(a){ return a.length ? Math.round(a.reduce(function(x, y){ return x + y; }, 0) / a.length) : 0; };
     var o = ddVal('b-obj') || 'awareness';
     var videoShare = 0; on.forEach(function(f){ if (f.video) videoShare += split[f.id] || 0; });
-    var rule = (own ? '<b>Your mix.</b> ' : '<b>Rule.</b> ') + objWord(o) + ' with ' + (picked.length ? 'personas who watch video at ' + avg(vids) + '% and live on social at ' + avg(socs) + '%' : 'no personas yet') +
-      ' points to a video-led mix: on Astro social, video content engages at 3.25% against 1.40% for image. ' +
-      (b ? Math.round(videoShare / b * 100) + '% of the budget sits in video formats. ' : '') +
-      (own ? (splitTouched ? 'The split is yours; shares below are as you set them.' : 'Formats are yours; shares follow each format\'s weight.')
-           : 'Each format takes a share by its weight for this objective, and the whole budget is placed.');
+    var rule = whyRule(own ? 'Your mix' : objWord(o) + ' points to a video-led mix', [
+      picked.length ? 'Personas watch video ' + avg(vids) + '%, live on social ' + avg(socs) + '%' : 'No personas picked yet',
+      'Astro video engages 3.25% against 1.40% for image',
+      b ? Math.round(videoShare / b * 100) + '% of the budget sits in video formats' : 'No budget yet',
+      own ? (splitTouched ? 'Shares as you set them' : 'Your formats; shares follow their weights') : 'Shares by weight for ' + objWord(o).toLowerCase() + ', fully placed'
+    ]);
     var rows = '';
     on.forEach(function(f){
       var amt = split[f.id] || 0, sh = b ? Math.round(amt / b * 100) : (totalW ? Math.round(f.w / totalW * 100) : 0);
@@ -3199,7 +3222,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var fc = forecast();
     return {title: own ? 'The mix' : 'Why this mix', own: own,
       sub: rm(fc.alloc) + ' placed at a blended ' + rm(fc.blended) + ' CPM: ' + fmt(fc.imps) + ' impressions, ' + fmt(fc.reach) + ' reach at ' + fc.freq + ' frequency.',
-      body: whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + '<p class="rule">' + rule + '</p>' + rows,
+      body: whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + rule + rows,
       foot: own ? '<span>Your mix, kept as is. Restore AI draft brings the recommendation back.</span>' : '<span>Override any of it; the draft is one click away.</span>'};
   }
   function whyCard(parts){
@@ -3259,6 +3282,19 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     if (e.target.closest('[data-whyclose]')) closeWhyPop();
     if (e.target.closest('[data-whyevidence]')){ closeWhyPop(); openWhy(); }
   });
+  (function(){
+    var tbl = $('summaryBudget'), host = $('summaryChannels');
+    function hot(id){
+      var bar = host.querySelector('.p-chanbar'); if (!bar) return;
+      bar.classList.toggle('is-dim', !!id);
+      Array.prototype.forEach.call(bar.children, function(sg){ sg.classList.toggle('is-hot', !!id && sg.dataset.seg === id); });
+      Array.prototype.forEach.call(tbl.children, function(tr){ tr.classList.toggle('is-hot', !!id && tr.dataset.fmt === id); });
+    }
+    tbl.addEventListener('mouseover', function(e){ var tr = e.target.closest('tr[data-fmt]'); if (tr) hot(tr.dataset.fmt); });
+    tbl.addEventListener('mouseleave', function(){ hot(null); });
+    host.addEventListener('mouseover', function(e){ var sg = e.target.closest('.seg'); if (sg) hot(sg.dataset.seg); });
+    host.addEventListener('mouseleave', function(){ hot(null); });
+  })();
   $('summaryWhy').addEventListener('click', function(e){
     if (e.target.closest('[data-whyevidence]')) openWhy();
   });
@@ -4043,7 +4079,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     /* Headline: the five numbers a reviewer checks first. */
     var unalloc = budget() - fc.alloc;
     var reachVsTarget = target && $('b-kpi').value === 'Net reach'
-      ? (fc.reach >= target ? {cls:'p-ok', t:'Clears the ' + fmt(target) + ' target'} : {cls:'p-over', t:fmt(target - fc.reach) + ' short of the ' + fmt(target) + ' target'})
+      ? (fc.reach >= target ? {cls:'p-ok', t:'Clears ' + fmt(target) + ' target'} : {cls:'p-over', t:fmt(target - fc.reach) + ' short of ' + fmt(target)})
       : {cls:'', t: target ? 'Target: ' + fmt(target) + ' ' + ($('b-unit').value || '') : 'No target set'};
     var stat = function(label, value, foot, cls){
       return '<div class="c-stat"><span class="c-stat-label">' + label + '</span><span class="c-stat-value">' + value + '</span>' +
@@ -4053,7 +4089,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       stat('Budget', rm(budget()), Math.abs(unalloc) < 1 ? 'Fully placed' : unalloc > 0 ? rm(unalloc) + ' unallocated' : rm(-unalloc) + ' over', Math.abs(unalloc) < 1 ? '' : 'p-over') +
       stat('Campaign', days ? days + ' days' : '–', $('sumFlightLabel').textContent || 'Dates not set') +
       stat('Forecast reach', fmt(fc.reach), reachVsTarget.t, reachVsTarget.cls) +
-      stat('Impressions', fmt(fc.imps), (fc.blended ? rm(fc.blended) + ' blended CPM · ' : '') + fc.freq + ' frequency') +
+      stat('Impressions', fmt(fc.imps), (fc.blended ? rm(fc.blended) + ' CPM · ' : '') + fc.freq + ' freq') +
       stat('Audience', (mode === 'mass' || selected.length) ? fmt(audienceReach()) : '–',
         mode === 'mass' ? 'Entire Malaysia' : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') + ' · ' + r.pct + '% overlap' : 'No personas');
     $('summaryRows').innerHTML = rows.map(function(x){
@@ -4063,9 +4099,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     }).join('');
 
     $('sumBudgetLabel').textContent = rm(budget());
+    var CH_TONE = {OTT:'fire', Social:'wood', Web:'earth', TV:'water', Radio:'gold'};
     $('summaryBudget').innerHTML = fmts.map(function(f){
       var amt = split[f.id] || 0;
-      return '<tr><td style="font-weight:700;">' + f.name + '</td>' +
+      return '<tr data-fmt="' + f.id + '"><td style="font-weight:700;"><span class="dot tone-' + CH_TONE[f.ch] + '"></span>' + f.name + '</td>' +
         '<td class="num">' + cpmFmt(f.cpm) + '</td>' +
         '<td class="num">' + rm(amt) + '</td>' +
         '<td class="num">' + (budget() ? Math.round(amt / budget() * 100) : 0) + '%</td>' +
@@ -4078,22 +4115,25 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var chShare = {};
     fmts.forEach(function(f){ chShare[f.ch] = (chShare[f.ch] || 0) + (split[f.id] || 0); });
     var series = CH_ORDER.filter(function(c){ return chShare[c]; });
-    var CH_TONE = {OTT:'fire', Social:'wood', Web:'earth', TV:'water', Radio:'gold'};
     var host = $('summaryChannels');
-    var sig = series.map(function(c){ return c + ':' + chShare[c]; }).join('|');
+    var b = budget() || fc.alloc || 1;
+    var sig = fmts.map(function(f){ return f.id + ':' + (split[f.id] || 0); }).join('|') + '|' + b;
     if (host.dataset.sig !== sig){
       host.dataset.sig = sig;
-      host.innerHTML = series.length
-        ? '<div class="p-chanbar" role="img" aria-label="Budget by channel: ' + series.map(function(c){ return c + ' ' + Math.round(chShare[c] / fc.alloc * 100) + '%'; }).join(', ') + '">' +
-          series.map(function(c, i){
-            var pct = fc.alloc ? chShare[c] / fc.alloc * 100 : 0;
-            return '<div class="seg tone-' + CH_TONE[c] + (pct < 9 ? ' is-slim' : '') + '" style="--w:' + pct.toFixed(2) + '%; --i:' + i + ';" title="' + c + ' · ' + rm(chShare[c]) + ' · ' + Math.round(pct) + '%">' +
+      host.innerHTML = fmts.length
+        ? '<div class="p-chanbar" role="img" aria-label="Budget by format: ' + fmts.map(function(f){ return f.name + ' ' + Math.round((split[f.id] || 0) / b * 100) + '%'; }).join(', ') +
+            (unalloc > 0 ? ', ' + rm(unalloc) + ' unallocated' : '') + '">' +
+          fmts.map(function(f, i){
+            var amt = split[f.id] || 0, pct = amt / b * 100;
+            return '<div class="seg tone-' + CH_TONE[f.ch] + (pct < 9 ? ' is-slim' : '') + '" data-seg="' + f.id + '" style="--w:' + pct.toFixed(2) + '%; --i:' + i + ';" title="' + f.name + ' · ' + rm(amt) + ' · ' + Math.round(pct) + '%">' +
               '<span class="c-progress-fill-label">' + Math.round(pct) + '%</span></div>';
           }).join('') + '</div>' +
           '<div class="p-chanlegend">' + series.map(function(c){
             var fl = fmts.filter(function(f){ return f.ch === c; }).length;
-            return '<span class="it"><span class="sw tone-' + CH_TONE[c] + '"></span><b>' + c + '</b> ' + Math.round(chShare[c] / fc.alloc * 100) + '% · ' + rm(chShare[c]) + ' · ' + fl + ' format' + (fl > 1 ? 's' : '') + '</span>';
-          }).join('') + '</div>'
+            return '<span class="it"><span class="sw tone-' + CH_TONE[c] + '"></span><b>' + c + '</b> ' + Math.round(chShare[c] / b * 100) + '% · ' + rm(chShare[c]) + ' · ' + fl + ' format' + (fl > 1 ? 's' : '') + '</span>';
+          }).join('') +
+          (unalloc > 0 ? '<span class="it"><span class="sw" style="background:var(--color-neutral-3);"></span><b>Unallocated</b> ' + Math.round(unalloc / b * 100) + '% · ' + rm(unalloc) + '</span>' : '') +
+          '</div>'
         : '';
       var bar = host.querySelector('.p-chanbar');
       if (bar){
