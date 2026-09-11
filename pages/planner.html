@@ -235,6 +235,23 @@
   /* Form layout inside cards */
   .p-grid2{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
   .p-grid3{display:grid; grid-template-columns:2fr 1fr 1fr; gap:var(--spacing-12);}
+  /* The goal reads top down: the objective alone on its line, then the
+     measure it implies as one three-field sentence in a quiet well. */
+  .p-goal{display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .p-goal-obj{max-width:420px;}
+  .p-goal-measure{background:var(--color-neutral-2); border-radius:var(--radius-md);
+    padding:var(--spacing-16);}
+  .p-goal-measure-head{display:flex; align-items:center; gap:var(--spacing-8);
+    margin-bottom:var(--spacing-12); flex-wrap:wrap;}
+  .p-goal-row{display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:var(--spacing-12);}
+  .p-goal-measure .p-note{margin-top:var(--spacing-12);}
+  .p-goal-measure .c-dropdown-input, .p-goal-measure input[type="number"]{background:var(--color-neutral-1);}
+  @media (max-width:760px){ .p-goal-row{grid-template-columns:1fr;} }
+  /* A dropdown row may carry a plain-words description under its label. */
+  .c-dropdown-row-label .p-dd-desc{display:block; font-size:var(--text-caption-size);
+    line-height:var(--text-caption-lh); font-weight:400; color:var(--color-neutral-5); margin-top:1px;}
+  .c-dropdown-row:has(.p-dd-desc){align-items:flex-start;}
+  .c-dropdown-row:has(.p-dd-desc) .c-dropdown-row-check{margin-top:3px;}
   .c-card .c-field, .p-block .c-field{width:100%;}
   .p-note{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     margin-top:var(--spacing-8);}
@@ -679,9 +696,24 @@
   .p-brief-guide{margin:0 0 var(--spacing-12); font-size:var(--text-body2-size);
     line-height:var(--text-body2-lh); color:var(--color-neutral-5);}
   .p-brief-guide b{color:var(--color-neutral-9); font-weight:700;}
-  .p-brief-text{flex:1; min-height:220px; width:100%; resize:none; border:0; outline:0;
-    padding:0; background:transparent; font-family:inherit;
-    font-size:var(--text-body1-size); line-height:1.6; color:var(--color-neutral-9);}
+  /* The composer's labels are bolded by a backdrop: a div holding the
+     same text with every "Label:" in 700, under a textarea whose own
+     text is transparent. Both share one box and one set of type
+     metrics, so the two stay in register; the caret and a translucent
+     selection keep the textarea feeling like a textarea. */
+  .p-brief-field{position:relative; flex:1; min-height:220px; display:flex;}
+  .p-brief-hl, .p-brief-text{width:100%; padding:0; border:0; margin:0;
+    font-family:inherit; font-size:var(--text-body1-size); line-height:1.6;
+    letter-spacing:inherit; white-space:pre-wrap; overflow-wrap:break-word; word-break:normal;}
+  .p-brief-hl{position:absolute; inset:0; overflow:hidden; pointer-events:none;
+    color:var(--color-neutral-9); z-index:0;}
+  /* The labels are thickened with a stroke rather than a bold weight:
+     a stroke leaves the advance widths untouched, so the backdrop
+     wraps exactly where the textarea does, however long the line. */
+  .p-brief-hl b{font-weight:inherit; -webkit-text-stroke:.6px var(--color-neutral-9);}
+  .p-brief-text{position:relative; z-index:1; flex:1; resize:none; outline:0;
+    background:transparent; color:transparent; caret-color:var(--color-neutral-9);}
+  .p-brief-text::selection{background:rgba(20,115,230,.24); color:transparent;}
   .p-brief-text::placeholder{color:var(--color-neutral-4);}
   .p-brief-starters{display:flex; flex-wrap:wrap; gap:var(--spacing-8);
     margin-top:var(--spacing-12);}
@@ -1309,32 +1341,41 @@
 
               <div class="p-sect">
                 <span class="c-stat-label">The goal</span>
-                <div class="p-grid4">
-                  <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">Primary objective</label>
+                <div class="p-goal">
+                  <div class="c-field c-dropdown-field p-goal-obj" data-dd="b-obj"><label for="b-obj">What should this campaign do?</label>
                     <div class="input-wrap has-trailing-icon">
                       <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
                       <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
                       <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
                     </div>
+                    <span class="c-helper">The one choice that shapes everything after it: which formats lead, and how the budget splits.</span>
                   </div>
-                  <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">Primary KPI</label>
-                    <div class="input-wrap has-trailing-icon">
-                      <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Select KPI" readonly />
-                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                      <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                  <div class="p-goal-measure">
+                    <div class="p-goal-measure-head">
+                      <span class="c-stat-label" style="margin:0;">How we will know it worked</span>
+                      <span class="c-badge c-badge-neutral" id="kpiAuto" hidden>Set from your objective</span>
                     </div>
-                  </div>
-                  <div class="c-field"><label for="b-target">Target</label>
-                    <input id="b-target" type="number" placeholder="0" /></div>
-                  <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Unit</label>
-                    <div class="input-wrap has-trailing-icon">
-                      <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
-                      <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
-                      <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                    <div class="p-goal-row">
+                      <div class="c-field c-dropdown-field" data-dd="b-kpi"><label for="b-kpi">What we count</label>
+                        <div class="input-wrap has-trailing-icon">
+                          <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Pick an objective first" readonly />
+                          <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                          <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                        </div>
+                      </div>
+                      <div class="c-field"><label for="b-target">How many</label>
+                        <input id="b-target" type="number" placeholder="0" /></div>
+                      <div class="c-field c-dropdown-field" data-dd="b-unit"><label for="b-unit">Counted in</label>
+                        <div class="input-wrap has-trailing-icon">
+                          <input type="text" class="c-dropdown-input" id="b-unit" placeholder="Unit" readonly />
+                          <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
+                          <div class="c-dropdown-panel" hidden><div class="c-dropdown-list"></div></div>
+                        </div>
+                      </div>
                     </div>
+                    <p class="p-note" id="goalEcho">Pick an objective and the rest follows.</p>
                   </div>
                 </div>
-                <p class="p-note">A number, not a wish. "Get people to turn out" can't be planned against; 5,000 attendees can.</p>
               </div>
 
               <div class="p-sect">
@@ -1840,8 +1881,11 @@
     </div>
     <div class="p-fold-body p-brief-body">
       <p class="p-brief-guide"><b>Start with the brand and what you are launching.</b> Then add whatever you know: budget, dates, objective, who it is for, languages. Paste a whole brief if you have one; labels like <b>Budget:</b> or <b>Dates:</b> help but are not required.</p>
-      <textarea class="p-brief-text" id="briefText" aria-label="Campaign description" spellcheck="true"
-        placeholder="Maybank Raya campaign for the new Islamic savings account. RM 200k working budget, running 15 Sept to 6 Oct. Awareness first, we want 2M people reached. Young families in BM and English."></textarea>
+      <div class="p-brief-field">
+        <div class="p-brief-hl" id="briefHL" aria-hidden="true"></div>
+        <textarea class="p-brief-text" id="briefText" aria-label="Campaign description" spellcheck="true"
+          placeholder="Maybank Raya campaign for the new Islamic savings account. RM 200k working budget, running 15 Sept to 6 Oct. Awareness first, we want 2M people reached. Young families in BM and English."></textarea>
+      </div>
       <div class="p-brief-starters">
         <button class="p-try-chip" id="briefTemplate" type="button"><i class="ph ph-list-dashes"></i> Use a template</button>
         <button class="p-try-chip" id="briefExample" type="button"><i class="ph ph-sparkle"></i> Try an example</button>
@@ -2582,7 +2626,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       list.innerHTML = opts.map(function(o){
         var sel = String(o.v) === String(input.dataset.value || '');
         return '<div class="c-dropdown-row' + (sel ? ' selected' : '') + '" data-v="' + o.v + '">' +
-          '<span class="c-dropdown-row-label">' + o.label + '</span>' +
+          '<span class="c-dropdown-row-label">' + o.label +
+            (o.desc ? '<span class="p-dd-desc">' + o.desc + '</span>' : '') + '</span>' +
           '<i class="ph ph-check c-dropdown-row-check"></i></div>';
       }).join('');
     }
@@ -2622,18 +2667,55 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDD(); });
   function ddVal(id){ return $(id).dataset.value || ''; }
 
+  /* Users told us the objective is the decision they care about and
+     that KPI, target and unit were guesswork. So the objective carries
+     plain-words descriptions, and picking one fills the measure that
+     normally goes with it — until someone sets their own, after which
+     we leave it alone. GOAL_MEASURE is the same mapping the AI fill
+     uses, in one place. */
+  var GOAL_MEASURE = {
+    awareness:     ['Net reach', 'people'],
+    consideration: ['Video completions', 'views'],
+    conversion:    ['Registrations', 'sign-ups'],
+    footfall:      ['Store visits', 'people'],
+    leadgen:       ['Registrations', 'sign-ups']
+  };
+  var measureTouched = false;
+  function setDDValue(id, v){
+    var f = document.querySelector('[data-dd="' + id + '"]');
+    if (f && f._set) f._set(v, true);
+  }
+  function applyGoalMeasure(obj){
+    var m = GOAL_MEASURE[obj];
+    if (!m || measureTouched) return;
+    setDDValue('b-kpi', m[0]);
+    setDDValue('b-unit', m[1]);
+  }
   initSingleSelect(document.querySelector('[data-dd="b-obj"]'), [
-    {v:'awareness', label:'Awareness'}, {v:'consideration', label:'Consideration'},
-    {v:'conversion', label:'Conversion'}, {v:'footfall', label:'Footfall'},
-    {v:'leadgen', label:'Lead generation'}
-  ], undefined, function(){ renderAll(); markSaved(); });
-  initSingleSelect(document.querySelector('[data-dd="b-kpi"]'),
-    ['Event attendees','Net reach','Registrations','Video completions','Store visits']
-      .map(function(x){ return {v:x, label:x}; }),
-    undefined, function(){ renderAll(); });
+    {v:'awareness', label:'Awareness', desc:'Get in front of as many of the right people as possible'},
+    {v:'consideration', label:'Consideration', desc:'Get them to watch, read and remember'},
+    {v:'conversion', label:'Conversion', desc:'Get them to sign up or buy'},
+    {v:'footfall', label:'Footfall', desc:'Get them to walk into a store or an event'},
+    {v:'leadgen', label:'Lead generation', desc:'Collect details from people who are interested'}
+  ], undefined, function(v){ applyGoalMeasure(v); renderAll(); markSaved(); });
+  /* The unit belongs to what is being counted, so it follows the KPI
+     rather than being a third thing to work out. It stays editable. */
+  var KPI_UNIT = {'Net reach':'people', 'Video completions':'views', 'Registrations':'sign-ups',
+    'Store visits':'people', 'Event attendees':'people'};
+  initSingleSelect(document.querySelector('[data-dd="b-kpi"]'), [
+    {v:'Net reach', label:'Net reach', desc:'How many different people saw it'},
+    {v:'Video completions', label:'Video completions', desc:'How many watched a video to the end'},
+    {v:'Registrations', label:'Registrations', desc:'How many signed up'},
+    {v:'Store visits', label:'Store visits', desc:'How many walked in'},
+    {v:'Event attendees', label:'Event attendees', desc:'How many turned up'}
+  ], undefined, function(v){
+    measureTouched = true;
+    if (KPI_UNIT[v]) setDDValue('b-unit', KPI_UNIT[v]);
+    renderAll(); markSaved();
+  });
   initSingleSelect(document.querySelector('[data-dd="b-unit"]'),
     ['people','sign-ups','views'].map(function(x){ return {v:x, label:x}; }),
-    undefined, function(){ renderAll(); });
+    undefined, function(){ measureTouched = true; renderAll(); markSaved(); });
 
   /* ═══ DLS Date picker — the c-dp trigger/panel recipe wired to the
      hidden native inputs, so every reader of $('b-start').value keeps
@@ -2788,6 +2870,23 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     $('railKpi').textContent = target && budget() ? rm(budget() / target) + ' per target ' +
       ($('b-unit').value === 'people' ? 'attendee' : ($('b-unit').value || 'unit').replace(/s$/,'')) : 'Set a KPI target';
     $('sumFlightLabel').textContent = flight;
+
+    /* The goal, read back as one sentence, so the three measure fields
+       add up to something a person can check. */
+    var gObj = ddVal('b-obj'), gKpi = $('b-kpi').value, gUnit = $('b-unit').value;
+    var gTarget = parseInt($('b-target').value, 10) || 0;
+    var echo = $('goalEcho');
+    if (echo){
+      echo.textContent = !gObj
+        ? 'Pick an objective and the rest follows.'
+        : !gTarget
+          ? objWord(gObj) + (gKpi ? ', measured as ' + gKpi.toLowerCase() : '') +
+            '. Add a number so the plan can be checked against it.'
+          : objWord(gObj) + ': ' + gTarget.toLocaleString('en-MY') + ' ' + (gUnit || 'people') +
+            (gKpi ? ', counted as ' + gKpi.toLowerCase() : '') + '. Every forecast is checked against this.';
+    }
+    var auto = $('kpiAuto');
+    if (auto) auto.hidden = !(gObj && gKpi && !measureTouched);
     syncBudgetDial();
     dpSyncs.forEach(function(f){ f(); });
   }
@@ -4606,10 +4705,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       steps.push({el: $('b-obj'), apply: function(){ setDD('b-obj', 'awareness'); }});
       defaults.push('an awareness objective');
     }
-    var KPI_FOR = {awareness: ['Net reach', 'people'], consideration: ['Video completions', 'views'],
-      conversion: ['Registrations', 'sign-ups'], footfall: ['Store visits', 'people'],
-      leadgen: ['Registrations', 'sign-ups']};
-    var pick = KPI_FOR[effObj] || ['Net reach', 'people'];
+    var pick = GOAL_MEASURE[effObj] || ['Net reach', 'people'];
     var unitForTarget = got.unit || $('b-unit').value || pick[1];
     if (!got.kpi && !$('b-kpi').value){
       steps.push({el: $('b-kpi'), apply: function(){ setDD('b-kpi', pick[0]); }});
@@ -4796,6 +4892,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var ov = $('briefOverlay');
     var shell = ov.querySelector('.p-fold-shell');
     if (seed != null) $('briefText').value = seed;
+    syncBriefHL();
     ov.classList.add('is-open');
     ov.setAttribute('aria-hidden', 'false');
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5489,11 +5586,28 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   $('briefCancel').addEventListener('click', closeBrief);
   $('briefVeil').addEventListener('click', closeBrief);
   $('briefSend').addEventListener('click', sendBrief);
+  /* The backdrop that bolds the labels. It holds the same text with
+     every line-leading "Label:" wrapped in a <b>, and follows the
+     textarea's own scroll so the two never drift apart. */
+  function syncBriefHL(){
+    var ta = $('briefText'), hl = $('briefHL');
+    if (!ta || !hl) return;
+    var html = ta.value
+      .replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; })
+      .replace(/^([ \t]*[A-Za-z][A-Za-z /&'-]{0,28}:)/gm, '<b>$1</b>');
+    /* A trailing newline needs something after it to take up a line. */
+    hl.innerHTML = html + '\n';
+    hl.scrollTop = ta.scrollTop;
+  }
+  $('briefText').addEventListener('input', syncBriefHL);
+  $('briefText').addEventListener('scroll', function(){ $('briefHL').scrollTop = $('briefText').scrollTop; });
+
   /* Starters replace whatever is in the field; picking one is a
      fresh start, not an addition. */
   $('briefTemplate').addEventListener('click', function(){
     var ta = $('briefText');
     ta.value = BRIEF_TEMPLATE;
+    syncBriefHL();
     ta.focus();
     var at = 'Campaign: '.length;
     ta.setSelectionRange(at, at);
@@ -5503,6 +5617,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
     lastTryIdx = idx;
     $('briefText').value = tryText(TRY_BRIEFS[idx]);
+    syncBriefHL();
     $('briefText').focus();
   });
   $('briefText').addEventListener('keydown', function(e){
@@ -5648,6 +5763,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       if (f && f._set) f._set(v, true);
     };
     setDD('b-obj', st.dd.obj); setDD('b-kpi', st.dd.kpi); setDD('b-unit', st.dd.unit);
+    /* A saved measure that is not the one this objective implies was
+       somebody's own choice; never overwrite it later. */
+    var savedMeasure = GOAL_MEASURE[st.dd.obj];
+    if (st.dd.kpi && (!savedMeasure || savedMeasure[0] !== st.dd.kpi || savedMeasure[1] !== st.dd.unit)) measureTouched = true;
     langOn = st.langOn || [];
     renderLangs();
     selected = st.selected || [];

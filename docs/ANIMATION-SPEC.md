@@ -714,6 +714,35 @@ on first render (`--duration-slow` `--ease-flow`, 60ms stagger) and
 the bar only re-renders when a share changes. Nothing else on the
 review moves.
 
+## 9f. Two reading aids on step 1
+
+**Bold labels in the composer.** `#briefText` sits over `#briefHL`, a
+backdrop div holding the same text with every line-leading `Label:`
+wrapped in a `<b>`. The textarea's own text is `transparent` with an
+Obsidian `caret-color` and a translucent `::selection`, so the
+backdrop is what the reader sees. Both share one box (`.p-brief-field`,
+`inset:0`) and one set of type metrics, and the backdrop's scrollTop
+follows the textarea's on every scroll. The `<b>` is thickened with
+`-webkit-text-stroke:.6px`, **not** a bold weight: a stroke leaves
+advance widths untouched, so the two layers wrap identically however
+long the line (a real 700 weight is wider and would drift). Rebuilt on
+input, on open, and after either starter button.
+
+**The goal reads top down.** Users said the objective is the decision
+they care about and that KPI, target and unit were guesswork, so the
+section is no longer four equal fields. The objective stands alone
+(max 420px) under "What should this campaign do?", each option
+carrying a plain-words description in its dropdown row
+(`.p-dd-desc`). Below it, a Neutral-2 well holds the measure as one
+three-field sentence: what we count, how many, counted in. Picking an
+objective fills the KPI and unit from `GOAL_MEASURE` (the same map the
+AI fill uses) and shows a "Set from your objective" badge; picking a
+KPI sets its own unit from `KPI_UNIT`. The moment anyone sets a KPI or
+unit themselves, `measureTouched` latches and nothing is overwritten
+again, including on hydration of a plan whose saved measure is not the
+default. `#goalEcho` reads the whole thing back as a sentence
+("Conversion: 8,000 sign-ups, counted as registrations"). No motion.
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.
