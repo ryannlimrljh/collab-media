@@ -557,8 +557,9 @@
   /* v2 funnel: one block per kept channel, holding its rows, its
      add-chips and the sites it runs on, so a choice up top visibly
      opens the things it governs. */
-  .p-blocks-tools{display:flex; justify-content:space-between; align-items:center;
+  .p-blocks-tools{display:flex; justify-content:flex-end; align-items:center;
     gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
+  .p-blocks-tools:empty, .p-blocks-tools:has(> [hidden]:only-child){display:none;}
   .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
   .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
     padding:var(--spacing-12) var(--spacing-16);}
@@ -571,10 +572,13 @@
   .p-chanblock .p-fmtrow:first-child{border-top:0;}
   .p-chanblock-empty{margin:0; padding:var(--spacing-4) 0; font-size:var(--text-body2-size);
     color:var(--color-neutral-5);}
-  .p-chan-add, .p-chan-sites{display:flex; flex-wrap:wrap; align-items:center;
-    gap:var(--spacing-8); margin-top:var(--spacing-8);}
+  .p-chan-add, .p-chan-sites{display:grid; grid-template-columns:64px 1fr; align-items:start;
+    column-gap:var(--spacing-8); margin-top:var(--spacing-8);}
+  .p-chan-add .chips, .p-chan-sites .chips{display:flex; flex-wrap:wrap; align-items:center;
+    gap:var(--spacing-8); min-width:0;}
+  .p-chan-add .lab, .p-chan-sites .lab{padding-top:8px;}
   .p-chan-sites{padding-top:var(--spacing-8); border-top:1px dotted var(--color-neutral-3);}
-  .p-chan-add .lab, .p-chan-sites .lab{flex:0 0 64px; font-size:var(--text-caption-size); font-weight:700;
+  .p-chan-add .lab, .p-chan-sites .lab{font-size:var(--text-caption-size); font-weight:700;
     text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);}
   .p-chan-add .c-chip-filter .cpm, .p-chan-sites .c-chip-filter .inv{color:var(--color-neutral-5); font-weight:400;}
   .p-chan-sites .c-chip-filter.is-active .inv{color:rgba(255,255,255,.72);}
@@ -1288,7 +1292,6 @@
                   <span class="p-picker-sub" id="channelSummary">All channels</span>
                 </div>
                 <div class="c-chip-group p-chanrow" id="channelRow"></div>
-                <p class="p-note p-chan-note" id="channelNote">Pick where the campaign runs. Each channel you keep opens its own block below, with its formats, split and sites. Switch one off and it folds away; switch it back and it returns as it was.</p>
               </div>
 
               <div class="p-sect">
@@ -1304,7 +1307,6 @@
                   </button>
                 </div>
                 <div class="p-blocks-tools">
-                  <span class="p-note" style="margin:0;">One block per channel you kept: what is in the mix, what you can add, and the sites it runs on.</span>
                   <div class="c-search-input-box p-shelf-search" id="shelfSearchWrap" hidden>
                     <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
                     <input type="search" id="shelfSearch" placeholder="Find a format" aria-label="Find a format" autocomplete="off" />
@@ -2843,7 +2845,7 @@
       var add = document.createElement('div');
       add.className = 'p-chan-add';
       var allIn = !FORMATS.some(function(f){ return !f.on && f.ch === c; });
-      add.innerHTML = '<span class="lab">Add</span>' +
+      add.innerHTML = '<span class="lab">Add</span><div class="chips">' +
         (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
         (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
         vis.map(function(f, i){
@@ -2854,7 +2856,8 @@
             '<i class="ph ph-plus" aria-hidden="true"></i>' + f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
         }).join('') +
         (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
-        (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '');
+        (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
+        '</div>';
       block.appendChild(add);
 
       /* Runs on: the sites in this channel; an active chip is a must-buy. */
@@ -2862,10 +2865,10 @@
       var runs = document.createElement('div');
       runs.className = 'p-chan-sites';
       if (!sites.length){
-        runs.innerHTML = '<span class="lab">Runs on</span><span class="sum" style="margin-left:0;">Bought as airtime, no site pool to pick from.</span>';
+        runs.innerHTML = '<span class="lab">Runs on</span><div class="chips"><span class="sum" style="margin-left:0;">Bought as airtime, no site pool to pick from.</span></div>';
       } else {
         var pinned = sites.filter(function(s){ return s.pin; }).length;
-        runs.innerHTML = '<span class="lab">Runs on</span>' +
+        runs.innerHTML = '<span class="lab">Runs on</span><div class="chips">' +
           sites.map(function(sx){
             return '<button class="p-site-chip' + (sx.pin ? ' is-active' : '') + (sx.id === popPin ? ' is-pop' : '') + '" type="button" data-pin="' + sx.id + '"' +
               ' aria-pressed="' + (sx.pin ? 'true' : 'false') + '"' +
@@ -2873,7 +2876,8 @@
               '<i class="' + (sx.pin ? 'ph-fill' : 'ph') + ' ph-push-pin" aria-hidden="true"></i>' + sx.name +
               ' <span class="inv">' + sx.inv + '</span></button>';
           }).join('') +
-          '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>';
+          '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>' +
+          '</div>';
       }
       block.appendChild(runs);
       list.appendChild(block);
