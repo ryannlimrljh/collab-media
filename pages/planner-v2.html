@@ -1960,6 +1960,7 @@
     }
     step = n;
     maxVisited = Math.max(maxVisited, n);
+    if (n === 4) setTimeout(watchBookCta, 700); else dropBookWatch();
     [1,2,3,4].forEach(function(i){
       var li = $('step' + i);
       li.classList.toggle('is-open', i === n);
@@ -3523,11 +3524,13 @@
       setTimeout(beaconNext, (reduced || document.hidden) ? 0 : 650);
     }, 1000);
   }
-  /* The beacon is a one-shot: it ends on the first sign of attention. */
+  /* The beacon is a one-shot: it ends on the first sign of attention.
+     Step 1 beacons Next after an AI fill; step 4 beacons Confirm
+     booking the moment it scrolls into view. */
   var beaconTimer = null;
-  function beaconNext(){
-    var b = document.querySelector('#view1 [data-next="2"]');
-    if (!b || step !== 1) return;
+  function beaconNext(){ beaconCta(document.querySelector('#view1 [data-next="2"]'), 1); }
+  function beaconCta(b, onStep){
+    if (!b || b.disabled || step !== onStep) return;
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced || document.hidden) return;
     function stop(){
@@ -3541,6 +3544,46 @@
     ['pointerenter', 'focus', 'click'].forEach(function(ev){ b.addEventListener(ev, stop); });
     clearTimeout(beaconTimer);
     beaconTimer = setTimeout(stop, 9000);
+  }
+  var bookWatch = null, bookScrollWatch = null;
+  function dropBookWatch(){
+    if (bookWatch){ bookWatch.disconnect(); bookWatch = null; }
+    if (bookScrollWatch){
+      var sc = document.querySelector('.c-shell-content');
+      if (sc) sc.removeEventListener('scroll', bookScrollWatch);
+      bookScrollWatch = null;
+    }
+  }
+  function bookCtaOnScreen(){
+    var b = $('bookBtn');
+    if (!b) return false;
+    var r = b.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.height > 0 && r.top >= 0 && r.bottom <= vh;
+  }
+  function fireBookBeacon(){
+    dropBookWatch();
+    setTimeout(function(){ beaconCta($('bookBtn'), 4); }, 450);
+  }
+  /* An IntersectionObserver is the main watch; a rect check on arrival
+     and on scroll backs it up where an embedded browser never reports
+     intersections. */
+  function watchBookCta(){
+    dropBookWatch();
+    var b = $('bookBtn');
+    if (!b || b.disabled || booked) return;
+    if (bookCtaOnScreen()){ fireBookBeacon(); return; }
+    if ('IntersectionObserver' in window){
+      bookWatch = new IntersectionObserver(function(entries){
+        if (entries.some(function(e){ return e.isIntersecting; })) fireBookBeacon();
+      }, {threshold: .6});
+      bookWatch.observe(b);
+    }
+    var sc = document.querySelector('.c-shell-content');
+    if (sc){
+      bookScrollWatch = function(){ if (bookCtaOnScreen()) fireBookBeacon(); };
+      sc.addEventListener('scroll', bookScrollWatch, {passive: true});
+    }
   }
 
   /* Staggered AI fill — fields land one by one: text types in, numbers

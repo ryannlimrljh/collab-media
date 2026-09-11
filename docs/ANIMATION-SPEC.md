@@ -501,7 +501,7 @@ on a ghost button at opacity .14, rising to .26 on hover.
   `cubic-bezier(.22,1,.36,1)` and carry a travelling sheen
   (`background-position` loop, 1.8s) so a static bar still looks alive.
 
-## 9a. v2: the Next beacon after an AI fill
+## 9a. v2: the CTA beacon (Next after an AI fill, Confirm booking on arrival)
 
 When an AI fill finishes on step 1, `revealNextCta()` scrolls the
 footer into view (1000ms after the fill, smooth) and then, 650ms
@@ -511,7 +511,13 @@ indicator's own `p-ind-pulse` recipe: `box-shadow` from
 `0 0 0 0 rgba(8,8,8,.32)` to `0 0 0 12px` transparent) while its arrow
 icon nods down 3px at the 30% mark of each cycle. The beacon is a
 one-shot: the first `pointerenter`, `focus` or `click` on the button
-ends it, and so does a 9s timer, set just past the last ring. Reduced motion and hidden tabs skip
+ends it, and so does a 9s timer, set just past the last ring.
+
+The same beacon (`beaconCta(btn, step)`) fires on step 4's Confirm
+booking button. Opening step 4 arms an IntersectionObserver on the
+button (threshold .6); the first time it is at least 60% on screen the
+observer disconnects and, 450ms later, the button beacons. A booked or
+disabled button never beacons, and leaving step 4 drops the watch. Reduced motion and hidden tabs skip
 it entirely.
 
 ## 9b. v2 media mix: toggle choreography and the three shapes
