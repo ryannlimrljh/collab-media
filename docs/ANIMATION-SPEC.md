@@ -510,8 +510,8 @@ the rebuild** and **arrive after** it.
 | Toggle | Exit (before state change) | Entrance (after re-render) |
 |---|---|---|
 | Channel off | block: measure `getBoundingClientRect().height` into inline `height`, force reflow, add `is-leaving` (height/padding/margin/border to 0, opacity 0, 260ms `--ease-settle`), state change at 270ms | none (block is gone) |
-| Channel on | none | block `is-new`: `p-row-in` 260ms `--ease-settle` (opacity 0 + translateY(6px) to settled) |
-| Format added (chip) | chip `is-lifting`: scale .85 + opacity 0 over 160ms, state change at 150ms | row `is-new` (`p-row-in`), channel tile count `is-pop` (`p-chip-in` 240ms) |
+| Channel on | none | block grows in via `growIn(el)`: measured height, starts at 0 with padding, border and margin collapsed (`is-growing`), then transitions to full height over 300ms `--ease-settle` while fading in (`is-grown` keeps overflow clipped; inline styles cleared at 330ms) |
+| Format added (chip) | chip `is-lifting`: scale .85 + opacity 0 over 160ms, state change at 150ms | row grows in via `growIn` (same recipe), channel button count `is-pop` (`p-chip-in` 240ms) |
 | Format removed (row untick) | row `is-leaving` (same collapse as the block) | chip `is-new`: `p-chip-in` (scale .82 to 1, 220ms) |
 | Site pinned/unpinned | none | tag `is-pop`: the pin icon runs `p-chip-in`; icon swaps `ph` to `ph-fill` |
 | Dial drag | none; the block header sum updates in place via `syncBlockSums()` | none |

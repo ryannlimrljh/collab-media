@@ -535,6 +535,13 @@
   .c-chip.is-new, .p-site-chip.is-new{animation:p-chip-in 220ms var(--ease-settle) both;}
   .c-chip.is-lifting{opacity:0; transform:scale(.85);
     transition:opacity 160ms var(--ease-standard), transform 160ms var(--ease-standard);}
+  /* growing in: start collapsed (is-growing), then transition to the
+     measured height (is-grown keeps overflow clipped until settled) */
+  .p-chanblock.is-growing, .p-fmtrow.is-growing{box-sizing:border-box; overflow:hidden;
+    padding-top:0 !important; padding-bottom:0 !important; margin-top:0 !important;
+    margin-bottom:0 !important; border-top-width:0 !important; border-bottom-width:0 !important;
+    opacity:0;}
+  .p-chanblock.is-grown, .p-fmtrow.is-grown{box-sizing:border-box; overflow:hidden; opacity:1;}
   .p-chanblock.is-leaving, .p-fmtrow.is-leaving{box-sizing:border-box; overflow:hidden;
     height:0 !important; padding-top:0 !important; padding-bottom:0 !important;
     margin-top:0 !important; margin-bottom:0 !important; border-top-width:0 !important;
@@ -563,7 +570,7 @@
   .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
   .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
     padding:var(--spacing-12) var(--spacing-16);}
-  .p-chanblock.is-new{animation:p-row-in 260ms var(--ease-settle) both;}
+
   .p-chanblock-head{display:flex; justify-content:space-between; align-items:baseline;
     gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
   .p-chanblock-head h5{margin:0; font-size:var(--text-h5-size); font-weight:var(--text-h5-weight);}
@@ -587,7 +594,7 @@
     margin-left:auto;}
   .p-chan-add .c-chip-filter:hover, .p-chan-sites .c-chip-filter:hover:not(.is-active){background:var(--color-neutral-2);}
   @keyframes p-row-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
-  .p-fmtrow.is-new{animation:p-row-in 260ms var(--ease-settle) both;}
+
   .p-shelf{margin-top:var(--spacing-16); padding-top:var(--spacing-12);
     border-top:1px dotted var(--color-neutral-3);}
   .p-shelf-head{display:flex; justify-content:space-between; align-items:center;
@@ -2882,6 +2889,9 @@
       block.appendChild(runs);
       list.appendChild(block);
     });
+    /* new block or row: grow it in now that it has a real height */
+    var grown = list.querySelector('.p-chanblock.is-new') || list.querySelector('.p-fmtrow.is-new');
+    if (grown) growIn(grown);
     newFmt = null; newChan = null; newChip = null; popPin = null; popCount = null; revealChan = null;
 
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
@@ -2955,6 +2965,27 @@
       after.style.overflow = '';
       after.style.boxSizing = '';
     }, 320);
+  }
+  /* Entrance for a block or row that has just been rendered: it grows
+     from nothing to its measured height while fading in, so the rest
+     of the page slides rather than jumps. */
+  function growIn(el){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!el || reduced || document.hidden) return;
+    var h = el.getBoundingClientRect().height;
+    if (!h) return;
+    el.classList.add('is-growing');
+    el.style.height = '0px';
+    void el.offsetWidth;
+    el.style.transition = 'height 300ms var(--ease-settle), padding 300ms var(--ease-settle), border-width 300ms var(--ease-settle), margin 300ms var(--ease-settle), opacity 220ms var(--ease-standard) 60ms';
+    el.classList.remove('is-growing');
+    el.classList.add('is-grown');
+    el.style.height = h + 'px';
+    setTimeout(function(){
+      el.classList.remove('is-grown');
+      el.style.transition = '';
+      el.style.height = '';
+    }, 330);
   }
   function liftThen(el, fn){
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4472,11 +4503,13 @@
   $('briefCancel').addEventListener('click', closeBrief);
   $('briefVeil').addEventListener('click', closeBrief);
   $('briefSend').addEventListener('click', sendBrief);
+  /* Starters replace whatever is in the field; picking one is a
+     fresh start, not an addition. */
   $('briefTemplate').addEventListener('click', function(){
     var ta = $('briefText');
-    ta.value = ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n' + BRIEF_TEMPLATE : BRIEF_TEMPLATE;
+    ta.value = BRIEF_TEMPLATE;
     ta.focus();
-    var at = ta.value.indexOf('Campaign: ') + 'Campaign: '.length;
+    var at = 'Campaign: '.length;
     ta.setSelectionRange(at, at);
   });
   $('briefExample').addEventListener('click', function(){
