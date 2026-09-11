@@ -4796,20 +4796,43 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var labels = {};
     var free = [];
     raw.split('\n').forEach(function(line){
-      var lm = /^\s*(campaign|campaign name|name|title|brand|advertiser|client|product|budget|dates?|flight|period|timing|objective|goal|kpi|target|audience|languages?|language)\s*[:\-\u2013]\s*(.+)$/i.exec(line);
+      var lm = /^\s*[-*\u2022\u2013]?\s*(campaign|campaign name|name|title|brand|advertiser|client|product|budget|dates?|flight|period|timing|objective|goal|kpi|target|audience|languages?|language)\s*[:\-\u2013]\s*(.+)$/i.exec(line);
       if (lm) labels[lm[1].toLowerCase()] = lm[2].trim();
       else if (line.trim()) free.push(line.trim());
     });
     var lower = raw.toLowerCase();
 
+    /* Amounts are written every which way in a real brief: 200k,
+       RM 1.2 million, 2.4mil, 95K. One scale reader for all of them. */
+    var SCALE = /^(k|m|mil|million|bil|billion|b)$/i;
+    function scaled(numStr, sufStr){
+      var amt = parseFloat(String(numStr).replace(/,/g, ''));
+      var suf = String(sufStr || '').toLowerCase();
+      if (!isFinite(amt)) return 0;
+      if (suf === 'k') amt *= 1e3;
+      else if (suf === 'm' || suf === 'mil' || suf === 'million') amt *= 1e6;
+      else if (suf === 'b' || suf === 'bil' || suf === 'billion') amt *= 1e9;
+      return amt;
+    }
+
     /* Budget: RM first, then "budget ... 200k". */
-    var bm = /rm\s*([\d][\d.,]*)\s*(k|m)?\b/i.exec(raw) ||
-      /budget[^\d]{0,24}([\d][\d.,]*)\s*(k|m)?\b/i.exec(raw);
+    /* A number is digits with thousands commas; a decimal point only
+       counts when digits follow it, so "2026." is 2026 and the full
+       stop stays a full stop. The gap in a "working media" phrase may
+       not cross a sentence end either. */
+    var NUM = '([\\d][\\d,]*(?:\\.\\d+)?)';
+    var SUF = '(k|m|mil|million|bil|billion|b)?';
+    var GAP = '[^\\d.!?\\n]{0,8}';
+    /* "110k is the working media number" states the figure before the
+       phrase; "working media is RM 1.2 million" after it. Read the
+       first shape first, and keep both gaps short enough that neither
+       can reach past the clause it belongs to. */
+    var bm = new RegExp('(?:rm\\s*)?' + NUM + '\\s*' + SUF + '[^\\d.!?\\n]{0,12}working\\s*media', 'i').exec(raw) ||
+      new RegExp('working\\s*media' + GAP + '(?:rm\\s*)?' + NUM + '\\s*' + SUF + '\\b', 'i').exec(raw) ||
+      new RegExp('rm\\s*' + NUM + '\\s*' + SUF + '\\b', 'i').exec(raw) ||
+      new RegExp('budget' + GAP + NUM + '\\s*' + SUF + '\\b', 'i').exec(raw);
     if (bm){
-      var amt = parseFloat(bm[1].replace(/,/g, ''));
-      var suf = (bm[2] || '').toLowerCase();
-      if (suf === 'k') amt *= 1000;
-      if (suf === 'm') amt *= 1000000;
+      var amt = scaled(bm[1], bm[2]);
       if (amt > 0){ got.budget = Math.round(amt); got._src.budget = bm[0].trim(); }
     }
 
@@ -4832,24 +4855,52 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         got.start = isoOf(d1); got.end = isoOf(d2);
         got._src.dates = rm2[0].trim();
       }
-    } else {
-      var wk = /(\d+)\s*-?\s*(week|wk)s?\b/i.exec(raw) || /(\d+)\s*-?\s*(month)s?\b/i.exec(raw);
+    }
+    /* 15/9 to 6/10, with or without a year. */
+    if (!got.start){
+      var sl = /(\d{1,2})\s*\/\s*(\d{1,2})(?:\s*\/\s*(\d{2,4}))?\s*(?:to|until|till|through|-|\u2013|\u2014)\s*(\d{1,2})\s*\/\s*(\d{1,2})(?:\s*\/\s*(\d{2,4}))?/.exec(dateSrc);
+      if (sl){
+        var yr = function(y){ if (!y) return null; y = parseInt(y, 10); return y < 100 ? 2000 + y : y; };
+        var now = new Date();
+        var y1 = yr(sl[3]) || yr(sl[6]) || now.getFullYear();
+        var a = new Date(y1, parseInt(sl[2], 10) - 1, parseInt(sl[1], 10));
+        var b = new Date(yr(sl[6]) || y1, parseInt(sl[5], 10) - 1, parseInt(sl[4], 10));
+        if (!isNaN(a) && !isNaN(b)){
+          if (b < a) b.setFullYear(b.getFullYear() + 1);
+          if (!sl[3] && !sl[6] && a < now) { a.setFullYear(a.getFullYear() + 1); b.setFullYear(b.getFullYear() + 1); }
+          got.start = isoOf(a); got.end = isoOf(b);
+          got._src.dates = sl[0].trim();
+        }
+      }
+    }
+    if (!got.start){
+      /* A duration, in digits or in words, and it may name the day it
+         starts from ("5 weeks starting 1 Dec"). */
+      var WORDNUM = {one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, twelve:12,
+        satu:1, dua:2, tiga:3, empat:4, lima:5, enam:6};
+      var wk = /(\d+|one|two|three|four|five|six|seven|eight|nine|ten|twelve|satu|dua|tiga|empat|lima|enam)\s*-?\s*(week|wk|month|minggu|bulan)s?\b/i.exec(raw);
       if (wk){
-        var days = parseInt(wk[1], 10) * (/month/i.test(wk[2]) ? 30 : 7);
-        var s0 = new Date(); s0.setDate(s0.getDate() + 14);
+        var qty = parseInt(wk[1], 10);
+        if (isNaN(qty)) qty = WORDNUM[wk[1].toLowerCase()] || 0;
+        var days = qty * (/month|bulan/i.test(wk[2]) ? 30 : 7);
+        var from = /(?:start(?:ing|s)?|from|kick(?:ing)? off|live|mula(?:i|kan)?|bermula)\s*(?:on\s*|pada\s*)?(\d{1,2}\s*(?:st|nd|rd|th)?\s*[a-z]{3,9}\.?(?:\s*\d{4})?)/i.exec(raw);
+        var s0 = (from && parseDayMonth(from[1])) || null;
+        if (!s0){ s0 = new Date(); s0.setDate(s0.getDate() + 14); }
         var e0 = new Date(s0); e0.setDate(e0.getDate() + days);
         got.start = isoOf(s0); got.end = isoOf(e0);
-        got._src.dates = wk[0].trim() + ', starting two weeks from today';
+        got._src.dates = wk[0].trim() + (from ? ', from ' + from[1].trim() : ', starting two weeks from today');
       }
     }
 
-    /* Target with a unit. */
-    var tm = /([\d][\d.,]*)\s*(k|m)?\s*(people|reach|viewers|views|completions|sign-?ups|registrations|leads|visits|visitors|attendees|footfall)\b/i.exec(labels.target || labels.kpi || raw);
+    /* Target with a unit. Briefs rarely put the number next to the
+       word that names it: "25,000 store visits", "2.4m video
+       completions", "1.8 million people reached". Allow a couple of
+       describing words in between, but not a sentence. */
+    var tm = new RegExp(NUM + '\\s*' + SUF +
+      '\\s*(?:[a-z][a-z-]*\\s+){0,2}(people|reach|reached|viewers|views|completions|sign-?ups|registrations|leads|visits|visitors|attendees|footfall)\\b',
+      'i').exec(labels.target || labels.kpi || raw);
     if (tm){
-      var tv = parseFloat(tm[1].replace(/,/g, ''));
-      var ts = (tm[2] || '').toLowerCase();
-      if (ts === 'k') tv *= 1000;
-      if (ts === 'm') tv *= 1000000;
+      var tv = scaled(tm[1], tm[2]);
       var tu = tm[3].toLowerCase();
       got.target = Math.round(tv);
       got._src.target = tm[0].trim();
@@ -4878,7 +4929,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     }
     if (!got.brand && window.collabBrand){
       var seen = {};
-      raw.split(/[^A-Za-z'&]+/).forEach(function(w){
+      /* Accented names (Nestlé, Lancôme) are one word, not two. */
+      raw.split(/[^A-Za-z\u00C0-\u024F'&]+/).forEach(function(w){
         if (got.brand || w.length < 3 || seen[w]) return;
         seen[w] = 1;
         if (/^[A-Z]/.test(w) && collabBrand.known(w) &&
@@ -4890,7 +4942,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     got.prod = labels.product || '';
     if (got.prod) got._src.prod = 'the Product line';
     if (!got.prod){
-      var pm = /\b(?:launch(?:ing)?|promot(?:e|ing)|push(?:ing)?|selling|for the)\s+(?:of\s+)?(?:the\s+|our\s+|a\s+|its\s+)?([^.,\n]{3,60}?)(?=[.,\n]|\s+(?:with|for|in|on|across|running|from)\b|$)/i.exec(raw);
+      var pm = /\b(?:launch(?:ing)?|promot(?:e|ing)|push(?:ing)?|selling|for the)\s+(?:of\s+|for\s+)?(?:the\s+|our\s+|a\s+|its\s+)?([^.,\n]{3,60}?)(?=[.,\n]|\s+(?:with|for|in|on|across|running|from)\b|$)/i.exec(raw);
       if (pm){ got.prod = pm[1].trim(); got._src.prod = 'what your notes say you are launching'; }
     }
 
@@ -4898,9 +4950,27 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     got.name = labels.campaign || labels['campaign name'] || labels.name || labels.title || '';
     if (got.name) got._src.name = 'the Campaign line';
     if (!got.name && free.length){
-      /* the first sentence of the first line, if it reads like a title */
-      var first = free[0].split(/[.!?]\s/)[0].replace(/[.!?]$/, '').trim();
-      if (first.length >= 4 && first.length <= 70 && !/^(we|our|the|this|i|it)\b/i.test(first)){ got.name = first; got._src.name = 'the first sentence of your notes'; }
+      /* The first line that reads like a title. Housekeeping lines —
+         a note, a greeting, a forwarding header — are not one. */
+      var SKIP = /^(note|nb|ps|fyi|hi|hey|hello|dear|thanks|cheers|regards|from|to|subject|forwarded|attached|cc|bcc)\b/i;
+      var cand = '';
+      for (var fi = 0; fi < free.length && !cand; fi++){
+        var line = free[fi].replace(/^["'\u201c\u2018]+/, '');
+        /* Housekeeping lines are judged before any opener is stripped,
+           or "Note:" would look like a title with a prefix. */
+        if (SKIP.test(line.trim())) continue;
+        var first = line.split(/[.!?]\s/)[0]
+          .replace(/[.!?,]$/, '')
+          /* Drop a short opener: "Quick one:", "Guys,", "So," */
+          .replace(/^[A-Za-z][A-Za-z ]{0,18}:\s*/, '')
+          .replace(/^(guys|team|ok|okay|so|right|alright)\b[,:]\s*/i, '')
+          .trim();
+        /* A sentence about money or metrics states a fact; it is not
+           what the campaign is called. */
+        if (/\brm\s*[\d]|\bbudget\b|\bwe (?:want|need|are looking)\b/i.test(first)) continue;
+        if (first.length >= 4 && first.length <= 70 && !/^(we|our|the|this|i|it)\b/i.test(first)) cand = first;
+      }
+      if (cand){ got.name = cand; got._src.name = 'the first line that reads like a title'; }
     }
     if (!got.name){
       var bits = [];
@@ -4999,6 +5069,31 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     });
   }
   /* A detailed example, the multi-line cousin of tryLine. */
+  /* Briefs as they actually arrive: forwarded mail, a phone message,
+     a bulleted list, two languages at once, amounts written three
+     different ways. Each one is here because it exercises a different
+     corner of parseBriefText; every one is checked to fill the form
+     cleanly. The Try-an-example pool draws from these and from the
+     tidy TRY_BRIEFS above. */
+  var TRY_PROSE = [
+    /* A forwarded client mail: a quote inside a quote, a word duration, a stated start. */
+    'Forwarded from client:\n\n"AEON Mega Home Sale is back this year. Budget is 180k working media. Six weeks starting 12 October 2026. We measure footfall, target 25,000 store visits across the Klang Valley stores. Please cover Malay, English and Mandarin."\n\nArtwork sizes to follow.',
+    /* A message off a phone: slash dates, no spaces, no labels. */
+    'Quick one from Grab: Merdeka promo. RM95k, 15/9 to 6/10. Conversion, 12,000 sign-ups. BM + English.',
+    /* Two amounts, one of them the working media number; millions written out. */
+    'Petronas Mesra Rewards relaunch.\n\nThe app has been rebuilt and we need the market to notice. Total campaign cost is RM 1.5 million including production, working media is RM 1.2 million. Live from 3 November through 14 December 2026. Awareness is the priority, ideally 1.8 million people reached. Malay and English creative only.',
+    /* A bulleted list, labels behind dashes. */
+    'Lazada Payday Fiesta\n- Budget: RM 320,000\n- Dates: 1 Nov 2026 to 30 Nov 2026\n- Objective: conversion, 20,000 registrations\n- Languages: English, Bahasa Malaysia, Chinese\n- Note: heavy on social video, keep some budget for OTT',
+    /* A clean label block with a trailing instruction that is not part of the brief. */
+    'Client: Maxis\nProduct: 5G Home Fibre bundle\nBudget: RM 145k\nDates: 20 Oct 2026 - 30 Nov 2026\nObjective: lead generation, 7,500 registrations\nLanguages: English, Malay\nNote: no radio, please skew digital.',
+    /* Half Bahasa Malaysia, half English, the way a Malaysian brief is really written. */
+    'Toyota Vios facelift launch.\n\nKempen ini nak push test drive booking. Budget RM 260,000, 5 minggu mula 1 Dec 2026. Conversion, target 3,000 sign-ups. Bahasa Malaysia dan English, plus Chinese for the urban market.',
+    /* An event circuit: a duration in months and a head count. */
+    'Guinness St Patrick\'s circuit 2026\n\nWe are taking the festival to four cities. Working media RM 230,000. Two months from 2 March 2026. Awareness, we want 40,000 attendees across the circuit. English and Chinese.',
+    /* Thinking out loud, lower case, hedged numbers. */
+    'ok so Cuckoo wants a big push for the new water purifier range, the one with the app.\n\nthey said 110k is the working media number, maybe 6 weeks, starting 5 Jan 2027. it\'s a consideration play, they want 850,000 video completions. BM, English, Mandarin and Tamil please.'
+  ];
+
   function tryText(b){
     var s0 = new Date(); s0.setDate(s0.getDate() + 14);
     var e0 = new Date(s0); e0.setDate(e0.getDate() + (b.weeks || 3) * 7);
@@ -5332,12 +5427,15 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
      the pill beside it. */
   $('aiInviteBtn').addEventListener('click', function(){ openBrief(); });
 
-  $('briefAiTry').addEventListener('click', function(){
-    var idx;
-    do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
+  /* One pool for both doors: the tidy generated briefs and the messy
+     real-world ones, never the same sample twice running. */
+  function pickSample(){
+    var n = TRY_BRIEFS.length + TRY_PROSE.length, idx;
+    do { idx = Math.floor(Math.random() * n); } while (idx === lastTryIdx && n > 1);
     lastTryIdx = idx;
-    openBrief(tryText(TRY_BRIEFS[idx]));
-  });
+    return idx < TRY_BRIEFS.length ? tryText(TRY_BRIEFS[idx]) : TRY_PROSE[idx - TRY_BRIEFS.length];
+  }
+  $('briefAiTry').addEventListener('click', function(){ openBrief(pickSample()); });
   /* Clicking into the field turns a running seed into editable text.
      Pointerdown covers embedded browsers where focus never fires. */
   function unghost(e){
@@ -5639,10 +5737,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     ta.setSelectionRange(at, at);
   });
   $('briefExample').addEventListener('click', function(){
-    var idx;
-    do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
-    lastTryIdx = idx;
-    $('briefText').value = tryText(TRY_BRIEFS[idx]);
+    $('briefText').value = pickSample();
     syncBriefHL();
     $('briefText').focus();
   });
