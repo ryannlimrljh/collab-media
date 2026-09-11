@@ -765,10 +765,15 @@ grid as the ask above it (equal halves, spacing-32 apart) but carries
 the measure only exists because of the objective. So one section
 label, "The goal", spans both. Left: the objective, asked as "What
 should this campaign do?", each option carrying a plain-words
-description in its dropdown row (`.p-dd-desc`). Right, under a
-label-weight heading "How we will know it worked": the measure, with
-what we count spanning the half and how many / counted in sharing the
-row beneath. Under 900px the columns stack. Picking an
+description in its dropdown row (`.p-dd-desc`). Right: the measure, its
+first field labelled "How we will know it worked" and spanning the
+half, with how many / counted in sharing the row beneath. Both
+columns open on a `.p-goal-lab` row of the same fixed 24px height —
+the right one also carries the "Set from your objective" badge — so
+the two first fields sit on one line whether the badge is showing or
+not. No group heading over the right column: an extra row there
+pushed every field below it out of line with the left. Under 900px
+the columns stack. Picking an
 objective fills the KPI and unit from `GOAL_MEASURE` (the same map the
 AI fill uses) and shows a "Set from your objective" badge; picking a
 KPI sets its own unit from `KPI_UNIT`. The moment anyone sets a KPI or

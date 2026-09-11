@@ -245,9 +245,11 @@
   .p-goal-cols{display:grid; grid-template-columns:1fr 1fr; gap:0;}
   .p-goal-cols > :first-child{padding-right:var(--spacing-32);}
   .p-goal-cols > :last-child{padding-left:var(--spacing-32);}
-  .p-goal-head{display:flex; align-items:center; gap:var(--spacing-8);
-    flex-wrap:wrap; margin-bottom:var(--spacing-8); min-height:20px;}
-  .p-goal-head .t{font-size:var(--text-label1-size); font-weight:var(--text-label1-weight);}
+  /* Both columns open on a label row of the same fixed height, so the
+     two first fields sit on one line however tall the badge is. */
+  .p-goal-lab{display:flex; align-items:center; gap:var(--spacing-8);
+    min-height:24px; flex-wrap:nowrap;}
+  .p-goal-lab > label{white-space:nowrap;}
   .p-goal-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-12);}
   .p-goal-row .p-goal-kpi{grid-column:1 / -1;}
   @media (max-width:900px){
@@ -1352,7 +1354,8 @@
                 <span class="c-stat-label">The goal</span>
                 <div class="p-goal-cols">
                   <div>
-                    <div class="c-field c-dropdown-field" data-dd="b-obj"><label for="b-obj">What should this campaign do?</label>
+                    <div class="c-field c-dropdown-field" data-dd="b-obj">
+                      <span class="p-goal-lab"><label for="b-obj">What should this campaign do?</label></span>
                       <div class="input-wrap has-trailing-icon">
                         <input type="text" class="c-dropdown-input" id="b-obj" placeholder="Select objective" readonly />
                         <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
@@ -1362,12 +1365,10 @@
                     </div>
                   </div>
                   <div>
-                    <div class="p-goal-head">
-                      <span class="t">How we will know it worked</span>
-                      <span class="c-badge c-badge-neutral" id="kpiAuto" hidden>Set from your objective</span>
-                    </div>
                     <div class="p-goal-row">
-                      <div class="c-field c-dropdown-field p-goal-kpi" data-dd="b-kpi"><label for="b-kpi">What we count</label>
+                      <div class="c-field c-dropdown-field p-goal-kpi" data-dd="b-kpi">
+                        <span class="p-goal-lab"><label for="b-kpi">How we will know it worked</label>
+                          <span class="c-badge c-badge-neutral" id="kpiAuto" hidden>Set from your objective</span></span>
                         <div class="input-wrap has-trailing-icon">
                           <input type="text" class="c-dropdown-input" id="b-kpi" placeholder="Pick an objective first" readonly />
                           <span class="icon-trailing" aria-hidden="true"><i class="ph ph-caret-down c-dropdown-chevron"></i></span>
