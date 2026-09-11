@@ -673,6 +673,17 @@ the evidence modal.
 Reduced motion removes the transition. The card is `role="dialog"`,
 non-modal, with `aria-labelledby` on its title.
 
+**In the review step** the same three reasonings stand side by side
+in a "Why this plan" block: three bordered columns (brief, audience,
+mix) composed from the identical parts as the cards, rows stacked
+name over reason so the columns stay narrow, one column per row on
+screens under 900px. Each column carries a source badge, AI draft or
+You. Where the user overrode a step, the column keeps the catalogue
+evidence and swaps the rule line for "Your pick" / "Your mix", with
+the shares reported as set; mass targeting and a hand-entered brief
+get a one-line "Your choice" rule instead of rows. The columns
+re-render with the summary. No motion of their own.
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.

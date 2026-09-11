@@ -513,32 +513,43 @@
     transition:opacity var(--duration-base) var(--ease-standard),
       transform var(--duration-base) var(--ease-settle);}
   .p-whypop.is-open{opacity:1; transform:none; pointer-events:auto;}
-  .p-whypop .head{display:flex; align-items:flex-start; gap:var(--spacing-12);
+  .p-why .head{display:flex; align-items:flex-start; gap:var(--spacing-12);
     padding:var(--spacing-16) var(--spacing-16) var(--spacing-12);}
-  .p-whypop .head h5{margin:0; font-size:var(--text-h5-size); font-weight:700;}
-  .p-whypop .head .sub{margin:2px 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .p-whypop .head .c-icon-btn{margin-left:auto; flex:none;}
-  .p-whypop .scroll{max-height:min(60vh, 520px); overflow:auto; overscroll-behavior:contain;}
-  .p-whypop .inputs{display:flex; flex-wrap:wrap; gap:var(--spacing-4);
+  .p-why .head h5{margin:0; font-size:var(--text-h5-size); font-weight:700;}
+  .p-why .head .sub{margin:2px 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .p-why .head .c-icon-btn{margin-left:auto; flex:none;}
+  .p-why .scroll{max-height:min(60vh, 520px); overflow:auto; overscroll-behavior:contain;}
+  .p-why .inputs{display:flex; flex-wrap:wrap; gap:var(--spacing-4);
     padding:0 var(--spacing-16) var(--spacing-12);}
-  .p-whypop .inputs .lab{width:100%; font-size:10px; line-height:12px; letter-spacing:.04em;
+  .p-why .inputs .lab{width:100%; font-size:10px; line-height:12px; letter-spacing:.04em;
     text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-bottom:2px;}
-  .p-whypop .rule{margin:0; padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
+  .p-why .rule{margin:0; padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
     font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
-  .p-whypop .rule b{font-weight:700;}
-  .p-whypop .row{display:grid; grid-template-columns:132px 1fr; gap:var(--spacing-12);
+  .p-why .rule b{font-weight:700;}
+  .p-why .row{display:grid; grid-template-columns:132px 1fr; gap:var(--spacing-12);
     padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);}
-  .p-whypop .row .k{font-size:var(--text-caption-size); font-weight:700; line-height:var(--text-caption-lh);}
-  .p-whypop .row .k .ev{display:block; margin-top:2px; font-weight:400; color:var(--color-neutral-5);
+  .p-why .row .k{font-size:var(--text-caption-size); font-weight:700; line-height:var(--text-caption-lh);}
+  .p-why .row .k .ev{display:block; margin-top:2px; font-weight:400; color:var(--color-neutral-5);
     font-variant-numeric:tabular-nums;}
-  .p-whypop .row .r{margin:0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh);
+  .p-why .row .r{margin:0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh);
     color:var(--color-neutral-9);}
-  .p-whypop .row .r .src{color:var(--color-neutral-5);}
-  .p-whypop .row .r .src q{quotes:'\201C' '\201D';}
-  .p-whypop .foot{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);
+  .p-why .row .r .src{color:var(--color-neutral-5);}
+  .p-why .row .r .src q{quotes:'\201C' '\201D';}
+  .p-why .foot{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);
     padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
     font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   @media (prefers-reduced-motion:reduce){ .p-whypop{transition:none;} }
+  /* Review: the same reasoning, three columns side by side so the
+     brief, the audience and the mix can be read against each other. */
+  .p-whygrid{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacing-16);
+    margin-top:var(--spacing-16); align-items:start;}
+  .p-whycol{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); overflow:hidden; min-width:0;}
+  .p-whycol .head{flex-wrap:wrap;}
+  .p-whycol .head .c-badge{margin-left:auto; flex:none;}
+  .p-whycol .row{grid-template-columns:1fr; gap:var(--spacing-4);}
+  .p-whycol .inputs{padding-top:0;}
+  @media (max-width:900px){ .p-whygrid{grid-template-columns:1fr;} }
   .p-persona-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);
     align-items:start;}
   @media (max-width:640px){ .p-persona-row{grid-template-columns:1fr;} }
@@ -1552,6 +1563,15 @@
 
             <div class="p-block">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <h4>Why this plan</h4>
+                <span class="p-picker-sub">The reasoning behind each step, side by side</span>
+              </div>
+              <p>What was read, the rule applied, and the evidence behind each pick. Where you overrode Collab AI, the same evidence is shown for your choice.</p>
+              <div class="p-whygrid" id="summaryWhy"></div>
+            </div>
+
+            <div class="p-block">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>Budget by format</h4>
                 <span class="p-picker-sub" id="sumBudgetLabel"></span>
               </div>
@@ -1783,7 +1803,7 @@
   </div>
 </div>
 
-<div class="p-whypop" id="whyPop" role="dialog" aria-modal="false" aria-labelledby="whyPopTitle" aria-hidden="true"></div>
+<div class="p-whypop p-why" id="whyPop" role="dialog" aria-modal="false" aria-labelledby="whyPopTitle" aria-hidden="true"></div>
 <div class="p-audpeek" id="audPeek" aria-hidden="true"><div class="pic"><img id="audPeekArt" alt="" /></div><div class="body"><div class="lbl"><span id="audPeekName"></span><span class="fam" id="audPeekSize"></span></div><p class="sub" id="audPeekSub"></p><p class="desc" id="audPeekDesc"></p><div class="bars" id="audPeekBars"></div><p class="fit" id="audPeekFit"></p><p class="meta" id="audPeekMeta"></p></div></div>
 <div class="p-fmtpeek" id="fmtPeek" aria-hidden="true"><div class="fp-stage" id="fmtPeekStage"></div><div class="lbl"><span id="fmtPeekName"></span><span class="fam" id="fmtPeekFam"></span></div></div>
 <div class="c-toast-host" id="toastHost"></div>
@@ -3020,7 +3040,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     return '<div class="row"><div class="k">' + esc(k) + (ev ? '<span class="ev">' + esc(ev) + '</span>' : '') + '</div>' +
       '<p class="r">' + r + '</p></div>';
   }
-  function whyBrief(){
+  function partsBrief(){
     var g = lastBrief || {_src:{}, _defaults:[]}, src = g._src || {};
     var rows = '';
     var field = function(label, value, key, how){
@@ -3041,15 +3061,24 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       g.kpi ? 'The unit sets the KPI: ' + g.kpi + '.' : '');
     field('Languages', g.langs && g.langs.length ? g.langs.join(', ') : '', 'langs');
     var defs = (g._defaults || []).map(function(d){ return '<li>' + esc(d) + '</li>'; }).join('');
-    return '<div class="head"><div><h5 id="whyPopTitle">Why these fields</h5><p class="sub">Each value and the line of your notes it came from.</p></div>' +
-      '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
-      '<div class="scroll">' + rows +
-      (defs ? '<p class="rule"><b>Starting points, not read from your notes.</b> Where the notes said nothing, the planner filled a default so the brief is complete: ' +
-        '<ul style="margin:var(--spacing-4) 0 0; padding-left:18px;">' + defs + '</ul>' +
-        'Dates default to a three-week run starting in two weeks. A target is sized from the budget at RM 30 per person reached, RM 1 per three views, or RM 75 per sign-up.</p>' : '') +
-      '</div><div class="foot"><span>Edit any field and the badge steps aside.</span></div>';
+    var own = !lastBrief || !briefAi;
+    return {
+      title: own ? 'The brief' : 'Why these fields',
+      sub: own ? 'Entered by hand.' : 'Each value and the line of your notes it came from.',
+      own: own,
+      body: (own ? whyInputs() + '<p class="rule"><b>Your words.</b> Nothing here was inferred; the audience and mix reasoning below reads from these values.</p>' : rows) +
+        (defs ? '<p class="rule"><b>Starting points, not read from your notes.</b> Where the notes said nothing, the planner filled a default so the brief is complete: ' +
+          '<ul style="margin:var(--spacing-4) 0 0; padding-left:18px;">' + defs + '</ul>' +
+          'Dates default to a three-week run starting in two weeks. A target is sized from the budget at RM 30 per person reached, RM 1 per three views, or RM 75 per sign-up.</p>' : ''),
+      foot: own ? '' : '<span>Edit any field and the badge steps aside.</span>'
+    };
   }
-  function whyPersonas(){
+  function partsPersonas(){
+    if (mode === 'mass'){
+      return {title:'The audience', sub:'Mass targeting: entire Malaysia, ' + fmt(audienceReach()) + ' after refiners.', own:true,
+        body: whyInputs() + '<p class="rule"><b>Your choice.</b> The whole footprint with no persona modelling; refiners are the only narrowing.</p>', foot:''};
+    }
+    var own = personaSource !== 'ai';
     var picked = selected.map(byId);
     var segs = {}; picked.forEach(function(p){ segs[p.id] = segmentFor(p.id); });
     var largest = picked.slice().sort(function(a, b){ return b.users - a.users; })[0];
@@ -3059,7 +3088,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var broad = /awareness|consideration/.test(o);
     var r = reach();
     var cats = {}; picked.forEach(function(p){ cats[p.cat] = 1; });
-    var rule = broad
+    var rule = own
+      ? '<b>Your pick.</b> The figures are the catalogue\'s, so the same evidence applies to whoever chose.' +
+        (broad ? '' : ' ' + objWord(o) + ' usually wants intent; an intent segment such as Automotive intent strengthens a response goal.')
+      : broad
       ? '<b>Rule.</b> ' + objWord(o) + ' asks for reach, so the pick favours broad entertainment and lifestyle segments over intent segments, and mixes categories so the audiences overlap as little as possible.'
       : '<b>Rule.</b> ' + objWord(o) + ' usually wants intent. These three are reach segments; add an intent segment such as Automotive intent or Finance & investing if the goal is a response.';
     var rows = '';
@@ -3077,13 +3109,13 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var t = parseInt($('b-target').value, 10) || 0;
     var together = 'Together ' + fmt(r.uniq) + ' unique reach after ' + r.pct + '% overlap across ' + Object.keys(cats).length + ' categor' + (Object.keys(cats).length > 1 ? 'ies' : 'y') +
       (t && $('b-kpi').value === 'Net reach' ? (r.uniq >= t ? ', which clears your ' + fmt(t) + ' target.' : ', short of your ' + fmt(t) + ' target; widen or add a segment.') : '.');
-    return '<div class="head"><div><h5 id="whyPopTitle">Why these personas</h5><p class="sub">' + esc(together) + '</p></div>' +
-      '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
-      '<div class="scroll">' + whyInputs() + '<p class="rule">' + rule + '</p>' + rows + '</div>' +
-      '<div class="foot"><span>Swap any of them; your pick is kept.</span>' +
-      '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button></div>';
+    return {title: own ? 'The audience' : 'Why these personas', sub: picked.length ? together : 'No personas picked.', own: own,
+      body: whyInputs() + '<p class="rule">' + rule + '</p>' + rows,
+      foot: (own ? '<span>Your pick, kept as is.</span>' : '<span>Swap any of them; your pick is kept.</span>') +
+        '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button>'};
   }
-  function whyMix(){
+  function partsMix(){
+    var own = mixSource !== 'ai' || splitTouched;
     var on = onFormats(), b = budget();
     var totalW = 0; on.forEach(function(f){ totalW += f.w; });
     var picked = selected.map(byId);
@@ -3092,13 +3124,14 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var avg = function(a){ return a.length ? Math.round(a.reduce(function(x, y){ return x + y; }, 0) / a.length) : 0; };
     var o = ddVal('b-obj') || 'awareness';
     var videoShare = 0; on.forEach(function(f){ if (f.video) videoShare += split[f.id] || 0; });
-    var rule = '<b>Rule.</b> ' + objWord(o) + ' with ' + (picked.length ? 'personas who watch video at ' + avg(vids) + '% and live on social at ' + avg(socs) + '%' : 'no personas yet') +
+    var rule = (own ? '<b>Your mix.</b> ' : '<b>Rule.</b> ') + objWord(o) + ' with ' + (picked.length ? 'personas who watch video at ' + avg(vids) + '% and live on social at ' + avg(socs) + '%' : 'no personas yet') +
       ' points to a video-led mix: on Astro social, video content engages at 3.25% against 1.40% for image. ' +
       (b ? Math.round(videoShare / b * 100) + '% of the budget sits in video formats. ' : '') +
-      'Each format takes a share by its weight for this objective, and the whole budget is placed.';
+      (own ? (splitTouched ? 'The split is yours; shares below are as you set them.' : 'Formats are yours; shares follow each format\'s weight.')
+           : 'Each format takes a share by its weight for this objective, and the whole budget is placed.');
     var rows = '';
     on.forEach(function(f){
-      var amt = split[f.id] || 0, sh = totalW ? Math.round(f.w / totalW * 100) : 0;
+      var amt = split[f.id] || 0, sh = b ? Math.round(amt / b * 100) : (totalW ? Math.round(f.w / totalW * 100) : 0);
       var why = f.video
         ? (f.cpm <= 10 ? 'The cheapest video on the card at ' + cpmFmt(f.cpm) + ' CPM, on the channel these personas use most.' : 'Premium video at ' + cpmFmt(f.cpm) + ' CPM for completed views in a brand-safe slot.')
         : 'Low-cost ' + f.ch.toLowerCase() + ' display at ' + cpmFmt(f.cpm) + ' CPM to add frequency and cover sessions without video.';
@@ -3116,16 +3149,30 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
           ' Pinned so the optimiser cannot move budget off them.'));
     }
     var fc = forecast();
-    return '<div class="head"><div><h5 id="whyPopTitle">Why this mix</h5><p class="sub">' +
-      esc(rm(fc.alloc) + ' placed at a blended ' + rm(fc.blended) + ' CPM: ' + fmt(fc.imps) + ' impressions, ' + fmt(fc.reach) + ' reach at ' + fc.freq + ' frequency.') + '</p></div>' +
+    return {title: own ? 'The mix' : 'Why this mix', own: own,
+      sub: rm(fc.alloc) + ' placed at a blended ' + rm(fc.blended) + ' CPM: ' + fmt(fc.imps) + ' impressions, ' + fmt(fc.reach) + ' reach at ' + fc.freq + ' frequency.',
+      body: whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + '<p class="rule">' + rule + '</p>' + rows,
+      foot: own ? '<span>Your mix, kept as is. Restore AI draft brings the recommendation back.</span>' : '<span>Override any of it; the draft is one click away.</span>'};
+  }
+  function whyCard(parts){
+    return '<div class="head"><div><h5 id="whyPopTitle">' + esc(parts.title) + '</h5><p class="sub">' + esc(parts.sub) + '</p></div>' +
       '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
-      '<div class="scroll">' + whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + '<p class="rule">' + rule + '</p>' + rows + '</div>' +
-      '<div class="foot"><span>Override any of it; the draft is one click away.</span></div>';
+      '<div class="scroll">' + parts.body + '</div>' +
+      (parts.foot ? '<div class="foot">' + parts.foot + '</div>' : '');
+  }
+  function whyColumn(parts){
+    return '<div class="p-whycol p-why"><div class="head"><div><h5>' + esc(parts.title) + '</h5><p class="sub">' + esc(parts.sub) + '</p></div>' +
+      '<span class="' + (parts.own ? 'c-badge c-badge-neutral' : 'c-badge p-ai-badge') + '">' + (parts.own ? 'You' : 'AI draft') + '</span></div>' +
+      parts.body + (parts.foot ? '<div class="foot">' + parts.foot + '</div>' : '') + '</div>';
+  }
+  function renderSummaryWhy(){
+    var host = $('summaryWhy'); if (!host) return;
+    host.innerHTML = whyColumn(partsBrief()) + whyColumn(partsPersonas()) + whyColumn(partsMix());
   }
   function openWhyPop(trig, kind){
     if (whyPop.classList.contains('is-open') && whyTrig === trig){ closeWhyPop(); return; }
     whyTrig = trig;
-    whyPop.innerHTML = kind === 'brief' ? whyBrief() : kind === 'personas' ? whyPersonas() : whyMix();
+    whyPop.innerHTML = whyCard(kind === 'brief' ? partsBrief() : kind === 'personas' ? partsPersonas() : partsMix());
     whyPop.setAttribute('aria-hidden', 'false');
     var r = trig.getBoundingClientRect();
     whyPop.style.left = '0px'; whyPop.style.top = '0px';
@@ -3151,6 +3198,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     e.stopPropagation();
     if (e.target.closest('[data-whyclose]')) closeWhyPop();
     if (e.target.closest('[data-whyevidence]')){ closeWhyPop(); openWhy(); }
+  });
+  $('summaryWhy').addEventListener('click', function(e){
+    if (e.target.closest('[data-whyevidence]')) openWhy();
   });
   document.addEventListener('click', function(){ closeWhyPop(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeWhyPop(); });
@@ -3939,6 +3989,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       return '<span class="c-chip c-chip-input"><i class="ph-fill ph-push-pin icon" style="font-size:12px;"></i> ' +
         s.name + ' · ' + s.ch + '</span>';
     }).join('') : '<span class="p-note">No must-buys, so the optimiser buys freely across the pool.</span>';
+    renderSummaryWhy();
 
   }
 
