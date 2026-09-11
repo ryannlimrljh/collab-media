@@ -564,9 +564,6 @@
   /* v2 funnel: one block per kept channel, holding its rows, its
      add-chips and the sites it runs on, so a choice up top visibly
      opens the things it governs. */
-  .p-blocks-tools{display:flex; justify-content:flex-end; align-items:center;
-    gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
-  .p-blocks-tools:empty, .p-blocks-tools:has(> [hidden]:only-child){display:none;}
   .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
   .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
     padding:var(--spacing-12) var(--spacing-16);}
@@ -600,10 +597,6 @@
   .p-shelf-head{display:flex; justify-content:space-between; align-items:center;
     gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
   .p-shelf-head .c-stat-label{margin:0;}
-  .p-shelf-search{width:min(260px, 100%);}
-  .p-shelf-search i{position:absolute; left:12px; color:var(--color-neutral-5);
-    font-size:var(--icon-sm); pointer-events:none;}
-  .p-shelf-search input{height:32px; padding-left:34px;}
   .p-shelf-group{margin-top:var(--spacing-8);}
   .p-shelf-lab{display:flex; align-items:baseline; gap:var(--spacing-8);
     margin-bottom:var(--spacing-4); font-size:var(--text-caption-size); font-weight:700;
@@ -1312,12 +1305,6 @@
                   <button class="c-btn c-btn-ghost c-btn-sm" id="splitReset" type="button" hidden style="flex:none;">
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
-                </div>
-                <div class="p-blocks-tools">
-                  <div class="c-search-input-box p-shelf-search" id="shelfSearchWrap" hidden>
-                    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                    <input type="search" id="shelfSearch" placeholder="Find a format" aria-label="Find a format" autocomplete="off" />
-                  </div>
                 </div>
                 <div class="p-chanblocks" id="formatList"></div>
               </div>
@@ -2784,10 +2771,7 @@
     var b = budget();
     $('splitBudgetLabel').textContent = rm(b) +
       ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
-    var rest = FORMATS.filter(function(f){ return !f.on && chanAllows(f.ch); });
-    var wrap = $('shelfSearchWrap');
-    if (wrap) wrap.hidden = rest.length <= 12;
-    var q = shelfQuery.trim().toLowerCase();
+    var q = '';
 
     CH_ORDER.filter(function(c){ return chanOn.indexOf(c) > -1; }).forEach(function(c){
       var mix = FORMATS.filter(function(f){ return f.on && f.ch === c; });
@@ -2930,7 +2914,7 @@
   var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
   var CH_ICON = {TV:'ph ph-television', Radio:'ph ph-radio', OTT:'ph ph-monitor-play',
     Web:'ph ph-globe', Social:'ph ph-share-network'};
-  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null, revealChan = null;
+  var shelfOpen = {}, newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null, revealChan = null;
   /* Exit before rebuild: measure, collapse, then let the caller change
      state and re-render. Reduced motion and hidden tabs go straight through. */
   function leaveThen(el, fn){
@@ -3033,11 +3017,6 @@
         renderAll();
         markSaved();
       });
-    });
-    var search = $('shelfSearch');
-    if (search) search.addEventListener('input', function(){
-      shelfQuery = search.value;
-      renderFormats();
     });
   })();
 
