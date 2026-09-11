@@ -552,6 +552,43 @@ squared TAGS (`p-site-chip`, Neutral-2, leading pin that fills when
 active). The Add and Runs on labels share a fixed 88px column so the
 first pill of each row lines up.
 
+## 9c. Audience pull: what each pill draws from the universe
+
+Step 2 shows reach per pill and in total against the 16.15M Malaysia
+universe, under the persona chips, in a block called `#reachPull`.
+
+**Shapes.** Each persona chip (DLS Input Chip, 24px) carries a trailing
+`.count` with the segment's size (label2/400, Neutral-5, spacing-4 gap:
+the same lighter-than-label relationship the DLS gives the Filter Chip
+count). Under the chips: the headline unique reach (h3, tabular
+figures) with "unique reach" in label2/400 Neutral-5, on the right the
+share of the universe as caption with the percentage in 700, then a DLS
+stacked Progress Bar (`c-progress-track size-default stacked`) 8px
+tall, then a caption row: personas, raw sum and overlap removed on the
+left, the refiner cut on the right.
+
+**Slices.** One `c-progress-stack-segment` per pill in the order the
+reach model counts them (largest first), all Obsidian, width = that
+pill's unique contribution / 16.15M, with a 1px Neutral-1 inset shadow
+between neighbours so the slices read as separate pulls. Refiners add a
+trailing Neutral-4 slice sized to what they cut. Mass targeting is one
+slice. Minimum slice width 0.25% so a tiny persona still shows.
+
+| Moment | Motion |
+|---|---|
+| First pick (or AI pick) | block folds open: `grid-template-rows` 0fr to 1fr and `margin-top` 0 to spacing-24 over `--duration-base` `--ease-settle`; the AI pick also runs the `p-ai-flash-row` wash on the block |
+| Pill added | its slice is inserted at 0% width, reflow, then width set to its share 20ms later (width transition `--duration-base` `--ease-settle`); neighbours slide over on the same transition |
+| Pill removed | its slice goes to 0% and is removed at 240ms; the others widen into the room |
+| Any change | the headline number counts from the last value to the new one over 420ms (cubic ease-out, 24ms timer steps, `fmt()` on every step); the percentage and captions swap instantly |
+| Hover a pill | the bar gets `is-dim` and the pill's slice `is-hot`: every other Obsidian slice drops to Neutral-5 over `--duration-fast`; the cut slice stays Neutral-4 |
+| Last pill removed | block folds shut (same fold reversed); slices are cleared |
+
+Slices are keyed by persona id (`data-seg`) and reused across renders,
+so a re-render tweens widths rather than repainting. Reduced motion or
+a hidden tab takes the instant path for the fold, the slices and the
+count. The bar is `role="img"` with an `aria-label` that states the
+reach and the share in words.
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.

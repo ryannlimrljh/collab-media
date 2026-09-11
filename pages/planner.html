@@ -247,6 +247,49 @@
   .p-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-4);
     margin-top:var(--spacing-8);}
   .p-picker-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  /* Audience pull — what the picked pills draw out of the 16.15M
+     universe. Persona chips carry the DLS Filter-chip count relationship
+     (label2/400, one step lighter) as a trailing figure; the bar is the
+     DLS stacked Progress Bar, one obsidian slice per pill in pick order,
+     hairline-divided, with a Neutral-4 slice for the reach refiners cut.
+     The block folds open on the first pick (grid-rows 0fr to 1fr). */
+  .p-chips .c-chip-input .count{font-weight:400; color:var(--color-neutral-5);
+    margin-left:var(--spacing-4);}
+  .p-chips .c-chip-input{cursor:default;}
+  .p-pull{display:grid; grid-template-rows:0fr; margin-top:0;
+    transition:grid-template-rows var(--duration-base) var(--ease-settle),
+      margin-top var(--duration-base) var(--ease-settle);}
+  .p-pull.is-open{grid-template-rows:1fr; margin-top:var(--spacing-24);}
+  .p-pull-inner{overflow:hidden; min-height:0;}
+  .p-pull.is-open .p-pull-inner{border-top:1px dotted var(--color-neutral-4);
+    padding-top:var(--spacing-24);}
+  .p-pull-head{display:flex; align-items:flex-end; justify-content:space-between;
+    gap:var(--spacing-16); flex-wrap:wrap;}
+  .p-pull-head .c-stat-label{display:block; margin-bottom:var(--spacing-4);}
+  .p-pull-num{font-size:var(--text-h3-size); font-weight:var(--text-h1-weight);
+    line-height:1.1; font-variant-numeric:tabular-nums;}
+  .p-pull-num .unit{font-size:var(--text-label2-size); font-weight:400;
+    color:var(--color-neutral-5); margin-left:var(--spacing-4);}
+  .p-pull-of{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    font-variant-numeric:tabular-nums; padding-bottom:2px;}
+  .p-pull-of b{color:var(--color-neutral-9); font-weight:700;}
+  .p-pull-bar{margin-top:var(--spacing-12);}
+  .p-pull-bar .c-progress-stack-segment{background:var(--color-obsidian);
+    transition:width var(--duration-base) var(--ease-settle),
+      background-color var(--duration-fast) var(--ease-standard),
+      opacity var(--duration-fast) var(--ease-standard);}
+  .p-pull-bar .c-progress-stack-segment + .c-progress-stack-segment{
+    box-shadow:inset 1px 0 var(--color-neutral-1);}
+  .p-pull-bar .c-progress-stack-segment.is-cut{background:var(--color-neutral-4);}
+  /* Hovering a pill lights its slice; the rest step back. */
+  .p-pull-bar.is-dim .c-progress-stack-segment:not(.is-hot):not(.is-cut){
+    background:var(--color-neutral-5);}
+  .p-pull-foot{display:flex; justify-content:space-between; gap:var(--spacing-12);
+    margin-top:var(--spacing-8); font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+  @media (prefers-reduced-motion:reduce){
+    .p-pull, .p-pull-bar .c-progress-stack-segment{transition:none;}
+  }
   .c-dropdown-option .meta{margin-left:auto; font-size:var(--text-caption-size);
     color:var(--color-neutral-5); font-variant-numeric:tabular-nums;
     white-space:nowrap;}
@@ -1203,6 +1246,20 @@
                 </div>
                 <div class="c-chip-group p-chips" id="chipRow"></div>
               </div>
+
+              <div class="p-pull" id="reachPull">
+                <div class="p-pull-inner">
+                  <div class="p-pull-head">
+                    <div>
+                      <span class="c-stat-label">Audience pull</span>
+                      <div class="p-pull-num"><span id="pullNum">0</span><span class="unit">unique reach</span></div>
+                    </div>
+                    <div class="p-pull-of"><b id="pullPct">0%</b> of the 16.15M audience universe</div>
+                  </div>
+                  <div class="c-progress-track size-default stacked p-pull-bar" id="pullBar" role="img" aria-label="Audience pull"></div>
+                  <div class="p-pull-foot"><span id="pullFoot"></span><span id="pullCut"></span></div>
+                </div>
+              </div>
             </div>
 
             <div class="p-drawer" id="refineCard">
@@ -1819,14 +1876,17 @@
   function reach(){
     var picked = selected.map(byId).sort(function(a,b){ return b.users - a.users; });
     var raw = 0, uniq = 0, counted = [];
+    var parts = [];
     picked.forEach(function(p){
       raw += p.users;
       var worst = 0;
       counted.forEach(function(q){ worst = Math.max(worst, q.cat === p.cat ? 0.60 : 0.25); });
-      uniq += p.users * (1 - worst);
+      var add = p.users * (1 - worst);
+      uniq += add;
+      parts.push({id:p.id, name:p.name, users:p.users, uniq:Math.round(add)});
       counted.push(p);
     });
-    return {raw:raw, uniq:Math.round(uniq), pct: raw ? Math.round((1 - uniq/raw) * 100) : 0};
+    return {raw:raw, uniq:Math.round(uniq), pct: raw ? Math.round((1 - uniq/raw) * 100) : 0, parts:parts};
   }
   function filterMult(){
     var m = 1;
@@ -2002,7 +2062,7 @@
         personaSource = 'ai';
         if (personaOpen) renderPersonaList();
         renderChips(); renderAll();
-        aiFlash(['personaField', 'chipRow']);
+        aiFlash(['personaField', 'chipRow', 'reachPull']);
         askShow('I read the brief as a broad entertainment play and picked three personas to start: Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
           fmt(reach().uniq) + ' unique reach. Swap any of them freely.');
       }
@@ -2558,9 +2618,7 @@
   function renderPersonaTrigger(){
     $('personaTrigger').value = selected.length ? selected.length + ' selected' : '';
     personaField.classList.toggle('filled', !!selected.length);
-    $('pickerCount').textContent = selected.length
-      ? selected.length + ' of ' + MAX + ' selected · ' + fmt(reach().uniq) + ' unique reach'
-      : '0 of ' + MAX + ' selected';
+    $('pickerCount').textContent = selected.length + ' of ' + MAX + ' selected';
   }
 
   function renderChips(){
@@ -2569,11 +2627,15 @@
       var p = byId(id);
       var chip = document.createElement('span');
       chip.className = 'c-chip c-chip-input';
-      chip.innerHTML = p.name +
+      chip.dataset.persona = id;
+      chip.title = fmt(p.users) + ' people in this segment';
+      chip.innerHTML = p.name + '<span class="count">' + fmt(p.users) + '</span>' +
         '<button class="c-chip-remove" type="button" aria-label="Remove ' + p.name + '"><i class="ph ph-x"></i></button>';
       chip.querySelector('.c-chip-remove').addEventListener('click', function(e){
         e.stopPropagation(); togglePersona(id);
       });
+      chip.addEventListener('pointerenter', function(){ hotSegment(id); });
+      chip.addEventListener('pointerleave', function(){ hotSegment(null); });
       row.appendChild(chip);
     });
   }
@@ -2688,6 +2750,92 @@
   $('f-ex').addEventListener('input', function(){ renderFilters(); renderChecks(); });
   $('f-intent').addEventListener('input', function(){ renderFilters(); });
 
+  /* ═══ Audience pull — the picked pills, drawn as slices of the
+     16.15M universe. Slices are keyed by persona so a re-render tweens
+     widths instead of repainting; a new slice grows from 0, a removed
+     one shrinks to 0 before it leaves. The headline number counts
+     between values. Instant under reduced motion or a hidden tab. ═══ */
+  function instantMotion(){
+    return document.hidden || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function tweenNum(el, to){
+    var from = el._v || 0;
+    if (el._t) clearTimeout(el._t);
+    if (instantMotion() || from === to){ el._v = to; el.textContent = fmt(to); return; }
+    var t0 = Date.now(), dur = 420;
+    (function tick(){
+      var k = Math.min(1, (Date.now() - t0) / dur);
+      var e = 1 - Math.pow(1 - k, 3);
+      var v = Math.round(from + (to - from) * e);
+      el.textContent = fmt(v);
+      if (k < 1) el._t = setTimeout(tick, 24); else { el._v = to; el._t = null; }
+    })();
+  }
+  function hotSegment(id){
+    var bar = $('pullBar');
+    bar.classList.toggle('is-dim', !!id);
+    Array.prototype.forEach.call(bar.children, function(seg){
+      seg.classList.toggle('is-hot', !!id && seg.dataset.seg === id);
+    });
+  }
+  function renderPull(r, mult){
+    var wrap = $('reachPull'), bar = $('pullBar');
+    var live = mode === 'mass' || selected.length > 0;
+    wrap.classList.toggle('is-open', live);
+    if (!live){
+      Array.prototype.slice.call(bar.children).forEach(function(seg){ seg.remove(); });
+      $('pullNum')._v = 0; $('pullNum').textContent = '0';
+      return;
+    }
+    var base = mode === 'mass' ? MASS : r.uniq;
+    var net = Math.round(base * mult);
+    var cut = base - net;
+    var slices = mode === 'mass'
+      ? [{id:'mass', name:'Entire Malaysia', uniq:net}]
+      : r.parts.map(function(p){ return {id:p.id, name:p.name, uniq:Math.round(p.uniq * mult)}; });
+    if (cut > 0) slices.push({id:'cut', name:'Cut by refiners', uniq:cut, cut:true});
+    var instant = instantMotion();
+    var keep = {};
+    slices.forEach(function(sl){ keep[sl.id] = sl; });
+    /* leave: shrink then remove */
+    Array.prototype.slice.call(bar.children).forEach(function(seg){
+      if (keep[seg.dataset.seg]) return;
+      if (instant){ seg.remove(); return; }
+      if (seg._leaving) return;
+      seg._leaving = true;
+      seg.style.width = '0%';
+      setTimeout(function(){ seg.remove(); }, 240);
+    });
+    /* place and size, in slice order */
+    var prev = null;
+    slices.forEach(function(sl){
+      var seg = bar.querySelector('[data-seg="' + sl.id + '"]');
+      var w = Math.max(0.25, sl.uniq / MASS * 100).toFixed(2) + '%';
+      if (!seg){
+        seg = document.createElement('div');
+        seg.className = 'c-progress-stack-segment' + (sl.cut ? ' is-cut' : '');
+        seg.dataset.seg = sl.id;
+        seg.style.width = instant ? w : '0%';
+        if (prev) prev.after(seg); else bar.prepend(seg);
+        if (!instant){ void seg.offsetWidth; setTimeout(function(){ seg.style.width = w; }, 20); }
+      } else {
+        if (prev && prev.nextSibling !== seg) prev.after(seg);
+        seg.style.width = w;
+      }
+      seg.title = sl.name + ' · ' + fmt(sl.uniq) + (sl.cut ? ' removed' : ' unique');
+      prev = seg;
+    });
+    tweenNum($('pullNum'), net);
+    var pct = net / MASS * 100;
+    $('pullPct').textContent = (pct >= 10 ? Math.round(pct) : pct.toFixed(1)) + '%';
+    $('pullFoot').textContent = mode === 'mass'
+      ? 'Entire Malaysia · no persona filter'
+      : selected.length + (selected.length > 1 ? ' personas · ' : ' persona · ') + fmt(r.raw) + ' raw' +
+        (r.pct ? ' · ' + r.pct + '% overlap removed' : '');
+    $('pullCut').textContent = cut > 0 ? 'Refiners keep ' + Math.round(mult * 100) + '% · ' + fmt(cut) + ' cut' : '';
+    bar.setAttribute('aria-label', 'Audience pull: ' + fmt(net) + ' unique reach, ' + $('pullPct').textContent + ' of the 16.15M universe');
+  }
+
   function renderAudienceRail(){
     var r = reach(), mult = filterMult();
     var base = mode === 'mass' ? MASS : r.uniq;
@@ -2703,6 +2851,7 @@
       ? selected.length + ' selected · ' + fmt(r.uniq) + ' unique'
       : 'None selected yet';
     renderPersonaTrigger();
+    renderPull(r, mult);
     $('personaAiTag').hidden = !(personaSource === 'ai' && selected.length && mode === 'personas');
     $('repick').hidden = !(personaSource === 'user' && mode === 'personas');
   }
