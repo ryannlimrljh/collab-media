@@ -589,6 +589,34 @@ a hidden tab takes the instant path for the fold, the slices and the
 count. The bar is `role="img"` with an `aria-label` that states the
 reach and the share in words.
 
+## 9d. Format sample peek (media mix, hover a format)
+
+Hovering a format pill in an Add row, or the name of a row already in
+the mix, floats that format's live miniature beside it: the same
+sample the Ad formats page draws, from `shared/format-previews.js`
+and `.css` (`FormatPreviews.mount` + `live`), matched by name to
+`shared/formats-data.js` with aliases for the rate card's spellings
+(Hotspot, Image Social Ad, In-stream Video, Product Collector Ad,
+Skinner / Wallpaper, Video Social Ad). TV, OTT and Radio have no
+sample and show nothing.
+
+**Shape.** `#fmtPeek`: fixed, 300px wide, Neutral-1, 1px Neutral-3
+border, radius-lg, shadow-4, a 16:10 `fp-stage` over a caption row
+(name in 700, family in 400 Neutral-5). Placed 12px to the right of
+the pill, vertically centred on it; flips to the left when the right
+edge would leave the viewport; clamped 12px inside all edges.
+
+| Moment | Motion |
+|---|---|
+| First show | lands in place (`is-jumping` limits the transition to opacity and transform): opacity 0 to 1 over `--duration-base`, translateY 6px + scale .98 to rest over `--duration-slow` `--ease-settle`; the sample goes live (`FormatPreviews.live`) |
+| Move to another pill while visible | the card slides: `top`/`left` transition `--duration-slow` `--ease-flow`; the old sample drops to opacity 0 on `--duration-instant`, the new one is mounted 90ms later and fades in over `--duration-base` (`is-switching`) |
+| Leave | 140ms grace, then opacity and transform reverse; the sample stops |
+| Click, scroll, resize | hides at once (the click re-renders the list under it) |
+| Keyboard | focus on a pill shows it, blur hides it, same timings |
+
+Pointer only: `(hover:none)` skips the peek entirely. Reduced motion
+removes the transitions; the sample's own tickers already respect it.
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.

@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=0.9.41c" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=0.9.41c" />
 <link rel="stylesheet" href="../shared/shell.css?v=0.9.52" />
+<link rel="stylesheet" href="../shared/format-previews.css?v=8" />
 <style>
   /* ── Page-local. Composes DLS tokens only — no new colors or radii. ── */
 
@@ -253,9 +254,35 @@
      DLS stacked Progress Bar, one obsidian slice per pill in pick order,
      hairline-divided, with a Neutral-4 slice for the reach refiners cut.
      The block folds open on the first pick (grid-rows 0fr to 1fr). */
-  .p-chips .c-chip-input .count{font-weight:400; color:var(--color-neutral-5);
-    margin-left:var(--spacing-4);}
-  .p-chips .c-chip-input{cursor:default;}
+  /* Picked personas are the DLS Filter Chip in its active (Obsidian)
+     state: they are selections, and the count rides in the chip's own
+     lighter ink. Only the remove glyph is recoloured for the dark fill. */
+  .p-chips .c-chip-filter{cursor:default;}
+  .p-chips .c-chip-filter .c-chip-remove{color:rgba(255,255,255,.7); margin-right:-8px;}
+  .p-chips .c-chip-filter .c-chip-remove:hover{color:var(--color-neutral-1);}
+  .p-chips .c-chip-filter .c-chip-remove:focus-visible{outline-color:var(--color-neutral-1);}
+  /* Format sample peek: hovering a format pill or row in the media mix
+     floats the catalogue's live miniature (shared/format-previews) next
+     to it. Same recipe as the Ad formats page's row peek: fixed, 300px,
+     radius-lg, shadow-4; it lands in place on first show and slides
+     between pills after that; the sample cross-fades on a swap. */
+  .p-fmtpeek{position:fixed; width:300px; z-index:40; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-4); overflow:hidden; opacity:0; pointer-events:none;
+    transform:translateY(6px) scale(.98);
+    transition:opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-slow) var(--ease-settle),
+      top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
+  .p-fmtpeek.is-visible{opacity:1; transform:none;}
+  .p-fmtpeek.is-jumping{transition-property:opacity, transform;}
+  .p-fmtpeek .fp-stage, .p-fmtpeek .lbl{transition:opacity var(--duration-base) var(--ease-standard);}
+  .p-fmtpeek.is-switching .fp-stage, .p-fmtpeek.is-switching .lbl{opacity:0;
+    transition-duration:var(--duration-instant);}
+  .p-fmtpeek .lbl{display:flex; justify-content:space-between; gap:var(--spacing-8);
+    padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size);
+    font-weight:700; border-top:1px solid var(--color-neutral-2);}
+  .p-fmtpeek .lbl .fam{font-weight:400; color:var(--color-neutral-5); white-space:nowrap;}
+  @media (prefers-reduced-motion:reduce){ .p-fmtpeek{transition:none;} }
   .p-pull{display:grid; grid-template-rows:0fr; margin-top:0;
     transition:grid-template-rows var(--duration-base) var(--ease-settle),
       margin-top var(--duration-base) var(--ease-settle);}
@@ -1656,12 +1683,16 @@
   </div>
 </div>
 
+<div class="p-fmtpeek" id="fmtPeek" aria-hidden="true"><div class="fp-stage" id="fmtPeekStage"></div><div class="lbl"><span id="fmtPeekName"></span><span class="fam" id="fmtPeekFam"></span></div></div>
 <div class="c-toast-host" id="toastHost"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
+<script src="../shared/formats-data.js?v=4"></script>
+<script src="../shared/format-previews.js?v=2"></script>
 <script src="../shared/plan-store.js?v=4"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script>
+window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for the sample peek */
 (function () {
   'use strict';
 
@@ -2626,7 +2657,7 @@
     selected.forEach(function(id){
       var p = byId(id);
       var chip = document.createElement('span');
-      chip.className = 'c-chip c-chip-input';
+      chip.className = 'c-chip c-chip-filter is-active';
       chip.dataset.persona = id;
       chip.title = fmt(p.users) + ' people in this segment';
       chip.innerHTML = p.name + '<span class="count">' + fmt(p.users) + '</span>' +
@@ -2749,6 +2780,101 @@
   });
   $('f-ex').addEventListener('input', function(){ renderFilters(); renderChecks(); });
   $('f-intent').addEventListener('input', function(){ renderFilters(); });
+
+  /* ═══ Format sample peek — the catalogue's live miniature, next to
+     whichever format pill or row the pointer is on. Samples come from
+     shared/format-previews (the Ad formats page's own), matched by name
+     with a few aliases for the rate card's spellings. TV, OTT and Radio
+     have no sample and show nothing. Pointer only; touch skips it. ═══ */
+  var PEEK_ALIAS = {'hotspot':'hotspot-interactive', 'image social ad':'social-display-ad',
+    'product collector ad':'product-collector', 'skinner / wallpaper':'skinner',
+    'in-stream video':'@instream', 'video social ad':'3d-social-video'};
+  var peekCache = {};
+  function sampleFor(fid){
+    if (fid in peekCache) return peekCache[fid];
+    var f = FORMATS.filter(function(x){ return x.id === fid; })[0];
+    var cat = window.FORMATS_CATALOGUE || [];
+    var hit = null;
+    if (f){
+      var key = f.name.toLowerCase();
+      var alias = PEEK_ALIAS[key];
+      cat.forEach(function(c){
+        if (hit) return;
+        if (alias && alias.charAt(0) === '@'){ if (c.preview === alias.slice(1)) hit = c; }
+        else if (alias){ if (c.id === alias) hit = c; }
+        else if (c.name.toLowerCase() === key) hit = c;
+      });
+    }
+    peekCache[fid] = hit;
+    return hit;
+  }
+  var peek = $('fmtPeek'), peekStage = $('fmtPeekStage'), peekId = null, peekHide = null, peekSwap = null;
+  var PEEK_TOUCH = window.matchMedia && window.matchMedia('(hover:none)').matches;
+  function showPeek(anchor, fid){
+    var P = window.FormatPreviews; if (!P) return;
+    var c = sampleFor(fid); if (!c){ hidePeek(true); return; }
+    clearTimeout(peekHide);
+    var wasVisible = peek.classList.contains('is-visible');
+    if (peekId !== c.id){
+      clearTimeout(peekSwap);
+      peek.classList.add('is-switching');
+      peekId = c.id;
+      peekSwap = setTimeout(function(){
+        P.mount(peekStage, c);
+        $('fmtPeekName').textContent = c.name;
+        $('fmtPeekFam').textContent = c.family;
+        peek.classList.remove('is-switching');
+        if (peek.classList.contains('is-visible')) P.live(peekStage, true);
+      }, wasVisible ? 90 : 0);
+    } else if (!wasVisible){
+      P.live(peekStage, true);
+    }
+    var r = anchor.getBoundingClientRect(), w = 300, h = 222;
+    var left = r.right + 12;
+    if (left + w > window.innerWidth - 12) left = r.left - w - 12;
+    left = Math.max(12, Math.min(window.innerWidth - w - 12, left));
+    var top = r.top + r.height / 2 - h / 2;
+    top = Math.max(12, Math.min(window.innerHeight - h - 12, top));
+    peek.classList.toggle('is-jumping', !wasVisible);
+    peek.style.left = left + 'px'; peek.style.top = top + 'px';
+    peek.classList.add('is-visible');
+  }
+  function hidePeek(now){
+    clearTimeout(peekHide);
+    var go = function(){
+      peek.classList.remove('is-visible');
+      if (window.FormatPreviews) window.FormatPreviews.live(peekStage, false);
+    };
+    if (now) go(); else peekHide = setTimeout(go, 140);
+  }
+  function peekTarget(e){
+    var chip = e.target.closest('[data-add]');
+    if (chip) return {el:chip, id:chip.dataset.add};
+    var lab = e.target.closest('.p-fmtrow .c-choice');
+    if (lab) return {el:lab, id:lab.closest('.p-fmtrow').dataset.fmt};
+    return null;
+  }
+  (function(){
+    var host = $('formatList');
+    host.addEventListener('mouseover', function(e){
+      if (PEEK_TOUCH) return;
+      var t = peekTarget(e); if (!t || t.el.contains(e.relatedTarget)) return;
+      showPeek(t.el, t.id);
+    });
+    host.addEventListener('mouseout', function(e){
+      var t = peekTarget(e); if (!t || t.el.contains(e.relatedTarget)) return;
+      hidePeek();
+    });
+    host.addEventListener('focusin', function(e){
+      var t = peekTarget(e); if (t) showPeek(t.el, t.id);
+    });
+    host.addEventListener('focusout', function(e){
+      var t = peekTarget(e); if (t) hidePeek();
+    });
+    host.addEventListener('click', function(){ hidePeek(true); }, true);
+    document.addEventListener('scroll', function(){ if (peek.classList.contains('is-visible')) hidePeek(true); }, true);
+    window.addEventListener('resize', function(){ hidePeek(true); });
+  })();
 
   /* ═══ Audience pull — the picked pills, drawn as slices of the
      16.15M universe. Slices are keyed by persona so a re-render tweens
@@ -2970,6 +3096,7 @@
         var amt = split[f.id] || 0;
         var row = document.createElement('div');
         row.className = 'p-fmtrow' + (f.id === newFmt ? ' is-new' : '');
+        row.dataset.fmt = f.id;
         row.innerHTML =
           '<label class="c-choice">' +
             '<input type="checkbox" checked aria-label="' + f.name + '" />' +
