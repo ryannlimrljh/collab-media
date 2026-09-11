@@ -714,6 +714,17 @@ on first render (`--duration-slow` `--ease-flow`, 60ms stagger) and
 the bar only re-renders when a share changes. Nothing else on the
 review moves.
 
+## 9e2. One frame for every sub-box
+
+A sub-box inside a step is always the same object: `--color-neutral-1`
+on the off-white canvas, `1px solid --color-neutral-3`, `--radius-md`.
+That covers the Add context drawers, the targeting-basis cards, the
+step-3 channel blocks, the goal's measure group and the review's
+evidence tiles. No filled wells, no borderless groups, and nothing
+left transparent so the canvas shows through a frame its siblings
+paint white. The DLS Stat card keeps its own `--radius-lg`; it is the
+system's component, not a page-local box.
+
 ## 9f. Two reading aids on step 1
 
 **Bold labels in the composer.** `#briefText` sits over `#briefHL`, a

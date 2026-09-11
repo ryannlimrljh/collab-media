@@ -239,13 +239,16 @@
      measure it implies as one three-field sentence in a quiet well. */
   .p-goal{display:flex; flex-direction:column; gap:var(--spacing-16);}
   .p-goal-obj{max-width:420px;}
-  .p-goal-measure{background:var(--color-neutral-2); border-radius:var(--radius-md);
-    padding:var(--spacing-16);}
+  /* Every sub-box inside a step wears one frame: Neutral-1 on the
+     off-white canvas, 1px Neutral-3, radius-md. Same as the Add
+     context drawer, the targeting cards, the channel blocks and the
+     review tiles — no filled wells, no unframed strays. */
+  .p-goal-measure{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); padding:var(--spacing-16);}
   .p-goal-measure-head{display:flex; align-items:center; gap:var(--spacing-8);
     margin-bottom:var(--spacing-12); flex-wrap:wrap;}
   .p-goal-row{display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:var(--spacing-12);}
   .p-goal-measure .p-note{margin-top:var(--spacing-12);}
-  .p-goal-measure .c-dropdown-input, .p-goal-measure input[type="number"]{background:var(--color-neutral-1);}
   @media (max-width:760px){ .p-goal-row{grid-template-columns:1fr;} }
   /* A dropdown row may carry a plain-words description under its label. */
   .c-dropdown-row-label .p-dd-desc{display:block; font-size:var(--text-caption-size);
@@ -875,8 +878,8 @@
      add-chips and the sites it runs on, so a choice up top visibly
      opens the things it governs. */
   .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
-  .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
-    padding:var(--spacing-12) var(--spacing-16);}
+  .p-chanblock{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); padding:var(--spacing-12) var(--spacing-16);}
 
   .p-chanblock-head{display:flex; justify-content:space-between; align-items:baseline;
     gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
