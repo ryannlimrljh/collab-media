@@ -714,6 +714,16 @@ on first render (`--duration-slow` `--ease-flow`, 60ms stagger) and
 the bar only re-renders when a share changes. Nothing else on the
 review moves.
 
+## 9e1. One number format
+
+`fmt(n)` groups thousands and nothing else: `3,315,840`, never
+`3.32M` or `512K`. Every figure a reader sees goes through it —
+audience sizes, reach, impressions, site inventory, the universe —
+so a number reads the same wherever it appears and lines up with
+`rm()`, which already grouped. Site inventory is stored as a real
+number rather than a display string. Tabular figures
+(`font-variant-numeric:tabular-nums`) keep the columns aligned.
+
 ## 9e2. One frame for every sub-box
 
 A sub-box inside a step is always the same object: `--color-neutral-1`

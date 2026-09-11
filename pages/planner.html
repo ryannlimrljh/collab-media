@@ -1468,7 +1468,7 @@
                     <span class="head"><span class="c-radio-circle"><span class="dot" hidden></span></span>
                       <span class="t">Mass targeting</span></span>
                     <span class="desc">The whole Malaysia footprint, no segmentation. Reach everyone, then use the refiners below if it needs narrowing.</span>
-                    <span class="meta">Entire Malaysia · 16.15M</span>
+                    <span class="meta">Entire Malaysia · 16,150,000</span>
                   </label>
                 </div>
               </div>
@@ -1516,7 +1516,7 @@
                       <span class="c-stat-label">Audience pull</span>
                       <div class="p-pull-num"><span id="pullNum">0</span><span class="unit">unique reach</span></div>
                     </div>
-                    <div class="p-pull-of"><b id="pullPct">0%</b> of the 16.15M audience universe</div>
+                    <div class="p-pull-of"><b id="pullPct">0%</b> of the 16,150,000 audience universe</div>
                   </div>
                   <div class="c-progress-track size-default stacked p-pull-bar" id="pullBar" role="img" aria-label="Audience pull"></div>
                   <div class="p-pull-foot"><span id="pullFoot"></span><span id="pullCut"></span></div>
@@ -2038,19 +2038,19 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   ];
 
   var SITES = [
-    {id:'sooka',   name:'sooka',          ch:'OTT',    cpm:30, inv:'13.2M', pin:true,  ai:true},
-    {id:'astrogo', name:'Astro GO',       ch:'OTT',    cpm:32, inv:'9.8M',  pin:false, ai:false},
-    {id:'awani',   name:'Awani',          ch:'Web',    cpm:10, inv:'18.4M', pin:true,  ai:true},
-    {id:'stadium', name:'Stadium Astro',  ch:'Web',    cpm:12, inv:'12.7M', pin:false, ai:false},
-    {id:'gempakw', name:'Gempak',         ch:'Web',    cpm:11, inv:'11.9M', pin:false, ai:true},
-    {id:'era',     name:'ERA',            ch:'Web',    cpm:10, inv:'10.6M', pin:false, ai:false},
-    {id:'sinar',   name:'Sinar',          ch:'Web',    cpm:10, inv:'9.2M',  pin:false, ai:false},
-    {id:'rojak',   name:'RojakDaily',     ch:'Web',    cpm:9,  inv:'7.4M',  pin:false, ai:false},
-    {id:'goxuan',  name:'GoXuan',         ch:'Web',    cpm:9,  inv:'4.1M',  pin:false, ai:false},
-    {id:'gempaks', name:'Astro Gempak',   ch:'Social', cpm:18, inv:'406.9M',pin:true,  ai:true},
-    {id:'hiburan', name:'Media Hiburan',  ch:'Social', cpm:16, inv:'319.5M',pin:false, ai:true},
-    {id:'arena',   name:'Astro Arena',    ch:'Social', cpm:17, inv:'425.9M',pin:false, ai:false},
-    {id:'meletop', name:'MeleTop',        ch:'Social', cpm:20, inv:'78.7M', pin:false, ai:false}
+    {id:'sooka',   name:'sooka',          ch:'OTT',    cpm:30, inv:13200000, pin:true,  ai:true},
+    {id:'astrogo', name:'Astro GO',       ch:'OTT',    cpm:32, inv:9800000,  pin:false, ai:false},
+    {id:'awani',   name:'Awani',          ch:'Web',    cpm:10, inv:18400000, pin:true,  ai:true},
+    {id:'stadium', name:'Stadium Astro',  ch:'Web',    cpm:12, inv:12700000, pin:false, ai:false},
+    {id:'gempakw', name:'Gempak',         ch:'Web',    cpm:11, inv:11900000, pin:false, ai:true},
+    {id:'era',     name:'ERA',            ch:'Web',    cpm:10, inv:10600000, pin:false, ai:false},
+    {id:'sinar',   name:'Sinar',          ch:'Web',    cpm:10, inv:9200000,  pin:false, ai:false},
+    {id:'rojak',   name:'RojakDaily',     ch:'Web',    cpm:9,  inv:7400000,  pin:false, ai:false},
+    {id:'goxuan',  name:'GoXuan',         ch:'Web',    cpm:9,  inv:4100000,  pin:false, ai:false},
+    {id:'gempaks', name:'Astro Gempak',   ch:'Social', cpm:18, inv:406900000,pin:true,  ai:true},
+    {id:'hiburan', name:'Media Hiburan',  ch:'Social', cpm:16, inv:319500000,pin:false, ai:true},
+    {id:'arena',   name:'Astro Arena',    ch:'Social', cpm:17, inv:425900000,pin:false, ai:false},
+    {id:'meletop', name:'MeleTop',        ch:'Social', cpm:20, inv:78700000, pin:false, ai:false}
   ];
 
   /* ═══ State ═══ */
@@ -2063,11 +2063,10 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
 
   /* ═══ Helpers ═══ */
   function $(id){ return document.getElementById(id); }
-  function fmt(n){
-    if (n >= 1e6) return (n/1e6).toFixed(n >= 1e7 ? 1 : 2).replace(/\.?0+$/,'') + 'M';
-    if (n >= 1e3) return Math.round(n/1e3) + 'K';
-    return String(Math.round(n));
-  }
+  /* Every number a reader sees is grouped the same way: 3,320,000,
+     not 3.32M. Abbreviations saved a few pixels and cost the reader a
+     conversion on exactly the figures that matter most. */
+  function fmt(n){ return Math.round(n || 0).toLocaleString('en-MY'); }
   function rm(n){ return 'RM ' + Math.round(n).toLocaleString('en-MY'); }
   /* Rate-card CPMs carry sen where the card does (Video 3.26, Audio 6.61). */
   function cpmFmt(n){ return 'RM ' + (Number.isInteger(n) ? n.toLocaleString('en-MY') : n.toFixed(2)); }
@@ -3636,7 +3635,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       : selected.length + (selected.length > 1 ? ' personas · ' : ' persona · ') + fmt(r.raw) + ' raw' +
         (r.pct ? ' · ' + r.pct + '% overlap removed' : '');
     $('pullCut').textContent = cut > 0 ? 'Refiners keep ' + Math.round(mult * 100) + '% · ' + fmt(cut) + ' cut' : '';
-    bar.setAttribute('aria-label', 'Audience pull: ' + fmt(net) + ' unique reach, ' + $('pullPct').textContent + ' of the 16.15M universe');
+    bar.setAttribute('aria-label', 'Audience pull: ' + fmt(net) + ' unique reach, ' + $('pullPct').textContent + ' of the 16,150,000 universe');
   }
 
   function renderAudienceRail(){
@@ -3836,9 +3835,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
           sites.map(function(sx){
             return '<button class="p-site-chip' + (sx.pin ? ' is-active' : '') + (sx.id === popPin ? ' is-pop' : '') + '" type="button" data-pin="' + sx.id + '"' +
               ' aria-pressed="' + (sx.pin ? 'true' : 'false') + '"' +
-              ' title="' + sx.inv + ' monthly impressions · ' + cpmFmt(sx.cpm) + ' CPM' + (sx.ai ? ' · in the AI draft' : '') + '">' +
+              ' title="' + fmt(sx.inv) + ' monthly impressions · ' + cpmFmt(sx.cpm) + ' CPM' + (sx.ai ? ' · in the AI draft' : '') + '">' +
               '<i class="' + (sx.pin ? 'ph-fill' : 'ph') + ' ph-push-pin" aria-hidden="true"></i>' + sx.name +
-              ' <span class="inv">' + sx.inv + '</span></button>';
+              ' <span class="inv">' + fmt(sx.inv) + '</span></button>';
           }).join('') +
           '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>' +
           '</div>';
