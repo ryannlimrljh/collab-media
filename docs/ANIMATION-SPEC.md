@@ -637,6 +637,42 @@ take the nearest segment (Rom-Com Fans, EPL Fans, Corporate Leaders,
 Emerging Affluents). Timings, placement and grace are identical to the
 format peek.
 
+## 9e. The Why card (justification behind every Collab AI pick)
+
+Users asked why the AI suggested what it did. Every AI provenance
+badge is now a button ending in an underlined "why?": "Filled by
+Collab AI" on the ask (appears after a brief fill, retires on the
+first manual edit of a brief field), "Picked by Collab AI" on the
+personas, "Drafted by Collab AI" on the mix. Each opens `#whyPop`, one
+shared card rebuilt from state on every open, never stored copy.
+
+**Anatomy** (440px, Neutral-1, 1px Neutral-3, radius-lg, shadow-4):
+a head with the title and a one-line outcome (for the mix: budget
+placed, blended CPM, impressions, reach, frequency; for personas:
+unique reach, overlap, and whether it clears the target), then a
+scrolling body of three parts. *Read from your plan*: input chips
+(objective, budget, days, KPI target, languages, persona count).
+*Rule*: one paragraph stating the rule that turned those inputs into
+the pick. *Rows*: one per pick, name in 700 with an evidence line in
+Neutral-5 tabular figures (addressable size and video/social
+consumption from the audience catalogue; share of budget and
+impressions for a format), and the reason in plain sentences. The
+brief card's rows quote the phrase of the notes each value was read
+from (the parser records `_src` per field) and list the starting
+points it filled where the notes said nothing, with the sizing rules
+stated. A foot line says the pick can be overridden; the persona card
+also carries "See the Astro data", which closes the card and opens
+the evidence modal.
+
+| Moment | Motion |
+|---|---|
+| Open | placed 8px under the badge, left-aligned, clamped 12px inside the viewport, flipping above when there is no room below; opacity 0 to 1 over `--duration-base`, translateY -6px + scale .98 to rest on `--ease-settle`; focus moves to the close button |
+| Close | the reverse; focus returns to the badge. Escape, a click outside, a page scroll or a resize all close it; scrolling inside the card's own body does not |
+| Same badge clicked again | toggles it closed |
+
+Reduced motion removes the transition. The card is `role="dialog"`,
+non-modal, with `aria-labelledby` on its title.
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.

@@ -496,6 +496,49 @@
   @media (prefers-reduced-motion:reduce){
     .p-ai-badge::before, .p-ai-badge::after{animation:none;}
   }
+  /* "why?" on an AI badge: the badge is a button; only the question
+     word reads as a link, so the provenance line stays quiet. */
+  button.p-ai-badge{font:inherit; font-size:var(--text-caption-size); cursor:pointer;
+    font-family:var(--font-primary);}
+  .p-ai-badge .q{text-decoration:underline; text-underline-offset:2px; text-decoration-color:rgba(8,8,8,.35);}
+  button.p-ai-badge:hover .q{text-decoration-color:currentColor;}
+  button.p-ai-badge:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  /* The reasoning card: what Collab AI read, what it picked, and the
+     rule and evidence behind each pick. Anchored under its badge,
+     fold-in on the base curve, closes on outside click or Escape. */
+  .p-whypop{position:fixed; z-index:45; width:min(440px, calc(100vw - 24px));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4); opacity:0;
+    transform:translateY(-6px) scale(.98); pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-settle);}
+  .p-whypop.is-open{opacity:1; transform:none; pointer-events:auto;}
+  .p-whypop .head{display:flex; align-items:flex-start; gap:var(--spacing-12);
+    padding:var(--spacing-16) var(--spacing-16) var(--spacing-12);}
+  .p-whypop .head h5{margin:0; font-size:var(--text-h5-size); font-weight:700;}
+  .p-whypop .head .sub{margin:2px 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .p-whypop .head .c-icon-btn{margin-left:auto; flex:none;}
+  .p-whypop .scroll{max-height:min(60vh, 520px); overflow:auto; overscroll-behavior:contain;}
+  .p-whypop .inputs{display:flex; flex-wrap:wrap; gap:var(--spacing-4);
+    padding:0 var(--spacing-16) var(--spacing-12);}
+  .p-whypop .inputs .lab{width:100%; font-size:10px; line-height:12px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--color-neutral-5); font-weight:700; margin-bottom:2px;}
+  .p-whypop .rule{margin:0; padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
+    font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-9);}
+  .p-whypop .rule b{font-weight:700;}
+  .p-whypop .row{display:grid; grid-template-columns:132px 1fr; gap:var(--spacing-12);
+    padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);}
+  .p-whypop .row .k{font-size:var(--text-caption-size); font-weight:700; line-height:var(--text-caption-lh);}
+  .p-whypop .row .k .ev{display:block; margin-top:2px; font-weight:400; color:var(--color-neutral-5);
+    font-variant-numeric:tabular-nums;}
+  .p-whypop .row .r{margin:0; font-size:var(--text-caption-size); line-height:var(--text-caption-lh);
+    color:var(--color-neutral-9);}
+  .p-whypop .row .r .src{color:var(--color-neutral-5);}
+  .p-whypop .row .r .src q{quotes:'\201C' '\201D';}
+  .p-whypop .foot{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);
+    padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
+    font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  @media (prefers-reduced-motion:reduce){ .p-whypop{transition:none;} }
   .p-persona-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);
     align-items:start;}
   @media (max-width:640px){ .p-persona-row{grid-template-columns:1fr;} }
@@ -1123,8 +1166,10 @@
         <div class="p-stack">
 
             <div class="p-block" id="askCard">
-              <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                <h4>The ask</h4>
+              <div style="display:flex; align-items:center; gap:var(--spacing-12);">
+                <h4 style="margin:0;">The ask</h4>
+                <button class="c-badge p-ai-badge" id="briefAiTag" type="button" hidden data-why="brief" aria-haspopup="dialog"><i class="ph-fill ph-sparkle"></i> Filled by Collab AI · <span class="q">why?</span></button>
+                <span style="flex:1;"></span>
                 <span class="c-badge c-badge-neutral">Required</span>
               </div>
               <p>Fill these and the planner can already draft you a directional plan. Everything after this sharpens it.</p>
@@ -1296,7 +1341,7 @@
               <div class="p-sect" id="personaBody">
                 <div class="p-sect-labelrow">
                   <span class="c-stat-label">Personas from the KULT audience playbook</span>
-                  <span class="c-badge p-ai-badge" id="personaAiTag" hidden><i class="ph-fill ph-sparkle"></i> Picked by Collab AI · swap freely</span>
+                  <button class="c-badge p-ai-badge" id="personaAiTag" type="button" hidden data-why="personas" aria-haspopup="dialog"><i class="ph-fill ph-sparkle"></i> Picked by Collab AI · <span class="q">why?</span></button>
                   <span style="flex:1;"></span>
                   <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="repick" type="button" hidden style="flex:none;">
                     <i class="ph ph-sparkle"></i> Let AI pick again
@@ -1436,7 +1481,7 @@
             <div class="p-block" id="formatCard">
               <div style="display:flex; align-items:center; gap:var(--spacing-12);">
                 <h4 style="margin:0;">Channels and formats</h4>
-                <span class="c-badge p-ai-badge" id="mixAiTag"><i class="ph-fill ph-sparkle"></i> Drafted by Collab AI · override freely</span>
+                <button class="c-badge p-ai-badge" id="mixAiTag" type="button" data-why="mix" aria-haspopup="dialog"><i class="ph-fill ph-sparkle"></i> Drafted by Collab AI · <span class="q">why?</span></button>
                 <span style="flex:1;"></span>
                 <button class="c-btn c-btn-ghost c-btn-sm p-ai-btn" id="redraft" type="button" style="flex:none;">
                   <i class="ph ph-sparkle"></i> Restore AI draft
@@ -1738,6 +1783,7 @@
   </div>
 </div>
 
+<div class="p-whypop" id="whyPop" role="dialog" aria-modal="false" aria-labelledby="whyPopTitle" aria-hidden="true"></div>
 <div class="p-audpeek" id="audPeek" aria-hidden="true"><div class="pic"><img id="audPeekArt" alt="" /></div><div class="body"><div class="lbl"><span id="audPeekName"></span><span class="fam" id="audPeekSize"></span></div><p class="sub" id="audPeekSub"></p><p class="desc" id="audPeekDesc"></p><div class="bars" id="audPeekBars"></div><p class="fit" id="audPeekFit"></p><p class="meta" id="audPeekMeta"></p></div></div>
 <div class="p-fmtpeek" id="fmtPeek" aria-hidden="true"><div class="fp-stage" id="fmtPeekStage"></div><div class="lbl"><span id="fmtPeekName"></span><span class="fam" id="fmtPeekFam"></span></div></div>
 <div class="c-toast-host" id="toastHost"></div>
@@ -2636,8 +2682,15 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   }
 
   ['b-name','b-brand','b-prod','b-start','b-end','b-budget','b-target'].forEach(function(id){
-    $(id).addEventListener('input', function(){ renderAll(); });
+    $(id).addEventListener('input', function(){ briefEdited(); renderAll(); });
   });
+  var lastBrief = null, briefAi = false;
+  function briefEdited(){
+    if (!briefAi) return;
+    briefAi = false;
+    $('briefAiTag').hidden = true;
+    closeWhyPop();
+  }
   /* While the split is still the untouched AI draft, it follows the
      budget and stays fully allocated. Once the user has shaped it,
      the dials hold their ground and a budget change surfaces as
@@ -2934,6 +2987,175 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     document.addEventListener('scroll', function(){ if (peek.classList.contains('is-visible')) hidePeek(true); }, true);
     window.addEventListener('resize', function(){ hidePeek(true); });
   })();
+
+  /* ═══ Why? The reasoning card behind every Collab AI suggestion.
+     Users asked for the justification, not just the pick, so each AI
+     badge opens a card with three parts: what was read from the brief,
+     the rule that turned it into a pick, and the evidence per pick
+     from the plan's own numbers and the audience catalogue. Nothing in
+     the card is stored copy; it is rebuilt from state on every open. ═══ */
+  var whyPop = $('whyPop'), whyTrig = null;
+  function objWord(o){
+    return {awareness:'Awareness', consideration:'Consideration', conversion:'Conversion',
+      footfall:'Footfall', leadgen:'Lead generation'}[o] || 'No objective yet';
+  }
+  function campaignDays(){
+    var a = new Date($('b-start').value), b = new Date($('b-end').value);
+    return (isNaN(a) || isNaN(b)) ? 0 : Math.max(0, Math.round((b - a) / 864e5));
+  }
+  function whyInputs(extra){
+    var chips = [];
+    var o = ddVal('b-obj'); if (o) chips.push(objWord(o));
+    if (budget() > 0) chips.push(rm(budget()));
+    var d = campaignDays(); if (d) chips.push(d + ' days');
+    var t = parseInt($('b-target').value, 10);
+    if (t > 0) chips.push(fmt(t) + ' ' + ($('b-unit').value || 'people') + ($('b-kpi').value ? ' · ' + $('b-kpi').value : ''));
+    if (langOn.length) chips.push(langOn.map(function(l){ return l === 'Bahasa Malaysia' ? 'BM' : l; }).join(', '));
+    (extra || []).forEach(function(x){ chips.push(x); });
+    if (!chips.length) return '';
+    return '<div class="inputs"><span class="lab">Read from your plan</span>' +
+      chips.map(function(c){ return '<span class="c-chip c-chip-input">' + esc(c) + '</span>'; }).join('') + '</div>';
+  }
+  function whyRow(k, ev, r){
+    return '<div class="row"><div class="k">' + esc(k) + (ev ? '<span class="ev">' + esc(ev) + '</span>' : '') + '</div>' +
+      '<p class="r">' + r + '</p></div>';
+  }
+  function whyBrief(){
+    var g = lastBrief || {_src:{}, _defaults:[]}, src = g._src || {};
+    var rows = '';
+    var field = function(label, value, key, how){
+      if (!value) return;
+      var from = (src[key] || '').replace(/[.,;:\s]+$/, '');
+      rows += whyRow(label, value, from
+        ? 'From ' + (/^(the|a|what|language|built)/.test(from) ? from : '<span class="src"><q>' + esc(from) + '</q></span>') + (how ? '. ' + how : '.')
+        : (how || 'Read from your notes.'));
+    };
+    field('Campaign', g.name, 'name');
+    field('Brand', g.brand, 'brand');
+    field('Product', g.prod, 'prod');
+    field('Budget', g.budget ? rm(g.budget) : '', 'budget', 'k and m suffixes are expanded.');
+    field('Dates', g.start && g.end ? new Date(g.start).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) + ' to ' +
+      new Date(g.end).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '', 'dates');
+    field('Objective', g.obj ? objWord(g.obj) : '', 'obj');
+    field('Target', g.target ? fmt(g.target) + ' ' + (g.unit || '') : '', 'target',
+      g.kpi ? 'The unit sets the KPI: ' + g.kpi + '.' : '');
+    field('Languages', g.langs && g.langs.length ? g.langs.join(', ') : '', 'langs');
+    var defs = (g._defaults || []).map(function(d){ return '<li>' + esc(d) + '</li>'; }).join('');
+    return '<div class="head"><div><h5 id="whyPopTitle">Why these fields</h5><p class="sub">Each value and the line of your notes it came from.</p></div>' +
+      '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
+      '<div class="scroll">' + rows +
+      (defs ? '<p class="rule"><b>Starting points, not read from your notes.</b> Where the notes said nothing, the planner filled a default so the brief is complete: ' +
+        '<ul style="margin:var(--spacing-4) 0 0; padding-left:18px;">' + defs + '</ul>' +
+        'Dates default to a three-week run starting in two weeks. A target is sized from the budget at RM 30 per person reached, RM 1 per three views, or RM 75 per sign-up.</p>' : '') +
+      '</div><div class="foot"><span>Edit any field and the badge steps aside.</span></div>';
+  }
+  function whyPersonas(){
+    var picked = selected.map(byId);
+    var segs = {}; picked.forEach(function(p){ segs[p.id] = segmentFor(p.id); });
+    var largest = picked.slice().sort(function(a, b){ return b.users - a.users; })[0];
+    var byVideo = picked.slice().sort(function(a, b){ return ((segs[b.id] || {}).consumption || {}).video - ((segs[a.id] || {}).consumption || {}).video; })[0];
+    var bySocial = picked.slice().sort(function(a, b){ return ((segs[b.id] || {}).consumption || {}).social - ((segs[a.id] || {}).consumption || {}).social; })[0];
+    var o = ddVal('b-obj') || 'awareness';
+    var broad = /awareness|consideration/.test(o);
+    var r = reach();
+    var cats = {}; picked.forEach(function(p){ cats[p.cat] = 1; });
+    var rule = broad
+      ? '<b>Rule.</b> ' + objWord(o) + ' asks for reach, so the pick favours broad entertainment and lifestyle segments over intent segments, and mixes categories so the audiences overlap as little as possible.'
+      : '<b>Rule.</b> ' + objWord(o) + ' usually wants intent. These three are reach segments; add an intent segment such as Automotive intent or Finance & investing if the goal is a response.';
+    var rows = '';
+    picked.forEach(function(p){
+      var sg = segs[p.id] || {}, c = sg.consumption || {};
+      var why = [];
+      if (p === largest && !(sg.fit && /largest/i.test(sg.fit))) why.push('The largest pool of the three, so it anchors the reach.');
+      if (p === byVideo && c.video) why.push('Heaviest video viewers of the set at ' + c.video + '%, which is what a video-led mix needs.');
+      if (p === bySocial && c.social && p !== byVideo) why.push('Most social of the set at ' + c.social + '%, so social video reaches them cheaply.');
+      if (sg.fit) why.push(sg.fit);
+      if (!why.length) why.push('Adds ' + (/^[aeiou]/i.test(p.cat) ? 'an ' : 'a ') + p.cat.toLowerCase() + ' audience with little overlap against the others.');
+      var ev = fmt(p.users) + ' addressable' + (c.video ? ' · video ' + c.video + '%' : '') + (c.social ? ' · social ' + c.social + '%' : '');
+      rows += whyRow(p.name, ev, esc(why.join(' ')));
+    });
+    var t = parseInt($('b-target').value, 10) || 0;
+    var together = 'Together ' + fmt(r.uniq) + ' unique reach after ' + r.pct + '% overlap across ' + Object.keys(cats).length + ' categor' + (Object.keys(cats).length > 1 ? 'ies' : 'y') +
+      (t && $('b-kpi').value === 'Net reach' ? (r.uniq >= t ? ', which clears your ' + fmt(t) + ' target.' : ', short of your ' + fmt(t) + ' target; widen or add a segment.') : '.');
+    return '<div class="head"><div><h5 id="whyPopTitle">Why these personas</h5><p class="sub">' + esc(together) + '</p></div>' +
+      '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
+      '<div class="scroll">' + whyInputs() + '<p class="rule">' + rule + '</p>' + rows + '</div>' +
+      '<div class="foot"><span>Swap any of them; your pick is kept.</span>' +
+      '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button></div>';
+  }
+  function whyMix(){
+    var on = onFormats(), b = budget();
+    var totalW = 0; on.forEach(function(f){ totalW += f.w; });
+    var picked = selected.map(byId);
+    var vids = [], socs = [];
+    picked.forEach(function(p){ var c = (segmentFor(p.id) || {}).consumption || {}; if (c.video) vids.push(c.video); if (c.social) socs.push(c.social); });
+    var avg = function(a){ return a.length ? Math.round(a.reduce(function(x, y){ return x + y; }, 0) / a.length) : 0; };
+    var o = ddVal('b-obj') || 'awareness';
+    var videoShare = 0; on.forEach(function(f){ if (f.video) videoShare += split[f.id] || 0; });
+    var rule = '<b>Rule.</b> ' + objWord(o) + ' with ' + (picked.length ? 'personas who watch video at ' + avg(vids) + '% and live on social at ' + avg(socs) + '%' : 'no personas yet') +
+      ' points to a video-led mix: on Astro social, video content engages at 3.25% against 1.40% for image. ' +
+      (b ? Math.round(videoShare / b * 100) + '% of the budget sits in video formats. ' : '') +
+      'Each format takes a share by its weight for this objective, and the whole budget is placed.';
+    var rows = '';
+    on.forEach(function(f){
+      var amt = split[f.id] || 0, sh = totalW ? Math.round(f.w / totalW * 100) : 0;
+      var why = f.video
+        ? (f.cpm <= 10 ? 'The cheapest video on the card at ' + cpmFmt(f.cpm) + ' CPM, on the channel these personas use most.' : 'Premium video at ' + cpmFmt(f.cpm) + ' CPM for completed views in a brand-safe slot.')
+        : 'Low-cost ' + f.ch.toLowerCase() + ' display at ' + cpmFmt(f.cpm) + ' CPM to add frequency and cover sessions without video.';
+      if (f.placeholder) why += ' Placeholder rate, directional only.';
+      rows += whyRow(f.name, sh + '% of budget · ' + fmt(amt / f.cpm * 1000) + ' imps', esc(why));
+    });
+    var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
+    if (pins.length){
+      var props = {};
+      picked.forEach(function(p){ ((segmentFor(p.id) || {}).properties || []).forEach(function(x){ props[audLabel(window.AUDIENCE_PROPERTIES, x.key).toLowerCase()] = 1; }); });
+      var matched = pins.filter(function(s){ return Object.keys(props).some(function(k){ return k.indexOf(s.name.toLowerCase()) > -1 || s.name.toLowerCase().indexOf(k) > -1; }); });
+      rows += whyRow('Must-buy sites', pins.map(function(s){ return s.name; }).join(', '),
+        esc('The top Astro properties by 90-day impressions for these personas' +
+          (matched.length ? '; ' + matched.map(function(s){ return s.name; }).join(', ') + (matched.length > 1 ? ' are' : ' is') + ' also where the catalogue says they spend their time.' : '.') +
+          ' Pinned so the optimiser cannot move budget off them.'));
+    }
+    var fc = forecast();
+    return '<div class="head"><div><h5 id="whyPopTitle">Why this mix</h5><p class="sub">' +
+      esc(rm(fc.alloc) + ' placed at a blended ' + rm(fc.blended) + ' CPM: ' + fmt(fc.imps) + ' impressions, ' + fmt(fc.reach) + ' reach at ' + fc.freq + ' frequency.') + '</p></div>' +
+      '<button class="c-icon-btn" type="button" data-whyclose aria-label="Close"><i class="ph ph-x"></i></button></div>' +
+      '<div class="scroll">' + whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + '<p class="rule">' + rule + '</p>' + rows + '</div>' +
+      '<div class="foot"><span>Override any of it; the draft is one click away.</span></div>';
+  }
+  function openWhyPop(trig, kind){
+    if (whyPop.classList.contains('is-open') && whyTrig === trig){ closeWhyPop(); return; }
+    whyTrig = trig;
+    whyPop.innerHTML = kind === 'brief' ? whyBrief() : kind === 'personas' ? whyPersonas() : whyMix();
+    whyPop.setAttribute('aria-hidden', 'false');
+    var r = trig.getBoundingClientRect();
+    whyPop.style.left = '0px'; whyPop.style.top = '0px';
+    whyPop.classList.add('is-open');
+    var w = whyPop.offsetWidth, h = whyPop.offsetHeight;
+    var left = Math.max(12, Math.min(window.innerWidth - w - 12, r.left));
+    var top = r.bottom + 8;
+    if (top + h > window.innerHeight - 12) top = Math.max(12, r.top - h - 8);
+    whyPop.style.left = left + 'px'; whyPop.style.top = top + 'px';
+    var c = whyPop.querySelector('[data-whyclose]'); if (c) c.focus();
+  }
+  function closeWhyPop(){
+    if (!whyPop.classList.contains('is-open')) return;
+    whyPop.classList.remove('is-open');
+    whyPop.setAttribute('aria-hidden', 'true');
+    if (whyTrig && document.contains(whyTrig)) whyTrig.focus();
+    whyTrig = null;
+  }
+  document.querySelectorAll('[data-why]').forEach(function(b){
+    b.addEventListener('click', function(e){ e.stopPropagation(); openWhyPop(b, b.dataset.why); });
+  });
+  whyPop.addEventListener('click', function(e){
+    e.stopPropagation();
+    if (e.target.closest('[data-whyclose]')) closeWhyPop();
+    if (e.target.closest('[data-whyevidence]')){ closeWhyPop(); openWhy(); }
+  });
+  document.addEventListener('click', function(){ closeWhyPop(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeWhyPop(); });
+  document.addEventListener('scroll', function(e){ if (!whyPop.contains(e.target)) closeWhyPop(); }, true);
+  window.addEventListener('resize', closeWhyPop);
 
   /* ═══ Audience segment peek — the Audiences catalogue's still and
      clip for a persona, beside the chip or the picker row the pointer
@@ -4136,6 +4358,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
        the user has not already set, so a line completes the brief
        instead of leaving a homework list. */
     var iso = function(d){ return d.toISOString().slice(0, 10); };
+    got._defaults = defaults;
     if (!got.start && !got.end && !$('b-start').value && !$('b-end').value){
       var s0 = new Date(); s0.setDate(s0.getDate() + 14);
       var e0 = new Date(); e0.setDate(e0.getDate() + 35);
@@ -4214,7 +4437,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   function parseBriefText(text){
     var raw = String(text || '').replace(/\r/g, '');
     var got = {budget:0, obj:'', name:'', brand:'', prod:'', start:'', end:'',
-      kpi:'', target:0, unit:'', langs:[]};
+      kpi:'', target:0, unit:'', langs:[], _src:{}};
     var labels = {};
     var free = [];
     raw.split('\n').forEach(function(line){
@@ -4232,7 +4455,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       var suf = (bm[2] || '').toLowerCase();
       if (suf === 'k') amt *= 1000;
       if (suf === 'm') amt *= 1000000;
-      if (amt > 0) got.budget = Math.round(amt);
+      if (amt > 0){ got.budget = Math.round(amt); got._src.budget = bm[0].trim(); }
     }
 
     /* Objective. */
@@ -4240,6 +4463,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     if (om){
       var ow = om[0].toLowerCase();
       got.obj = /^lead/.test(ow) ? 'leadgen' : /store/.test(ow) ? 'footfall' : ow;
+      got._src.obj = om[0];
     }
 
     /* Dates: an explicit range, else a duration. */
@@ -4251,6 +4475,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       if (d1 && d2){
         if (d2 < d1) d2.setFullYear(d2.getFullYear() + 1);
         got.start = isoOf(d1); got.end = isoOf(d2);
+        got._src.dates = rm2[0].trim();
       }
     } else {
       var wk = /(\d+)\s*-?\s*(week|wk)s?\b/i.exec(raw) || /(\d+)\s*-?\s*(month)s?\b/i.exec(raw);
@@ -4259,6 +4484,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         var s0 = new Date(); s0.setDate(s0.getDate() + 14);
         var e0 = new Date(s0); e0.setDate(e0.getDate() + days);
         got.start = isoOf(s0); got.end = isoOf(e0);
+        got._src.dates = wk[0].trim() + ', starting two weeks from today';
       }
     }
 
@@ -4271,6 +4497,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       if (ts === 'm') tv *= 1000000;
       var tu = tm[3].toLowerCase();
       got.target = Math.round(tv);
+      got._src.target = tm[0].trim();
       if (/view|completion/.test(tu)){ got.kpi = 'Video completions'; got.unit = 'views'; }
       else if (/sign|regist|lead/.test(tu)){ got.kpi = 'Registrations'; got.unit = 'sign-ups'; }
       else if (/visit|footfall/.test(tu)){ got.kpi = 'Store visits'; got.unit = 'people'; }
@@ -4285,12 +4512,14 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     if (/english|\ben\b/.test(langSrc)) got.langs.push('English');
     if (/chinese|mandarin|cantonese/.test(langSrc)) got.langs.push('Chinese');
     if (/tamil/.test(langSrc)) got.langs.push('Tamil');
+    if (got.langs.length) got._src.langs = (labels.languages || labels.language) ? 'the Languages line' : 'language names in your notes';
 
     /* Brand: a label, "for <Brand>", or a known name anywhere. */
     got.brand = labels.brand || labels.advertiser || labels.client || '';
+    if (got.brand) got._src.brand = 'the Brand line';
     if (!got.brand){
       var fm = /\bfor\s+([A-Z][\w'&.]*(?:\s+[A-Z][\w'&.]*){0,2})/.exec(raw);
-      if (fm && window.collabBrand && collabBrand.known(fm[1])) got.brand = fm[1];
+      if (fm && window.collabBrand && collabBrand.known(fm[1])){ got.brand = fm[1]; got._src.brand = 'a brand we know, named in your notes'; }
     }
     if (!got.brand && window.collabBrand){
       var seen = {};
@@ -4298,29 +4527,32 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         if (got.brand || w.length < 3 || seen[w]) return;
         seen[w] = 1;
         if (/^[A-Z]/.test(w) && collabBrand.known(w) &&
-            !/^(The|For|With|And|Our|New|Campaign|Budget|Dates|Awareness|Objective|Languages|Target|Malaysia|English|Chinese|Tamil|Bahasa)$/.test(w)) got.brand = w;
+            !/^(The|For|With|And|Our|New|Campaign|Budget|Dates|Awareness|Objective|Languages|Target|Malaysia|English|Chinese|Tamil|Bahasa)$/.test(w)){ got.brand = w; got._src.brand = 'a capitalised name in your notes'; }
       });
     }
 
     /* Product: a label, or "launch(ing) <thing>". */
     got.prod = labels.product || '';
+    if (got.prod) got._src.prod = 'the Product line';
     if (!got.prod){
       var pm = /\b(?:launch(?:ing)?|promot(?:e|ing)|push(?:ing)?|selling|for the)\s+(?:of\s+)?(?:the\s+|our\s+|a\s+|its\s+)?([^.,\n]{3,60}?)(?=[.,\n]|\s+(?:with|for|in|on|across|running|from)\b|$)/i.exec(raw);
-      if (pm) got.prod = pm[1].trim();
+      if (pm){ got.prod = pm[1].trim(); got._src.prod = 'what your notes say you are launching'; }
     }
 
     /* Name: a label, else a short first line, else brand plus product. */
     got.name = labels.campaign || labels['campaign name'] || labels.name || labels.title || '';
+    if (got.name) got._src.name = 'the Campaign line';
     if (!got.name && free.length){
       /* the first sentence of the first line, if it reads like a title */
       var first = free[0].split(/[.!?]\s/)[0].replace(/[.!?]$/, '').trim();
-      if (first.length >= 4 && first.length <= 70 && !/^(we|our|the|this|i|it)\b/i.test(first)) got.name = first;
+      if (first.length >= 4 && first.length <= 70 && !/^(we|our|the|this|i|it)\b/i.test(first)){ got.name = first; got._src.name = 'the first sentence of your notes'; }
     }
     if (!got.name){
       var bits = [];
       if (got.brand) bits.push(got.brand);
       if (got.prod) bits.push(got.prod);
       got.name = bits.length ? bits.join(' ') + (got.prod ? '' : ' campaign') : '';
+      if (got.name) got._src.name = 'built from the brand and product';
     }
     return got;
   }
@@ -4390,6 +4622,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var got = parseBriefText(text);
     askShow('Reading your notes and writing the brief now. Watch the fields land.');
     applyBriefLine(got, function(){
+      lastBrief = got; briefAi = true;
+      $('briefAiTag').hidden = false;
       var bits = [];
       if (got.brand) bits.push(got.brand);
       if (got.budget) bits.push(rm(got.budget));
