@@ -585,7 +585,7 @@
      hover darkens 15% toward Neutral-9, legend bottom-left with 10px
      round swatches in caption Neutral-5. Segments grow in on render. */
   .p-sumchan{margin-top:var(--spacing-16);}
-  .p-chanbar{display:flex; height:20px; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden;}
+  .p-chanbar{display:flex; height:8px; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden;}
   .p-chanbar .seg{height:100%; flex:none; width:0; position:relative;
     transition:width var(--duration-slow) var(--ease-flow), filter var(--duration-fast) var(--ease-standard);
     transition-delay:calc(var(--i, 0) * 60ms), 0ms;}
@@ -599,8 +599,7 @@
   #summaryBudget tr{transition:background-color var(--duration-fast) var(--ease-standard);}
   #summaryBudget tr.is-hot{background:var(--color-neutral-2);}
   #summaryBudget tr .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:var(--spacing-8); vertical-align:-1px;}
-  .p-chanbar .seg .c-progress-fill-label{font-size:11px;}
-  .p-chanbar .seg.is-slim .c-progress-fill-label{display:none;}
+  .p-chanbar .seg .c-progress-fill-label{display:none;}
   .p-chanlegend{display:flex; flex-wrap:wrap; gap:var(--spacing-8) var(--spacing-16); margin-top:var(--spacing-8);
     font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
   .p-chanlegend .it{display:inline-flex; align-items:center; gap:var(--spacing-8);}
@@ -3145,7 +3144,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       body: (own ? whyInputs() + whyRule('Your words', ['Nothing inferred; audience and mix read from these values']) : rows) +
         (defs ? whyRule('Starting points, not from your notes', (g._defaults || []).map(esc).concat(
           ['Sized at RM 30 a person, RM 1 per three views, RM 75 a sign-up'])) : ''),
-      foot: own ? '' : '<span>Edit any field and the badge steps aside.</span>'
+      foot: ''
     };
   }
   function partsPersonas(){
@@ -3185,8 +3184,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       (t && $('b-kpi').value === 'Net reach' ? (r.uniq >= t ? ', which clears your ' + fmt(t) + ' target.' : ', short of your ' + fmt(t) + ' target; widen or add a segment.') : '.');
     return {title: own ? 'The audience' : 'Why these personas', sub: picked.length ? together : 'No personas picked.', own: own,
       body: whyInputs() + rule + rows,
-      foot: (own ? '<span>Your pick, kept as is.</span>' : '<span>Swap any of them; your pick is kept.</span>') +
-        '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button>'};
+      foot: '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-whyevidence><i class="ph ph-chart-bar"></i> See the Astro data</button>'};
   }
   function partsMix(){
     var own = mixSource !== 'ai' || splitTouched;
@@ -3227,7 +3225,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     return {title: own ? 'The mix' : 'Why this mix', own: own,
       sub: rm(fc.alloc) + ' placed at a blended ' + rm(fc.blended) + ' CPM: ' + fmt(fc.imps) + ' impressions, ' + fmt(fc.reach) + ' reach at ' + fc.freq + ' frequency.',
       body: whyInputs(picked.length ? [picked.length + ' persona' + (picked.length > 1 ? 's' : '')] : []) + rule + rows,
-      foot: own ? '<span>Your mix, kept as is. Restore AI draft brings the recommendation back.</span>' : '<span>Override any of it; the draft is one click away.</span>'};
+      foot: ''};
   }
   function whyCard(parts){
     return '<div class="head"><div><h5 id="whyPopTitle">' + esc(parts.title) + '</h5><p class="sub">' + esc(parts.sub) + '</p></div>' +

@@ -661,9 +661,9 @@ impressions for a format), and the reason in plain sentences. The
 brief card's rows quote the phrase of the notes each value was read
 from (the parser records `_src` per field) and list the starting
 points it filled where the notes said nothing, with the sizing rules
-stated. A foot line says the pick can be overridden; the persona card
-also carries "See the Astro data", which closes the card and opens
-the evidence modal.
+stated. The persona card's foot carries only "See the Astro data",
+which closes the card and opens the evidence modal; the other cards
+have no foot line.
 
 | Moment | Motion |
 |---|---|
@@ -696,11 +696,11 @@ CPM and frequency, Audience with persona count and overlap), the plan
 table carries campaign, dates, refiner values, intent and exclusions
 and must-buys, and the budget table closes with a total row and a budget-by-format
 bar built the audience pull bar's way: one stacked horizontal bar
-(20px, pill ends, hairline Neutral-1 dividers) with one slice per
+(8px like the audience pull bar, pill ends, hairline Neutral-1 dividers) with one slice per
 format in table order, sized to its share of the budget, coloured by
 its channel on the DLS chart series (OTT Fire, Social Wood, Web
-Earth, TV Water, Radio Gold), the share printed inside any slice 9%
-or wider, unallocated budget left as bare Neutral-3 track. Each table
+Earth, TV Water, Radio Gold), unallocated budget left as bare Neutral-3 track (shares live in
+the hover title, the table and the legend). Each table
 row carries a 10px dot in its channel colour. Hovering a row lights
 its slice and drops the others to 30% opacity; hovering a slice
 highlights its row (Neutral-2). The legend beneath is by channel
