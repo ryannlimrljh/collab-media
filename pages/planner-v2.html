@@ -508,9 +508,35 @@
   .p-mixhead{display:flex; justify-content:space-between; align-items:baseline;
     gap:var(--spacing-12); margin:var(--spacing-8) 0 var(--spacing-4);}
   .p-mixhead .c-stat-label{margin:0;}
-  .p-fmtlist:empty::after{content:'Nothing in the mix yet. Pick from the shelf below.';
-    display:block; padding:var(--spacing-12) 0; font-size:var(--text-body2-size);
+  /* v2 funnel: one block per kept channel, holding its rows, its
+     add-chips and the sites it runs on, so a choice up top visibly
+     opens the things it governs. */
+  .p-blocks-tools{display:flex; justify-content:space-between; align-items:center;
+    gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
+  .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
+  .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+    padding:var(--spacing-12) var(--spacing-16);}
+  .p-chanblock.is-new{animation:p-row-in 260ms var(--ease-settle) both;}
+  .p-chanblock-head{display:flex; justify-content:space-between; align-items:baseline;
+    gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
+  .p-chanblock-head h5{margin:0; font-size:var(--text-h5-size); font-weight:var(--text-h5-weight);}
+  .p-chanblock-head .sum{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    font-variant-numeric:tabular-nums; text-align:right;}
+  .p-chanblock .p-fmtrow:first-child{border-top:0;}
+  .p-chanblock-empty{margin:0; padding:var(--spacing-4) 0; font-size:var(--text-body2-size);
     color:var(--color-neutral-5);}
+  .p-chan-add, .p-chan-sites{display:flex; flex-wrap:wrap; align-items:center;
+    gap:var(--spacing-8); margin-top:var(--spacing-8);}
+  .p-chan-sites{padding-top:var(--spacing-8); border-top:1px dotted var(--color-neutral-3);}
+  .p-chan-add .lab, .p-chan-sites .lab{font-size:var(--text-caption-size); font-weight:700;
+    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);
+    margin-right:var(--spacing-4);}
+  .p-chan-add .c-chip-filter .cpm, .p-chan-sites .c-chip-filter .inv{color:var(--color-neutral-5); font-weight:400;}
+  .p-chan-sites .c-chip-filter.is-active .inv{color:rgba(255,255,255,.72);}
+  .p-chan-sites .c-chip-filter i{font-size:12px;}
+  .p-chan-sites .sum, .p-chan-add .sum{font-size:var(--text-caption-size); color:var(--color-neutral-5);
+    margin-left:auto;}
+  .p-chan-add .c-chip-filter:hover, .p-chan-sites .c-chip-filter:hover:not(.is-active){background:var(--color-neutral-2);}
   @keyframes p-row-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
   .p-fmtrow.is-new{animation:p-row-in 260ms var(--ease-settle) both;}
   .p-shelf{margin-top:var(--spacing-16); padding-top:var(--spacing-12);
@@ -1217,7 +1243,7 @@
                   <span class="p-picker-sub" id="channelSummary">All channels</span>
                 </div>
                 <div class="c-chip-group p-chanrow" id="channelRow"></div>
-                <p class="p-note p-chan-note" id="channelNote">Every channel is in play until you switch one off. Its formats step out of the mix, and step back in when you switch it on again.</p>
+                <p class="p-note p-chan-note" id="channelNote">Pick where the campaign runs. Each channel you keep opens its own block below, with its formats, split and sites. Switch one off and it folds away; switch it back and it returns as it was.</p>
               </div>
 
               <div class="p-sect">
@@ -1232,45 +1258,16 @@
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
                 </div>
-                <div class="p-mixhead">
-                  <span class="c-stat-label" id="mixCount">In the mix</span>
-                  <span class="p-note" style="margin:0;">Untick a format to return it to the shelf.</span>
-                </div>
-                <div class="p-fmtlist" id="formatList"></div>
-                <div class="p-shelf" id="formatShelf">
-                  <div class="p-shelf-head">
-                    <span class="c-stat-label" id="shelfCount">Add formats</span>
-                    <div class="c-search-input-box p-shelf-search" id="shelfSearchWrap" hidden>
-                      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-                      <input type="search" id="shelfSearch" placeholder="Find a format" aria-label="Find a format" autocomplete="off" />
-                    </div>
+                <div class="p-blocks-tools">
+                  <span class="p-note" style="margin:0;">One block per channel you kept: what is in the mix, what you can add, and the sites it runs on.</span>
+                  <div class="c-search-input-box p-shelf-search" id="shelfSearchWrap" hidden>
+                    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" id="shelfSearch" placeholder="Find a format" aria-label="Find a format" autocomplete="off" />
                   </div>
-                  <div id="shelfGroups"></div>
                 </div>
+                <div class="p-chanblocks" id="formatList"></div>
               </div>
             </div>
-
-            <div class="p-drawer" id="sitesDrawer">
-              <button class="p-disclose" data-drawer="sitesPanel" aria-expanded="false" aria-controls="sitesPanel" type="button">
-                <div>
-                  <h4>Sites</h4>
-                  <p class="sub" id="sitesSummary">Loading…</p>
-                </div>
-                <i class="ph ph-caret-down"></i>
-              </button>
-              <div class="p-drawer-body" id="sitesPanel" hidden>
-                <div class="p-drawer-section">
-                  <p class="p-note" style="margin:0 0 var(--spacing-8);">Tick a site to make it a guaranteed must-buy. Everything left unticked stays in the pool for the optimiser to move budget between.</p>
-                  <table class="c-table">
-                    <thead><tr><th>Site</th><th>Channel</th><th class="num">Est. CPM</th><th class="num">Inventory</th><th style="text-align:right;">Must buy</th></tr></thead>
-                    <tbody id="siteRows"></tbody>
-                  </table>
-                  <p class="p-note" id="sitesFoot"></p>
-                </div>
-              </div>
-            </div>
-
-          </div>
 
         <div class="p-footer">
           <button class="c-btn c-btn-secondary c-btn-md" data-back="2" type="button"><i class="ph ph-arrow-up"></i> Back to audience</button>
@@ -1837,7 +1834,7 @@
       add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective with a video-led mix'
         : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
       var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
-      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked, so the optimiser buys freely', 'sitesDrawer');
+      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked, so the optimiser buys freely', 'formatList');
     }
     if (n === 4){
       checksFor(1).concat(checksFor(2), checksFor(3)).forEach(function(c){
@@ -1965,7 +1962,7 @@
     function finish(){
       li.classList.remove('is-loading');
       if (step !== 3) return;
-      aiFlash(['sitesDrawer']);
+      aiFlash(['formatList']);
       animateSplitSweep();
       askShow('I drafted the mix from your brief and audience: a video-led format set, the draft sites marked as must-buys, and the budget fully allocated. Override anything; your changes are kept.');
     }
@@ -2676,6 +2673,7 @@
           FORMATS.forEach(function(f){ if (f.ch === c) f.on = false; });
         } else {
           chanOn.push(c);
+          newChan = c;
           var back = chanMemory[c] || [];
           FORMATS.forEach(function(f){ if (f.ch === c && back.indexOf(f.id) > -1) f.on = true; });
         }
@@ -2720,37 +2718,105 @@
     var b = budget();
     $('splitBudgetLabel').textContent = rm(b) +
       ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
-    var mix = FORMATS.filter(function(f){ return f.on && chanAllows(f.ch); });
-    var mixCount = $('mixCount');
-    if (mixCount) mixCount.textContent = 'In the mix · ' + mix.length + (mix.length === 1 ? ' format' : ' formats');
-    mix.forEach(function(f){
-      var amt = f.on ? (split[f.id] || 0) : 0;
-      var row = document.createElement('div');
-      row.className = 'p-fmtrow' + (f.on ? '' : ' is-off') + (f.id === newFmt ? ' is-new' : '');
-      row.innerHTML =
-        '<label class="c-choice">' +
-          '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
-          '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-          '<span class="text"><span class="label">' + f.name +
-            (f.placeholder ? ' <span class="c-badge c-badge-warning">placeholder rate</span>' : '') + '</span>' +
-          '<span class="desc">' + f.ch + ' · ' + cpmFmt(f.cpm) + ' CPM</span></span>' +
-        '</label>' +
-        '<div class="c-slider-group"><div class="c-slider-rail">' +
-          '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
-          '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="100" value="' + amt +
-          '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '"' + (f.on ? '' : ' disabled') + ' /></div></div>' +
-        '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
-        '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
-      row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
-        f.on = !f.on;
-        mixSource = 'user';
-        resetSplit();
-        renderAll();
+    var rest = FORMATS.filter(function(f){ return !f.on && chanAllows(f.ch); });
+    var wrap = $('shelfSearchWrap');
+    if (wrap) wrap.hidden = rest.length <= 12;
+    var q = shelfQuery.trim().toLowerCase();
+
+    CH_ORDER.filter(function(c){ return chanOn.indexOf(c) > -1; }).forEach(function(c){
+      var mix = FORMATS.filter(function(f){ return f.on && f.ch === c; });
+      var shelf = FORMATS.filter(function(f){
+        return !f.on && f.ch === c && (!q || f.name.toLowerCase().indexOf(q) > -1);
       });
-      list.appendChild(row);
+      var sum = mix.reduce(function(acc, f){ return acc + (split[f.id] || 0); }, 0);
+      var block = document.createElement('div');
+      block.className = 'p-chanblock' + (c === newChan ? ' is-new' : '');
+      block.dataset.ch = c;
+      block.innerHTML =
+        '<div class="p-chanblock-head"><h5>' + c + '</h5><span class="sum">' +
+          (mix.length
+            ? mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%'
+            : 'Nothing in the mix yet') +
+        '</span></div>' +
+        '<div class="p-fmtlist"></div>';
+      var rows = block.querySelector('.p-fmtlist');
+
+      if (!mix.length){
+        var empty = document.createElement('p');
+        empty.className = 'p-chanblock-empty';
+        empty.textContent = 'Add a format below to bring ' + c + ' into the plan.';
+        rows.appendChild(empty);
+      }
+      mix.forEach(function(f){
+        var amt = split[f.id] || 0;
+        var row = document.createElement('div');
+        row.className = 'p-fmtrow' + (f.id === newFmt ? ' is-new' : '');
+        row.innerHTML =
+          '<label class="c-choice">' +
+            '<input type="checkbox" checked aria-label="' + f.name + '" />' +
+            '<span class="c-checkbox-box on"><i class="ph ph-check"></i></span>' +
+            '<span class="text"><span class="label">' + f.name +
+              (f.placeholder ? ' <span class="c-badge c-badge-warning">placeholder rate</span>' : '') + '</span>' +
+            '<span class="desc">' + cpmFmt(f.cpm) + ' CPM</span></span>' +
+          '</label>' +
+          '<div class="c-slider-group"><div class="c-slider-rail">' +
+            '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
+            '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="100" value="' + amt +
+            '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '" /></div></div>' +
+          '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
+          '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
+        row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
+          f.on = false;
+          mixSource = 'user';
+          resetSplit();
+          renderAll();
+          markSaved();
+        });
+        rows.appendChild(row);
+      });
+
+      /* Add: this channel's shelf, capped until opened, ignoring the cap while searching. */
+      var cap = 8, open = !!shelfOpen[c] || !!q;
+      var vis = open ? shelf : shelf.slice(0, cap);
+      var more = shelf.length - vis.length;
+      var add = document.createElement('div');
+      add.className = 'p-chan-add';
+      var allIn = !FORMATS.some(function(f){ return !f.on && f.ch === c; });
+      add.innerHTML = '<span class="lab">Add</span>' +
+        (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
+        (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
+        vis.map(function(f){
+          return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '"' +
+            (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
+            f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
+        }).join('') +
+        (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
+        (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '');
+      block.appendChild(add);
+
+      /* Runs on: the sites in this channel; an active chip is a must-buy. */
+      var sites = SITES.filter(function(s){ return s.ch === c; });
+      var runs = document.createElement('div');
+      runs.className = 'p-chan-sites';
+      if (!sites.length){
+        runs.innerHTML = '<span class="lab">Runs on</span><span class="sum" style="margin-left:0;">Bought as airtime, no site pool to pick from.</span>';
+      } else {
+        var pinned = sites.filter(function(s){ return s.pin; }).length;
+        runs.innerHTML = '<span class="lab">Runs on</span>' +
+          sites.map(function(sx){
+            return '<button class="c-chip c-chip-filter' + (sx.pin ? ' is-active' : '') + '" type="button" data-pin="' + sx.id + '"' +
+              ' aria-pressed="' + (sx.pin ? 'true' : 'false') + '"' +
+              ' title="' + sx.inv + ' monthly impressions · ' + cpmFmt(sx.cpm) + ' CPM' + (sx.ai ? ' · in the AI draft' : '') + '">' +
+              (sx.pin ? '<i class="ph-fill ph-push-pin" aria-hidden="true"></i> ' : '') + sx.name +
+              ' <span class="inv">' + sx.inv + '</span></button>';
+          }).join('') +
+          '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>';
+      }
+      block.appendChild(runs);
+      list.appendChild(block);
     });
-    newFmt = null;
-    renderShelf();
+    newFmt = null; newChan = null;
+
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
       sl.addEventListener('input', function(){
         var id = sl.dataset.fmt;
@@ -2766,63 +2832,44 @@
         $('splitReset').hidden = false;
         $('splitOrigin').textContent = 'Your split. Unspent budget shows as unallocated; Reset closes it in one move.';
         syncSplitRows();
+        syncBlockSums();
         renderMixRail(); renderChecks(); renderPreview(); renderStepSums();
       });
       sl.addEventListener('change', function(){ markSaved(); });
     });
   }
-
-  /* The shelf (v2): every format not in the mix, as chips grouped by
-     channel. Eight per group, then an overflow count; the search box
-     appears once there is enough to search and shows every match. */
-  var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
-  var shelfOpen = {}, shelfQuery = '', newFmt = null;
-  function renderShelf(){
-    var host = $('shelfGroups');
-    if (!host) return;
-    var rest = FORMATS.filter(function(f){ return !f.on && chanAllows(f.ch); });
-    var wrap = $('shelfSearchWrap');
-    if (wrap) wrap.hidden = rest.length <= 12;
-    var count = $('shelfCount');
-    if (count) count.textContent = 'Add formats · ' + rest.length + ' on the shelf';
-    var q = shelfQuery.trim().toLowerCase();
-    var shown = q ? rest.filter(function(f){ return f.name.toLowerCase().indexOf(q) > -1; }) : rest;
-    if (!rest.length){
-      host.innerHTML = '<p class="p-shelf-empty">Every format is in the mix.</p>';
-      return;
-    }
-    if (!shown.length){
-      host.innerHTML = '<p class="p-shelf-empty">No format matches \u201c' + shelfQuery.replace(/</g, '&lt;') + '\u201d.</p>';
-      return;
-    }
-    var chs = CH_ORDER.filter(function(c){ return shown.some(function(f){ return f.ch === c; }); });
-    host.innerHTML = chs.map(function(c){
-      var items = shown.filter(function(f){ return f.ch === c; });
-      var cap = 8;
-      var open = !!shelfOpen[c] || !!q;
-      var vis = open ? items : items.slice(0, cap);
-      var more = items.length - vis.length;
-      return '<div class="p-shelf-group" data-ch="' + c + '">' +
-        '<div class="p-shelf-lab">' + c + ' <span class="n">' + items.length + '</span></div>' +
-        '<div class="c-chip-group">' +
-          vis.map(function(f){
-            return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '"' +
-              (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
-              f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
-          }).join('') +
-          (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
-          (open && !q && items.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
-        '</div></div>';
-    }).join('');
+  /* Block headers follow the dials without a rebuild. */
+  function syncBlockSums(){
+    var b = budget();
+    document.querySelectorAll('#formatList .p-chanblock').forEach(function(block){
+      var c = block.dataset.ch;
+      var mix = FORMATS.filter(function(f){ return f.on && f.ch === c; });
+      if (!mix.length) return;
+      var sum = mix.reduce(function(acc, f){ return acc + (split[f.id] || 0); }, 0);
+      block.querySelector('.p-chanblock-head .sum').textContent =
+        mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%';
+    });
   }
+  var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
+  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null;
   (function(){
-    var host = $('shelfGroups');
+    var host = $('formatList');
     if (!host) return;
     host.addEventListener('click', function(e){
       var more = e.target.closest('[data-more]');
-      if (more){ shelfOpen[more.dataset.more] = true; renderShelf(); return; }
+      if (more){ shelfOpen[more.dataset.more] = true; renderFormats(); return; }
       var less = e.target.closest('[data-less]');
-      if (less){ shelfOpen[less.dataset.less] = false; renderShelf(); return; }
+      if (less){ shelfOpen[less.dataset.less] = false; renderFormats(); return; }
+      var pin = e.target.closest('[data-pin]');
+      if (pin){
+        var sx = SITES.filter(function(x){ return x.id === pin.dataset.pin; })[0];
+        if (!sx) return;
+        sx.pin = !sx.pin;
+        mixSource = 'user';
+        renderAll();
+        markSaved();
+        return;
+      }
       var add = e.target.closest('[data-add]');
       if (!add) return;
       var f = FORMATS.filter(function(x){ return x.id === add.dataset.add; })[0];
@@ -2839,7 +2886,7 @@
     var search = $('shelfSearch');
     if (search) search.addEventListener('input', function(){
       shelfQuery = search.value;
-      renderShelf();
+      renderFormats();
     });
   })();
 
@@ -2913,37 +2960,8 @@
     setTimeout(nextRow, 550);
   }
 
-  function renderSites(){
-    var rows = $('siteRows'); rows.innerHTML = '';
-    var visible = SITES.filter(function(s){ return chanAllows(s.ch); });
-    visible.forEach(function(s){
-      var tr = document.createElement('tr');
-      tr.innerHTML = '<td style="font-weight:700;">' + s.name +
-          (s.ai ? ' <span class="c-badge p-ai-badge" title="In the AI draft">AI draft</span>' : '') + '</td>' +
-        '<td>' + s.ch + '</td>' +
-        '<td class="num">' + rm(s.cpm) + '</td>' +
-        '<td class="num">' + s.inv + '</td>' +
-        '<td style="text-align:right;"><label class="c-choice p-mustbuy">' +
-          '<input type="checkbox"' + (s.pin ? ' checked' : '') + ' aria-label="Must buy ' + s.name + '" data-site="' + s.id + '" />' +
-          '<span class="c-checkbox-box' + (s.pin ? ' on' : '') + '">' + (s.pin ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-          '</label></td>';
-      rows.appendChild(tr);
-    });
-    rows.querySelectorAll('input[data-site]').forEach(function(cb){
-      cb.addEventListener('change', function(){
-        var s = SITES.filter(function(x){ return x.id === cb.dataset.site; })[0];
-        s.pin = !s.pin;
-        mixSource = 'user';
-        renderAll();
-      });
-    });
-    var pinned = visible.filter(function(s){ return s.pin; });
-    $('sitesSummary').textContent = pinned.length
-      ? pinned.length + ' must-buys · ' + (visible.length - pinned.length) + ' in the optimiser pool'
-      : visible.length + ' sites in the optimiser pool · none marked must-buy';
-    $('sitesFoot').textContent = 'Showing ' + visible.length + ' of ' + SITES.length +
-      ' sites for the selected channels. Est. CPMs come from the central rate card.';
-  }
+  /* Sites render inside each channel block (see renderFormats). */
+  function renderSites(){}
 
   function resetSplit(){
     split = {};
@@ -2981,7 +2999,7 @@
     resetSplit();
     renderAll();
     markSaved();
-    aiFlash(['sitesDrawer']);
+    aiFlash(['formatList']);
     animateSplitSweep();
     askShow('Re-drafted the formats, sites and split from your brief and audience. Your channel picks were kept.');
   });
@@ -3875,7 +3893,7 @@
         SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
         mixSource = 'user';
         renderAll(); markSaved();
-        aiFlash(['sitesDrawer']);
+        aiFlash(['formatList']);
         var pinned = SITES.filter(function(s){ return s.pin; });
         askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
           '. Everything else stays in the pool for the optimiser to move budget between.');
@@ -4302,7 +4320,7 @@
   /* Which section a request belongs to, for the anchor choreography. */
   function intentAnchor(q){
     if (/persona|audience|\bwho\b/.test(q)) return {step: 2, target: 'personaBody'};
-    if (/\bpin|must.?buy|\bsites?\b/.test(q)) return {step: 3, target: 'sitesDrawer'};
+    if (/\bpin|must.?buy|\bsites?\b/.test(q)) return {step: 3, target: 'formatList'};
     if (/draft|\bmix\b|format|balanc|allocat|split/.test(q)) return {step: 3, target: 'formatCard'};
     if (/budget/.test(q)) return {step: 1, target: 'b-budget'};
     if (/rm\s*\d/.test(q)) return {step: 1, target: 'askCard'};
