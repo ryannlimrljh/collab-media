@@ -530,7 +530,7 @@ what a pill is: channels are DLS BUTTONS (`c-btn c-btn-md`, 40px,
 press and a `c-badge c-badge-selected` count riding inside; addable
 formats are 32px DLS filter PILLS with a leading plus; sites are 26px
 squared TAGS (`p-site-chip`, Neutral-2, leading pin that fills when
-active). The Add and Runs on labels share a fixed 64px column so the
+active). The Add and Runs on labels share a fixed 88px column so the
 first pill of each row lines up.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
