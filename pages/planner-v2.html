@@ -1578,42 +1578,44 @@
   var CHANNELS = ['TV', 'Radio', 'OTT', 'Web', 'Social'];
 
   var FORMATS = [
-    {id:'isv', name:'In-stream video',  cpm:32, w:40, ch:'OTT',    video:true,  on:true},
-    {id:'sva', name:'Social video ad',  cpm:18, w:35, ch:'Social', video:true,  on:true},
-    {id:'ldb', name:'Leaderboard',      cpm:12, w:10, ch:'Web',    video:false, on:true},
-    {id:'msh', name:'Masthead takeover',cpm:48, w:15, ch:'Web',    video:false, on:false},
-    {id:'isa', name:'Image social ad',  cpm:14, w:10, ch:'Social', video:false, on:false},
-    {id:'tvc', name:'TV spot (30s)',    cpm:45, w:30, ch:'TV',     video:true,  on:false},
-    {id:'rad', name:'Radio adlib',      cpm:12, w:12, ch:'Radio',  video:false, on:false},
-    /* the rest of the rate card, at the size the live build carries */
-    {id:'bil', name:'Billboard',            cpm:30, w:6, ch:'Web', video:false, on:false},
-    {id:'car', name:'Carousel ad',          cpm:30, w:6, ch:'Web', video:false, on:false},
-    {id:'crs', name:'Cross slider',         cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'cub', name:'CubeVibe',             cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'dat', name:'Data capture',         cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'hlf', name:'Half page',            cpm:18, w:8, ch:'Web', video:false, on:false},
-    {id:'hot', name:'Hotspot',              cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'irv', name:'In-read video',        cpm:20, w:8, ch:'Web', video:true,  on:false},
-    {id:'int', name:'Interstitial',         cpm:30, w:6, ch:'Web', video:false, on:false},
-    {id:'lmb', name:'Large mobile banner',  cpm:18, w:8, ch:'Web', video:false, on:false},
-    {id:'mrv', name:'MerryView',            cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'mng', name:'Mini game',            cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'mob', name:'Mobile banner',        cpm:18, w:8, ch:'Web', video:false, on:false},
-    {id:'mlb', name:'Mobile leaderboard',   cpm:18, w:8, ch:'Web', video:false, on:false},
-    {id:'mrc', name:'MREC',                 cpm:18, w:8, ch:'Web', video:false, on:false},
-    {id:'mtb', name:'Multi-tab',            cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'pca', name:'Product collector ad', cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'puz', name:'Puzzle ad',            cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'qiz', name:'Quiz ad',              cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'rmb', name:'Reveal mystery box',   cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'shp', name:'Shape drop',           cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'sto', name:'Site takeover',        cpm:80, w:8, ch:'Web', video:false, on:false},
-    {id:'skn', name:'Skinner / wallpaper',  cpm:80, w:8, ch:'Web', video:false, on:false},
-    {id:'sty', name:'Storytelling',         cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'vib', name:'Video in-banner',      cpm:20, w:8, ch:'Web', video:true,  on:false},
-    {id:'wav', name:'Wave cards',           cpm:30, w:5, ch:'Web', video:false, on:false},
-    {id:'svs', name:'Social story ad',      cpm:16, w:8, ch:'Social', video:true, on:false},
-    {id:'ott', name:'OTT pre-roll',         cpm:26, w:12, ch:'OTT', video:true, on:false}
+    /* The live rate card, name for name and rate for rate, in the
+       order the build lists them. Weights steer the AI draft only. */
+    {id:'cal', name:'Calculator Ad',        cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'car', name:'Carousel Ad',          cpm:30,   w:5,  ch:'Web',    video:false, on:false},
+    {id:'cat', name:'Catfish Ad',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'cnt', name:'Countdown',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'crs', name:'Cross Slider',         cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'cub', name:'CubeVibe',             cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'dat', name:'Data Capture',         cpm:30,   w:5,  ch:'Web',    video:false, on:false},
+    {id:'hlf', name:'Half Page',            cpm:18,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'hot', name:'Hotspot',              cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'isa', name:'Image Social Ad',      cpm:5,    w:10, ch:'Social', video:false, on:false},
+    {id:'irv', name:'In-Read Video',        cpm:20,   w:10, ch:'Web',    video:true,  on:false},
+    {id:'isv', name:'In-stream Video',      cpm:25,   w:30, ch:'Web',    video:true,  on:true},
+    {id:'int', name:'Interstitial',         cpm:30,   w:5,  ch:'Web',    video:false, on:false},
+    {id:'lmb', name:'Large Mobile Banner',  cpm:18,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'ldb', name:'Leaderboard',          cpm:18,   w:12, ch:'Web',    video:false, on:true},
+    {id:'msh', name:'Masthead',             cpm:35,   w:10, ch:'Web',    video:false, on:false},
+    {id:'mrv', name:'MerryView',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'mng', name:'Mini Game',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'mob', name:'Mobile Banner',        cpm:18,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'mlb', name:'Mobile Leaderboard',   cpm:18,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'mrc', name:'MREC',                 cpm:18,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'mtb', name:'Multi-Tab',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'pca', name:'Product Collector Ad', cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'puz', name:'Puzzle Ad',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'qiz', name:'Quiz Ad',              cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'rmb', name:'Reveal Mystery Box',   cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'shp', name:'Shape Drop',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'sto', name:'Site Takeover',        cpm:80,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'skn', name:'Skinner / Wallpaper',  cpm:80,   w:8,  ch:'Web',    video:false, on:false},
+    {id:'sty', name:'Storytelling',         cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'vib', name:'Video In-banner',      cpm:20,   w:8,  ch:'Web',    video:true,  on:false},
+    {id:'sva', name:'Video Social Ad',      cpm:9,    w:30, ch:'Social', video:true,  on:true},
+    {id:'wav', name:'Wave Cards',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
+    {id:'tvc', name:'TV',                   cpm:3.26, w:25, ch:'TV',     video:true,  on:false},
+    {id:'ott', name:'OTT',                  cpm:26,   w:20, ch:'OTT',    video:true,  on:false, placeholder:true},
+    {id:'rad', name:'Radio',                cpm:6.61, w:12, ch:'Radio',  video:false, on:false}
   ];
 
   var SITES = [
@@ -1647,6 +1649,8 @@
     return String(Math.round(n));
   }
   function rm(n){ return 'RM ' + Math.round(n).toLocaleString('en-MY'); }
+  /* Rate-card CPMs carry sen where the card does (TV 3.26, Radio 6.61). */
+  function cpmFmt(n){ return 'RM ' + (Number.isInteger(n) ? n.toLocaleString('en-MY') : n.toFixed(2)); }
   function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
   function budget(){ return parseInt($('b-budget').value, 10) || 0; }
   function onFormats(){ return FORMATS.filter(function(f){ return f.on; }); }
@@ -2676,8 +2680,9 @@
         '<label class="c-choice">' +
           '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
           '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-          '<span class="text"><span class="label">' + f.name + '</span>' +
-          '<span class="desc">' + f.ch + ' · ' + rm(f.cpm) + ' CPM</span></span>' +
+          '<span class="text"><span class="label">' + f.name +
+            (f.placeholder ? ' <span class="c-badge c-badge-warning">placeholder rate</span>' : '') + '</span>' +
+          '<span class="desc">' + f.ch + ' · ' + cpmFmt(f.cpm) + ' CPM</span></span>' +
         '</label>' +
         '<div class="c-slider-group"><div class="c-slider-rail">' +
           '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
@@ -2750,8 +2755,9 @@
         '<div class="p-shelf-lab">' + c + ' <span class="n">' + items.length + '</span></div>' +
         '<div class="c-chip-group">' +
           vis.map(function(f){
-            return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '">' +
-              f.name + ' <span class="cpm">' + rm(f.cpm) + '</span></button>';
+            return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '"' +
+              (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
+              f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
           }).join('') +
           (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
           (open && !q && items.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
@@ -3024,7 +3030,7 @@
     $('summaryBudget').innerHTML = fmts.map(function(f){
       var amt = split[f.id] || 0;
       return '<tr><td style="font-weight:700;">' + f.name + '</td>' +
-        '<td class="num">' + rm(f.cpm) + '</td>' +
+        '<td class="num">' + cpmFmt(f.cpm) + '</td>' +
         '<td class="num">' + rm(amt) + '</td>' +
         '<td class="num">' + (budget() ? Math.round(amt / budget() * 100) : 0) + '%</td>' +
         '<td class="num">' + fmt(amt / f.cpm * 1000) + '</td></tr>';
