@@ -283,6 +283,32 @@
     font-weight:700; border-top:1px solid var(--color-neutral-2);}
   .p-fmtpeek .lbl .fam{font-weight:400; color:var(--color-neutral-5); white-space:nowrap;}
   @media (prefers-reduced-motion:reduce){ .p-fmtpeek{transition:none;} }
+  /* Audience segment peek: the same card at the Audiences page's width,
+     a 4:3 still with the clip fading over it, then name and size. */
+  .p-audpeek{position:fixed; width:220px; z-index:40; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-4); overflow:hidden; opacity:0; pointer-events:none;
+    transform:translateY(6px) scale(.98);
+    transition:opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-slow) var(--ease-settle),
+      top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
+  .p-audpeek.is-visible{opacity:1; transform:none;}
+  .p-audpeek.is-jumping{transition-property:opacity, transform;}
+  .p-audpeek .pic{position:relative; aspect-ratio:4/3; background:var(--color-neutral-2);
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  .p-audpeek .pic img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .p-audpeek .pic video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    display:block; z-index:1; opacity:0; pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  .p-audpeek .pic video.is-on{opacity:1;}
+  .p-audpeek .lbl{display:flex; justify-content:space-between; gap:var(--spacing-8);
+    padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-caption-size);
+    font-weight:700; border-top:1px solid var(--color-neutral-2);
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  .p-audpeek .lbl .fam{font-weight:400; color:var(--color-neutral-5); white-space:nowrap;}
+  .p-audpeek.is-switching .pic, .p-audpeek.is-switching .lbl{opacity:0;
+    transition-duration:var(--duration-instant);}
+  @media (prefers-reduced-motion:reduce){ .p-audpeek{transition:none;} }
   .p-pull{display:grid; grid-template-rows:0fr; margin-top:0;
     transition:grid-template-rows var(--duration-base) var(--ease-settle),
       margin-top var(--duration-base) var(--ease-settle);}
@@ -1683,11 +1709,13 @@
   </div>
 </div>
 
+<div class="p-audpeek" id="audPeek" aria-hidden="true"><div class="pic"><img id="audPeekArt" alt="" /></div><div class="lbl"><span id="audPeekName"></span><span class="fam" id="audPeekSize"></span></div></div>
 <div class="p-fmtpeek" id="fmtPeek" aria-hidden="true"><div class="fp-stage" id="fmtPeekStage"></div><div class="lbl"><span id="fmtPeekName"></span><span class="fam" id="fmtPeekFam"></span></div></div>
 <div class="c-toast-host" id="toastHost"></div>
 
 <script src="../shared/shell.js?v=0.9.52"></script>
 <script src="../shared/formats-data.js?v=4"></script>
+<script src="../shared/audiences-data.js?v=4"></script>
 <script src="../shared/format-previews.js?v=2"></script>
 <script src="../shared/plan-store.js?v=4"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
@@ -2644,6 +2672,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     personaOpen = false;
     personaPanel.hidden = true;
     personaField.classList.remove('open');
+    hideAudPeek(true);
   }
 
   function renderPersonaTrigger(){
@@ -2686,6 +2715,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       var full = !on && selected.length >= MAX;
       var row = document.createElement('label');
       row.className = 'c-dropdown-option' + (full ? ' disabled' : '');
+      row.dataset.persona = p.id;
       if (full) row.title = 'Five personas maximum';
       row.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + (full ? ' disabled' : '') +
           ' aria-label="' + p.name + '" />' +
@@ -2874,6 +2904,95 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     host.addEventListener('click', function(){ hidePeek(true); }, true);
     document.addEventListener('scroll', function(){ if (peek.classList.contains('is-visible')) hidePeek(true); }, true);
     window.addEventListener('resize', function(){ hidePeek(true); });
+  })();
+
+  /* ═══ Audience segment peek — the Audiences catalogue's still and
+     clip for a persona, beside the chip or the picker row the pointer
+     is on. Ten personas match a catalogue segment exactly (the
+     catalogue's "addressable" figure is the persona's size); the other
+     four take the nearest segment. ═══ */
+  var AUD_ALIAS = {kd:'rom-com-fans', fb:'epl-fans', bp:'corporate-leaders', fi:'emerging-affluents'};
+  var audCache = {};
+  function segmentFor(pid){
+    if (pid in audCache) return audCache[pid];
+    var p = byId(pid), cat = window.AUDIENCES || [], hit = null;
+    if (p){
+      cat.forEach(function(c){ if (!hit && c.addressable === p.users) hit = c; });
+      if (!hit && AUD_ALIAS[pid]) cat.forEach(function(c){ if (!hit && c.id === AUD_ALIAS[pid]) hit = c; });
+    }
+    audCache[pid] = hit;
+    return hit;
+  }
+  var audPeek = $('audPeek'), audId = null, audHide = null, audSwap = null;
+  function audClip(on, seg){
+    var pic = audPeek.querySelector('.pic'), v = pic.querySelector('video');
+    if (!on){ if (v){ v.dataset.want = '0'; v.classList.remove('is-on'); v.pause(); } return; }
+    if (instantMotion()) return;
+    if (!v || v.dataset.seg !== seg.id){
+      if (v) v.remove();
+      v = document.createElement('video');
+      v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+      v.dataset.seg = seg.id;
+      v.addEventListener('canplay', function(){ if (v.dataset.want === '1' && v.paused) v.play().catch(function(){}); });
+      v.addEventListener('playing', function(){ if (v.dataset.want === '1') v.classList.add('is-on'); });
+      v.src = '../assets/clips-web/' + seg.id + '.mp4';
+      pic.appendChild(v);
+    }
+    v.dataset.want = '1';
+    var go = v.play(); if (go && go.catch) go.catch(function(){});
+  }
+  function showAudPeek(anchor, pid){
+    var seg = segmentFor(pid), p = byId(pid);
+    if (!seg || !p){ hideAudPeek(true); return; }
+    clearTimeout(audHide);
+    var wasVisible = audPeek.classList.contains('is-visible');
+    if (audId !== pid){
+      clearTimeout(audSwap);
+      audPeek.classList.add('is-switching');
+      audId = pid;
+      audSwap = setTimeout(function(){
+        $('audPeekArt').src = '../assets/stills-web/' + seg.id + '.jpg';
+        $('audPeekName').textContent = p.name;
+        $('audPeekSize').textContent = fmt(p.users);
+        audPeek.classList.remove('is-switching');
+        audClip(true, seg);
+      }, wasVisible ? 90 : 0);
+    } else if (!wasVisible){
+      audClip(true, seg);
+    }
+    var r = anchor.getBoundingClientRect(), w = 220, h = audPeek.offsetHeight || 200;
+    var left = r.right + 12;
+    if (left + w > window.innerWidth - 12) left = r.left - w - 12;
+    left = Math.max(12, Math.min(window.innerWidth - w - 12, left));
+    var top = Math.max(12, Math.min(window.innerHeight - h - 12, r.top + r.height / 2 - h / 2));
+    audPeek.classList.toggle('is-jumping', !wasVisible);
+    audPeek.style.left = left + 'px'; audPeek.style.top = top + 'px';
+    audPeek.classList.add('is-visible');
+  }
+  function hideAudPeek(now){
+    clearTimeout(audHide);
+    var go = function(){ audPeek.classList.remove('is-visible'); audClip(false); };
+    if (now) go(); else audHide = setTimeout(go, 140);
+  }
+  (function(){
+    function target(e){ return e.target.closest('[data-persona]'); }
+    ['chipRow', 'personaList'].forEach(function(id){
+      var host = $(id);
+      host.addEventListener('mouseover', function(e){
+        if (PEEK_TOUCH) return;
+        var t = target(e); if (!t || t.contains(e.relatedTarget)) return;
+        showAudPeek(t, t.dataset.persona);
+      });
+      host.addEventListener('mouseout', function(e){
+        var t = target(e); if (!t || t.contains(e.relatedTarget)) return;
+        hideAudPeek();
+      });
+      host.addEventListener('focusin', function(e){ var t = target(e); if (t) showAudPeek(t, t.dataset.persona); });
+      host.addEventListener('focusout', function(e){ if (target(e)) hideAudPeek(); });
+      host.addEventListener('click', function(e){ if (e.target.closest('.c-chip-remove')) hideAudPeek(true); }, true);
+    });
+    document.addEventListener('scroll', function(){ if (audPeek.classList.contains('is-visible')) hideAudPeek(true); }, true);
+    window.addEventListener('resize', function(){ hideAudPeek(true); });
   })();
 
   /* ═══ Audience pull — the picked pills, drawn as slices of the

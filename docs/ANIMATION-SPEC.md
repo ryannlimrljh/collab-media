@@ -589,7 +589,7 @@ a hidden tab takes the instant path for the fold, the slices and the
 count. The bar is `role="img"` with an `aria-label` that states the
 reach and the share in words.
 
-## 9d. Format sample peek (media mix, hover a format)
+## 9d. Sample peeks: formats in the mix, segments in the audience
 
 Hovering a format pill in an Add row, or the name of a row already in
 the mix, floats that format's live miniature beside it: the same
@@ -616,6 +616,19 @@ edge would leave the viewport; clamped 12px inside all edges.
 
 Pointer only: `(hover:none)` skips the peek entirely. Reduced motion
 removes the transitions; the sample's own tickers already respect it.
+
+**Audience segments** get the same card at the Audiences page's width
+(`#audPeek`, 220px): a 4:3 still from `assets/stills-web` with the
+segment's clip from `assets/clips-web` fading over it once it plays
+(muted, looped, never under reduced motion), then the persona name and
+its size. It shows on the persona chips and on the rows of the persona
+picker; closing the picker or removing a chip hides it at once. Ten
+personas map to their catalogue segment exactly (the catalogue's
+addressable figure equals the persona size); K-drama watchers,
+Football followers, Business & professional and Finance & investing
+take the nearest segment (Rom-Com Fans, EPL Fans, Corporate Leaders,
+Emerging Affluents). Timings, placement and grace are identical to the
+format peek.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
