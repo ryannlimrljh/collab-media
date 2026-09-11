@@ -490,6 +490,37 @@
     text-align:right; white-space:nowrap;}
   .p-fmtrow .v .imp{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     font-weight:400;}
+  /* v2: the long list splits in two. The mix keeps full rows because
+     they carry the dials; everything else waits on a shelf of chips,
+     grouped by channel, eight per group before an overflow count. */
+  .p-mixhead{display:flex; justify-content:space-between; align-items:baseline;
+    gap:var(--spacing-12); margin:var(--spacing-8) 0 var(--spacing-4);}
+  .p-mixhead .c-stat-label{margin:0;}
+  .p-fmtlist:empty::after{content:'Nothing in the mix yet. Pick from the shelf below.';
+    display:block; padding:var(--spacing-12) 0; font-size:var(--text-body2-size);
+    color:var(--color-neutral-5);}
+  @keyframes p-row-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+  .p-fmtrow.is-new{animation:p-row-in 260ms var(--ease-settle) both;}
+  .p-shelf{margin-top:var(--spacing-16); padding-top:var(--spacing-12);
+    border-top:1px dotted var(--color-neutral-3);}
+  .p-shelf-head{display:flex; justify-content:space-between; align-items:center;
+    gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
+  .p-shelf-head .c-stat-label{margin:0;}
+  .p-shelf-search{width:min(260px, 100%);}
+  .p-shelf-search i{position:absolute; left:12px; color:var(--color-neutral-5);
+    font-size:var(--icon-sm); pointer-events:none;}
+  .p-shelf-search input{height:32px; padding-left:34px;}
+  .p-shelf-group{margin-top:var(--spacing-8);}
+  .p-shelf-lab{display:flex; align-items:baseline; gap:var(--spacing-8);
+    margin-bottom:var(--spacing-4); font-size:var(--text-caption-size); font-weight:700;
+    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);}
+  .p-shelf-lab .n{font-weight:400; text-transform:none; letter-spacing:0;}
+  .p-shelf .c-chip-filter{gap:var(--spacing-4);}
+  .p-shelf .c-chip-filter:hover{background:var(--color-neutral-2);}
+  .p-shelf .c-chip-filter:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-shelf .c-chip-filter .cpm{color:var(--color-neutral-5); font-weight:400;}
+  .p-shelf-empty{font-size:var(--text-body2-size); color:var(--color-neutral-5);
+    padding:var(--spacing-8) 0;}
   /* AI-flavoured ghost CTA — the badge's pastel sweep on a button. */
   .p-ai-btn{position:relative; z-index:0; overflow:hidden;}
   .p-ai-btn:hover{background:none;}
@@ -1188,7 +1219,21 @@
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
                 </div>
+                <div class="p-mixhead">
+                  <span class="c-stat-label" id="mixCount">In the mix</span>
+                  <span class="p-note" style="margin:0;">Untick a format to return it to the shelf.</span>
+                </div>
                 <div class="p-fmtlist" id="formatList"></div>
+                <div class="p-shelf" id="formatShelf">
+                  <div class="p-shelf-head">
+                    <span class="c-stat-label" id="shelfCount">Add formats</span>
+                    <div class="c-search-input-box p-shelf-search" id="shelfSearchWrap" hidden>
+                      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                      <input type="search" id="shelfSearch" placeholder="Find a format" aria-label="Find a format" autocomplete="off" />
+                    </div>
+                  </div>
+                  <div id="shelfGroups"></div>
+                </div>
               </div>
             </div>
 
@@ -1539,7 +1584,36 @@
     {id:'msh', name:'Masthead takeover',cpm:48, w:15, ch:'Web',    video:false, on:false},
     {id:'isa', name:'Image social ad',  cpm:14, w:10, ch:'Social', video:false, on:false},
     {id:'tvc', name:'TV spot (30s)',    cpm:45, w:30, ch:'TV',     video:true,  on:false},
-    {id:'rad', name:'Radio adlib',      cpm:12, w:12, ch:'Radio',  video:false, on:false}
+    {id:'rad', name:'Radio adlib',      cpm:12, w:12, ch:'Radio',  video:false, on:false},
+    /* the rest of the rate card, at the size the live build carries */
+    {id:'bil', name:'Billboard',            cpm:30, w:6, ch:'Web', video:false, on:false},
+    {id:'car', name:'Carousel ad',          cpm:30, w:6, ch:'Web', video:false, on:false},
+    {id:'crs', name:'Cross slider',         cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'cub', name:'CubeVibe',             cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'dat', name:'Data capture',         cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'hlf', name:'Half page',            cpm:18, w:8, ch:'Web', video:false, on:false},
+    {id:'hot', name:'Hotspot',              cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'irv', name:'In-read video',        cpm:20, w:8, ch:'Web', video:true,  on:false},
+    {id:'int', name:'Interstitial',         cpm:30, w:6, ch:'Web', video:false, on:false},
+    {id:'lmb', name:'Large mobile banner',  cpm:18, w:8, ch:'Web', video:false, on:false},
+    {id:'mrv', name:'MerryView',            cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'mng', name:'Mini game',            cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'mob', name:'Mobile banner',        cpm:18, w:8, ch:'Web', video:false, on:false},
+    {id:'mlb', name:'Mobile leaderboard',   cpm:18, w:8, ch:'Web', video:false, on:false},
+    {id:'mrc', name:'MREC',                 cpm:18, w:8, ch:'Web', video:false, on:false},
+    {id:'mtb', name:'Multi-tab',            cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'pca', name:'Product collector ad', cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'puz', name:'Puzzle ad',            cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'qiz', name:'Quiz ad',              cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'rmb', name:'Reveal mystery box',   cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'shp', name:'Shape drop',           cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'sto', name:'Site takeover',        cpm:80, w:8, ch:'Web', video:false, on:false},
+    {id:'skn', name:'Skinner / wallpaper',  cpm:80, w:8, ch:'Web', video:false, on:false},
+    {id:'sty', name:'Storytelling',         cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'vib', name:'Video in-banner',      cpm:20, w:8, ch:'Web', video:true,  on:false},
+    {id:'wav', name:'Wave cards',           cpm:30, w:5, ch:'Web', video:false, on:false},
+    {id:'svs', name:'Social story ad',      cpm:16, w:8, ch:'Social', video:true, on:false},
+    {id:'ott', name:'OTT pre-roll',         cpm:26, w:12, ch:'OTT', video:true, on:false}
   ];
 
   var SITES = [
@@ -2591,10 +2665,13 @@
     var b = budget();
     $('splitBudgetLabel').textContent = rm(b) +
       ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
-    FORMATS.filter(function(f){ return chanAllows(f.ch); }).forEach(function(f){
+    var mix = FORMATS.filter(function(f){ return f.on && chanAllows(f.ch); });
+    var mixCount = $('mixCount');
+    if (mixCount) mixCount.textContent = 'In the mix · ' + mix.length + (mix.length === 1 ? ' format' : ' formats');
+    mix.forEach(function(f){
       var amt = f.on ? (split[f.id] || 0) : 0;
       var row = document.createElement('div');
-      row.className = 'p-fmtrow' + (f.on ? '' : ' is-off');
+      row.className = 'p-fmtrow' + (f.on ? '' : ' is-off') + (f.id === newFmt ? ' is-new' : '');
       row.innerHTML =
         '<label class="c-choice">' +
           '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
@@ -2616,6 +2693,8 @@
       });
       list.appendChild(row);
     });
+    newFmt = null;
+    renderShelf();
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
       sl.addEventListener('input', function(){
         var id = sl.dataset.fmt;
@@ -2636,6 +2715,76 @@
       sl.addEventListener('change', function(){ markSaved(); });
     });
   }
+
+  /* The shelf (v2): every format not in the mix, as chips grouped by
+     channel. Eight per group, then an overflow count; the search box
+     appears once there is enough to search and shows every match. */
+  var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
+  var shelfOpen = {}, shelfQuery = '', newFmt = null;
+  function renderShelf(){
+    var host = $('shelfGroups');
+    if (!host) return;
+    var rest = FORMATS.filter(function(f){ return !f.on && chanAllows(f.ch); });
+    var wrap = $('shelfSearchWrap');
+    if (wrap) wrap.hidden = rest.length <= 12;
+    var count = $('shelfCount');
+    if (count) count.textContent = 'Add formats · ' + rest.length + ' on the shelf';
+    var q = shelfQuery.trim().toLowerCase();
+    var shown = q ? rest.filter(function(f){ return f.name.toLowerCase().indexOf(q) > -1; }) : rest;
+    if (!rest.length){
+      host.innerHTML = '<p class="p-shelf-empty">Every format is in the mix.</p>';
+      return;
+    }
+    if (!shown.length){
+      host.innerHTML = '<p class="p-shelf-empty">No format matches \u201c' + shelfQuery.replace(/</g, '&lt;') + '\u201d.</p>';
+      return;
+    }
+    var chs = CH_ORDER.filter(function(c){ return shown.some(function(f){ return f.ch === c; }); });
+    host.innerHTML = chs.map(function(c){
+      var items = shown.filter(function(f){ return f.ch === c; });
+      var cap = 8;
+      var open = !!shelfOpen[c] || !!q;
+      var vis = open ? items : items.slice(0, cap);
+      var more = items.length - vis.length;
+      return '<div class="p-shelf-group" data-ch="' + c + '">' +
+        '<div class="p-shelf-lab">' + c + ' <span class="n">' + items.length + '</span></div>' +
+        '<div class="c-chip-group">' +
+          vis.map(function(f){
+            return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '">' +
+              f.name + ' <span class="cpm">' + rm(f.cpm) + '</span></button>';
+          }).join('') +
+          (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
+          (open && !q && items.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
+        '</div></div>';
+    }).join('');
+  }
+  (function(){
+    var host = $('shelfGroups');
+    if (!host) return;
+    host.addEventListener('click', function(e){
+      var more = e.target.closest('[data-more]');
+      if (more){ shelfOpen[more.dataset.more] = true; renderShelf(); return; }
+      var less = e.target.closest('[data-less]');
+      if (less){ shelfOpen[less.dataset.less] = false; renderShelf(); return; }
+      var add = e.target.closest('[data-add]');
+      if (!add) return;
+      var f = FORMATS.filter(function(x){ return x.id === add.dataset.add; })[0];
+      if (!f) return;
+      /* Same path as ticking a row: the recommendation re-spreads over
+         the new set, and the row arrives in the mix with a settle. */
+      f.on = true;
+      newFmt = f.id;
+      mixSource = 'user';
+      resetSplit();
+      renderAll();
+      markSaved();
+    });
+    var search = $('shelfSearch');
+    if (search) search.addEventListener('input', function(){
+      shelfQuery = search.value;
+      renderShelf();
+    });
+  })();
 
   /* Update the split widgets in place — a drag must never rebuild the
      slider under the pointer. */
