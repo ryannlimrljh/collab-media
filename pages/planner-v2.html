@@ -493,13 +493,73 @@
   /* v2: the long list splits in two. The mix keeps full rows because
      they carry the dials; everything else waits on a shelf of chips,
      grouped by channel, eight per group before an overflow count. */
-  /* v2 channels: filter chips, all active by default, each counting
-     the formats it has in the mix. Selected reads as selected. */
+  /* v2: three kinds of thing, three shapes. Channels are TILES (the
+     decision: tall, squared, iconed). Formats you can add are PILLS
+     with a plus. Sites are small SQUARED tags with a pin. Nobody has
+     to read a label to know which is which. */
   .p-chanrow{gap:var(--spacing-8);}
-  .p-chanrow .c-chip-filter .count{margin-left:2px;}
-  .p-chanrow .c-chip-filter.is-active .count{color:rgba(255,255,255,.72);}
-  .p-chanrow .c-chip-filter .dot{width:6px; height:6px; border-radius:50%;
-    background:var(--color-green); margin-left:2px;}
+  .p-chantile{display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px;
+    padding:0 var(--spacing-16) 0 var(--spacing-12); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    color:var(--color-neutral-9); font-family:inherit; font-size:var(--text-body2-size);
+    font-weight:700; cursor:pointer;
+    transition:background var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);}
+  .p-chantile i{font-size:var(--icon-md); color:var(--color-neutral-5);
+    transition:color var(--duration-fast) var(--ease-standard);}
+  .p-chantile .count{display:inline-flex; align-items:center; justify-content:center;
+    min-width:20px; height:20px; padding:0 6px; border-radius:var(--radius-pill);
+    background:var(--color-neutral-2); font-size:var(--text-caption-size); font-weight:700;
+    color:var(--color-neutral-9);}
+  .p-chantile:hover:not(.is-active){background:var(--color-neutral-2);}
+  .p-chantile:active{transform:scale(.97);}
+  .p-chantile.is-active{background:var(--color-obsidian); border-color:var(--color-obsidian);
+    color:var(--color-neutral-1);}
+  .p-chantile.is-active i{color:var(--color-neutral-1);}
+  .p-chantile.is-active .count{background:rgba(255,255,255,.18); color:var(--color-neutral-1);}
+  .p-chantile:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-chantile .count.is-pop{animation:p-chip-in 240ms var(--ease-settle) both;}
+  .p-chanblock-head h5{display:flex; align-items:center; gap:var(--spacing-8);}
+  .p-chanblock-head h5 i{font-size:var(--icon-sm); color:var(--color-neutral-5);}
+  /* formats: pills with a plus; they are actions, not states */
+  .p-chan-add .c-chip-filter i{font-size:12px; color:var(--color-neutral-5);}
+  /* sites: small squared tags; the pin is the state */
+  .p-site-chip{display:inline-flex; align-items:center; gap:var(--spacing-4); height:26px;
+    padding:0 var(--spacing-8); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-2);
+    color:var(--color-neutral-9); font-family:inherit; font-size:var(--text-caption-size);
+    font-weight:600; cursor:pointer;
+    transition:background var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);}
+  .p-site-chip i{font-size:12px; color:var(--color-neutral-5);
+    transition:color var(--duration-fast) var(--ease-standard);}
+  .p-site-chip .inv{color:var(--color-neutral-5); font-weight:400;}
+  .p-site-chip:hover:not(.is-active){background:var(--color-neutral-3);}
+  .p-site-chip.is-active{background:var(--color-obsidian); border-color:var(--color-obsidian);
+    color:var(--color-neutral-1);}
+  .p-site-chip.is-active i{color:var(--color-neutral-1);}
+  .p-site-chip.is-active .inv{color:rgba(255,255,255,.72);}
+  .p-site-chip:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .p-site-chip.is-pop i{animation:p-chip-in 240ms var(--ease-settle) both;}
+  /* toggle choreography: things leave before the rebuild, arrive after */
+  @keyframes p-chip-in{from{opacity:0; transform:scale(.82);} to{opacity:1; transform:none;}}
+  .c-chip.is-new, .p-site-chip.is-new{animation:p-chip-in 220ms var(--ease-settle) both;}
+  .c-chip.is-lifting{opacity:0; transform:scale(.85);
+    transition:opacity 160ms var(--ease-standard), transform 160ms var(--ease-standard);}
+  .p-chanblock.is-leaving, .p-fmtrow.is-leaving{box-sizing:border-box; overflow:hidden;
+    height:0 !important; padding-top:0 !important; padding-bottom:0 !important;
+    margin-top:0 !important; margin-bottom:0 !important; border-top-width:0 !important;
+    border-bottom-width:0 !important; opacity:0;
+    transition:height 260ms var(--ease-settle), padding 260ms var(--ease-settle),
+      margin 260ms var(--ease-settle), border-width 260ms var(--ease-settle),
+      opacity 180ms var(--ease-standard);}
+  @media (prefers-reduced-motion:reduce){
+    .c-chip.is-new, .p-site-chip.is-new, .p-site-chip.is-pop i, .p-chantile .count.is-pop{animation:none;}
+    .c-chip.is-lifting, .p-chanblock.is-leaving, .p-fmtrow.is-leaving{transition:none;}
+  }
   .p-chan-note{margin:var(--spacing-8) 0 0;}
   .p-chan-reset{display:inline-flex; align-items:center; height:32px; background:transparent;
     border:0; padding:0 var(--spacing-4); font-family:inherit; font-size:var(--text-label2-size);
@@ -2655,10 +2715,11 @@
       var inMix = FORMATS.filter(function(f){ return f.on && f.ch === c; }).length;
       var chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = 'c-chip c-chip-filter' + (on ? ' is-active' : '');
+      chip.className = 'p-chantile' + (on ? ' is-active' : '');
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
       chip.setAttribute('aria-label', c + (on ? ', in play, ' + inMix + ' in the mix' : ', switched off'));
-      chip.innerHTML = c + (on && inMix ? ' <span class="count">' + inMix + '</span>' : '');
+      chip.innerHTML = '<i class="' + CH_ICON[c] + '" aria-hidden="true"></i>' + c +
+        (on && inMix ? ' <span class="count' + (c === popCount ? ' is-pop' : '') + '">' + inMix + '</span>' : '');
       chip.addEventListener('click', function(){
         mixSource = 'user';
         var i = chanOn.indexOf(c);
@@ -2667,10 +2728,21 @@
             toast('neutral', null, 'Keep at least one channel in play.');
             return;
           }
-          /* Park this channel's formats so switching it back restores them. */
+          /* Park this channel's formats so switching it back restores
+             them; the block folds away before the rebuild. */
           chanMemory[c] = FORMATS.filter(function(f){ return f.on && f.ch === c; }).map(function(f){ return f.id; });
-          chanOn.splice(i, 1);
-          FORMATS.forEach(function(f){ if (f.ch === c) f.on = false; });
+          leaveThen(document.querySelector('.p-chanblock[data-ch="' + c + '"]'), function(){
+            chanOn.splice(chanOn.indexOf(c), 1);
+            FORMATS.forEach(function(f){ if (f.ch === c) f.on = false; });
+            if (!onFormats().length){
+              var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+              if (first) first.on = true;
+            }
+            resetSplit();
+            renderAll();
+            markSaved();
+          });
+          return;
         } else {
           chanOn.push(c);
           newChan = c;
@@ -2733,7 +2805,7 @@
       block.className = 'p-chanblock' + (c === newChan ? ' is-new' : '');
       block.dataset.ch = c;
       block.innerHTML =
-        '<div class="p-chanblock-head"><h5>' + c + '</h5><span class="sum">' +
+        '<div class="p-chanblock-head"><h5><i class="' + CH_ICON[c] + '" aria-hidden="true"></i>' + c + '</h5><span class="sum">' +
           (mix.length
             ? mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%'
             : 'Nothing in the mix yet') +
@@ -2766,11 +2838,15 @@
           '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
           '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
         row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
-          f.on = false;
-          mixSource = 'user';
-          resetSplit();
-          renderAll();
-          markSaved();
+          leaveThen(row, function(){
+            f.on = false;
+            newChip = f.id;
+            popCount = f.ch;
+            mixSource = 'user';
+            resetSplit();
+            renderAll();
+            markSaved();
+          });
         });
         rows.appendChild(row);
       });
@@ -2786,9 +2862,9 @@
         (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
         (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
         vis.map(function(f){
-          return '<button class="c-chip c-chip-filter" type="button" data-add="' + f.id + '"' +
+          return '<button class="c-chip c-chip-filter' + (f.id === newChip ? ' is-new' : '') + '" type="button" data-add="' + f.id + '"' +
             (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
-            f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
+            '<i class="ph ph-plus" aria-hidden="true"></i>' + f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
         }).join('') +
         (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
         (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '');
@@ -2804,10 +2880,10 @@
         var pinned = sites.filter(function(s){ return s.pin; }).length;
         runs.innerHTML = '<span class="lab">Runs on</span>' +
           sites.map(function(sx){
-            return '<button class="c-chip c-chip-filter' + (sx.pin ? ' is-active' : '') + '" type="button" data-pin="' + sx.id + '"' +
+            return '<button class="p-site-chip' + (sx.pin ? ' is-active' : '') + (sx.id === popPin ? ' is-pop' : '') + '" type="button" data-pin="' + sx.id + '"' +
               ' aria-pressed="' + (sx.pin ? 'true' : 'false') + '"' +
               ' title="' + sx.inv + ' monthly impressions · ' + cpmFmt(sx.cpm) + ' CPM' + (sx.ai ? ' · in the AI draft' : '') + '">' +
-              (sx.pin ? '<i class="ph-fill ph-push-pin" aria-hidden="true"></i> ' : '') + sx.name +
+              '<i class="' + (sx.pin ? 'ph-fill' : 'ph') + ' ph-push-pin" aria-hidden="true"></i>' + sx.name +
               ' <span class="inv">' + sx.inv + '</span></button>';
           }).join('') +
           '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>';
@@ -2815,7 +2891,7 @@
       block.appendChild(runs);
       list.appendChild(block);
     });
-    newFmt = null; newChan = null;
+    newFmt = null; newChan = null; newChip = null; popPin = null; popCount = null;
 
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
       sl.addEventListener('input', function(){
@@ -2851,7 +2927,25 @@
     });
   }
   var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
-  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null;
+  var CH_ICON = {TV:'ph ph-television', Radio:'ph ph-radio', OTT:'ph ph-monitor-play',
+    Web:'ph ph-globe', Social:'ph ph-share-network'};
+  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null;
+  /* Exit before rebuild: measure, collapse, then let the caller change
+     state and re-render. Reduced motion and hidden tabs go straight through. */
+  function leaveThen(el, fn){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!el || reduced || document.hidden){ fn(); return; }
+    el.style.height = el.getBoundingClientRect().height + 'px';
+    void el.offsetWidth;
+    el.classList.add('is-leaving');
+    setTimeout(fn, 270);
+  }
+  function liftThen(el, fn){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!el || reduced || document.hidden){ fn(); return; }
+    el.classList.add('is-lifting');
+    setTimeout(fn, 150);
+  }
   (function(){
     var host = $('formatList');
     if (!host) return;
@@ -2865,6 +2959,7 @@
         var sx = SITES.filter(function(x){ return x.id === pin.dataset.pin; })[0];
         if (!sx) return;
         sx.pin = !sx.pin;
+        popPin = sx.id;
         mixSource = 'user';
         renderAll();
         markSaved();
@@ -2874,14 +2969,17 @@
       if (!add) return;
       var f = FORMATS.filter(function(x){ return x.id === add.dataset.add; })[0];
       if (!f) return;
-      /* Same path as ticking a row: the recommendation re-spreads over
-         the new set, and the row arrives in the mix with a settle. */
-      f.on = true;
-      newFmt = f.id;
-      mixSource = 'user';
-      resetSplit();
-      renderAll();
-      markSaved();
+      /* The chip lifts off the shelf, then the row settles into the
+         mix and the channel tile's count pops. */
+      liftThen(add, function(){
+        f.on = true;
+        newFmt = f.id;
+        popCount = f.ch;
+        mixSource = 'user';
+        resetSplit();
+        renderAll();
+        markSaved();
+      });
     });
     var search = $('shelfSearch');
     if (search) search.addEventListener('input', function(){

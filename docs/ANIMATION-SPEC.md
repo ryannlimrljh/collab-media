@@ -501,6 +501,33 @@ on a ghost button at opacity .14, rising to .26 on hover.
   `cubic-bezier(.22,1,.36,1)` and carry a travelling sheen
   (`background-position` loop, 1.8s) so a static bar still looks alive.
 
+## 9b. v2 media mix: toggle choreography and the three shapes
+
+`pages/planner-v2.html` rebuilds step 3's channel blocks wholesale on
+every change, so animation is done in two halves: things **leave before
+the rebuild** and **arrive after** it.
+
+| Toggle | Exit (before state change) | Entrance (after re-render) |
+|---|---|---|
+| Channel off | block: measure `getBoundingClientRect().height` into inline `height`, force reflow, add `is-leaving` (height/padding/margin/border to 0, opacity 0, 260ms `--ease-settle`), state change at 270ms | none (block is gone) |
+| Channel on | none | block `is-new`: `p-row-in` 260ms `--ease-settle` (opacity 0 + translateY(6px) to settled) |
+| Format added (chip) | chip `is-lifting`: scale .85 + opacity 0 over 160ms, state change at 150ms | row `is-new` (`p-row-in`), channel tile count `is-pop` (`p-chip-in` 240ms) |
+| Format removed (row untick) | row `is-leaving` (same collapse as the block) | chip `is-new`: `p-chip-in` (scale .82 to 1, 220ms) |
+| Site pinned/unpinned | none | tag `is-pop`: the pin icon runs `p-chip-in`; icon swaps `ph` to `ph-fill` |
+| Dial drag | none; the block header sum updates in place via `syncBlockSums()` | none |
+
+Two helpers do the exits: `leaveThen(el, fn)` and `liftThen(el, fn)`.
+Both take the instant path under reduced motion or `document.hidden`.
+The re-render reads one-shot markers (`newFmt`, `newChan`, `newChip`,
+`popPin`, `popCount`) to decide which element gets an entrance class,
+then clears them.
+
+**Three shapes for three things**, so nobody reads a label to know
+what a pill is: channels are 44px squared TILES (`radius-sm`, leading
+Phosphor icon, count badge, Obsidian when active); addable formats are
+32px DLS filter PILLS with a leading plus; sites are 26px squared TAGS
+(`p-site-chip`, Neutral-2, leading pin that fills when active).
+
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
 1. If the target sits in a collapsed step the user has visited, open it.
