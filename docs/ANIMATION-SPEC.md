@@ -617,11 +617,18 @@ edge would leave the viewport; clamped 12px inside all edges.
 Pointer only: `(hover:none)` skips the peek entirely. Reduced motion
 removes the transitions; the sample's own tickers already respect it.
 
-**Audience segments** get the same card at the Audiences page's width
-(`#audPeek`, 220px): a 4:3 still from `assets/stills-web` with the
-segment's clip from `assets/clips-web` fading over it once it plays
-(muted, looped, never under reduced motion), then the persona name and
-its size. It shows on the persona chips and on the rows of the persona
+**Audience segments** get the same card (`#audPeek`, 272px): a 4:3
+still from `assets/stills-web` with the segment's clip from
+`assets/clips-web` fading over it once it plays (muted, looped, never
+under reduced motion), then the catalogue entry: persona name and
+addressable size, group and KULT published size (two bases, shown
+side by side, never summed), the one-line description (two-line
+clamp), media consumption as up to five bars that grow in from zero
+on every show (`--duration-slow` `--ease-flow`, 55ms stagger, bars
+sit at zero while hidden or switching), Karen's planner note where
+the segment has one, then the top three properties and interests. The
+card is re-placed after the swap so its real height keeps it on
+screen. It shows on the persona chips and on the rows of the persona
 picker; closing the picker or removing a chip hides it at once. Ten
 personas map to their catalogue segment exactly (the catalogue's
 addressable figure equals the persona size); K-drama watchers,

@@ -285,7 +285,7 @@
   @media (prefers-reduced-motion:reduce){ .p-fmtpeek{transition:none;} }
   /* Audience segment peek: the same card at the Audiences page's width,
      a 4:3 still with the clip fading over it, then name and size. */
-  .p-audpeek{position:fixed; width:220px; z-index:40; background:var(--color-neutral-1);
+  .p-audpeek{position:fixed; width:272px; z-index:40; background:var(--color-neutral-1);
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
     box-shadow:var(--shadow-4); overflow:hidden; opacity:0; pointer-events:none;
     transform:translateY(6px) scale(.98);
@@ -294,7 +294,7 @@
       top var(--duration-slow) var(--ease-flow), left var(--duration-slow) var(--ease-flow);}
   .p-audpeek.is-visible{opacity:1; transform:none;}
   .p-audpeek.is-jumping{transition-property:opacity, transform;}
-  .p-audpeek .pic{position:relative; aspect-ratio:4/3; background:var(--color-neutral-2);
+  .p-audpeek .pic{position:relative; aspect-ratio:16/10; background:var(--color-neutral-2);
     transition:opacity var(--duration-base) var(--ease-standard);}
   .p-audpeek .pic img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
   .p-audpeek .pic video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
@@ -306,8 +306,37 @@
     font-weight:700; border-top:1px solid var(--color-neutral-2);
     transition:opacity var(--duration-base) var(--ease-standard);}
   .p-audpeek .lbl .fam{font-weight:400; color:var(--color-neutral-5); white-space:nowrap;}
-  .p-audpeek.is-switching .pic, .p-audpeek.is-switching .lbl{opacity:0;
+  .p-audpeek .lbl{border-top:0; padding-bottom:0;}
+  .p-audpeek .body{border-top:1px solid var(--color-neutral-2); padding-bottom:var(--spacing-12);
+    transition:opacity var(--duration-base) var(--ease-standard);}
+  .p-audpeek .sub, .p-audpeek .desc, .p-audpeek .fit, .p-audpeek .meta{margin:0;
+    padding:0 var(--spacing-12); font-size:var(--text-caption-size);
+    line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
+  .p-audpeek .sub{margin-top:2px;}
+  .p-audpeek .desc{margin-top:var(--spacing-8); color:var(--color-neutral-9);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .p-audpeek .desc:empty, .p-audpeek .fit:empty, .p-audpeek .meta:empty{display:none;}
+  /* Media consumption, the Audiences page's mini bars: five rows that
+     grow in on show, staggered 55ms, and sit at zero while hidden. */
+  .p-audpeek .bars{display:flex; flex-direction:column; gap:2px; padding:var(--spacing-8) var(--spacing-12) 0;}
+  .p-audpeek .bars:empty{display:none;}
+  .p-ab{display:grid; grid-template-columns:48px 1fr 30px; align-items:center; gap:8px;
+    font-size:10px; line-height:12px;}
+  .p-ab > span{color:var(--color-neutral-5); font-weight:600; white-space:nowrap;}
+  .p-ab i{display:block; height:5px; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
+  .p-ab i b{display:block; height:100%; width:0; border-radius:var(--radius-pill); background:var(--color-obsidian);
+    transition:width var(--duration-slow) var(--ease-flow); transition-delay:calc(var(--i, 0) * 55ms);}
+  .p-audpeek.is-visible:not(.is-switching) .p-ab i b{width:var(--w);}
+  .p-ab em{font-style:normal; text-align:right; font-weight:700; color:var(--color-neutral-9);
+    font-variant-numeric:tabular-nums;}
+  .p-audpeek .fit{margin-top:var(--spacing-8); color:var(--color-neutral-9);}
+  .p-audpeek .fit b{display:block; font-size:10px; line-height:12px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--color-neutral-5); margin-bottom:2px;}
+  .p-audpeek .meta{margin-top:var(--spacing-8);}
+  .p-audpeek .meta b{color:var(--color-neutral-9); font-weight:600;}
+  .p-audpeek.is-switching .pic, .p-audpeek.is-switching .body{opacity:0;
     transition-duration:var(--duration-instant);}
+  @media (prefers-reduced-motion:reduce){ .p-ab i b{transition:none;} }
   @media (prefers-reduced-motion:reduce){ .p-audpeek{transition:none;} }
   .p-pull{display:grid; grid-template-rows:0fr; margin-top:0;
     transition:grid-template-rows var(--duration-base) var(--ease-settle),
@@ -1709,7 +1738,7 @@
   </div>
 </div>
 
-<div class="p-audpeek" id="audPeek" aria-hidden="true"><div class="pic"><img id="audPeekArt" alt="" /></div><div class="lbl"><span id="audPeekName"></span><span class="fam" id="audPeekSize"></span></div></div>
+<div class="p-audpeek" id="audPeek" aria-hidden="true"><div class="pic"><img id="audPeekArt" alt="" /></div><div class="body"><div class="lbl"><span id="audPeekName"></span><span class="fam" id="audPeekSize"></span></div><p class="sub" id="audPeekSub"></p><p class="desc" id="audPeekDesc"></p><div class="bars" id="audPeekBars"></div><p class="fit" id="audPeekFit"></p><p class="meta" id="audPeekMeta"></p></div></div>
 <div class="p-fmtpeek" id="fmtPeek" aria-hidden="true"><div class="fp-stage" id="fmtPeekStage"></div><div class="lbl"><span id="fmtPeekName"></span><span class="fam" id="fmtPeekFam"></span></div></div>
 <div class="c-toast-host" id="toastHost"></div>
 
@@ -2953,21 +2982,55 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       audSwap = setTimeout(function(){
         $('audPeekArt').src = '../assets/stills-web/' + seg.id + '.jpg';
         $('audPeekName').textContent = p.name;
-        $('audPeekSize').textContent = fmt(p.users);
+        $('audPeekSize').textContent = fmt(p.users) + ' addressable';
+        fillAudPeek(seg, p);
         audPeek.classList.remove('is-switching');
         audClip(true, seg);
+        placeAudPeek(anchor);
       }, wasVisible ? 90 : 0);
     } else if (!wasVisible){
       audClip(true, seg);
     }
-    var r = anchor.getBoundingClientRect(), w = 220, h = audPeek.offsetHeight || 200;
+    audPeek.classList.toggle('is-jumping', !wasVisible);
+    placeAudPeek(anchor);
+    audPeek.classList.add('is-visible');
+  }
+  function placeAudPeek(anchor){
+    var r = anchor.getBoundingClientRect(), w = 272, h = audPeek.offsetHeight || 320;
     var left = r.right + 12;
     if (left + w > window.innerWidth - 12) left = r.left - w - 12;
     left = Math.max(12, Math.min(window.innerWidth - w - 12, left));
     var top = Math.max(12, Math.min(window.innerHeight - h - 12, r.top + r.height / 2 - h / 2));
-    audPeek.classList.toggle('is-jumping', !wasVisible);
     audPeek.style.left = left + 'px'; audPeek.style.top = top + 'px';
-    audPeek.classList.add('is-visible');
+  }
+  /* The rest of the card is the catalogue entry: group and KULT size,
+     the one-line description, media consumption as five bars, Karen's
+     planner note where the segment has one, then where they spend
+     their time and what they are into. KULT's published size and the
+     addressable figure are different bases; both are shown, never
+     summed. */
+  var AUD_CH = [['video','Video'],['audio','Audio'],['tv','TV'],['podcast','Podcast'],['social','Social'],['games','Games'],['communities','Forums']];
+  function audLabel(list, key){
+    var hit = (list || []).filter(function(x){ return x.key === key; })[0];
+    return hit ? hit.label : key;
+  }
+  function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fillAudPeek(seg, p){
+    $('audPeekSub').textContent = audLabel(window.AUDIENCE_GROUPS, seg.group) +
+      (seg.size ? ' · ' + fmt(seg.size) + ' KULT audience' : '') +
+      (AUD_ALIAS[p.id] ? ' · as ' + seg.name : '');
+    $('audPeekDesc').textContent = seg.desc || '';
+    var cons = seg.consumption || {};
+    $('audPeekBars').innerHTML = AUD_CH.filter(function(c){ return cons[c[0]] != null; }).slice(0, 5).map(function(c, i){
+      return '<div class="p-ab" style="--i:' + i + '"><span>' + c[1] + '</span><i><b style="--w:' + cons[c[0]] + '%"></b></i><em>' + cons[c[0]] + '%</em></div>';
+    }).join('');
+    $('audPeekFit').innerHTML = seg.fit ? '<b>Planner note</b>' + esc(seg.fit) : '';
+    var where = (seg.properties || []).slice(0, 3).map(function(x){ return audLabel(window.AUDIENCE_PROPERTIES, x.key); });
+    var into = (seg.topics || []).slice(0, 3);
+    $('audPeekMeta').innerHTML =
+      (where.length ? '<b>Spends time on</b> ' + esc(where.join(', ')) : '') +
+      (where.length && into.length ? '<br>' : '') +
+      (into.length ? '<b>Into</b> ' + esc(into.join(', ')) : '');
   }
   function hideAudPeek(now){
     clearTimeout(audHide);
