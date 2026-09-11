@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Collab:Media · New media plan (v2)</title>
+<title>Collab:Media · New media plan (v1 archive)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <!-- Water is Collab:Media's element, so the drop is the tab mark. The DLS
      asset is used directly rather than a re-drawn copy. -->
@@ -413,28 +413,6 @@
     font-size:var(--text-body1-size); color:var(--color-neutral-9); outline:none;
     background:var(--color-neutral-1);}
   .p-fold-composer input:focus{border-color:var(--color-obsidian);}
-  /* Brief composer (v2): the one-liner grew into a page. Same fold
-     shell as the thread, sized for writing; the textarea is borderless
-     so the whole body reads as one sheet of paper. */
-  .p-brief-shell{height:min(620px, calc(100vh - var(--spacing-48, 48px)));}
-  .p-brief-guide{margin:0 0 var(--spacing-12); font-size:var(--text-body2-size);
-    line-height:var(--text-body2-lh); color:var(--color-neutral-5);}
-  .p-brief-guide b{color:var(--color-neutral-9); font-weight:700;}
-  .p-brief-text{flex:1; min-height:220px; width:100%; resize:none; border:0; outline:0;
-    padding:0; background:transparent; font-family:inherit;
-    font-size:var(--text-body1-size); line-height:1.6; color:var(--color-neutral-9);}
-  .p-brief-text::placeholder{color:var(--color-neutral-4);}
-  .p-brief-starters{display:flex; flex-wrap:wrap; gap:var(--spacing-8);
-    margin-top:var(--spacing-12);}
-  .p-brief-foot{flex:none; display:flex; align-items:center; justify-content:space-between;
-    gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-24);
-    border-top:1px solid var(--color-neutral-3);}
-  .p-brief-foot .hint{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .p-brief-foot .right{display:flex; gap:var(--spacing-8);}
-  .p-brief-body{display:flex; flex-direction:column;}
-  /* On step 1 the pill is a door, not a field: it opens the composer. */
-  .p-ask:not(.is-docked) .p-ask-pill input{cursor:pointer;}
-  .p-thread-body .p-msg.me{white-space:pre-wrap;}
 
   /* Fold-out modal — the landing's folding shell, veil and delayed
      content fade, aimed at whatever trigger opened it. */
@@ -490,143 +468,6 @@
     text-align:right; white-space:nowrap;}
   .p-fmtrow .v .imp{font-size:var(--text-caption-size); color:var(--color-neutral-5);
     font-weight:400;}
-  /* v2: the long list splits in two. The mix keeps full rows because
-     they carry the dials; everything else waits on a shelf of chips,
-     grouped by channel, eight per group before an overflow count. */
-  /* v2: three kinds of thing, three shapes. Channels are TILES (the
-     decision: tall, squared, iconed). Formats you can add are PILLS
-     with a plus. Sites are small SQUARED tags with a pin. Nobody has
-     to read a label to know which is which. */
-  .p-chanrow{gap:var(--spacing-8);}
-  /* Channel toggles are DLS Buttons with aria-pressed: Secondary when
-     off, Primary when on, outline icon swapping to fill on press (the
-     same state-change logic the DLS gives Checkbox, Radio and the
-     chat thumbs). The count is a DLS Badge riding inside. */
-  .p-chanrow .c-btn{gap:var(--spacing-8);}
-  .p-chanrow .c-btn i{font-size:var(--icon-md);}
-  .p-chanrow .c-btn .c-badge{margin-left:2px;}
-  .p-chanrow .c-btn .c-badge.is-pop{animation:p-chip-in 240ms var(--ease-settle) both;}
-  .p-chanrow .c-btn:active{transform:scale(.97);}
-  .p-chanblock-head h5{display:flex; align-items:center; gap:var(--spacing-8);}
-  .p-chanblock-head h5 i{font-size:var(--icon-sm); color:var(--color-neutral-5);}
-  /* formats: pills with a plus; they are actions, not states */
-  .p-chan-add .c-chip-filter i{font-size:12px; color:var(--color-neutral-5);}
-  /* sites: small squared tags; the pin is the state */
-  .p-site-chip{display:inline-flex; align-items:center; gap:var(--spacing-4); height:26px;
-    padding:0 var(--spacing-8); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-2);
-    color:var(--color-neutral-9); font-family:inherit; font-size:var(--text-caption-size);
-    font-weight:600; cursor:pointer;
-    transition:background var(--duration-fast) var(--ease-standard),
-      border-color var(--duration-fast) var(--ease-standard),
-      color var(--duration-fast) var(--ease-standard);}
-  .p-site-chip i{font-size:12px; color:var(--color-neutral-5);
-    transition:color var(--duration-fast) var(--ease-standard);}
-  .p-site-chip .inv{color:var(--color-neutral-5); font-weight:400;}
-  .p-site-chip:hover:not(.is-active){background:var(--color-neutral-3);}
-  .p-site-chip.is-active{background:var(--color-obsidian); border-color:var(--color-obsidian);
-    color:var(--color-neutral-1);}
-  .p-site-chip.is-active i{color:var(--color-neutral-1);}
-  .p-site-chip.is-active .inv{color:rgba(255,255,255,.72);}
-  .p-site-chip:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-site-chip.is-pop i{animation:p-chip-in 240ms var(--ease-settle) both;}
-  /* toggle choreography: things leave before the rebuild, arrive after */
-  @keyframes p-chip-in{from{opacity:0; transform:scale(.82);} to{opacity:1; transform:none;}}
-  .c-chip.is-new, .p-site-chip.is-new{animation:p-chip-in 220ms var(--ease-settle) both;}
-  .c-chip.is-lifting{opacity:0; transform:scale(.85);
-    transition:opacity 160ms var(--ease-standard), transform 160ms var(--ease-standard);}
-  /* growing in: start collapsed (is-growing), then transition to the
-     measured height (is-grown keeps overflow clipped until settled) */
-  .p-chanblock.is-growing, .p-fmtrow.is-growing{box-sizing:border-box; overflow:hidden;
-    padding-top:0 !important; padding-bottom:0 !important; margin-top:0 !important;
-    margin-bottom:0 !important; border-top-width:0 !important; border-bottom-width:0 !important;
-    opacity:0;}
-  .p-chanblock.is-grown, .p-fmtrow.is-grown{box-sizing:border-box; overflow:hidden; opacity:1;}
-  .p-chanblock.is-leaving, .p-fmtrow.is-leaving{box-sizing:border-box; overflow:hidden;
-    height:0 !important; padding-top:0 !important; padding-bottom:0 !important;
-    margin-top:0 !important; margin-bottom:0 !important; border-top-width:0 !important;
-    border-bottom-width:0 !important; opacity:0;
-    transition:height 260ms var(--ease-settle), padding 260ms var(--ease-settle),
-      margin 260ms var(--ease-settle), border-width 260ms var(--ease-settle),
-      opacity 180ms var(--ease-standard);}
-  @media (prefers-reduced-motion:reduce){
-    .c-chip.is-new, .p-site-chip.is-new, .p-site-chip.is-pop i, .p-chanrow .c-btn .c-badge.is-pop{animation:none;}
-    .c-chip.is-lifting, .p-chanblock.is-leaving, .p-fmtrow.is-leaving{transition:none;}
-  }
-  .p-chan-note{margin:var(--spacing-8) 0 0;}
-  .p-chan-reset{display:inline-flex; align-items:center; height:32px; background:transparent;
-    border:0; padding:0 var(--spacing-4); font-family:inherit; font-size:var(--text-label2-size);
-    font-weight:var(--text-label2-weight); color:var(--color-neutral-9); text-decoration:underline;
-    text-underline-offset:3px; cursor:pointer;}
-  .p-mixhead{display:flex; justify-content:space-between; align-items:baseline;
-    gap:var(--spacing-12); margin:var(--spacing-8) 0 var(--spacing-4);}
-  .p-mixhead .c-stat-label{margin:0;}
-  /* After an AI fill lands and the page settles on the footer, the
-     Next button beacons: six Obsidian rings breathe out of it (the
-     step indicator's own pulse recipe) and its arrow nods along. Any
-     hover, focus or click ends it; so does nine seconds, just after
-     the last ring fades. */
-  @keyframes p-cta-beacon{
-    0%{box-shadow:0 0 0 0 rgba(8, 8, 8, .32);}
-    70%{box-shadow:0 0 0 12px rgba(8, 8, 8, 0);}
-    100%{box-shadow:0 0 0 0 rgba(8, 8, 8, 0);}
-  }
-  @keyframes p-cta-nod{
-    0%, 60%, 100%{transform:none;}
-    30%{transform:translateY(3px);}
-  }
-  .c-btn.is-beacon{animation:p-cta-beacon 1.4s var(--ease-standard) 6;}
-  .c-btn.is-beacon i{display:inline-block; animation:p-cta-nod 1.4s var(--ease-standard) 6;}
-  @media (prefers-reduced-motion:reduce){
-    .c-btn.is-beacon, .c-btn.is-beacon i{animation:none;}
-  }
-  /* v2 funnel: one block per kept channel, holding its rows, its
-     add-chips and the sites it runs on, so a choice up top visibly
-     opens the things it governs. */
-  .p-chanblocks{display:flex; flex-direction:column; gap:var(--spacing-12); margin-top:var(--spacing-8);}
-  .p-chanblock{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
-    padding:var(--spacing-12) var(--spacing-16);}
-
-  .p-chanblock-head{display:flex; justify-content:space-between; align-items:baseline;
-    gap:var(--spacing-12); margin-bottom:var(--spacing-4);}
-  .p-chanblock-head h5{margin:0; font-size:var(--text-h5-size); font-weight:var(--text-h5-weight);}
-  .p-chanblock-head .sum{font-size:var(--text-caption-size); color:var(--color-neutral-5);
-    font-variant-numeric:tabular-nums; text-align:right;}
-  .p-chanblock .p-fmtrow:first-child{border-top:0;}
-  .p-chanblock-empty{margin:0; padding:var(--spacing-4) 0; font-size:var(--text-body2-size);
-    color:var(--color-neutral-5);}
-  .p-chan-add, .p-chan-sites{display:grid; grid-template-columns:88px 1fr; align-items:start;
-    column-gap:var(--spacing-8); margin-top:var(--spacing-8);}
-  .p-chan-add .chips, .p-chan-sites .chips{display:flex; flex-wrap:wrap; align-items:center;
-    gap:var(--spacing-8); min-width:0;}
-  .p-chan-add .lab, .p-chan-sites .lab{padding-top:8px; white-space:nowrap;}
-  .p-chan-sites{padding-top:var(--spacing-8); border-top:1px dotted var(--color-neutral-3);}
-  .p-chan-add .lab, .p-chan-sites .lab{font-size:var(--text-caption-size); font-weight:700;
-    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);}
-  .p-chan-add .c-chip-filter .cpm, .p-chan-sites .c-chip-filter .inv{color:var(--color-neutral-5); font-weight:400;}
-  .p-chan-sites .c-chip-filter.is-active .inv{color:rgba(255,255,255,.72);}
-  .p-chan-sites .c-chip-filter i{font-size:12px;}
-  .p-chan-sites .sum, .p-chan-add .sum{font-size:var(--text-caption-size); color:var(--color-neutral-5);
-    margin-left:auto;}
-  .p-chan-add .c-chip-filter:hover, .p-chan-sites .c-chip-filter:hover:not(.is-active){background:var(--color-neutral-2);}
-  @keyframes p-row-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
-
-  .p-shelf{margin-top:var(--spacing-16); padding-top:var(--spacing-12);
-    border-top:1px dotted var(--color-neutral-3);}
-  .p-shelf-head{display:flex; justify-content:space-between; align-items:center;
-    gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
-  .p-shelf-head .c-stat-label{margin:0;}
-  .p-shelf-group{margin-top:var(--spacing-8);}
-  .p-shelf-lab{display:flex; align-items:baseline; gap:var(--spacing-8);
-    margin-bottom:var(--spacing-4); font-size:var(--text-caption-size); font-weight:700;
-    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);}
-  .p-shelf-lab .n{font-weight:400; text-transform:none; letter-spacing:0;}
-  .p-shelf .c-chip-filter{gap:var(--spacing-4);}
-  .p-shelf .c-chip-filter:hover{background:var(--color-neutral-2);}
-  .p-shelf .c-chip-filter:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-shelf .c-chip-filter .cpm{color:var(--color-neutral-5); font-weight:400;}
-  .p-shelf-empty{font-size:var(--text-body2-size); color:var(--color-neutral-5);
-    padding:var(--spacing-8) 0;}
   /* AI-flavoured ghost CTA — the badge's pastel sweep on a button. */
   .p-ai-btn{position:relative; z-index:0; overflow:hidden;}
   .p-ai-btn:hover{background:none;}
@@ -1310,7 +1151,7 @@
                   <span class="c-stat-label">Channels</span>
                   <span class="p-picker-sub" id="channelSummary">All channels</span>
                 </div>
-                <div class="c-chip-group p-chanrow" id="channelRow"></div>
+                <div class="p-choices" id="channelRow"></div>
               </div>
 
               <div class="p-sect">
@@ -1325,9 +1166,31 @@
                     <i class="ph ph-arrow-counter-clockwise"></i> Reset to recommendation
                   </button>
                 </div>
-                <div class="p-chanblocks" id="formatList"></div>
+                <div class="p-fmtlist" id="formatList"></div>
               </div>
             </div>
+
+            <div class="p-drawer" id="sitesDrawer">
+              <button class="p-disclose" data-drawer="sitesPanel" aria-expanded="false" aria-controls="sitesPanel" type="button">
+                <div>
+                  <h4>Sites</h4>
+                  <p class="sub" id="sitesSummary">Loading…</p>
+                </div>
+                <i class="ph ph-caret-down"></i>
+              </button>
+              <div class="p-drawer-body" id="sitesPanel" hidden>
+                <div class="p-drawer-section">
+                  <p class="p-note" style="margin:0 0 var(--spacing-8);">Tick a site to make it a guaranteed must-buy. Everything left unticked stays in the pool for the optimiser to move budget between.</p>
+                  <table class="c-table">
+                    <thead><tr><th>Site</th><th>Channel</th><th class="num">Est. CPM</th><th class="num">Inventory</th><th style="text-align:right;">Must buy</th></tr></thead>
+                    <tbody id="siteRows"></tbody>
+                  </table>
+                  <p class="p-note" id="sitesFoot"></p>
+                </div>
+              </div>
+            </div>
+
+          </div>
 
         <div class="p-footer">
           <button class="c-btn c-btn-secondary c-btn-md" data-back="2" type="button"><i class="ph ph-arrow-up"></i> Back to audience</button>
@@ -1531,37 +1394,6 @@
   </div>
 </div>
 
-<!-- Brief composer (v2) — folds out of the ask pill; Send folds it back
-     and the form starts filling from whatever was written -->
-<div class="p-fold" id="briefOverlay" aria-hidden="true">
-  <div class="p-fold-veil" id="briefVeil"></div>
-  <div class="p-fold-shell p-brief-shell" role="dialog" aria-modal="true" aria-labelledby="briefTitle">
-    <div class="p-fold-head">
-      <div>
-        <h4 id="briefTitle">Describe the campaign</h4>
-        <p class="sub">As much or as little as you have. Collab AI drafts the brief from it.</p>
-      </div>
-      <button class="c-icon-btn" id="briefClose" aria-label="Close" type="button"><i class="ph ph-x"></i></button>
-    </div>
-    <div class="p-fold-body p-brief-body">
-      <p class="p-brief-guide"><b>Start with the brand and what you are launching.</b> Then add whatever you know: budget, dates, objective, who it is for, languages. Paste a whole brief if you have one; labels like <b>Budget:</b> or <b>Dates:</b> help but are not required.</p>
-      <textarea class="p-brief-text" id="briefText" aria-label="Campaign description" spellcheck="true"
-        placeholder="Maybank Raya campaign for the new Islamic savings account. RM 200k working budget, running 15 Sept to 6 Oct. Awareness first, we want 2M people reached. Young families in BM and English."></textarea>
-      <div class="p-brief-starters">
-        <button class="p-try-chip" id="briefTemplate" type="button"><i class="ph ph-list-dashes"></i> Use a template</button>
-        <button class="p-try-chip" id="briefExample" type="button"><i class="ph ph-sparkle"></i> Try an example</button>
-      </div>
-    </div>
-    <div class="p-brief-foot">
-      <span class="hint">Enter for a new line. <kbd>&#8984;</kbd>&#8239;Enter sends.</span>
-      <div class="right">
-        <button class="c-btn c-btn-secondary c-btn-md" id="briefCancel" type="button">Cancel</button>
-        <button class="c-btn c-btn-primary c-btn-md" id="briefSend" type="button"><i class="ph ph-sparkle"></i> Draft the brief</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Booking modal -->
 <div class="p-overlay" id="bookOverlay" hidden>
   <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle" style="max-width:480px;">
@@ -1648,44 +1480,13 @@
   var CHANNELS = ['TV', 'Radio', 'OTT', 'Web', 'Social'];
 
   var FORMATS = [
-    /* The live rate card, name for name and rate for rate, in the
-       order the build lists them. Weights steer the AI draft only. */
-    {id:'cal', name:'Calculator Ad',        cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'car', name:'Carousel Ad',          cpm:30,   w:5,  ch:'Web',    video:false, on:false},
-    {id:'cat', name:'Catfish Ad',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'cnt', name:'Countdown',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'crs', name:'Cross Slider',         cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'cub', name:'CubeVibe',             cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'dat', name:'Data Capture',         cpm:30,   w:5,  ch:'Web',    video:false, on:false},
-    {id:'hlf', name:'Half Page',            cpm:18,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'hot', name:'Hotspot',              cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'isa', name:'Image Social Ad',      cpm:5,    w:10, ch:'Social', video:false, on:false},
-    {id:'irv', name:'In-Read Video',        cpm:20,   w:10, ch:'Web',    video:true,  on:false},
-    {id:'isv', name:'In-stream Video',      cpm:25,   w:30, ch:'Web',    video:true,  on:true},
-    {id:'int', name:'Interstitial',         cpm:30,   w:5,  ch:'Web',    video:false, on:false},
-    {id:'lmb', name:'Large Mobile Banner',  cpm:18,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'ldb', name:'Leaderboard',          cpm:18,   w:12, ch:'Web',    video:false, on:true},
-    {id:'msh', name:'Masthead',             cpm:35,   w:10, ch:'Web',    video:false, on:false},
-    {id:'mrv', name:'MerryView',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'mng', name:'Mini Game',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'mob', name:'Mobile Banner',        cpm:18,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'mlb', name:'Mobile Leaderboard',   cpm:18,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'mrc', name:'MREC',                 cpm:18,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'mtb', name:'Multi-Tab',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'pca', name:'Product Collector Ad', cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'puz', name:'Puzzle Ad',            cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'qiz', name:'Quiz Ad',              cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'rmb', name:'Reveal Mystery Box',   cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'shp', name:'Shape Drop',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'sto', name:'Site Takeover',        cpm:80,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'skn', name:'Skinner / Wallpaper',  cpm:80,   w:8,  ch:'Web',    video:false, on:false},
-    {id:'sty', name:'Storytelling',         cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'vib', name:'Video In-banner',      cpm:20,   w:8,  ch:'Web',    video:true,  on:false},
-    {id:'sva', name:'Video Social Ad',      cpm:9,    w:30, ch:'Social', video:true,  on:true},
-    {id:'wav', name:'Wave Cards',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'tvc', name:'TV',                   cpm:3.26, w:25, ch:'TV',     video:true,  on:false},
-    {id:'ott', name:'OTT',                  cpm:26,   w:20, ch:'OTT',    video:true,  on:false, placeholder:true},
-    {id:'rad', name:'Radio',                cpm:6.61, w:12, ch:'Radio',  video:false, on:false}
+    {id:'isv', name:'In-stream video',  cpm:32, w:40, ch:'OTT',    video:true,  on:true},
+    {id:'sva', name:'Social video ad',  cpm:18, w:35, ch:'Social', video:true,  on:true},
+    {id:'ldb', name:'Leaderboard',      cpm:12, w:10, ch:'Web',    video:false, on:true},
+    {id:'msh', name:'Masthead takeover',cpm:48, w:15, ch:'Web',    video:false, on:false},
+    {id:'isa', name:'Image social ad',  cpm:14, w:10, ch:'Social', video:false, on:false},
+    {id:'tvc', name:'TV spot (30s)',    cpm:45, w:30, ch:'TV',     video:true,  on:false},
+    {id:'rad', name:'Radio adlib',      cpm:12, w:12, ch:'Radio',  video:false, on:false}
   ];
 
   var SITES = [
@@ -1707,8 +1508,7 @@
   /* ═══ State ═══ */
   var step = 1, maxVisited = 1;
   var mode = 'personas', selected = [], filterState = {}, personaSource = null, mixSource = 'ai';
-  var chanOn = CHANNELS.slice();   /* v2: all in play until switched off */
-  var chanMemory = {};             /* formats a switched-off channel had in the mix */
+  var chanOn = [];
   var split = {}, splitTouched = false;
   var booked = false;
 
@@ -1720,13 +1520,10 @@
     return String(Math.round(n));
   }
   function rm(n){ return 'RM ' + Math.round(n).toLocaleString('en-MY'); }
-  /* Rate-card CPMs carry sen where the card does (TV 3.26, Radio 6.61). */
-  function cpmFmt(n){ return 'RM ' + (Number.isInteger(n) ? n.toLocaleString('en-MY') : n.toFixed(2)); }
   function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
   function budget(){ return parseInt($('b-budget').value, 10) || 0; }
   function onFormats(){ return FORMATS.filter(function(f){ return f.on; }); }
-  function chanAllows(c){ return chanOn.indexOf(c) > -1; }
-  function allChannels(){ return chanOn.length === CHANNELS.length; }
+  function chanAllows(c){ return !chanOn.length || chanOn.indexOf(c) > -1; }
 
   function toast(tone, title, msg){
     var host = $('toastHost');
@@ -1894,7 +1691,7 @@
       add(!awareness || videoLed, true, awareness ? (videoLed ? 'Awareness objective with a video-led mix'
         : 'Awareness objective but no video format in the mix') : 'Mix matches the objective', 'formatCard');
       var pinned = SITES.some(function(s){ return s.pin && chanAllows(s.ch); });
-      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked, so the optimiser buys freely', 'formatList');
+      add(pinned, true, pinned ? 'Must-buy sites marked' : 'No must-buys marked, so the optimiser buys freely', 'sitesDrawer');
     }
     if (n === 4){
       checksFor(1).concat(checksFor(2), checksFor(3)).forEach(function(c){
@@ -1960,7 +1757,6 @@
     }
     step = n;
     maxVisited = Math.max(maxVisited, n);
-    if (n === 4) setTimeout(watchBookCta, 700); else dropBookWatch();
     [1,2,3,4].forEach(function(i){
       var li = $('step' + i);
       li.classList.toggle('is-open', i === n);
@@ -2023,7 +1819,7 @@
     function finish(){
       li.classList.remove('is-loading');
       if (step !== 3) return;
-      aiFlash(['formatList']);
+      aiFlash(['sitesDrawer']);
       animateSplitSweep();
       askShow('I drafted the mix from your brief and audience: a video-led format set, the draft sites marked as must-buys, and the budget fully allocated. Override anything; your changes are kept.');
     }
@@ -2097,7 +1893,7 @@
     document.querySelector('.p-ask-pill').classList.remove('is-ghosting');
     if (n === 1){
       input.placeholder = '';
-      input.readOnly = true;   /* v2: the pill opens the composer */
+      input.readOnly = false;
       ghost.classList.add('is-on');
       ghostT.textContent = ASK_HINTS[1];
       setTimeout(updateGhostMarquee, 60);
@@ -2713,75 +2509,26 @@
     var row = $('channelRow'); row.innerHTML = '';
     CHANNELS.forEach(function(c){
       var on = chanOn.indexOf(c) > -1;
-      var inMix = FORMATS.filter(function(f){ return f.on && f.ch === c; }).length;
-      var chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'c-btn c-btn-md ' + (on ? 'c-btn-primary' : 'c-btn-secondary');
-      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
-      chip.setAttribute('aria-label', c + (on ? ', in play, ' + inMix + ' in the mix' : ', switched off'));
-      chip.innerHTML = '<i class="' + (on ? CH_ICON[c].replace('ph ph-', 'ph-fill ph-') : CH_ICON[c]) + '" aria-hidden="true"></i>' + c +
-        (on && inMix ? ' <span class="c-badge c-badge-selected' + (c === popCount ? ' is-pop' : '') + '">' + inMix + '</span>' : '');
-      chip.addEventListener('click', function(){
+      var lab = document.createElement('label');
+      lab.className = 'c-choice';
+      lab.innerHTML = '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + c + '" />' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+        '<span class="text"><span class="label">' + c + '</span></span>';
+      lab.querySelector('input').addEventListener('change', function(){
         mixSource = 'user';
         var i = chanOn.indexOf(c);
-        if (i > -1){
-          if (chanOn.length === 1){
-            toast('neutral', null, 'Keep at least one channel in play.');
-            return;
-          }
-          /* Park this channel's formats so switching it back restores
-             them; the block folds away before the rebuild. */
-          chanMemory[c] = FORMATS.filter(function(f){ return f.on && f.ch === c; }).map(function(f){ return f.id; });
-          leaveThen(document.querySelector('.p-chanblock[data-ch="' + c + '"]'), function(){
-            chanOn.splice(chanOn.indexOf(c), 1);
-            FORMATS.forEach(function(f){ if (f.ch === c) f.on = false; });
-            if (!onFormats().length){
-              var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
-              if (first) first.on = true;
-            }
-            resetSplit();
-            renderAll();
-            markSaved();
-          });
-          return;
-        } else {
-          chanOn.push(c);
-          newChan = c;
-          var back = chanMemory[c] || [];
-          FORMATS.forEach(function(f){ if (f.ch === c && back.indexOf(f.id) > -1) f.on = true; });
-        }
+        if (i > -1) chanOn.splice(i, 1); else chanOn.push(c);
+        FORMATS.forEach(function(f){ if (!chanAllows(f.ch)) f.on = false; });
         if (!onFormats().length){
           var first = FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
           if (first) first.on = true;
         }
         resetSplit();
         renderAll();
-        markSaved();
       });
-      row.appendChild(chip);
+      row.appendChild(lab);
     });
-    if (!allChannels()){
-      var reset = document.createElement('button');
-      reset.type = 'button';
-      reset.className = 'p-chan-reset';
-      reset.textContent = 'All channels';
-      reset.addEventListener('click', function(){
-        mixSource = 'user';
-        CHANNELS.forEach(function(c){
-          if (chanOn.indexOf(c) > -1) return;
-          chanOn.push(c);
-          var back = chanMemory[c] || [];
-          FORMATS.forEach(function(f){ if (f.ch === c && back.indexOf(f.id) > -1) f.on = true; });
-        });
-        resetSplit();
-        renderAll();
-        markSaved();
-      });
-      row.appendChild(reset);
-    }
-    $('channelSummary').textContent = allChannels()
-      ? 'All ' + CHANNELS.length + ' in play'
-      : chanOn.length + ' of ' + CHANNELS.length + ' in play';
+    $('channelSummary').textContent = chanOn.length ? chanOn.join(', ') : 'All channels';
   }
 
   /* Formats and split are one thing: ticking a format gives it a live
@@ -2791,113 +2538,31 @@
     var b = budget();
     $('splitBudgetLabel').textContent = rm(b) +
       ($('b-obj').value ? ' · ' + $('b-obj').value.toLowerCase() : '');
-    var q = '';
-
-    CH_ORDER.filter(function(c){ return chanOn.indexOf(c) > -1; }).forEach(function(c){
-      var mix = FORMATS.filter(function(f){ return f.on && f.ch === c; });
-      var shelf = FORMATS.filter(function(f){
-        return !f.on && f.ch === c && (!q || f.name.toLowerCase().indexOf(q) > -1);
+    FORMATS.filter(function(f){ return chanAllows(f.ch); }).forEach(function(f){
+      var amt = f.on ? (split[f.id] || 0) : 0;
+      var row = document.createElement('div');
+      row.className = 'p-fmtrow' + (f.on ? '' : ' is-off');
+      row.innerHTML =
+        '<label class="c-choice">' +
+          '<input type="checkbox"' + (f.on ? ' checked' : '') + ' aria-label="' + f.name + '" />' +
+          '<span class="c-checkbox-box' + (f.on ? ' on' : '') + '">' + (f.on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+          '<span class="text"><span class="label">' + f.name + '</span>' +
+          '<span class="desc">' + f.ch + ' · ' + rm(f.cpm) + ' CPM</span></span>' +
+        '</label>' +
+        '<div class="c-slider-group"><div class="c-slider-rail">' +
+          '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
+          '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="100" value="' + amt +
+          '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '"' + (f.on ? '' : ' disabled') + ' /></div></div>' +
+        '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
+        '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
+      row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
+        f.on = !f.on;
+        mixSource = 'user';
+        resetSplit();
+        renderAll();
       });
-      var sum = mix.reduce(function(acc, f){ return acc + (split[f.id] || 0); }, 0);
-      var block = document.createElement('div');
-      block.className = 'p-chanblock' + (c === newChan ? ' is-new' : '');
-      block.dataset.ch = c;
-      block.innerHTML =
-        '<div class="p-chanblock-head"><h5><i class="' + CH_ICON[c] + '" aria-hidden="true"></i>' + c + '</h5><span class="sum">' +
-          (mix.length
-            ? mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%'
-            : 'Nothing in the mix yet') +
-        '</span></div>' +
-        '<div class="p-fmtlist"></div>';
-      var rows = block.querySelector('.p-fmtlist');
-
-      if (!mix.length){
-        var empty = document.createElement('p');
-        empty.className = 'p-chanblock-empty';
-        empty.textContent = 'Add a format below to bring ' + c + ' into the plan.';
-        rows.appendChild(empty);
-      }
-      mix.forEach(function(f){
-        var amt = split[f.id] || 0;
-        var row = document.createElement('div');
-        row.className = 'p-fmtrow' + (f.id === newFmt ? ' is-new' : '');
-        row.innerHTML =
-          '<label class="c-choice">' +
-            '<input type="checkbox" checked aria-label="' + f.name + '" />' +
-            '<span class="c-checkbox-box on"><i class="ph ph-check"></i></span>' +
-            '<span class="text"><span class="label">' + f.name +
-              (f.placeholder ? ' <span class="c-badge c-badge-warning">placeholder rate</span>' : '') + '</span>' +
-            '<span class="desc">' + cpmFmt(f.cpm) + ' CPM</span></span>' +
-          '</label>' +
-          '<div class="c-slider-group"><div class="c-slider-rail">' +
-            '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
-            '<input class="c-slider-input" type="range" min="0" max="' + b + '" step="100" value="' + amt +
-            '" aria-label="Budget for ' + f.name + '" data-fmt="' + f.id + '" /></div></div>' +
-          '<span class="v" data-val="' + f.id + '">' + rm(amt) + ' · ' + (b ? Math.round(amt / b * 100) : 0) + '%' +
-          '<span class="imp">' + fmt(amt / f.cpm * 1000) + ' imps</span></span>';
-        row.querySelector('input[type="checkbox"]').addEventListener('change', function(){
-          leaveThen(row, function(){
-            f.on = false;
-            newChip = f.id;
-            popCount = f.ch;
-            mixSource = 'user';
-            resetSplit();
-            renderAll();
-            markSaved();
-          });
-        });
-        rows.appendChild(row);
-      });
-
-      /* Add: this channel's shelf, capped until opened, ignoring the cap while searching. */
-      var cap = 8, open = !!shelfOpen[c] || !!q;
-      var vis = open ? shelf : shelf.slice(0, cap);
-      var more = shelf.length - vis.length;
-      var add = document.createElement('div');
-      add.className = 'p-chan-add';
-      var allIn = !FORMATS.some(function(f){ return !f.on && f.ch === c; });
-      add.innerHTML = '<span class="lab">Add</span><div class="chips">' +
-        (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
-        (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
-        vis.map(function(f, i){
-          var revealed = c === revealChan && i >= cap;
-          return '<button class="c-chip c-chip-filter' + (f.id === newChip || revealed ? ' is-new' : '') + '" type="button" data-add="' + f.id + '"' +
-            (revealed ? ' style="animation-delay:' + Math.min(240, (i - cap) * 18) + 'ms"' : '') +
-            (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
-            '<i class="ph ph-plus" aria-hidden="true"></i>' + f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
-        }).join('') +
-        (more > 0 ? '<button class="c-chip c-chip-overflow" type="button" data-more="' + c + '">+' + more + ' more</button>' : '') +
-        (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
-        '</div>';
-      block.appendChild(add);
-
-      /* Runs on: the sites in this channel; an active chip is a must-buy. */
-      var sites = SITES.filter(function(s){ return s.ch === c; });
-      var runs = document.createElement('div');
-      runs.className = 'p-chan-sites';
-      if (!sites.length){
-        runs.innerHTML = '<span class="lab">Runs on</span><div class="chips"><span class="sum" style="margin-left:0;">Bought as airtime, no site pool to pick from.</span></div>';
-      } else {
-        var pinned = sites.filter(function(s){ return s.pin; }).length;
-        runs.innerHTML = '<span class="lab">Runs on</span><div class="chips">' +
-          sites.map(function(sx){
-            return '<button class="p-site-chip' + (sx.pin ? ' is-active' : '') + (sx.id === popPin ? ' is-pop' : '') + '" type="button" data-pin="' + sx.id + '"' +
-              ' aria-pressed="' + (sx.pin ? 'true' : 'false') + '"' +
-              ' title="' + sx.inv + ' monthly impressions · ' + cpmFmt(sx.cpm) + ' CPM' + (sx.ai ? ' · in the AI draft' : '') + '">' +
-              '<i class="' + (sx.pin ? 'ph-fill' : 'ph') + ' ph-push-pin" aria-hidden="true"></i>' + sx.name +
-              ' <span class="inv">' + sx.inv + '</span></button>';
-          }).join('') +
-          '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>' +
-          '</div>';
-      }
-      block.appendChild(runs);
-      list.appendChild(block);
+      list.appendChild(row);
     });
-    /* new block or row: grow it in now that it has a real height */
-    var grown = list.querySelector('.p-chanblock.is-new') || list.querySelector('.p-fmtrow.is-new');
-    if (grown) growIn(grown);
-    newFmt = null; newChan = null; newChip = null; popPin = null; popCount = null; revealChan = null;
-
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
       sl.addEventListener('input', function(){
         var id = sl.dataset.fmt;
@@ -2913,132 +2578,11 @@
         $('splitReset').hidden = false;
         $('splitOrigin').textContent = 'Your split. Unspent budget shows as unallocated; Reset closes it in one move.';
         syncSplitRows();
-        syncBlockSums();
         renderMixRail(); renderChecks(); renderPreview(); renderStepSums();
       });
       sl.addEventListener('change', function(){ markSaved(); });
     });
   }
-  /* Block headers follow the dials without a rebuild. */
-  function syncBlockSums(){
-    var b = budget();
-    document.querySelectorAll('#formatList .p-chanblock').forEach(function(block){
-      var c = block.dataset.ch;
-      var mix = FORMATS.filter(function(f){ return f.on && f.ch === c; });
-      if (!mix.length) return;
-      var sum = mix.reduce(function(acc, f){ return acc + (split[f.id] || 0); }, 0);
-      block.querySelector('.p-chanblock-head .sum').textContent =
-        mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%';
-    });
-  }
-  var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
-  var CH_ICON = {TV:'ph ph-television', Radio:'ph ph-radio', OTT:'ph ph-monitor-play',
-    Web:'ph ph-globe', Social:'ph ph-share-network'};
-  var shelfOpen = {}, newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null, revealChan = null;
-  /* Exit before rebuild: measure, collapse, then let the caller change
-     state and re-render. Reduced motion and hidden tabs go straight through. */
-  function leaveThen(el, fn){
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!el || reduced || document.hidden){ fn(); return; }
-    el.style.height = el.getBoundingClientRect().height + 'px';
-    void el.offsetWidth;
-    el.classList.add('is-leaving');
-    setTimeout(fn, 270);
-  }
-  /* A block whose shelf opens or closes tweens its height between the
-     two renders instead of jumping; the chips it reveals stagger in. */
-  function growThen(ch, fn){
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var before = document.querySelector('.p-chanblock[data-ch="' + ch + '"]');
-    if (!before || reduced || document.hidden){ fn(); return; }
-    var h0 = before.getBoundingClientRect().height;
-    fn();
-    var after = document.querySelector('.p-chanblock[data-ch="' + ch + '"]');
-    if (!after) return;
-    var h1 = after.getBoundingClientRect().height;
-    if (Math.abs(h1 - h0) < 2) return;
-    after.style.height = h0 + 'px';
-    after.style.overflow = 'hidden';
-    after.style.boxSizing = 'border-box';
-    void after.offsetWidth;
-    after.style.transition = 'height 300ms var(--ease-settle)';
-    after.style.height = h1 + 'px';
-    setTimeout(function(){
-      after.style.transition = '';
-      after.style.height = '';
-      after.style.overflow = '';
-      after.style.boxSizing = '';
-    }, 320);
-  }
-  /* Entrance for a block or row that has just been rendered: it grows
-     from nothing to its measured height while fading in, so the rest
-     of the page slides rather than jumps. */
-  function growIn(el){
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!el || reduced || document.hidden) return;
-    var h = el.getBoundingClientRect().height;
-    if (!h) return;
-    el.classList.add('is-growing');
-    el.style.height = '0px';
-    void el.offsetWidth;
-    el.style.transition = 'height 300ms var(--ease-settle), padding 300ms var(--ease-settle), border-width 300ms var(--ease-settle), margin 300ms var(--ease-settle), opacity 220ms var(--ease-standard) 60ms';
-    el.classList.remove('is-growing');
-    el.classList.add('is-grown');
-    el.style.height = h + 'px';
-    setTimeout(function(){
-      el.classList.remove('is-grown');
-      el.style.transition = '';
-      el.style.height = '';
-    }, 330);
-  }
-  function liftThen(el, fn){
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!el || reduced || document.hidden){ fn(); return; }
-    el.classList.add('is-lifting');
-    setTimeout(fn, 150);
-  }
-  (function(){
-    var host = $('formatList');
-    if (!host) return;
-    host.addEventListener('click', function(e){
-      var more = e.target.closest('[data-more]');
-      if (more){
-        growThen(more.dataset.more, function(){ shelfOpen[more.dataset.more] = true; revealChan = more.dataset.more; renderFormats(); });
-        return;
-      }
-      var less = e.target.closest('[data-less]');
-      if (less){
-        growThen(less.dataset.less, function(){ shelfOpen[less.dataset.less] = false; renderFormats(); });
-        return;
-      }
-      var pin = e.target.closest('[data-pin]');
-      if (pin){
-        var sx = SITES.filter(function(x){ return x.id === pin.dataset.pin; })[0];
-        if (!sx) return;
-        sx.pin = !sx.pin;
-        popPin = sx.id;
-        mixSource = 'user';
-        renderAll();
-        markSaved();
-        return;
-      }
-      var add = e.target.closest('[data-add]');
-      if (!add) return;
-      var f = FORMATS.filter(function(x){ return x.id === add.dataset.add; })[0];
-      if (!f) return;
-      /* The chip lifts off the shelf, then the row settles into the
-         mix and the channel tile's count pops. */
-      liftThen(add, function(){
-        f.on = true;
-        newFmt = f.id;
-        popCount = f.ch;
-        mixSource = 'user';
-        resetSplit();
-        renderAll();
-        markSaved();
-      });
-    });
-  })();
 
   /* Update the split widgets in place — a drag must never rebuild the
      slider under the pointer. */
@@ -3110,8 +2654,37 @@
     setTimeout(nextRow, 550);
   }
 
-  /* Sites render inside each channel block (see renderFormats). */
-  function renderSites(){}
+  function renderSites(){
+    var rows = $('siteRows'); rows.innerHTML = '';
+    var visible = SITES.filter(function(s){ return chanAllows(s.ch); });
+    visible.forEach(function(s){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td style="font-weight:700;">' + s.name +
+          (s.ai ? ' <span class="c-badge p-ai-badge" title="In the AI draft">AI draft</span>' : '') + '</td>' +
+        '<td>' + s.ch + '</td>' +
+        '<td class="num">' + rm(s.cpm) + '</td>' +
+        '<td class="num">' + s.inv + '</td>' +
+        '<td style="text-align:right;"><label class="c-choice p-mustbuy">' +
+          '<input type="checkbox"' + (s.pin ? ' checked' : '') + ' aria-label="Must buy ' + s.name + '" data-site="' + s.id + '" />' +
+          '<span class="c-checkbox-box' + (s.pin ? ' on' : '') + '">' + (s.pin ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+          '</label></td>';
+      rows.appendChild(tr);
+    });
+    rows.querySelectorAll('input[data-site]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var s = SITES.filter(function(x){ return x.id === cb.dataset.site; })[0];
+        s.pin = !s.pin;
+        mixSource = 'user';
+        renderAll();
+      });
+    });
+    var pinned = visible.filter(function(s){ return s.pin; });
+    $('sitesSummary').textContent = pinned.length
+      ? pinned.length + ' must-buys · ' + (visible.length - pinned.length) + ' in the optimiser pool'
+      : visible.length + ' sites in the optimiser pool · none marked must-buy';
+    $('sitesFoot').textContent = 'Showing ' + visible.length + ' of ' + SITES.length +
+      ' sites for the selected channels. Est. CPMs come from the central rate card.';
+  }
 
   function resetSplit(){
     split = {};
@@ -3149,7 +2722,7 @@
     resetSplit();
     renderAll();
     markSaved();
-    aiFlash(['formatList']);
+    aiFlash(['sitesDrawer']);
     animateSplitSweep();
     askShow('Re-drafted the formats, sites and split from your brief and audience. Your channel picks were kept.');
   });
@@ -3225,7 +2798,7 @@
     var audTxt = mode === 'mass' ? 'Mass · entire Malaysia'
       : selected.map(function(id){ return byId(id).name; }).join(', ') || '–';
     var refOn = FILTERS.filter(function(f){ return filterState[f.id]; }).length;
-    var chTxt = allChannels() ? 'All channels' : chanOn.join(', ');
+    var chTxt = chanOn.length ? chanOn.join(', ') : 'All channels';
     var fmts = onFormats();
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
@@ -3235,7 +2808,7 @@
       ['Languages', langTxt, 'Brief'],
       ['Audience', audTxt, personaSource === 'ai' ? 'AI draft' : 'You'],
       ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '–'],
-      ['Channels', chTxt, allChannels() ? 'AI draft' : 'You'],
+      ['Channels', chTxt, chanOn.length ? 'You' : 'AI draft'],
       ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', splitTouched ? 'You' : 'AI draft'],
       ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
     ];
@@ -3249,7 +2822,7 @@
     $('summaryBudget').innerHTML = fmts.map(function(f){
       var amt = split[f.id] || 0;
       return '<tr><td style="font-weight:700;">' + f.name + '</td>' +
-        '<td class="num">' + cpmFmt(f.cpm) + '</td>' +
+        '<td class="num">' + rm(f.cpm) + '</td>' +
         '<td class="num">' + rm(amt) + '</td>' +
         '<td class="num">' + (budget() ? Math.round(amt / budget() * 100) : 0) + '%</td>' +
         '<td class="num">' + fmt(amt / f.cpm * 1000) + '</td></tr>';
@@ -3291,7 +2864,7 @@
   $('bookCancel').addEventListener('click', closeBook);
   $('bookOverlay').addEventListener('click', function(e){ if (e.target === $('bookOverlay')) closeBook(); });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); closeThread(); closeBrief(); }
+    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); closeThread(); }
   });
   $('bookGo').addEventListener('click', function(){
     booked = true;
@@ -3521,69 +3094,7 @@
         scroller.scrollTop - scroller.clientHeight + 24;
       scroller.scrollTo({top: Math.max(0, target),
         behavior: (reduced || document.hidden) ? 'auto' : 'smooth'});
-      setTimeout(beaconNext, (reduced || document.hidden) ? 0 : 650);
     }, 1000);
-  }
-  /* The beacon is a one-shot: it ends on the first sign of attention.
-     Step 1 beacons Next after an AI fill; step 4 beacons Confirm
-     booking the moment it scrolls into view. */
-  var beaconTimer = null;
-  function beaconNext(){ beaconCta(document.querySelector('#view1 [data-next="2"]'), 1); }
-  function beaconCta(b, onStep){
-    if (!b || b.disabled || step !== onStep) return;
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced || document.hidden) return;
-    function stop(){
-      clearTimeout(beaconTimer);
-      b.classList.remove('is-beacon');
-      ['pointerenter', 'focus', 'click'].forEach(function(ev){ b.removeEventListener(ev, stop); });
-    }
-    b.classList.remove('is-beacon');
-    void b.offsetWidth;
-    b.classList.add('is-beacon');
-    ['pointerenter', 'focus', 'click'].forEach(function(ev){ b.addEventListener(ev, stop); });
-    clearTimeout(beaconTimer);
-    beaconTimer = setTimeout(stop, 9000);
-  }
-  var bookWatch = null, bookScrollWatch = null;
-  function dropBookWatch(){
-    if (bookWatch){ bookWatch.disconnect(); bookWatch = null; }
-    if (bookScrollWatch){
-      var sc = document.querySelector('.c-shell-content');
-      if (sc) sc.removeEventListener('scroll', bookScrollWatch);
-      bookScrollWatch = null;
-    }
-  }
-  function bookCtaOnScreen(){
-    var b = $('bookBtn');
-    if (!b) return false;
-    var r = b.getBoundingClientRect();
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    return r.height > 0 && r.top >= 0 && r.bottom <= vh;
-  }
-  function fireBookBeacon(){
-    dropBookWatch();
-    setTimeout(function(){ beaconCta($('bookBtn'), 4); }, 450);
-  }
-  /* An IntersectionObserver is the main watch; a rect check on arrival
-     and on scroll backs it up where an embedded browser never reports
-     intersections. */
-  function watchBookCta(){
-    dropBookWatch();
-    var b = $('bookBtn');
-    if (!b || b.disabled || booked) return;
-    if (bookCtaOnScreen()){ fireBookBeacon(); return; }
-    if ('IntersectionObserver' in window){
-      bookWatch = new IntersectionObserver(function(entries){
-        if (entries.some(function(e){ return e.isIntersecting; })) fireBookBeacon();
-      }, {threshold: .6});
-      bookWatch.observe(b);
-    }
-    var sc = document.querySelector('.c-shell-content');
-    if (sc){
-      bookScrollWatch = function(){ if (bookCtaOnScreen()) fireBookBeacon(); };
-      sc.addEventListener('scroll', bookScrollWatch, {passive: true});
-    }
   }
 
   /* Staggered AI fill — fields land one by one: text types in, numbers
@@ -3657,28 +3168,15 @@
     };
     if (got.name) steps.push({el: $('b-name'), typeText: got.name,
       apply: function(){ $('b-name').value = got.name; }});
-    if (got.brand) steps.push({el: $('b-brand'), typeText: got.brand,
-      apply: function(){ $('b-brand').value = got.brand; }});
-    if (got.prod) steps.push({el: $('b-prod'), typeText: got.prod,
-      apply: function(){ $('b-prod').value = got.prod; }});
-    if (got.start) steps.push({el: $('b-start'), apply: function(){ $('b-start').value = got.start; }});
-    if (got.end) steps.push({el: $('b-end'), apply: function(){ $('b-end').value = got.end; }});
     if (got.budget) steps.push({el: $('b-budget'), countTo: got.budget,
       apply: function(){ $('b-budget').value = got.budget; }});
     if (got.obj) steps.push({el: $('b-obj'), apply: function(){ setDD('b-obj', got.obj); }});
-    if (got.kpi) steps.push({el: $('b-kpi'), apply: function(){ setDD('b-kpi', got.kpi); }});
-    if (got.target) steps.push({el: $('b-target'), countTo: got.target,
-      apply: function(){ $('b-target').value = got.target; }});
-    if (got.unit) steps.push({el: $('b-unit'), apply: function(){ setDD('b-unit', got.unit); }});
-    if (got.langs && got.langs.length) steps.push({el: $('langRow'), apply: function(){
-      langOn = got.langs.slice(); renderLangs();
-    }});
 
     /* Fill up the rest of the ask with a starting point — only fields
        the user has not already set, so a line completes the brief
        instead of leaving a homework list. */
     var iso = function(d){ return d.toISOString().slice(0, 10); };
-    if (!got.start && !got.end && !$('b-start').value && !$('b-end').value){
+    if (!$('b-start').value && !$('b-end').value){
       var s0 = new Date(); s0.setDate(s0.getDate() + 14);
       var e0 = new Date(); e0.setDate(e0.getDate() + 35);
       steps.push({el: $('b-start'), apply: function(){ $('b-start').value = iso(s0); }});
@@ -3696,14 +3194,14 @@
       conversion: ['Registrations', 'sign-ups'], footfall: ['Store visits', 'people'],
       leadgen: ['Registrations', 'sign-ups']};
     var pick = KPI_FOR[effObj] || ['Net reach', 'people'];
-    var unitForTarget = got.unit || $('b-unit').value || pick[1];
-    if (!got.kpi && !$('b-kpi').value){
+    var unitForTarget = $('b-unit').value || pick[1];
+    if (!$('b-kpi').value){
       steps.push({el: $('b-kpi'), apply: function(){ setDD('b-kpi', pick[0]); }});
       steps.push({el: $('b-unit'), apply: function(){ setDD('b-unit', pick[1]); }});
       unitForTarget = pick[1];
       defaults.push(pick[0] + ' as the KPI');
     }
-    if (!got.target && !(parseInt($('b-target').value, 10) > 0)){
+    if (!(parseInt($('b-target').value, 10) > 0)){
       var bud = got.budget || budget();
       if (bud > 0){
         var tgt = unitForTarget === 'views' ? Math.round(bud * 3 / 1000) * 1000
@@ -3714,7 +3212,7 @@
         defaults.push(fmt(tgt) + ' as the target');
       }
     }
-    if (!(got.langs && got.langs.length) && !langOn.length){
+    if (!langOn.length){
       steps.push({el: $('langRow'), apply: function(){
         langOn = ['Bahasa Malaysia', 'English'];
         renderLangs();
@@ -3734,238 +3232,6 @@
     }
     aiFillSequence(steps, done);
   }
-
-  /* ═══ Brief text (v2) — a whole description, not a line. Labels
-     help (Brand:, Budget:, Dates:) but plain prose works: it looks for
-     an RM amount, an objective word, a date range or a duration, a
-     target with a unit, the languages named, a known brand, and a
-     title. Whatever it cannot find, applyBriefLine defaults. ═══ */
-  var MONTHS = {jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, sept:8, oct:9, nov:10, dec:11};
-  function isoOf(d){
-    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-  }
-  function parseDayMonth(str, yearHint){
-    var m = /(\d{1,2})\s*(?:st|nd|rd|th)?\s*([a-z]{3,9})\.?\s*(\d{4})?/i.exec(str);
-    if (!m) return null;
-    var mo = MONTHS[m[2].slice(0, 4).toLowerCase()];
-    if (mo == null) mo = MONTHS[m[2].slice(0, 3).toLowerCase()];
-    if (mo == null) return null;
-    var y = m[3] ? parseInt(m[3], 10) : (yearHint || new Date().getFullYear());
-    return new Date(y, mo, parseInt(m[1], 10));
-  }
-  function parseBriefText(text){
-    var raw = String(text || '').replace(/\r/g, '');
-    var got = {budget:0, obj:'', name:'', brand:'', prod:'', start:'', end:'',
-      kpi:'', target:0, unit:'', langs:[]};
-    var labels = {};
-    var free = [];
-    raw.split('\n').forEach(function(line){
-      var lm = /^\s*(campaign|campaign name|name|title|brand|advertiser|client|product|budget|dates?|flight|period|timing|objective|goal|kpi|target|audience|languages?|language)\s*[:\-\u2013]\s*(.+)$/i.exec(line);
-      if (lm) labels[lm[1].toLowerCase()] = lm[2].trim();
-      else if (line.trim()) free.push(line.trim());
-    });
-    var lower = raw.toLowerCase();
-
-    /* Budget: RM first, then "budget ... 200k". */
-    var bm = /rm\s*([\d][\d.,]*)\s*(k|m)?\b/i.exec(raw) ||
-      /budget[^\d]{0,24}([\d][\d.,]*)\s*(k|m)?\b/i.exec(raw);
-    if (bm){
-      var amt = parseFloat(bm[1].replace(/,/g, ''));
-      var suf = (bm[2] || '').toLowerCase();
-      if (suf === 'k') amt *= 1000;
-      if (suf === 'm') amt *= 1000000;
-      if (amt > 0) got.budget = Math.round(amt);
-    }
-
-    /* Objective. */
-    var om = /awareness|consideration|conversion|footfall|store visits|lead\s*gen(?:eration)?|\bleads?\b/i.exec(labels.objective || labels.goal || raw);
-    if (om){
-      var ow = om[0].toLowerCase();
-      got.obj = /^lead/.test(ow) ? 'leadgen' : /store/.test(ow) ? 'footfall' : ow;
-    }
-
-    /* Dates: an explicit range, else a duration. */
-    var dateSrc = labels.dates || labels.date || labels.flight || labels.period || labels.timing || raw;
-    var rm2 = /(\d{1,2}\s*(?:st|nd|rd|th)?\s*[a-z]{3,9}\.?(?:\s*\d{4})?)\s*(?:to|until|till|through|-|\u2013|\u2014)\s*(\d{1,2}\s*(?:st|nd|rd|th)?\s*[a-z]{3,9}\.?(?:\s*\d{4})?)/i.exec(dateSrc);
-    if (rm2){
-      var d2 = parseDayMonth(rm2[2]);
-      var d1 = parseDayMonth(rm2[1], d2 ? d2.getFullYear() : null);
-      if (d1 && d2){
-        if (d2 < d1) d2.setFullYear(d2.getFullYear() + 1);
-        got.start = isoOf(d1); got.end = isoOf(d2);
-      }
-    } else {
-      var wk = /(\d+)\s*-?\s*(week|wk)s?\b/i.exec(raw) || /(\d+)\s*-?\s*(month)s?\b/i.exec(raw);
-      if (wk){
-        var days = parseInt(wk[1], 10) * (/month/i.test(wk[2]) ? 30 : 7);
-        var s0 = new Date(); s0.setDate(s0.getDate() + 14);
-        var e0 = new Date(s0); e0.setDate(e0.getDate() + days);
-        got.start = isoOf(s0); got.end = isoOf(e0);
-      }
-    }
-
-    /* Target with a unit. */
-    var tm = /([\d][\d.,]*)\s*(k|m)?\s*(people|reach|viewers|views|completions|sign-?ups|registrations|leads|visits|visitors|attendees|footfall)\b/i.exec(labels.target || labels.kpi || raw);
-    if (tm){
-      var tv = parseFloat(tm[1].replace(/,/g, ''));
-      var ts = (tm[2] || '').toLowerCase();
-      if (ts === 'k') tv *= 1000;
-      if (ts === 'm') tv *= 1000000;
-      var tu = tm[3].toLowerCase();
-      got.target = Math.round(tv);
-      if (/view|completion/.test(tu)){ got.kpi = 'Video completions'; got.unit = 'views'; }
-      else if (/sign|regist|lead/.test(tu)){ got.kpi = 'Registrations'; got.unit = 'sign-ups'; }
-      else if (/visit|footfall/.test(tu)){ got.kpi = 'Store visits'; got.unit = 'people'; }
-      else if (/attend/.test(tu)){ got.kpi = 'Event attendees'; got.unit = 'people'; }
-      else if (got.obj === 'footfall'){ got.kpi = 'Store visits'; got.unit = 'people'; }
-      else { got.kpi = 'Net reach'; got.unit = 'people'; }
-    }
-
-    /* Languages. */
-    var langSrc = (labels.languages || labels.language || raw).toLowerCase();
-    if (/\bbm\b|bahasa|malay\b/.test(langSrc)) got.langs.push('Bahasa Malaysia');
-    if (/english|\ben\b/.test(langSrc)) got.langs.push('English');
-    if (/chinese|mandarin|cantonese/.test(langSrc)) got.langs.push('Chinese');
-    if (/tamil/.test(langSrc)) got.langs.push('Tamil');
-
-    /* Brand: a label, "for <Brand>", or a known name anywhere. */
-    got.brand = labels.brand || labels.advertiser || labels.client || '';
-    if (!got.brand){
-      var fm = /\bfor\s+([A-Z][\w'&.]*(?:\s+[A-Z][\w'&.]*){0,2})/.exec(raw);
-      if (fm && window.collabBrand && collabBrand.known(fm[1])) got.brand = fm[1];
-    }
-    if (!got.brand && window.collabBrand){
-      var seen = {};
-      raw.split(/[^A-Za-z'&]+/).forEach(function(w){
-        if (got.brand || w.length < 3 || seen[w]) return;
-        seen[w] = 1;
-        if (/^[A-Z]/.test(w) && collabBrand.known(w) &&
-            !/^(The|For|With|And|Our|New|Campaign|Budget|Dates|Awareness|Objective|Languages|Target|Malaysia|English|Chinese|Tamil|Bahasa)$/.test(w)) got.brand = w;
-      });
-    }
-
-    /* Product: a label, or "launch(ing) <thing>". */
-    got.prod = labels.product || '';
-    if (!got.prod){
-      var pm = /\b(?:launch(?:ing)?|promot(?:e|ing)|push(?:ing)?|selling|for the)\s+(?:of\s+)?(?:the\s+|our\s+|a\s+|its\s+)?([^.,\n]{3,60}?)(?=[.,\n]|\s+(?:with|for|in|on|across|running|from)\b|$)/i.exec(raw);
-      if (pm) got.prod = pm[1].trim();
-    }
-
-    /* Name: a label, else a short first line, else brand plus product. */
-    got.name = labels.campaign || labels['campaign name'] || labels.name || labels.title || '';
-    if (!got.name && free.length){
-      /* the first sentence of the first line, if it reads like a title */
-      var first = free[0].split(/[.!?]\s/)[0].replace(/[.!?]$/, '').trim();
-      if (first.length >= 4 && first.length <= 70 && !/^(we|our|the|this|i|it)\b/i.test(first)) got.name = first;
-    }
-    if (!got.name){
-      var bits = [];
-      if (got.brand) bits.push(got.brand);
-      if (got.prod) bits.push(got.prod);
-      got.name = bits.length ? bits.join(' ') + (got.prod ? '' : ' campaign') : '';
-    }
-    return got;
-  }
-
-  /* ═══ Brief composer (v2) — folds out of the pill, folds back on
-     Send, and only then does the form start filling. ═══ */
-  function openBrief(seed){
-    var ov = $('briefOverlay');
-    var shell = ov.querySelector('.p-fold-shell');
-    if (seed != null) $('briefText').value = seed;
-    ov.classList.add('is-open');
-    ov.setAttribute('aria-hidden', 'false');
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduced && !document.hidden){
-      var t = $('askBox').getBoundingClientRect();
-      var sr = shell.getBoundingClientRect();
-      if (t.width && sr.width){
-        shell.style.setProperty('--fold-dx', (t.left - sr.left) + 'px');
-        shell.style.setProperty('--fold-dy', (t.top - sr.top) + 'px');
-        shell.style.setProperty('--fold-sx', Math.max(.05, t.width / sr.width));
-        shell.style.setProperty('--fold-sy', Math.max(.05, t.height / sr.height));
-        shell.classList.remove('is-folding-closed');
-        void shell.offsetWidth;
-        shell.classList.add('is-folding-open');
-      }
-    }
-    setTimeout(function(){ ov.classList.add('is-shown'); }, 20);
-    setTimeout(function(){
-      var ta = $('briefText');
-      ta.focus();
-      ta.setSelectionRange(ta.value.length, ta.value.length);
-    }, document.hidden ? 0 : 320);
-  }
-  function closeBrief(){
-    var ov = $('briefOverlay');
-    if (!ov.classList.contains('is-open')) return;
-    var shell = ov.querySelector('.p-fold-shell');
-    ov.classList.remove('is-shown');
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced || document.hidden){
-      ov.classList.remove('is-open');
-      shell.classList.remove('is-folding-open');
-      ov.setAttribute('aria-hidden', 'true');
-      return;
-    }
-    shell.classList.remove('is-folding-open');
-    shell.classList.add('is-folding-closed');
-    setTimeout(function(){
-      ov.classList.remove('is-open');
-      shell.classList.remove('is-folding-closed');
-      ov.setAttribute('aria-hidden', 'true');
-    }, 560);
-  }
-  /* Send: the sheet folds back into the pill, then the fields fill. */
-  function sendBrief(){
-    var text = $('briefText').value.trim();
-    if (!text) { $('briefText').focus(); return; }
-    closeBrief();
-    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(function(){
-      threadPush('user', text);
-      $('askBox').scrollIntoView({behavior: document.hidden ? 'auto' : 'smooth', block: 'start'});
-      handleBrief(text);
-    }, (reduced || document.hidden) ? 0 : 420);
-  }
-  function handleBrief(text){
-    var got = parseBriefText(text);
-    askShow('Reading your notes and writing the brief now. Watch the fields land.');
-    applyBriefLine(got, function(){
-      var bits = [];
-      if (got.brand) bits.push(got.brand);
-      if (got.budget) bits.push(rm(got.budget));
-      if (got.obj) bits.push(got.obj);
-      if (got.start && got.end) bits.push(
-        new Date(got.start).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) + ' to ' +
-        new Date(got.end).toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
-      if (got.target) bits.push(fmt(got.target) + ' ' + (got.unit || ''));
-      if (got.langs.length) bits.push(got.langs.join(', '));
-      var missing = checksFor(1).filter(function(c){ return c.level === 'block'; })
-        .map(function(c){ return c.label.toLowerCase(); });
-      var extras = (got._defaults && got._defaults.length)
-        ? ' I filled the rest with a starting point: ' + got._defaults.join(', ') + '. Adjust anything.'
-        : '';
-      askShow('Drafted the brief from your notes' + (bits.length ? ': ' + bits.join(', ') : '') + '.' +
-        extras + (missing.length ? ' Still needed: ' + missing.join('; ') + '.' : ''));
-    });
-  }
-  /* A detailed example, the multi-line cousin of tryLine. */
-  function tryText(b){
-    var s0 = new Date(); s0.setDate(s0.getDate() + 14);
-    var e0 = new Date(s0); e0.setDate(e0.getDate() + (b.weeks || 3) * 7);
-    var dd = function(d){ return d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'}); };
-    var objWord = {awareness:'Awareness', consideration:'Consideration', conversion:'Conversion',
-      footfall:'Footfall', leadgen:'Lead generation'}[b.obj] || b.obj;
-    return 'Campaign: ' + b.name + '\n' +
-      'Brand: ' + b.brand + '\n' +
-      'Product: ' + b.prod + '\n' +
-      'Budget: RM ' + b.budget.toLocaleString('en-MY') + ' working media\n' +
-      'Dates: ' + dd(s0) + ' to ' + dd(e0) + '\n' +
-      'Objective: ' + objWord + ', we want ' + b.target.toLocaleString('en-MY') + ' ' + b.unit + '\n' +
-      'Languages: ' + b.langs.join(', ');
-  }
-  var BRIEF_TEMPLATE = 'Campaign: \nBrand: \nProduct: \nBudget: RM \nDates: \nObjective: \nTarget: \nLanguages: ';
 
   /* ═══ Intent engine ═══
      Three rules keep it honest:
@@ -4105,7 +3371,7 @@
         SITES.forEach(function(s){ s.pin = s.ai && chanAllows(s.ch); });
         mixSource = 'user';
         renderAll(); markSaved();
-        aiFlash(['formatList']);
+        aiFlash(['sitesDrawer']);
         var pinned = SITES.filter(function(s){ return s.pin; });
         askShow('Pinned the draft sites as must-buys: ' + pinned.map(function(s){ return s.name; }).join(', ') +
           '. Everything else stays in the pool for the optimiser to move budget between.');
@@ -4282,13 +3548,23 @@
   var tryPendingBrief = null, tryPendingLine = '', lastTryIdx = -1;
   /* The invite chip is a label with a hand: it points the cursor at
      the pill beside it. */
-  $('aiInviteBtn').addEventListener('click', function(){ openBrief(); });
+  $('aiInviteBtn').addEventListener('click', function(){
+    $('askInput').focus();
+  });
 
   $('briefAiTry').addEventListener('click', function(){
     var idx;
     do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
     lastTryIdx = idx;
-    openBrief(tryText(TRY_BRIEFS[idx]));
+    var b = TRY_BRIEFS[idx];
+    tryPendingBrief = b;
+    tryPendingLine = tryLine(b);
+    var i = $('askInput');
+    i.value = tryPendingLine;
+    var pill = document.querySelector('.p-ask-pill');
+    pill.classList.add('has-text', 'is-ghosting');
+    $('askGhostT').textContent = tryPendingLine;
+    setTimeout(updateGhostMarquee, 30);
   });
   /* Clicking into the field turns a running seed into editable text.
      Pointerdown covers embedded browsers where focus never fires. */
@@ -4309,16 +3585,9 @@
   $('askInput').addEventListener('focus', unghost);
   $('askInput').addEventListener('pointerdown', unghost);
   $('askInput').addEventListener('input', unghost);
-  $('askInput').addEventListener('pointerdown', function(e){
-    if ($('askBox').classList.contains('is-docked')) return;
-    e.preventDefault();
-    openBrief();
-  });
 
   function askSubmit(){
     if ($('askBox').classList.contains('is-docked')){ openThread(); return; }
-    openBrief();
-    return;
     var v = $('askInput').value;
     $('askInput').value = '';
     var pill = document.querySelector('.p-ask-pill');
@@ -4532,7 +3801,7 @@
   /* Which section a request belongs to, for the anchor choreography. */
   function intentAnchor(q){
     if (/persona|audience|\bwho\b/.test(q)) return {step: 2, target: 'personaBody'};
-    if (/\bpin|must.?buy|\bsites?\b/.test(q)) return {step: 3, target: 'formatList'};
+    if (/\bpin|must.?buy|\bsites?\b/.test(q)) return {step: 3, target: 'sitesDrawer'};
     if (/draft|\bmix\b|format|balanc|allocat|split/.test(q)) return {step: 3, target: 'formatCard'};
     if (/budget/.test(q)) return {step: 1, target: 'b-budget'};
     if (/rm\s*\d/.test(q)) return {step: 1, target: 'askCard'};
@@ -4560,29 +3829,6 @@
   });
   $('threadClose').addEventListener('click', closeThread);
   $('threadVeil').addEventListener('click', closeThread);
-  $('briefClose').addEventListener('click', closeBrief);
-  $('briefCancel').addEventListener('click', closeBrief);
-  $('briefVeil').addEventListener('click', closeBrief);
-  $('briefSend').addEventListener('click', sendBrief);
-  /* Starters replace whatever is in the field; picking one is a
-     fresh start, not an addition. */
-  $('briefTemplate').addEventListener('click', function(){
-    var ta = $('briefText');
-    ta.value = BRIEF_TEMPLATE;
-    ta.focus();
-    var at = 'Campaign: '.length;
-    ta.setSelectionRange(at, at);
-  });
-  $('briefExample').addEventListener('click', function(){
-    var idx;
-    do { idx = Math.floor(Math.random() * TRY_BRIEFS.length); } while (idx === lastTryIdx);
-    lastTryIdx = idx;
-    $('briefText').value = tryText(TRY_BRIEFS[idx]);
-    $('briefText').focus();
-  });
-  $('briefText').addEventListener('keydown', function(e){
-    if ((e.metaKey || e.ctrlKey) && (e.key === 'Enter' || e.key === 'Return')){ e.preventDefault(); sendBrief(); }
-  });
   $('askBox').addEventListener('click', function(e){
     if (!$('askBox').classList.contains('is-docked')) return;
     if (e.target.closest('.p-ask-reply')) return;
@@ -4735,8 +3981,7 @@
     });
     $('f-intent').value = st.intent || '';
     $('f-ex').value = st.exclude || '';
-    /* older records saved [] to mean "all channels" */
-    chanOn = (st.chanOn && st.chanOn.length) ? st.chanOn.slice() : CHANNELS.slice();
+    chanOn = st.chanOn || [];
     FORMATS.forEach(function(f){ f.on = (st.formats || []).indexOf(f.id) > -1; });
     split = st.split || {};
     splitTouched = !!st.splitTouched;

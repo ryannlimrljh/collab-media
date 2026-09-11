@@ -501,7 +501,7 @@ on a ghost button at opacity .14, rising to .26 on hover.
   `cubic-bezier(.22,1,.36,1)` and carry a travelling sheen
   (`background-position` loop, 1.8s) so a static bar still looks alive.
 
-## 9a. v2: the CTA beacon (Next after an AI fill, Confirm booking on arrival)
+## 9a. The CTA beacon (Next after an AI fill, Confirm booking on arrival)
 
 When an AI fill finishes on step 1, `revealNextCta()` scrolls the
 footer into view (1000ms after the fill, smooth) and then, 650ms
@@ -520,9 +520,9 @@ observer disconnects and, 450ms later, the button beacons. A booked or
 disabled button never beacons, and leaving step 4 drops the watch. Reduced motion and hidden tabs skip
 it entirely.
 
-## 9b. v2 media mix: toggle choreography and the three shapes
+## 9b. Media mix: toggle choreography and the three shapes
 
-`pages/planner-v2.html` rebuilds step 3's channel blocks wholesale on
+`pages/planner.html` (the v2 build, now the main planner; the previous build is archived as `pages/planner-v1.html`) rebuilds step 3's channel blocks wholesale on
 every change, so animation is done in two halves: things **leave before
 the rebuild** and **arrive after** it.
 
