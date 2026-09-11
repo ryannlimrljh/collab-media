@@ -673,16 +673,26 @@ the evidence modal.
 Reduced motion removes the transition. The card is `role="dialog"`,
 non-modal, with `aria-labelledby` on its title.
 
-**In the review step** the same three reasonings stand side by side
-in a "Why this plan" block: three bordered columns (brief, audience,
-mix) composed from the identical parts as the cards, rows stacked
-name over reason so the columns stay narrow, one column per row on
-screens under 900px. Each column carries a source badge, AI draft or
-You. Where the user overrode a step, the column keeps the catalogue
-evidence and swaps the rule line for "Your pick" / "Your mix", with
-the shares reported as set; mass targeting and a hand-entered brief
-get a one-line "Your choice" rule instead of rows. The columns
-re-render with the summary. No motion of their own.
+**In the review step** the same three reasonings stand as a ledger
+in a "Why this plan" block: one full-width band per step (brief,
+audience, mix), dotted rules between them, each band a two-column
+grid. Left, up to 300px: title, one-line outcome, source badge (AI
+draft or You), the inputs as chips, the rule paragraph, the foot
+line. Right: the per-pick rows as tiles in an auto-fill grid (min
+200px, radius-md, 1px Neutral-3), the must-buy row spanning the full
+width. A band is only as tall as its own content, so there are no
+boxes of unequal height. Under 760px the band stacks. Where the user
+overrode a step, the tiles keep the catalogue evidence and the rule
+line reads "Your pick" / "Your mix"; mass targeting and a
+hand-entered brief get a one-line "Your choice" rule and no tiles.
+
+The review also opens with a headline strip of five DLS stat cards
+(Budget and its unallocated state, Campaign days and dates, Forecast
+reach against the target in green or red, Impressions with blended
+CPM and frequency, Audience with persona count and overlap), the plan
+table carries campaign, dates, refiner values, intent and exclusions
+and must-buys, and the budget table closes with a total row and a
+channel-share chip row. None of it moves.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 

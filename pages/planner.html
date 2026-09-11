@@ -539,17 +539,36 @@
     padding:var(--spacing-12) var(--spacing-16); border-top:1px solid var(--color-neutral-2);
     font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   @media (prefers-reduced-motion:reduce){ .p-whypop{transition:none;} }
-  /* Review: the same reasoning, three columns side by side so the
-     brief, the audience and the mix can be read against each other. */
-  .p-whygrid{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacing-16);
-    margin-top:var(--spacing-16); align-items:start;}
-  .p-whycol{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-lg); overflow:hidden; min-width:0;}
-  .p-whycol .head{flex-wrap:wrap;}
-  .p-whycol .head .c-badge{margin-left:auto; flex:none;}
-  .p-whycol .row{grid-template-columns:1fr; gap:var(--spacing-4);}
-  .p-whycol .inputs{padding-top:0;}
-  @media (max-width:900px){ .p-whygrid{grid-template-columns:1fr;} }
+  /* Review: the same reasoning as a ledger. One full-width section
+     per step (brief, audience, mix), each a two-column band: the
+     verdict on the left (title, outcome, source, inputs, rule) and the
+     evidence on the right as a grid of tiles that fills the width. No
+     boxes of unequal height; each band is as tall as its own content. */
+  .p-whyledger{margin-top:var(--spacing-16);}
+  .p-whysec{display:grid; grid-template-columns:minmax(220px, 300px) 1fr; gap:var(--spacing-24);
+    padding:var(--spacing-20) 0;}
+  .p-whysec + .p-whysec{border-top:1px dotted var(--color-neutral-4);}
+  .p-whysec .head{padding:0; align-items:flex-start; flex-wrap:wrap; gap:var(--spacing-8);}
+  .p-whysec .head .c-badge{flex:none;}
+  .p-whysec .inputs{padding:var(--spacing-12) 0 0;}
+  .p-whysec .rule{padding:var(--spacing-12) 0 0; border-top:0;}
+  .p-whysec .foot{padding:var(--spacing-8) 0 0; border-top:0;}
+  .p-whytiles{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:var(--spacing-12);
+    align-content:start;}
+  .p-whytiles .row{display:block; padding:var(--spacing-12); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); background:var(--color-neutral-1);}
+  .p-whytiles .row .r{margin-top:var(--spacing-8);}
+  .p-whytiles .row.is-wide{grid-column:1 / -1;}
+  .p-whytiles .rule{grid-column:1 / -1; padding:0; border-top:0;}
+  @media (max-width:760px){ .p-whysec{grid-template-columns:1fr;} }
+  /* Headline strip on the review: the DLS stat cards, compact. */
+  .p-sumstats .c-stat{gap:var(--spacing-4); box-shadow:none;}
+  .p-sumstats .c-stat-value{font-size:var(--text-h3-size); font-variant-numeric:tabular-nums;}
+  .p-sumstats .c-stat-footer{margin-top:var(--spacing-4);}
+  .p-sumstats .c-stat-footer.p-ok{color:var(--color-green);}
+  .p-sumstats .c-stat-footer.p-over{color:var(--color-red);}
+  .p-sumchan{display:flex; flex-wrap:wrap; gap:var(--spacing-8); margin-top:var(--spacing-12);}
+  .c-table tfoot td{font-weight:700; border-top:2px solid var(--color-neutral-3);}
   .p-persona-row{display:grid; grid-template-columns:1fr 1fr; gap:var(--spacing-16);
     align-items:start;}
   @media (max-width:640px){ .p-persona-row{grid-template-columns:1fr;} }
@@ -1550,6 +1569,10 @@
         <div class="p-stack">
 
             <div class="p-block">
+              <div class="c-stats p-sumstats" id="sumStats"></div>
+            </div>
+
+            <div class="p-block">
               <div style="display:flex; justify-content:space-between; align-items:baseline;">
                 <h4>The plan</h4>
                 <span class="p-picker-sub" id="sumFlightLabel"></span>
@@ -1567,7 +1590,7 @@
                 <span class="p-picker-sub">The reasoning behind each step, side by side</span>
               </div>
               <p>What was read, the rule applied, and the evidence behind each pick. Where you overrode Collab AI, the same evidence is shown for your choice.</p>
-              <div class="p-whygrid" id="summaryWhy"></div>
+              <div class="p-whyledger" id="summaryWhy"></div>
             </div>
 
             <div class="p-block">
@@ -1579,7 +1602,9 @@
               <table class="c-table" style="margin-top:var(--spacing-8);">
                 <thead><tr><th>Format</th><th class="num">CPM</th><th class="num">Budget</th><th class="num">Share</th><th class="num">Impressions</th></tr></thead>
                 <tbody id="summaryBudget"></tbody>
+                <tfoot id="summaryBudgetFoot"></tfoot>
               </table>
+              <div class="p-sumchan" id="summaryChannels"></div>
             </div>
 
             <div class="p-block">
@@ -3160,14 +3185,26 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       '<div class="scroll">' + parts.body + '</div>' +
       (parts.foot ? '<div class="foot">' + parts.foot + '</div>' : '');
   }
-  function whyColumn(parts){
-    return '<div class="p-whycol p-why"><div class="head"><div><h5>' + esc(parts.title) + '</h5><p class="sub">' + esc(parts.sub) + '</p></div>' +
+  function whySection(parts){
+    /* Split the body: inputs and rule stay with the verdict on the
+       left; the per-pick rows become tiles on the right. */
+    var tmp = document.createElement('div'); tmp.innerHTML = parts.body;
+    var left = '', tiles = '';
+    Array.prototype.forEach.call(tmp.children, function(el){
+      if (el.classList.contains('row')){
+        if (el.querySelector('.k') && /Must-buy/.test(el.querySelector('.k').textContent)) el.classList.add('is-wide');
+        tiles += el.outerHTML;
+      } else left += el.outerHTML;
+    });
+    return '<div class="p-whysec p-why"><div>' +
+      '<div class="head"><div><h5>' + esc(parts.title) + '</h5><p class="sub">' + esc(parts.sub) + '</p></div>' +
       '<span class="' + (parts.own ? 'c-badge c-badge-neutral' : 'c-badge p-ai-badge') + '">' + (parts.own ? 'You' : 'AI draft') + '</span></div>' +
-      parts.body + (parts.foot ? '<div class="foot">' + parts.foot + '</div>' : '') + '</div>';
+      left + (parts.foot ? '<div class="foot">' + parts.foot + '</div>' : '') + '</div>' +
+      '<div class="p-whytiles">' + (tiles || '<p class="rule" style="color:var(--color-neutral-5);">Nothing to itemise.</p>') + '</div></div>';
   }
   function renderSummaryWhy(){
     var host = $('summaryWhy'); if (!host) return;
-    host.innerHTML = whyColumn(partsBrief()) + whyColumn(partsPersonas()) + whyColumn(partsMix());
+    host.innerHTML = whySection(partsBrief()) + whySection(partsPersonas()) + whySection(partsMix());
   }
   function openWhyPop(trig, kind){
     if (whyPop.classList.contains('is-open') && whyTrig === trig){ closeWhyPop(); return; }
@@ -3959,16 +3996,43 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var fmts = onFormats();
     var pins = SITES.filter(function(s){ return s.pin && chanAllows(s.ch); });
 
+    var days = campaignDays();
+    var target = parseInt($('b-target').value, 10) || 0;
+    var refTxt = FILTERS.filter(function(f){ return filterState[f.id]; }).map(function(f){
+      var o = f.opts.filter(function(x){ return x[0] === filterState[f.id]; })[0];
+      return o ? o[1] : filterState[f.id];
+    }).join(', ');
+    var intent = $('f-intent').value.trim(), excl = $('f-ex').value.trim();
+    var briefSrc = briefAi ? 'AI draft' : 'Brief';
     var rows = [
-      ['Objective', ($('b-obj').value || 'Not set') + ', ' +
-        ($('b-target').value || '?') + ' ' + ($('b-unit').value || 'units') + ' (' + ($('b-kpi').value || 'no KPI') + ')', 'Brief'],
-      ['Languages', langTxt, 'Brief'],
-      ['Audience', audTxt, personaSource === 'ai' ? 'AI draft' : 'You'],
-      ['Refiners', refOn ? refOn + ' applied · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '–'],
+      ['Campaign', [$('b-name').value.trim() || 'Untitled', $('b-brand').value.trim(), $('b-prod').value.trim()].filter(Boolean).join(' · '), briefSrc],
+      ['Dates', $('sumFlightLabel').textContent ? $('sumFlightLabel').textContent + ' · ' + days + ' days' + (days && budget() ? ' · ' + rm(budget() / days) + ' a day' : '') : 'Not set', briefSrc],
+      ['Objective', objWord(ddVal('b-obj')) + (target ? ', ' + fmt(target) + ' ' + ($('b-unit').value || 'units') : '') + ' (' + ($('b-kpi').value || 'no KPI') + ')', briefSrc],
+      ['Languages', langTxt, briefSrc],
+      ['Audience', audTxt + (mode === 'mass' || selected.length ? ' · ' + fmt(audienceReach()) + ' unique · ' + Math.round(audienceReach() / MASS * 100) + '% of Malaysia' : ''), personaSource === 'ai' ? 'AI draft' : 'You'],
+      ['Refiners', refOn ? refTxt + ' · ' + Math.round(filterMult() * 100) + '% of base kept' : 'None', refOn ? 'You' : '–'],
+      ['Intent and exclusions', (intent || excl) ? [intent ? 'Intent: ' + intent : '', excl ? 'Exclude: ' + excl : ''].filter(Boolean).join(' · ') : 'None noted', (intent || excl) ? 'You' : '–'],
       ['Channels', chTxt, allChannels() ? 'AI draft' : 'You'],
-      ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', splitTouched ? 'You' : 'AI draft'],
-      ['Budget split', splitTouched ? 'Overridden by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft']
+      ['Formats', fmts.map(function(f){ return f.name; }).join(', ') || 'None', mixSource === 'ai' ? 'AI draft' : 'You'],
+      ['Budget split', splitTouched ? 'Shaped by you' : 'Recommendation, unchanged', splitTouched ? 'You' : 'AI draft'],
+      ['Must-buy sites', pins.length ? pins.map(function(s){ return s.name; }).join(', ') : 'None', mixSource === 'ai' ? 'AI draft' : 'You']
     ];
+    /* Headline: the five numbers a reviewer checks first. */
+    var unalloc = budget() - fc.alloc;
+    var reachVsTarget = target && $('b-kpi').value === 'Net reach'
+      ? (fc.reach >= target ? {cls:'p-ok', t:'Clears the ' + fmt(target) + ' target'} : {cls:'p-over', t:fmt(target - fc.reach) + ' short of the ' + fmt(target) + ' target'})
+      : {cls:'', t: target ? 'Target: ' + fmt(target) + ' ' + ($('b-unit').value || '') : 'No target set'};
+    var stat = function(label, value, foot, cls){
+      return '<div class="c-stat"><span class="c-stat-label">' + label + '</span><span class="c-stat-value">' + value + '</span>' +
+        '<span class="c-stat-footer' + (cls ? ' ' + cls : '') + '">' + foot + '</span></div>';
+    };
+    $('sumStats').innerHTML =
+      stat('Budget', rm(budget()), Math.abs(unalloc) < 1 ? 'Fully placed' : unalloc > 0 ? rm(unalloc) + ' unallocated' : rm(-unalloc) + ' over', Math.abs(unalloc) < 1 ? '' : 'p-over') +
+      stat('Campaign', days ? days + ' days' : '–', $('sumFlightLabel').textContent || 'Dates not set') +
+      stat('Forecast reach', fmt(fc.reach), reachVsTarget.t, reachVsTarget.cls) +
+      stat('Impressions', fmt(fc.imps), (fc.blended ? rm(fc.blended) + ' blended CPM · ' : '') + fc.freq + ' frequency') +
+      stat('Audience', (mode === 'mass' || selected.length) ? fmt(audienceReach()) : '–',
+        mode === 'mass' ? 'Entire Malaysia' : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') + ' · ' + r.pct + '% overlap' : 'No personas');
     $('summaryRows').innerHTML = rows.map(function(x){
       var badge = x[2] === 'AI draft' ? 'c-badge p-ai-badge' : 'c-badge c-badge-neutral';
       return '<tr><td style="font-weight:700; white-space:nowrap;">' + x[0] + '</td><td>' + x[1] +
@@ -3983,6 +4047,16 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         '<td class="num">' + rm(amt) + '</td>' +
         '<td class="num">' + (budget() ? Math.round(amt / budget() * 100) : 0) + '%</td>' +
         '<td class="num">' + fmt(amt / f.cpm * 1000) + '</td></tr>';
+    }).join('');
+    $('summaryBudgetFoot').innerHTML = fmts.length
+      ? '<tr><td>Total · ' + fmts.length + ' formats</td><td class="num">' + (fc.blended ? cpmFmt(fc.blended) : '–') + '</td>' +
+        '<td class="num">' + rm(fc.alloc) + '</td><td class="num">' + (budget() ? Math.round(fc.alloc / budget() * 100) : 0) + '%</td>' +
+        '<td class="num">' + fmt(fc.imps) + '</td></tr>' : '';
+    var chShare = {};
+    fmts.forEach(function(f){ chShare[f.ch] = (chShare[f.ch] || 0) + (split[f.id] || 0); });
+    $('summaryChannels').innerHTML = CHANNELS.filter(function(c){ return chShare[c]; }).map(function(c){
+      return '<span class="c-chip c-chip-filter is-active" style="cursor:default;"><i class="' + (CH_ICON[c] || 'ph ph-circle').replace('ph ', 'ph-fill ') + '"></i>' + c +
+        ' <span class="count">' + (fc.alloc ? Math.round(chShare[c] / fc.alloc * 100) : 0) + '%</span></span>';
     }).join('');
 
     $('summarySites').innerHTML = pins.length ? pins.map(function(s){
