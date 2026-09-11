@@ -498,29 +498,15 @@
      with a plus. Sites are small SQUARED tags with a pin. Nobody has
      to read a label to know which is which. */
   .p-chanrow{gap:var(--spacing-8);}
-  .p-chantile{display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px;
-    padding:0 var(--spacing-16) 0 var(--spacing-12); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
-    color:var(--color-neutral-9); font-family:inherit; font-size:var(--text-body2-size);
-    font-weight:700; cursor:pointer;
-    transition:background var(--duration-fast) var(--ease-standard),
-      border-color var(--duration-fast) var(--ease-standard),
-      color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-fast) var(--ease-standard);}
-  .p-chantile i{font-size:var(--icon-md); color:var(--color-neutral-5);
-    transition:color var(--duration-fast) var(--ease-standard);}
-  .p-chantile .count{display:inline-flex; align-items:center; justify-content:center;
-    min-width:20px; height:20px; padding:0 6px; border-radius:var(--radius-pill);
-    background:var(--color-neutral-2); font-size:var(--text-caption-size); font-weight:700;
-    color:var(--color-neutral-9);}
-  .p-chantile:hover:not(.is-active){background:var(--color-neutral-2);}
-  .p-chantile:active{transform:scale(.97);}
-  .p-chantile.is-active{background:var(--color-obsidian); border-color:var(--color-obsidian);
-    color:var(--color-neutral-1);}
-  .p-chantile.is-active i{color:var(--color-neutral-1);}
-  .p-chantile.is-active .count{background:rgba(255,255,255,.18); color:var(--color-neutral-1);}
-  .p-chantile:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .p-chantile .count.is-pop{animation:p-chip-in 240ms var(--ease-settle) both;}
+  /* Channel toggles are DLS Buttons with aria-pressed: Secondary when
+     off, Primary when on, outline icon swapping to fill on press (the
+     same state-change logic the DLS gives Checkbox, Radio and the
+     chat thumbs). The count is a DLS Badge riding inside. */
+  .p-chanrow .c-btn{gap:var(--spacing-8);}
+  .p-chanrow .c-btn i{font-size:var(--icon-md);}
+  .p-chanrow .c-btn .c-badge{margin-left:2px;}
+  .p-chanrow .c-btn .c-badge.is-pop{animation:p-chip-in 240ms var(--ease-settle) both;}
+  .p-chanrow .c-btn:active{transform:scale(.97);}
   .p-chanblock-head h5{display:flex; align-items:center; gap:var(--spacing-8);}
   .p-chanblock-head h5 i{font-size:var(--icon-sm); color:var(--color-neutral-5);}
   /* formats: pills with a plus; they are actions, not states */
@@ -557,7 +543,7 @@
       margin 260ms var(--ease-settle), border-width 260ms var(--ease-settle),
       opacity 180ms var(--ease-standard);}
   @media (prefers-reduced-motion:reduce){
-    .c-chip.is-new, .p-site-chip.is-new, .p-site-chip.is-pop i, .p-chantile .count.is-pop{animation:none;}
+    .c-chip.is-new, .p-site-chip.is-new, .p-site-chip.is-pop i, .p-chanrow .c-btn .c-badge.is-pop{animation:none;}
     .c-chip.is-lifting, .p-chanblock.is-leaving, .p-fmtrow.is-leaving{transition:none;}
   }
   .p-chan-note{margin:var(--spacing-8) 0 0;}
@@ -588,9 +574,8 @@
   .p-chan-add, .p-chan-sites{display:flex; flex-wrap:wrap; align-items:center;
     gap:var(--spacing-8); margin-top:var(--spacing-8);}
   .p-chan-sites{padding-top:var(--spacing-8); border-top:1px dotted var(--color-neutral-3);}
-  .p-chan-add .lab, .p-chan-sites .lab{font-size:var(--text-caption-size); font-weight:700;
-    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);
-    margin-right:var(--spacing-4);}
+  .p-chan-add .lab, .p-chan-sites .lab{flex:0 0 64px; font-size:var(--text-caption-size); font-weight:700;
+    text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); color:var(--color-neutral-5);}
   .p-chan-add .c-chip-filter .cpm, .p-chan-sites .c-chip-filter .inv{color:var(--color-neutral-5); font-weight:400;}
   .p-chan-sites .c-chip-filter.is-active .inv{color:rgba(255,255,255,.72);}
   .p-chan-sites .c-chip-filter i{font-size:12px;}
@@ -2715,11 +2700,11 @@
       var inMix = FORMATS.filter(function(f){ return f.on && f.ch === c; }).length;
       var chip = document.createElement('button');
       chip.type = 'button';
-      chip.className = 'p-chantile' + (on ? ' is-active' : '');
+      chip.className = 'c-btn c-btn-md ' + (on ? 'c-btn-primary' : 'c-btn-secondary');
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
       chip.setAttribute('aria-label', c + (on ? ', in play, ' + inMix + ' in the mix' : ', switched off'));
-      chip.innerHTML = '<i class="' + CH_ICON[c] + '" aria-hidden="true"></i>' + c +
-        (on && inMix ? ' <span class="count' + (c === popCount ? ' is-pop' : '') + '">' + inMix + '</span>' : '');
+      chip.innerHTML = '<i class="' + (on ? CH_ICON[c].replace('ph ph-', 'ph-fill ph-') : CH_ICON[c]) + '" aria-hidden="true"></i>' + c +
+        (on && inMix ? ' <span class="c-badge c-badge-selected' + (c === popCount ? ' is-pop' : '') + '">' + inMix + '</span>' : '');
       chip.addEventListener('click', function(){
         mixSource = 'user';
         var i = chanOn.indexOf(c);
@@ -2861,8 +2846,10 @@
       add.innerHTML = '<span class="lab">Add</span>' +
         (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
         (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
-        vis.map(function(f){
-          return '<button class="c-chip c-chip-filter' + (f.id === newChip ? ' is-new' : '') + '" type="button" data-add="' + f.id + '"' +
+        vis.map(function(f, i){
+          var revealed = c === revealChan && i >= cap;
+          return '<button class="c-chip c-chip-filter' + (f.id === newChip || revealed ? ' is-new' : '') + '" type="button" data-add="' + f.id + '"' +
+            (revealed ? ' style="animation-delay:' + Math.min(240, (i - cap) * 18) + 'ms"' : '') +
             (f.placeholder ? ' title="Placeholder rate, directional only"' : '') + '>' +
             '<i class="ph ph-plus" aria-hidden="true"></i>' + f.name + ' <span class="cpm">' + cpmFmt(f.cpm) + (f.placeholder ? ' est.' : '') + '</span></button>';
         }).join('') +
@@ -2891,7 +2878,7 @@
       block.appendChild(runs);
       list.appendChild(block);
     });
-    newFmt = null; newChan = null; newChip = null; popPin = null; popCount = null;
+    newFmt = null; newChan = null; newChip = null; popPin = null; popCount = null; revealChan = null;
 
     list.querySelectorAll('input[type="range"]').forEach(function(sl){
       sl.addEventListener('input', function(){
@@ -2929,7 +2916,7 @@
   var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
   var CH_ICON = {TV:'ph ph-television', Radio:'ph ph-radio', OTT:'ph ph-monitor-play',
     Web:'ph ph-globe', Social:'ph ph-share-network'};
-  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null;
+  var shelfOpen = {}, shelfQuery = '', newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null, revealChan = null;
   /* Exit before rebuild: measure, collapse, then let the caller change
      state and re-render. Reduced motion and hidden tabs go straight through. */
   function leaveThen(el, fn){
@@ -2939,6 +2926,31 @@
     void el.offsetWidth;
     el.classList.add('is-leaving');
     setTimeout(fn, 270);
+  }
+  /* A block whose shelf opens or closes tweens its height between the
+     two renders instead of jumping; the chips it reveals stagger in. */
+  function growThen(ch, fn){
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var before = document.querySelector('.p-chanblock[data-ch="' + ch + '"]');
+    if (!before || reduced || document.hidden){ fn(); return; }
+    var h0 = before.getBoundingClientRect().height;
+    fn();
+    var after = document.querySelector('.p-chanblock[data-ch="' + ch + '"]');
+    if (!after) return;
+    var h1 = after.getBoundingClientRect().height;
+    if (Math.abs(h1 - h0) < 2) return;
+    after.style.height = h0 + 'px';
+    after.style.overflow = 'hidden';
+    after.style.boxSizing = 'border-box';
+    void after.offsetWidth;
+    after.style.transition = 'height 300ms var(--ease-settle)';
+    after.style.height = h1 + 'px';
+    setTimeout(function(){
+      after.style.transition = '';
+      after.style.height = '';
+      after.style.overflow = '';
+      after.style.boxSizing = '';
+    }, 320);
   }
   function liftThen(el, fn){
     var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2951,9 +2963,15 @@
     if (!host) return;
     host.addEventListener('click', function(e){
       var more = e.target.closest('[data-more]');
-      if (more){ shelfOpen[more.dataset.more] = true; renderFormats(); return; }
+      if (more){
+        growThen(more.dataset.more, function(){ shelfOpen[more.dataset.more] = true; revealChan = more.dataset.more; renderFormats(); });
+        return;
+      }
       var less = e.target.closest('[data-less]');
-      if (less){ shelfOpen[less.dataset.less] = false; renderFormats(); return; }
+      if (less){
+        growThen(less.dataset.less, function(){ shelfOpen[less.dataset.less] = false; renderFormats(); });
+        return;
+      }
       var pin = e.target.closest('[data-pin]');
       if (pin){
         var sx = SITES.filter(function(x){ return x.id === pin.dataset.pin; })[0];

@@ -515,6 +515,7 @@ the rebuild** and **arrive after** it.
 | Format removed (row untick) | row `is-leaving` (same collapse as the block) | chip `is-new`: `p-chip-in` (scale .82 to 1, 220ms) |
 | Site pinned/unpinned | none | tag `is-pop`: the pin icon runs `p-chip-in`; icon swaps `ph` to `ph-fill` |
 | Dial drag | none; the block header sum updates in place via `syncBlockSums()` | none |
+| Shelf "+N more" / "Show less" | `growThen(ch, fn)`: measure the block, re-render, then tween the block's height from old to new over 300ms `--ease-settle` (inline styles cleared at 320ms) | revealed chips get `is-new` with `animation-delay` staggered 18ms apart, capped at 240ms |
 
 Two helpers do the exits: `leaveThen(el, fn)` and `liftThen(el, fn)`.
 Both take the instant path under reduced motion or `document.hidden`.
@@ -523,10 +524,14 @@ The re-render reads one-shot markers (`newFmt`, `newChan`, `newChip`,
 then clears them.
 
 **Three shapes for three things**, so nobody reads a label to know
-what a pill is: channels are 44px squared TILES (`radius-sm`, leading
-Phosphor icon, count badge, Obsidian when active); addable formats are
-32px DLS filter PILLS with a leading plus; sites are 26px squared TAGS
-(`p-site-chip`, Neutral-2, leading pin that fills when active).
+what a pill is: channels are DLS BUTTONS (`c-btn c-btn-md`, 40px,
+`radius-md`) toggling `c-btn-secondary` off and `c-btn-primary` on with
+`aria-pressed`, the leading Phosphor icon swapping outline for fill on
+press and a `c-badge c-badge-selected` count riding inside; addable
+formats are 32px DLS filter PILLS with a leading plus; sites are 26px
+squared TAGS (`p-site-chip`, Neutral-2, leading pin that fills when
+active). The Add and Runs on labels share a fixed 64px column so the
+first pill of each row lines up.
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
