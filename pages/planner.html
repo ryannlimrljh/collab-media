@@ -1924,7 +1924,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       ['sth','Southern region',.16],['ec','East Coast',.14],['em','East Malaysia',.20]]}
   ];
 
-  var CHANNELS = ['TV', 'Radio', 'OTT', 'Web', 'Social'];
+  var CHANNELS = ['Video', 'Audio', 'OTT', 'Web', 'Social'];
 
   var FORMATS = [
     /* The live rate card, name for name and rate for rate, in the
@@ -1962,9 +1962,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     {id:'vib', name:'Video In-banner',      cpm:20,   w:8,  ch:'Web',    video:true,  on:false},
     {id:'sva', name:'Video Social Ad',      cpm:9,    w:30, ch:'Social', video:true,  on:true},
     {id:'wav', name:'Wave Cards',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'tvc', name:'TV',                   cpm:3.26, w:25, ch:'TV',     video:true,  on:false},
+    {id:'tvc', name:'Video',                cpm:3.26, w:25, ch:'Video',  video:true,  on:false},
     {id:'ott', name:'OTT',                  cpm:26,   w:20, ch:'OTT',    video:true,  on:false, placeholder:true},
-    {id:'rad', name:'Radio',                cpm:6.61, w:12, ch:'Radio',  video:false, on:false}
+    {id:'rad', name:'Audio',                cpm:6.61, w:12, ch:'Audio',  video:false, on:false}
   ];
 
   var SITES = [
@@ -1999,7 +1999,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     return String(Math.round(n));
   }
   function rm(n){ return 'RM ' + Math.round(n).toLocaleString('en-MY'); }
-  /* Rate-card CPMs carry sen where the card does (TV 3.26, Radio 6.61). */
+  /* Rate-card CPMs carry sen where the card does (Video 3.26, Audio 6.61). */
   function cpmFmt(n){ return 'RM ' + (Number.isInteger(n) ? n.toLocaleString('en-MY') : n.toFixed(2)); }
   function byId(id){ return PERSONAS.filter(function(p){ return p.id === id; })[0]; }
   function budget(){ return parseInt($('b-budget').value, 10) || 0; }
@@ -2984,7 +2984,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   /* ═══ Format sample peek — the catalogue's live miniature, next to
      whichever format pill or row the pointer is on. Samples come from
      shared/format-previews (the Ad formats page's own), matched by name
-     with a few aliases for the rate card's spellings. TV, OTT and Radio
+     with a few aliases for the rate card's spellings. Video, OTT and Audio
      have no sample and show nothing. Pointer only; touch skips it. ═══ */
   var PEEK_ALIAS = {'hotspot':'hotspot-interactive', 'image social ad':'social-display-ad',
     'product collector ad':'product-collector', 'skinner / wallpaper':'skinner',
@@ -3759,8 +3759,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         mix.length + (mix.length === 1 ? ' format' : ' formats') + ' · ' + rm(sum) + ' · ' + (b ? Math.round(sum / b * 100) : 0) + '%';
     });
   }
-  var CH_ORDER = ['OTT', 'Social', 'Web', 'TV', 'Radio'];
-  var CH_ICON = {TV:'ph ph-television', Radio:'ph ph-radio', OTT:'ph ph-monitor-play',
+  var CH_ORDER = ['OTT', 'Social', 'Web', 'Video', 'Audio'];
+  var CH_ICON = {Video:'ph ph-video', Audio:'ph ph-speaker-high', OTT:'ph ph-monitor-play',
     Web:'ph ph-globe', Social:'ph ph-share-network'};
   var shelfOpen = {}, newFmt = null, newChan = null, newChip = null, popPin = null, popCount = null, revealChan = null;
   /* Exit before rebuild: measure, collapse, then let the caller change
@@ -4101,7 +4101,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     }).join('');
 
     $('sumBudgetLabel').textContent = rm(budget());
-    var CH_TONE = {OTT:'fire', Social:'wood', Web:'earth', TV:'water', Radio:'gold'};
+    var CH_TONE = {OTT:'fire', Social:'wood', Web:'earth', Video:'water', Audio:'gold'};
     $('summaryBudget').innerHTML = fmts.map(function(f){
       var amt = split[f.id] || 0;
       return '<tr data-fmt="' + f.id + '"><td style="font-weight:700;"><span class="dot tone-' + CH_TONE[f.ch] + '"></span>' + f.name + '</td>' +
@@ -5638,7 +5638,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     $('f-intent').value = st.intent || '';
     $('f-ex').value = st.exclude || '';
     /* older records saved [] to mean "all channels" */
-    chanOn = (st.chanOn && st.chanOn.length) ? st.chanOn.slice() : CHANNELS.slice();
+    /* plans saved before the rename carry TV and Radio */
+    var LEGACY_CH = {TV:'Video', Radio:'Audio'};
+    chanOn = (st.chanOn && st.chanOn.length) ? st.chanOn.map(function(c){ return LEGACY_CH[c] || c; }) : CHANNELS.slice();
     FORMATS.forEach(function(f){ f.on = (st.formats || []).indexOf(f.id) > -1; });
     split = st.split || {};
     splitTouched = !!st.splitTouched;

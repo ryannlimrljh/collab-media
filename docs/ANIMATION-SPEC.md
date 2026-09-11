@@ -597,7 +597,7 @@ sample the Ad formats page draws, from `shared/format-previews.js`
 and `.css` (`FormatPreviews.mount` + `live`), matched by name to
 `shared/formats-data.js` with aliases for the rate card's spellings
 (Hotspot, Image Social Ad, In-stream Video, Product Collector Ad,
-Skinner / Wallpaper, Video Social Ad). TV, OTT and Radio have no
+Skinner / Wallpaper, Video Social Ad). Video, OTT and Audio have no
 sample and show nothing.
 
 **Shape.** `#fmtPeek`: fixed, 300px wide, Neutral-1, 1px Neutral-3
@@ -699,7 +699,7 @@ bar built the audience pull bar's way: one stacked horizontal bar
 (8px like the audience pull bar, pill ends, hairline Neutral-1 dividers) with one slice per
 format in table order, sized to its share of the budget, coloured by
 its channel on the DLS chart series (OTT Fire, Social Wood, Web
-Earth, TV Water, Radio Gold), unallocated budget left as bare Neutral-3 track (shares live in
+Earth, Video Water, Audio Gold), unallocated budget left as bare Neutral-3 track (shares live in
 the hover title, the table and the legend). Each table
 row carries a 10px dot in its channel colour. Hovering a row lights
 its slice and drops the others to 30% opacity; hovering a slice
