@@ -45,8 +45,17 @@ const A = {
   channels_off: z.object({ op: z.literal('channels_off'), channels: z.array(z.string().max(20)).max(5) }),
   add_formats: z.object({ op: z.literal('add_formats'), ids: z.array(id).max(40) }),
   remove_formats: z.object({ op: z.literal('remove_formats'), ids: z.array(id).max(40) }),
+  // split is a list of {id, amount} pairs, not the more natural
+  // id-keyed record, because the API rejects a schema-typed
+  // additionalProperties: a map over arbitrary catalogue ids cannot be
+  // expressed in ENVELOPE_JSON_SCHEMA. The wire shape wins so there is
+  // no array-to-record fold between what the API returns and what this
+  // validates, which would be one more place for split data to drop.
   set_split: z.union([
-    z.object({ op: z.literal('set_split'), split: z.record(id, money) }),
+    z.object({
+      op: z.literal('set_split'),
+      split: z.array(z.object({ id: id, amount: money })).max(40),
+    }),
     z.object({ op: z.literal('set_split'), mode: z.literal('recommended') }),
   ]),
   pin_sites: z.object({ op: z.literal('pin_sites'), ids: z.array(id).max(20), pinned: z.boolean() }),
@@ -92,10 +101,10 @@ export const Envelope = z.object({
 // `additionalProperties` set to anything but the literal `false` ("For
 // 'object' type, 'additionalProperties: object' is not supported"), and
 // site ids are catalogue-controlled, not a fixed set this file can name.
-// So split travels as a list of {id, amount} pairs instead of an
-// id-keyed object. api/plan.mjs (Task 4) must fold that list back into
-// the {id: amount} record shape before handing the envelope to zod's
-// Envelope.safeParse, since SetSplit still expects a record.
+// So split travels as a list of {id, amount} pairs, and that is the one
+// canonical wire shape: zod's set_split validates the same list rather
+// than a record, so there is no array-to-record fold anywhere for split
+// data to go missing in.
 export const ENVELOPE_JSON_SCHEMA = {
   type: 'object',
   additionalProperties: false,

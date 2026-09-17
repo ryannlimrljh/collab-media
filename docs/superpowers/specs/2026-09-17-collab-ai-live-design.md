@@ -94,15 +94,23 @@ Request settings, from the Claude API skill:
 | Fallbacks | `fallbacks: "default"` with beta `server-side-fallback-2026-07-01` | The skill says to enable these by default on Opus 5 |
 | Caching | `cache_control` on the system block | The catalogue never changes between requests |
 
-**Call shape, verified 2026-09-17 against the live API.** B. A single
-`client.beta.messages.create()` call carries both features: `output_config:
-{ effort: 'low', format: zodOutputFormat(Schema) }` alongside `betas:
-['server-side-fallback-2026-07-01']` and `fallbacks: 'default'`. The one
-wrinkle is that `beta.messages.create()` does not populate
-`response.parsed_output` the way the non-beta `messages.parse()` does; the
-schema-constrained JSON still comes back as ordinary text in
-`response.content[0].text`, so the endpoint parses it itself with
-`JSON.parse()`.
+**Call shape, verified 2026-09-17 against the live API.** A single
+`client.beta.messages.create()` call carries structured output and refusal
+fallbacks together: `output_config: { effort: 'low', format: { type:
+'json_schema', schema: ENVELOPE_JSON_SCHEMA } }` alongside `betas:
+['server-side-fallback-2026-07-01']` and `fallbacks: 'default'`. Two
+wrinkles follow from using the beta namespace. It does not populate
+`response.parsed_output`, so the endpoint parses the JSON itself. And
+adaptive thinking can put a thinking block ahead of the answer, so the text
+block is selected by type rather than by position.
+
+**Three API constraints shape the schema**, all found by testing rather
+than reading. `additionalProperties` must be the literal `false`, so a map
+of arbitrary ids cannot be expressed and a split travels as a list of
+`{id, amount}`. The schema may carry at most 24 optional properties in
+total, so the campaign fields are required-and-nullable rather than
+optional. And an `enum` is genuinely enforced, which is why the schema is
+written twice.
 
 **The schema is written twice, on purpose.** Verified the same day: zod 4's
 `zodOutputFormat` demotes every constraint keyword it cannot express into a
@@ -131,7 +139,7 @@ Both modes answer in one shape:
   "actions": [
     {"op": "channels_on", "channels": ["OTT"]},
     {"op": "add_formats", "ids": ["ott"]},
-    {"op": "set_split", "split": {"ott": 40000, "ldb": 20000}}
+    {"op": "set_split", "split": [{"id": "ott", "amount": 40000}, {"id": "ldb", "amount": 20000}]}
   ],
   "why": {
     "brief": "Budget read from \"RM 200k working budget\" …",
@@ -165,7 +173,7 @@ Thirteen operations, each validated by the page before it runs.
 | `channels_off` | channel names, never the last one | Step 3 |
 | `add_formats` | format ids | Step 3 |
 | `remove_formats` | format ids | Step 3 |
-| `set_split` | id to amount, or `{"mode": "recommended"}` to reset | Step 3 |
+| `set_split` | a list of `{id, amount}`, or `{"mode": "recommended"}` to reset | Step 3 |
 | `pin_sites` | ids plus pinned true or false | Step 3 |
 | `go_to_step` | 1 to 4 | Navigation |
 | `confirm_booking` | none | Opens the booking dialog. Never books by itself |

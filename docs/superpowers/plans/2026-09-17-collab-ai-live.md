@@ -144,7 +144,7 @@ test('accepts a draft with fields, personas and a split', () => {
     actions: [
       { op: 'set_fields', fields: { name: 'Raya', budget: 200000, langs: ['English'] } },
       { op: 'set_personas', ids: ['cl', 'al'] },
-      { op: 'set_split', split: { isv: 100000, sva: 100000 } },
+      { op: 'set_split', split: [{ id: 'isv', amount: 100000 }, { id: 'sva', amount: 100000 }] },
     ],
     why: { brief: 'Budget from "RM 200k".', personas: 'Broad reach.', mix: 'Video led.' },
   });
@@ -556,7 +556,7 @@ In `package.json`, set `"scripts"` to:
 ```json
 {
   "dev": "vercel dev",
-  "test": "node --test test/"
+  "test": "node --test test/*.test.mjs"
 }
 ```
 
@@ -659,8 +659,14 @@ test('keeps confirm_booking, which the page gates separately', () => {
 });
 
 test('rejects a negative split amount', () => {
-  const { actions } = validate([{ op: 'set_split', split: { isv: -500 } }], cat);
+  const { actions } = validate([{ op: 'set_split', split: [{ id: 'isv', amount: -500 }] }], cat);
   assert.equal(actions.length, 0);
+});
+
+test('drops split entries whose format is not in the catalogue', () => {
+  const { actions } = validate([{ op: 'set_split',
+    split: [{ id: 'isv', amount: 1000 }, { id: 'ghost', amount: 500 }] }], cat);
+  assert.deepEqual(actions[0].split, [{ id: 'isv', amount: 1000 }]);
 });
 
 test('returns nothing when handed something that is not an array', () => {
@@ -745,12 +751,12 @@ Expected: FAIL, cannot find module.
 
         case 'set_split':
           if (a.mode === 'recommended') { ok.push({ op: a.op, mode: 'recommended' }); return; }
-          copy = {};
-          Object.keys(a.split || {}).forEach(function (k) {
-            var v = a.split[k];
-            if (F[k] && typeof v === 'number' && isFinite(v) && v >= 0) copy[k] = Math.round(v);
-          });
-          if (!Object.keys(copy).length) { rejected.push({ a: a, why: 'no usable split' }); return; }
+          /* A list, not a map: the API cannot express a map of arbitrary
+             ids, so the wire shape is a list and nothing converts it. */
+          copy = (a.split || []).filter(function (e) {
+            return e && F[e.id] && typeof e.amount === 'number' && isFinite(e.amount) && e.amount >= 0;
+          }).map(function (e) { return { id: e.id, amount: Math.round(e.amount) }; });
+          if (!copy.length) { rejected.push({ a: a, why: 'no usable split' }); return; }
           ok.push({ op: a.op, split: copy });
           return;
 
@@ -1028,7 +1034,7 @@ Inside the planner's IIFE, after `renderAll` is defined:
     },
     set_split: function(a){
       if (a.mode === 'recommended'){ resetSplit(); return; }
-      Object.keys(a.split).forEach(function(k){ split[k] = a.split[k]; });
+      a.split.forEach(function(e){ split[e.id] = e.amount; });
       splitTouched = true;
     },
     pin_sites: function(a){

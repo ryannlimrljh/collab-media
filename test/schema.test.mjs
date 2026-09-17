@@ -13,7 +13,7 @@ test('accepts a draft with fields, personas and a split', () => {
     actions: [
       { op: 'set_fields', fields: { name: 'Raya', budget: 200000, langs: ['English'] } },
       { op: 'set_personas', ids: ['cl', 'al'] },
-      { op: 'set_split', split: { isv: 100000, sva: 100000 } },
+      { op: 'set_split', split: [{ id: 'isv', amount: 100000 }, { id: 'sva', amount: 100000 }] },
     ],
     why: { brief: 'Budget from "RM 200k".', personas: 'Broad reach.', mix: 'Video led.' },
   });
@@ -79,4 +79,19 @@ test('every closed object in the JSON Schema sets additionalProperties: false', 
 test('the JSON Schema still has a real enum keyword, not just a hint', () => {
   assert.ok(Array.isArray(opEnumNode(ENVELOPE_JSON_SCHEMA).enum));
   assert.ok(opEnumNode(ENVELOPE_JSON_SCHEMA).enum.length > 0);
+});
+
+test('both schemas agree that a split is a list of id and amount', () => {
+  // the wire shape the API can express is the shape zod validates
+  const viaZod = Envelope.safeParse({ say: 'x', actions: [
+    { op: 'set_split', split: [{ id: 'isv', amount: 1000 }] }] });
+  assert.equal(viaZod.success, true);
+
+  const rejectsRecord = Envelope.safeParse({ say: 'x', actions: [
+    { op: 'set_split', split: { isv: 1000 } }] });
+  assert.equal(rejectsRecord.success, false);
+
+  const jsonSplit = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.split;
+  assert.equal(jsonSplit.type, 'array');
+  assert.deepEqual(Object.keys(jsonSplit.items.properties).sort(), ['amount', 'id']);
 });
