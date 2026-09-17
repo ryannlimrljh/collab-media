@@ -2,6 +2,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSystem } from '../api/_prompt.mjs';
 
+/* The prompt is prose, and prose gets rewrapped. Search it with the
+   whitespace flattened so a cosmetic line break can never fail a test
+   that is really asking whether the rule is stated at all. */
+const says = (s, phrase) => s.toLowerCase().replace(/\s+/g, ' ').includes(phrase);
+
 const catalogue = {
   channels: ['Video', 'Audio', 'OTT', 'Web', 'Social'],
   formats: [{ id: 'isv', name: 'In-stream Video', ch: 'Web', cpm: 25, video: true }],
@@ -17,16 +22,22 @@ test('carries every catalogue row into the prompt', () => {
 });
 
 test('states both standing rules', () => {
-  const s = buildSystem(catalogue).toLowerCase();
-  assert.ok(s.includes('never invent'));
-  assert.ok(s.includes('media plan'));
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'never invent'), 'facts must be caged');
+  assert.ok(says(s, 'media plan'), 'thinking must be invited');
 });
 
 test('fences the scope and protects booking', () => {
-  const s = buildSystem(catalogue).toLowerCase();
-  assert.ok(s.includes('out of scope'));
-  assert.ok(s.includes('confirm_booking'));
-  assert.ok(s.includes('never books'));
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'out of scope'), 'the scope fence must be stated');
+  assert.ok(says(s, 'confirm_booking'), 'booking must be named');
+  assert.ok(says(s, 'never books'), 'booking must be described as opening the dialog only');
+});
+
+test('the prompt practises the style it preaches', () => {
+  /* It tells the model never to use an em dash, so it must not use one. */
+  const s = buildSystem(catalogue);
+  assert.equal(s.includes('\u2014'), false, 'the prompt contains an em dash');
 });
 
 test('is stable for the same catalogue, so it caches', () => {
