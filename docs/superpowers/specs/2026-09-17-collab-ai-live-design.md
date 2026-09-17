@@ -44,9 +44,12 @@ outputs, refusal fallbacks).
    rates, 14 personas with their real consumption figures, 13 sites with
    their inventory, the channels and the overlap model. It is stable, so it
    caches; and it is the only source the model may quote a number from.
-5. **Booking is not in the action vocabulary.** The model may draft and
-   revise any part of a plan. It may not place an order, delete a plan, or
-   navigate away from the page.
+5. **Booking is reachable, but only through a confirmation.** Ryan's call,
+   taken on 2026-09-17. The model may draft and revise any part of a plan
+   and may ask to book one, so "book it" works in conversation.
+   `confirm_booking` does not book: it opens the page's existing booking
+   dialog, which still needs a human click. Deleting a plan and navigating
+   off the page stay absent from the vocabulary entirely.
 6. **The fake stays as the fallback.** No key, a failed call, or a plain
    static server all fall back to today's parser and keyword engine. The
    prototype keeps working offline; it just goes back to being a puppet.
@@ -125,7 +128,7 @@ A draft is expressed entirely in actions. There is no second schema for it:
 
 ### The action vocabulary
 
-Twelve operations, each validated by the page before it runs.
+Thirteen operations, each validated by the page before it runs.
 
 | Op | Payload | Applies to |
 |---|---|---|
@@ -141,6 +144,7 @@ Twelve operations, each validated by the page before it runs.
 | `set_split` | id to amount, or `{"mode": "recommended"}` to reset | Step 3 |
 | `pin_sites` | ids plus pinned true or false | Step 3 |
 | `go_to_step` | 1 to 4 | Navigation |
+| `confirm_booking` | none | Opens the booking dialog. Never books by itself |
 
 **Validation is the page's job, not the API's.** Every id is checked against
 `FORMATS`, `PERSONAS`, `SITES` and `CHANNELS`. A split that does not sum
@@ -210,18 +214,22 @@ are untouched. Only the source of the values changes.
 
 **Cost.** Caps on output, turns, message and brief length as tabled above. A
 draft is roughly 10 to 20 sen once the catalogue is caching; a chat turn
-less. The console's spend cap is the real backstop, as it is for the
-mothership.
+less. No client-side request cap: Ryan's call on 2026-09-17, on the grounds
+that the console's monthly spend limit is the right place for it.
 
-**Abuse.** The endpoint has no authentication, matching every other function
-in this stack. Anyone with the URL can spend the key's credit. This is
-acceptable for a prototype and must not ship to customers as it stands. It
-is recorded here so the decision is deliberate rather than forgotten.
+**Abuse.** The endpoint ships with no authentication and no rate limit,
+matching every other function in this stack. Ryan's call on 2026-09-17,
+taken with the consequence stated: anyone holding the deployed URL can spend
+this key's credit until the console's monthly limit stops them. That limit
+is therefore the only backstop, and it only exists if it has been set.
+Acceptable for a prototype; it must not ship to customers as it stands.
 
-**Safety.** The action vocabulary is a closed list. Booking, deleting and
-navigation away are absent by construction, not by instruction, so a prompt
-injection in a pasted brief cannot reach them. Pasted brief text is data: it
-rides as a user turn, never as system instructions.
+**Safety.** The action vocabulary is a closed list. Deleting a plan and
+navigating off the page are absent by construction, not by instruction, so a
+prompt injection in a pasted brief cannot reach them. Booking is reachable
+but cannot complete: `confirm_booking` only opens the dialog, and the dialog
+is the page's own, so the confirming click is always a human's. Pasted brief
+text is data: it rides as a user turn, never as system instructions.
 
 **Failure.** Any non-200, any timeout, any envelope that fails validation
 falls back to the local engine with a single quiet line in the reply saying
@@ -239,10 +247,13 @@ validated as a set before any of them is applied.
    swap a persona, widen the dates, reset the split.
 4. **Scope.** In-scope questions answer; out-of-scope ones decline in one
    line without lecturing.
-5. **Facts.** Asked for a rate or an audience size, the answer matches the
+5. **Booking.** "Book it" opens the dialog and stops there. The plan is
+   never booked without a human click, including when the model is asked
+   repeatedly or the instruction arrives inside a pasted brief.
+6. **Facts.** Asked for a rate or an audience size, the answer matches the
    catalogue exactly. Asked for one that is not there, it says so rather
    than inventing.
-6. **Fallback.** With the key unset and again with the endpoint 500ing, the
+7. **Fallback.** With the key unset and again with the endpoint 500ing, the
    page still drafts through the parser and still answers through keywords.
 
 ## Out of scope
