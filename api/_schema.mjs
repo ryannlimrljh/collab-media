@@ -1,6 +1,10 @@
-// api/_schema.mjs — the shape of every answer, and of every action the
-// page will consider. Shared by the endpoint and its tests so there is
-// one definition, not two.
+// api/_schema.mjs: the shape of every answer, and of every action the
+// page will consider, expressed twice on purpose. Envelope (zod) is the
+// runtime gate the endpoint validates a response against. The API cannot
+// be constrained with Envelope directly, so ENVELOPE_JSON_SCHEMA is a
+// second, hand-written schema that goes into the API call itself. See
+// the comment above ENVELOPE_JSON_SCHEMA for why the two cannot collapse
+// into one definition.
 import { z } from 'zod';
 
 const id = z.string().min(1).max(40);
@@ -45,12 +49,8 @@ const A = {
   channels_off: z.object({ op: z.literal('channels_off'), channels: z.array(z.string().max(20)).max(5) }),
   add_formats: z.object({ op: z.literal('add_formats'), ids: z.array(id).max(40) }),
   remove_formats: z.object({ op: z.literal('remove_formats'), ids: z.array(id).max(40) }),
-  // split is a list of {id, amount} pairs, not the more natural
-  // id-keyed record, because the API rejects a schema-typed
-  // additionalProperties: a map over arbitrary catalogue ids cannot be
-  // expressed in ENVELOPE_JSON_SCHEMA. The wire shape wins so there is
-  // no array-to-record fold between what the API returns and what this
-  // validates, which would be one more place for split data to drop.
+  // split is a list of {id, amount} pairs, not an id-keyed record: see
+  // the fuller rationale in the comment above ENVELOPE_JSON_SCHEMA.
   set_split: z.union([
     z.object({
       op: z.literal('set_split'),
@@ -81,7 +81,7 @@ export const Envelope = z.object({
   }).optional(),
 });
 
-// ENVELOPE_JSON_SCHEMA — a second, independently hand-written schema for
+// ENVELOPE_JSON_SCHEMA: a second, independently hand-written schema for
 // output_config.format. zodOutputFormat(Envelope) demotes every z.literal
 // and z.enum to a free-text `description` hint (zod 4's JSON Schema
 // converter has no `const`/`enum` output for those), so the API sees `op`
@@ -144,14 +144,25 @@ export const ENVELOPE_JSON_SCHEMA = {
               start: { type: ['string', 'null'] },
               end: { type: ['string', 'null'] },
               budget: { type: ['integer', 'null'] },
-              objective: { type: ['string', 'null'] },
+              // a live call rejected `type: ['string', 'null']` combined
+              // with `enum` in one node ("Enum value 'awareness' does not
+              // match declared type"), so the null branch has to live in
+              // its own anyOf arm instead of joining the type array.
+              objective: {
+                anyOf: [
+                  { type: 'string', enum: ['awareness', 'consideration', 'conversion', 'footfall', 'leadgen'] },
+                  { type: 'null' },
+                ],
+              },
               kpi: { type: ['string', 'null'] },
               target: { type: ['integer', 'null'] },
               unit: { type: ['string', 'null'] },
               langs: { type: ['array', 'null'], items: { type: 'string' } },
             },
           },
-          mode: { type: 'string' },
+          // legal across both ops that carry mode: set_mode's own
+          // personas/mass, and set_split's recommended-reset variant.
+          mode: { type: 'string', enum: ['personas', 'mass', 'recommended'] },
           ids: { type: 'array', items: { type: 'string' } },
           refiners: {
             type: 'object',
@@ -165,7 +176,10 @@ export const ENVELOPE_JSON_SCHEMA = {
           },
           intent: { type: 'string' },
           exclude: { type: 'string' },
-          channels: { type: 'array', items: { type: 'string' } },
+          channels: {
+            type: 'array',
+            items: { type: 'string', enum: ['OTT', 'Social', 'Web', 'Video', 'Audio'] },
+          },
           split: {
             type: 'array',
             items: {
@@ -179,6 +193,11 @@ export const ENVELOPE_JSON_SCHEMA = {
             },
           },
           pinned: { type: 'boolean' },
+          // tried `minimum: 1, maximum: 4` to match zod's go_to_step
+          // bound; a live call rejected it ("For 'integer' type,
+          // properties maximum, minimum are not supported"). Do not
+          // retry this, the API's strict schema filter has no numeric
+          // range keywords.
           step: { type: 'integer' },
         },
       },

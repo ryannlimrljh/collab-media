@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Envelope, ACTION_OPS, ENVELOPE_JSON_SCHEMA } from '../api/_schema.mjs';
+import { z } from 'zod';
+import { Envelope, ACTION_OPS, Action, ENVELOPE_JSON_SCHEMA } from '../api/_schema.mjs';
 
 test('accepts a chat reply with no actions', () => {
   const r = Envelope.safeParse({ say: 'Web is RM 18 CPM.', actions: [] });
@@ -43,11 +44,12 @@ test('covers exactly the thirteen ops the spec names', () => {
   assert.ok(!ACTION_OPS.includes('delete_plan'));
 });
 
-// The hand-written ENVELOPE_JSON_SCHEMA duplicates ACTION_OPS on purpose
-// (see the comment above its definition): it is what the API actually
-// enforces, since zodOutputFormat cannot turn a z.literal into a real
-// enum. These three tests are the drift guard and regression guard for
-// that duplication, not just shape checks.
+// The hand-written ENVELOPE_JSON_SCHEMA duplicates zod's constraints on
+// purpose (see the comment above its definition): it is what the API
+// actually enforces, since zodOutputFormat cannot turn a z.literal or a
+// z.enum into a real JSON Schema enum. Everything below this point is a
+// drift guard between the two representations, not a shape check on
+// either one alone.
 
 function opEnumNode(schema) {
   return schema.properties.actions.items.properties.op;
@@ -59,26 +61,153 @@ test('the JSON Schema op enum matches ACTION_OPS exactly, as a set', () => {
   assert.equal(enumOps.length, ACTION_OPS.length);
 });
 
+// walkObjects visits every node typed 'object', including one with no
+// 'properties' of its own. That second case is exactly the free-form
+// map shape the API rejects (see the split rationale below), so a node
+// like that must never appear, and the additionalProperties check right
+// after this can only catch it if the walk actually looks.
 function walkObjects(node, visit) {
   if (!node || typeof node !== 'object') return;
-  if (node.type === 'object' && node.properties) visit(node);
+  if (node.type === 'object') visit(node);
   for (const value of Object.values(node)) {
     if (value && typeof value === 'object') walkObjects(value, visit);
   }
 }
 
-test('every closed object in the JSON Schema sets additionalProperties: false', () => {
-  const closedObjects = [];
-  walkObjects(ENVELOPE_JSON_SCHEMA, (node) => closedObjects.push(node));
-  assert.ok(closedObjects.length > 0);
-  for (const node of closedObjects) {
+test('every object in the JSON Schema declares its properties and closes them off', () => {
+  const objectNodes = [];
+  walkObjects(ENVELOPE_JSON_SCHEMA, (node) => objectNodes.push(node));
+  assert.ok(objectNodes.length > 0);
+  for (const node of objectNodes) {
+    assert.ok(node.properties, 'a bare {type: "object"} with no properties is a free-form map, which the API rejects');
     assert.equal(node.additionalProperties, false);
   }
 });
 
-test('the JSON Schema still has a real enum keyword, not just a hint', () => {
-  assert.ok(Array.isArray(opEnumNode(ENVELOPE_JSON_SCHEMA).enum));
-  assert.ok(opEnumNode(ENVELOPE_JSON_SCHEMA).enum.length > 0);
+// actionKeys walks the zod side of the contract (Action is a union of
+// per-op objects, and set_split is itself a nested union) and collects
+// every top-level key any op's payload can carry. ENVELOPE_JSON_SCHEMA
+// is deliberately flat, one action shape with every op's keys folded
+// into optional properties, so this is the right shape to compare
+// against: derived from zod rather than hand-listed, so a fourteenth op
+// or a renamed payload key fails this test even if someone remembers to
+// update the op name in both places but not the new key here.
+function actionKeys(schema, keys = new Set()) {
+  if (schema instanceof z.ZodUnion) {
+    for (const option of schema.options) actionKeys(option, keys);
+  } else if (schema instanceof z.ZodObject) {
+    for (const key of Object.keys(schema.shape)) keys.add(key);
+  }
+  return keys;
+}
+
+test('every payload key a zod action can carry has a home in the flat JSON Schema', () => {
+  const zodKeys = actionKeys(Action);
+  const schemaKeys = new Set(Object.keys(ENVELOPE_JSON_SCHEMA.properties.actions.items.properties));
+  assert.ok(zodKeys.size > 0);
+  for (const key of zodKeys) {
+    assert.ok(schemaKeys.has(key), `zod action key "${key}" has no matching property in ENVELOPE_JSON_SCHEMA`);
+  }
+});
+
+// enumValuesForKey pulls every legal value a top-level action key can
+// take according to zod (a plain enum, or a literal on a union branch
+// like set_split's recommended-reset), so the JSON Schema's hand-written
+// enum can be checked against it instead of just against itself.
+function enumValuesForKey(schema, key, values = new Set()) {
+  if (schema instanceof z.ZodUnion) {
+    for (const option of schema.options) enumValuesForKey(option, key, values);
+  } else if (schema instanceof z.ZodObject) {
+    const field = schema.shape[key];
+    if (field) {
+      const unwrapped = field instanceof z.ZodOptional ? field.unwrap() : field;
+      if (unwrapped instanceof z.ZodEnum) for (const v of unwrapped.options) values.add(v);
+      else if (unwrapped instanceof z.ZodLiteral) values.add(unwrapped.value);
+    }
+  }
+  return values;
+}
+
+function findActionByOp(schema, op) {
+  if (schema instanceof z.ZodUnion) {
+    for (const option of schema.options) {
+      const found = findActionByOp(option, op);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (schema instanceof z.ZodObject) {
+    const opField = schema.shape.op;
+    if (opField instanceof z.ZodLiteral && opField.value === op) return schema;
+  }
+  return undefined;
+}
+
+test('the mode enum in the JSON Schema matches every mode value zod accepts', () => {
+  const zodModes = enumValuesForKey(Action, 'mode');
+  const schemaModes = new Set(ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.mode.enum);
+  assert.ok(zodModes.size > 0);
+  assert.deepEqual(schemaModes, zodModes);
+});
+
+test('the objective enum in the JSON Schema matches every objective value zod accepts', () => {
+  const setFields = findActionByOp(Action, 'set_fields');
+  const objectiveField = setFields.shape.fields.shape.objective;
+  const unwrapped = objectiveField instanceof z.ZodOptional ? objectiveField.unwrap() : objectiveField;
+  const zodObjectives = new Set(unwrapped.options);
+  const schemaObjectives = new Set(
+    ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.fields.properties.objective.anyOf[0].enum,
+  );
+  assert.ok(zodObjectives.size > 0);
+  assert.deepEqual(schemaObjectives, zodObjectives);
+});
+
+test('the channels enum in the JSON Schema matches the five catalogue channels', () => {
+  // channels_on/channels_off validate a channel name as any string up to
+  // 20 characters; zod does not know the fixed set of five, the site
+  // catalogue does (see the same list in test/prompt.test.mjs's fixture).
+  // Hand-maintained on purpose, but it fails loudly the moment the JSON
+  // Schema enum and this list disagree.
+  const expected = new Set(['OTT', 'Social', 'Web', 'Video', 'Audio']);
+  const actual = new Set(ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.channels.items.enum);
+  assert.deepEqual(actual, expected);
+});
+
+test('an illegal mode is schema-invalid, not just zod-invalid', () => {
+  assert.ok(!ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.mode.enum.includes('wat'));
+  const r = Envelope.safeParse({ say: 'x', actions: [{ op: 'set_mode', mode: 'wat' }] });
+  assert.equal(r.success, false);
+});
+
+// The API rejected a schema with 29 optional properties total ("Reduce
+// the number of optional parameters in your tool schemas (limit: 24)"),
+// discovered by a live call while building this schema (see the comment
+// on ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.fields).
+// Nothing else pins that ceiling, so a handful of careless additions
+// would 400 the endpoint in production with no test failing first.
+const OPTIONAL_PROPERTY_LIMIT = 24;
+
+function countOptionalProperties(node) {
+  if (!node || typeof node !== 'object') return 0;
+  let count = 0;
+  if (node.properties) {
+    const required = new Set(node.required || []);
+    for (const [key, child] of Object.entries(node.properties)) {
+      if (!required.has(key)) count += 1;
+      count += countOptionalProperties(child);
+    }
+  }
+  if (node.items) count += countOptionalProperties(node.items);
+  if (Array.isArray(node.anyOf)) for (const branch of node.anyOf) count += countOptionalProperties(branch);
+  return count;
+}
+
+test('optional properties across the schema stay at or below the API ceiling', () => {
+  const total = countOptionalProperties(ENVELOPE_JSON_SCHEMA);
+  assert.ok(
+    total <= OPTIONAL_PROPERTY_LIMIT,
+    `schema has ${total} optional properties, the API's live ceiling is ${OPTIONAL_PROPERTY_LIMIT}`,
+  );
 });
 
 test('both schemas agree that a split is a list of id and amount', () => {
