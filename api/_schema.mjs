@@ -71,3 +71,117 @@ export const Envelope = z.object({
     mix: z.string().max(1200).optional(),
   }).optional(),
 });
+
+// ENVELOPE_JSON_SCHEMA — a second, independently hand-written schema for
+// output_config.format. zodOutputFormat(Envelope) demotes every z.literal
+// and z.enum to a free-text `description` hint (zod 4's JSON Schema
+// converter has no `const`/`enum` output for those), so the API sees `op`
+// as a bare string and never actually constrains it to our thirteen
+// values. A hand-written schema can put `op` in a real `enum`, which the
+// API does enforce. This schema is deliberately flat: one action shape
+// carrying every op's possible payload keys as optional properties,
+// instead of the thirteen-branch anyOf the zod union expresses, because a
+// flatter grammar keeps generation quality high and the API only needs to
+// gate the op name and the outer shape. zod's Envelope stays the strict
+// per-op gate once a response comes back, and the browser still
+// re-validates every id against its own catalogue. The op list below is
+// written out by hand, not read from ACTION_OPS, so a test can catch the
+// two ever drifting apart.
+//
+// split cannot be a real record here: a live call proved the API rejects
+// `additionalProperties` set to anything but the literal `false` ("For
+// 'object' type, 'additionalProperties: object' is not supported"), and
+// site ids are catalogue-controlled, not a fixed set this file can name.
+// So split travels as a list of {id, amount} pairs instead of an
+// id-keyed object. api/plan.mjs (Task 4) must fold that list back into
+// the {id: amount} record shape before handing the envelope to zod's
+// Envelope.safeParse, since SetSplit still expects a record.
+export const ENVELOPE_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['say', 'actions'],
+  properties: {
+    say: { type: 'string' },
+    actions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['op'],
+        properties: {
+          op: {
+            type: 'string',
+            enum: [
+              'set_fields', 'set_mode', 'set_personas', 'set_refiners', 'set_notes',
+              'channels_on', 'channels_off', 'add_formats', 'remove_formats',
+              'set_split', 'pin_sites', 'go_to_step', 'confirm_booking',
+            ],
+          },
+          // fields' own properties are all required-but-nullable rather
+          // than left optional: a live call rejected this schema at 29
+          // optional parameters total ("Reduce the number of optional
+          // parameters in your tool schemas (limit: 24)"). Making this
+          // object's 11 slots required+nullable, the standard strict-
+          // schema move, drops the count to 18 without losing any slot
+          // set_fields can fill.
+          fields: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['name', 'brand', 'prod', 'start', 'end', 'budget', 'objective', 'kpi', 'target', 'unit', 'langs'],
+            properties: {
+              name: { type: ['string', 'null'] },
+              brand: { type: ['string', 'null'] },
+              prod: { type: ['string', 'null'] },
+              start: { type: ['string', 'null'] },
+              end: { type: ['string', 'null'] },
+              budget: { type: ['integer', 'null'] },
+              objective: { type: ['string', 'null'] },
+              kpi: { type: ['string', 'null'] },
+              target: { type: ['integer', 'null'] },
+              unit: { type: ['string', 'null'] },
+              langs: { type: ['array', 'null'], items: { type: 'string' } },
+            },
+          },
+          mode: { type: 'string' },
+          ids: { type: 'array', items: { type: 'string' } },
+          refiners: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              race: { type: 'string' },
+              gen: { type: 'string' },
+              inc: { type: 'string' },
+              geo: { type: 'string' },
+            },
+          },
+          intent: { type: 'string' },
+          exclude: { type: 'string' },
+          channels: { type: 'array', items: { type: 'string' } },
+          split: {
+            type: 'array',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['id', 'amount'],
+              properties: {
+                id: { type: 'string' },
+                amount: { type: 'integer' },
+              },
+            },
+          },
+          pinned: { type: 'boolean' },
+          step: { type: 'integer' },
+        },
+      },
+    },
+    why: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        brief: { type: 'string' },
+        personas: { type: 'string' },
+        mix: { type: 'string' },
+      },
+    },
+  },
+};
