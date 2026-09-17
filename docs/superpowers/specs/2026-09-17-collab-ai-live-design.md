@@ -94,6 +94,16 @@ Request settings, from the Claude API skill:
 | Fallbacks | `fallbacks: "default"` with beta `server-side-fallback-2026-07-01` | The skill says to enable these by default on Opus 5 |
 | Caching | `cache_control` on the system block | The catalogue never changes between requests |
 
+**Call shape, verified 2026-09-17 against the live API.** B. A single
+`client.beta.messages.create()` call carries both features: `output_config:
+{ effort: 'low', format: zodOutputFormat(Schema) }` alongside `betas:
+['server-side-fallback-2026-07-01']` and `fallbacks: 'default'`. The one
+wrinkle is that `beta.messages.create()` does not populate
+`response.parsed_output` the way the non-beta `messages.parse()` does; the
+schema-constrained JSON still comes back as ordinary text in
+`response.content[0].text`, so the endpoint parses it itself with
+`JSON.parse()`.
+
 Exact SDK call shapes come from the skill's TypeScript reference, read at
 implementation time rather than recalled.
 
