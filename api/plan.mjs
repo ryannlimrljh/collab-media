@@ -95,14 +95,22 @@ export default async function handler(req, res) {
      genuinely malformed request still fails fast and loudly. Without it a
      blip silently drops the user to the offline engine mid conversation. */
   const TRANSIENT = /Invalid request data/i;
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
   async function ask(req) {
-    try {
-      return await client.beta.messages.create(req);
-    } catch (e) {
-      if (e && e.status === 400 && TRANSIENT.test(String(e.message))) {
-        return client.beta.messages.create(req);
+    /* Two retries, not one: the eval saw this slip through a single
+       retry. Matched on the message rather than on a status field,
+       because the shape of the SDK's error object is not something to
+       bet reliability on. Every other failure still throws at once, so a
+       genuinely malformed request is never quietly retried into a bill. */
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await client.beta.messages.create(req);
+      } catch (e) {
+        const transient = TRANSIENT.test(String((e && e.message) || ''));
+        if (!transient || attempt >= 2) throw e;
+        await pause(250 * (attempt + 1));
       }
-      throw e;
     }
   }
 

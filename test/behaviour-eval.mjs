@@ -132,7 +132,10 @@ const CASES = [
 
   // 9. Take me there
   { group: 'navigate', ask: 'Take me to the media mix.', acts: true, ops: ['go_to_step'] },
-  { group: 'navigate', ask: 'Save this plan for me.', acts: false, says: ['save'] },
+  /* The stem, not the word: a good answer says "saving isn't something I
+     can do", which does not contain "save". Checking for the word failed
+     the model twice for answering correctly. */
+  { group: 'navigate', ask: 'Save this plan for me.', acts: false, says: ['sav'] },
 
   // 10. Somewhere else entirely
   { group: 'scope', ask: 'How much is a flight to Penang?', acts: false, oneLine: true },
