@@ -104,6 +104,20 @@ schema-constrained JSON still comes back as ordinary text in
 `response.content[0].text`, so the endpoint parses it itself with
 `JSON.parse()`.
 
+**The schema is written twice, on purpose.** Verified the same day: zod 4's
+`zodOutputFormat` demotes every constraint keyword it cannot express into a
+human-readable `description`, so `op` reached the API as a bare string with a
+hint, and the thirteen legal values were not enforced at all. A hand-written
+JSON Schema carrying a real `enum` was then tested against the API with a
+prompt demanding an illegal value; the API accepted the schema and the model
+returned a legal value instead. The enum is genuinely enforced, so the
+endpoint hands the API a hand-written `ENVELOPE_JSON_SCHEMA` and keeps zod's
+`Envelope` as the runtime gate. Three layers guard the answer: the API
+enforces the vocabulary and the overall shape, zod enforces the payload that
+belongs to each op, and the browser enforces that every id exists. A test
+asserts the two representations name the same thirteen ops, so they cannot
+drift apart unnoticed.
+
 Exact SDK call shapes come from the skill's TypeScript reference, read at
 implementation time rather than recalled.
 

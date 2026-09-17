@@ -438,8 +438,7 @@ Task 1 verified shape B against the live API: one `client.beta.messages.create()
    Anyone with the URL can spend this key's credit; the console's monthly
    cap is the only backstop. Fine for a prototype, not for customers. */
 import Anthropic from '@anthropic-ai/sdk';
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
-import { Envelope } from './_schema.mjs';
+import { Envelope, ENVELOPE_JSON_SCHEMA } from './_schema.mjs';
 import { buildSystem } from './_prompt.mjs';
 
 const KEY = process.env.ANTHROPIC_API_KEY || '';
@@ -512,7 +511,10 @@ export default async function handler(req, res) {
       max_tokens: MAX_OUT,
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      output_config: { effort: 'low', format: zodOutputFormat(Envelope) },
+      /* The hand-written schema, not zodOutputFormat(Envelope): zod 4
+         demotes the op enum to a description and the API then enforces
+         nothing. See the spec's note on why the schema exists twice. */
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: ENVELOPE_JSON_SCHEMA } },
       system: [{ type: 'text', text: buildSystem(catalogue), cache_control: { type: 'ephemeral' } }],
       messages,
     });
