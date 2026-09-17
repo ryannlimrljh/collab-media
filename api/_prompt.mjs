@@ -1,6 +1,17 @@
 // api/_prompt.mjs: the system prompt. Stable for a given catalogue so
 // it caches; the plan snapshot and the conversation ride as user turns.
+import { ENVELOPE_JSON_SCHEMA } from './_schema.mjs';
+
 const n = (v) => (typeof v === 'number' ? v.toLocaleString('en-MY') : String(v ?? ''));
+
+/* The names the model is taught must be the names the API will accept.
+   Written by hand they drifted immediately: the prompt said "product"
+   and "languages" while the schema declares "prod" and "langs", and the
+   schema is closed, so the model was being taught five keys it could not
+   physically emit. Read them out of the schema instead, and they cannot
+   disagree again. */
+const ACTION_ITEM = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties;
+const keysOf = (prop) => Object.keys((ACTION_ITEM[prop] || {}).properties || {}).join(', ');
 
 export function buildSystem(cat) {
   const formats = (cat.formats || [])
@@ -60,11 +71,10 @@ because they wondered aloud costs them their afternoon.
 
 WHAT YOU CAN CHANGE. These are the only ones, and you change the plan by
 returning them, never by describing changes you wish were made.
-set_fields       name, brand, product, start, end, budget, objective,
-                 kpi, target, unit, languages
+set_fields       ${keysOf('fields')}
 set_mode         personas, or mass targeting
 set_personas     up to five, by id
-set_refiners     race, generation, income, geography
+set_refiners     ${keysOf('refiners')}
 set_notes        the intent and exclusion notes
 channels_on      switch channels on
 channels_off     switch channels off, never the last one

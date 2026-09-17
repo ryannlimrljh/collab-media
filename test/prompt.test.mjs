@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSystem } from '../api/_prompt.mjs';
-import { ACTION_OPS } from '../api/_schema.mjs';
+import { ACTION_OPS, ENVELOPE_JSON_SCHEMA } from '../api/_schema.mjs';
 
 /* The prompt is prose, and prose gets rewrapped. Search it with the
    whitespace flattened so a cosmetic line break can never fail a test
@@ -92,4 +92,32 @@ test('humour is guided and capped', () => {
 test('the examples are marked as register, not as lines to reuse', () => {
   const s = buildSystem(catalogue);
   assert.ok(says(s, 'not lines to reuse'), 'the examples now read as scripted lines to parrot');
+});
+
+/* The prompt teaches the model a vocabulary; the schema decides what the
+   API will actually accept. Written by hand these drifted at once, and a
+   closed schema turns that drift into fields the model is told to use and
+   physically cannot. The prompt reads them from the schema now, and this
+   proves it keeps doing so. */
+test('the field names taught are the field names the API accepts', () => {
+  const s = buildSystem(catalogue);
+  const items = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties;
+
+  for (const group of ['fields', 'refiners']) {
+    const accepted = Object.keys(items[group].properties);
+    for (const key of accepted) {
+      assert.ok(says(s, key), `the prompt never names "${key}", which ${group} accepts`);
+    }
+  }
+
+  /* And the reverse: nothing taught that the API would refuse. */
+  const taught = (s.match(/^set_(?:fields|refiners) +(.+)$/gm) || [])
+    .flatMap((line) => line.replace(/^set_\w+ +/, '').split(',').map((k) => k.trim()));
+  const accepted = [
+    ...Object.keys(items.fields.properties),
+    ...Object.keys(items.refiners.properties),
+  ];
+  for (const key of taught) {
+    assert.ok(accepted.includes(key), `the prompt teaches "${key}", which the API would refuse`);
+  }
 });
