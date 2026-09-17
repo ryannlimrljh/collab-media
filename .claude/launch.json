@@ -3,8 +3,11 @@
   "configurations": [
     {
       "name": "media",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8797"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const http=require('http'),fs=require('fs'),p=require('path');const T={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4'};http.createServer((q,s)=>{let f=p.join(process.cwd(),decodeURIComponent(q.url.split('?')[0]));try{if(fs.statSync(f).isDirectory())f=p.join(f,'index.html');const b=fs.readFileSync(f);s.writeHead(200,{'Content-Type':T[p.extname(f)]||'application/octet-stream','Cache-Control':'no-store'});s.end(b);}catch(e){s.writeHead(404);s.end('not found');}}).listen(8797,()=>console.log('serving on 8797'));"
+      ],
       "port": 8797,
       "url": "http://localhost:8797",
       "autoPort": false

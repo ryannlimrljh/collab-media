@@ -3541,6 +3541,9 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     var hit = (list || []).filter(function(x){ return x.key === key; })[0];
     return hit ? hit.label : key;
   }
+  /* Campaign name and brand are free text, and once Collab AI can write
+     them from a pasted brief they are no longer only what this user
+     typed. Anything built with innerHTML from them goes through here. */
   function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function fillAudPeek(seg, p){
     $('audPeekSub').textContent = audLabel(window.AUDIENCE_GROUPS, seg.group) +
@@ -4251,10 +4254,13 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       stat('Impressions', fmt(fc.imps), (fc.blended ? rm(fc.blended) + ' CPM · ' : '') + fc.freq + ' freq') +
       stat('Audience', (mode === 'mass' || selected.length) ? fmt(audienceReach()) : '–',
         mode === 'mass' ? 'Entire Malaysia' : selected.length ? selected.length + ' persona' + (selected.length > 1 ? 's' : '') + ' · ' + r.pct + '% overlap' : 'No personas');
+    /* Several of these rows carry free text: campaign, brand, product and
+       the two refiner notes. Escape the value column rather than trusting
+       whoever filled the field, which is no longer only this user. */
     $('summaryRows').innerHTML = rows.map(function(x){
       var badge = x[2] === 'AI draft' ? 'c-badge p-ai-badge' : 'c-badge c-badge-neutral';
-      return '<tr><td style="font-weight:700; white-space:nowrap;">' + x[0] + '</td><td>' + x[1] +
-        '</td><td><span class="' + badge + '">' + x[2] + '</span></td></tr>';
+      return '<tr><td style="font-weight:700; white-space:nowrap;">' + esc(x[0]) + '</td><td>' + esc(x[1]) +
+        '</td><td><span class="' + badge + '">' + esc(x[2]) + '</span></td></tr>';
     }).join('');
 
     $('sumBudgetLabel').textContent = rm(budget());
@@ -4313,8 +4319,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   function openBook(){
     var fc = forecast();
     $('bookBody').innerHTML =
-      '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + ($('b-name').value.trim() || 'Untitled') + '</span></div>' +
-      '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + ($('b-brand').value.trim() || '–') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + esc($('b-name').value.trim() || 'Untitled') + '</span></div>' +
+      '<div class="p-kv"><span class="k">Advertiser</span><span class="v">' + esc($('b-brand').value.trim() || '–') + '</span></div>' +
       '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
       '<div class="p-kv"><span class="k">Campaign</span><span class="v">' + $('sumFlightLabel').textContent + '</span></div>' +
       '<div class="p-kv"><span class="k">Forecast reach</span><span class="v">' + fmt(fc.reach) + '</span></div>' +
@@ -4419,8 +4425,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     host.innerHTML =
       '<span class="c-stat-label">Plan preview</span>' +
       '<div style="margin-top:var(--spacing-8); font-weight:800; font-size:var(--text-h5-size);">' +
-        (($('b-name').value || '').trim() || 'Untitled campaign') + '</div>' +
-      '<div class="p-stat-foot">' + (($('b-brand').value || '').trim() || '–') + ' · ' + $('sumFlightLabel').textContent + '</div>' +
+        esc(($('b-name').value || '').trim() || 'Untitled campaign') + '</div>' +
+      '<div class="p-stat-foot">' + esc(($('b-brand').value || '').trim() || '–') + ' · ' + $('sumFlightLabel').textContent + '</div>' +
       '<div class="p-stat-sep" style="margin-top:var(--spacing-12);"></div>' +
       '<div class="p-kv"><span class="k">Budget</span><span class="v">' + rm(budget()) + '</span></div>' +
       '<div class="p-kv"><span class="k">Objective</span><span class="v">' + ($('b-obj').value || '–') + '</span></div>' +
