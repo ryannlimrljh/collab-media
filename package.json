@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vercel dev",
+    "test": "node --test test/*.test.mjs"
   },
   "repository": {
     "type": "git",
