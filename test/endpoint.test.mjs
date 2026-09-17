@@ -264,3 +264,36 @@ test('a conversation of 40 turns is cut to the last 16', async () => {
     mock.restore();
   }
 });
+
+/* The first draft of a new plan sends no plan at all. If the handler
+   treats "nothing" as "a plan", it tells the model it can see something
+   it cannot, which is the kind of quiet lie that produces confident
+   nonsense. JSON.stringify of nothing is the truthy string '""'. */
+test('an absent, empty or blank plan adds no PLAN AS IT STANDS preamble', async () => {
+  for (const sent of [undefined, '', {}, '   ']) {
+    const mock = installMockFetch();
+    try {
+      const req = { method: 'POST', body: {
+        mode: 'chat', plan: sent, catalogue: {},
+        messages: [{ role: 'user', content: 'hello' }] } };
+      await handler(req, fakeRes());
+      const preambles = mock.lastMessages().filter(
+        (m) => typeof m.content === 'string' && m.content.startsWith('PLAN AS IT STANDS'));
+      assert.equal(preambles.length, 0,
+        'a plan of ' + JSON.stringify(sent) + ' produced a preamble');
+    } finally { mock.restore(); }
+  }
+});
+
+test('a real plan does add the preamble', async () => {
+  const mock = installMockFetch();
+  try {
+    const req = { method: 'POST', body: {
+      mode: 'chat', plan: JSON.stringify({ campaign: { budget: 200000 } }), catalogue: {},
+      messages: [{ role: 'user', content: 'hello' }] } };
+    await handler(req, fakeRes());
+    const preambles = mock.lastMessages().filter(
+      (m) => typeof m.content === 'string' && m.content.startsWith('PLAN AS IT STANDS'));
+    assert.equal(preambles.length, 1);
+  } finally { mock.restore(); }
+});

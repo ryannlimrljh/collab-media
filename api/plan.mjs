@@ -45,7 +45,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'catalogue did not parse' });
   }
 
-  const plan = clean(typeof b.plan === 'string' ? b.plan : JSON.stringify(b.plan || ''), MAX_PLAN);
+  /* An absent plan must stay absent. JSON.stringify of nothing yields the
+     two-character string '""', and of an empty object '{}', both of which
+     are truthy; sending either would hand the model a preamble announcing
+     a plan it cannot see, on the very first draft when there is none. */
+  const planRaw = typeof b.plan === 'string' ? b.plan : (b.plan ? JSON.stringify(b.plan) : '');
+  const planText = clean(planRaw, MAX_PLAN).trim();
+  const plan = (planText === '""' || planText === '{}') ? '' : planText;
 
   /* Only the shape the page sends survives; this body is writable by
      anyone, so nothing else is forwarded. */
