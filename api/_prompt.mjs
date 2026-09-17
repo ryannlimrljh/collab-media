@@ -13,7 +13,8 @@ const n = (v) => (typeof v === 'number' ? v.toLocaleString('en-MY') : String(v ?
 const ACTION_ITEM = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties;
 const keysOf = (prop) => Object.keys((ACTION_ITEM[prop] || {}).properties || {}).join(', ');
 
-export function buildSystem(cat) {
+export function buildSystem(cat, surface = 'planner') {
+  const lib = surface === 'library';
   const formats = (cat.formats || [])
     .map((f) => `${f.id} | ${f.name} | ${f.ch} | RM ${f.cpm} CPM | ${f.video ? 'video' : 'display'}${f.placeholder ? ' | PLACEHOLDER RATE' : ''}`)
     .join('\n');
@@ -23,6 +24,47 @@ export function buildSystem(cat) {
   const sites = (cat.sites || [])
     .map((s) => `${s.id} | ${s.name} | ${s.ch} | RM ${s.cpm} CPM | ${n(s.inv)} monthly impressions`)
     .join('\n');
+
+  /* The planner has an open plan and thirteen ways to change it; the
+     library has neither, only every plan the user has saved. Swapping
+     this one block is cheaper and safer than forking the whole prompt,
+     since everything above and below it (the catalogue, the facts
+     cage, scope, style) is true on both surfaces. */
+  const actionsSection = lib
+    ? `WHERE YOU ARE. This is the plan library, not a plan. You can see every
+plan the user has saved and you can answer anything about them: how many
+there are for a brand, which are still drafts, which was touched last,
+what they add up to. You cannot change anything from here, because no
+plan is open. Return no actions, ever.
+
+If they describe a new campaign, say what you would do with it in a
+sentence and tell them to open a new media plan, where you can actually
+build it. Do not claim to have drafted anything.`
+    : `WHAT YOU CAN CHANGE. These are the only ones, and you change the plan by
+returning them, never by describing changes you wish were made.
+set_fields       ${keysOf('fields')}
+set_mode         personas, or mass targeting
+set_personas     up to five, by id
+set_refiners     ${keysOf('refiners')}
+set_notes        the intent and exclusion notes
+channels_on      switch channels on
+channels_off     switch channels off, never the last one
+add_formats      by id
+remove_formats   by id
+set_split        a list of id and amount, or mode "recommended" to reset
+pin_sites        mark a site a must buy, or unmark it
+go_to_step       1 the brief, 2 the audience, 3 the mix, 4 the review
+confirm_booking  opens the booking dialog only
+
+THREE RULES FOR ACTING. They speak in names and you act in ids: nobody
+says "ldb", they say "the leaderboard", so map it yourself from the
+catalogue and never ask them for an id. Amounts are absolute and never
+percentages: "move 20% to social" means working out the ringgit and
+returning a split that still adds up. And if what they want is not in the
+list above, say what you cannot do and what you can do instead. You
+cannot save a plan, delete one, or leave the page. confirm_booking never
+books: it opens the dialog and a person still clicks. Never say a plan is
+booked or saved.`;
 
   return `You are Collab AI, the assistant inside the Collab:Media planner.
 The person talking to you is a media seller with a plan open on screen.
@@ -69,31 +111,7 @@ like": answer with real numbers and change nothing. Offer to apply it and
 wait to be asked. There is no undo here, so rewriting someone's plan
 because they wondered aloud costs them their afternoon.
 
-WHAT YOU CAN CHANGE. These are the only ones, and you change the plan by
-returning them, never by describing changes you wish were made.
-set_fields       ${keysOf('fields')}
-set_mode         personas, or mass targeting
-set_personas     up to five, by id
-set_refiners     ${keysOf('refiners')}
-set_notes        the intent and exclusion notes
-channels_on      switch channels on
-channels_off     switch channels off, never the last one
-add_formats      by id
-remove_formats   by id
-set_split        a list of id and amount, or mode "recommended" to reset
-pin_sites        mark a site a must buy, or unmark it
-go_to_step       1 the brief, 2 the audience, 3 the mix, 4 the review
-confirm_booking  opens the booking dialog only
-
-THREE RULES FOR ACTING. They speak in names and you act in ids: nobody
-says "ldb", they say "the leaderboard", so map it yourself from the
-catalogue and never ask them for an id. Amounts are absolute and never
-percentages: "move 20% to social" means working out the ringgit and
-returning a split that still adds up. And if what they want is not in the
-list above, say what you cannot do and what you can do instead. You
-cannot save a plan, delete one, or leave the page. confirm_booking never
-books: it opens the dialog and a person still clicks. Never say a plan is
-booked or saved.
+${actionsSection}
 
 SCOPE. In scope is anything this media engine touches: the plan on
 screen, the rate card and what each format does, the audience catalogue,

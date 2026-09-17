@@ -297,3 +297,96 @@ test('a real plan does add the preamble', async () => {
     assert.equal(preambles.length, 1);
   } finally { mock.restore(); }
 });
+
+// --- 8. The library: an optional `plans` field, same absent-means-absent care ---
+
+test('an absent, empty or unparseable plans list adds no library preamble', async () => {
+  for (const sent of [undefined, [], '[]', 'not an array', {}, null]) {
+    const mock = installMockFetch();
+    try {
+      const req = { method: 'POST', body: {
+        mode: 'chat', surface: 'library', plans: sent, catalogue: {},
+        messages: [{ role: 'user', content: 'hello' }] } };
+      await handler(req, fakeRes());
+      const preambles = mock.lastMessages().filter(
+        (m) => typeof m.content === 'string' && m.content.startsWith("THE USER'S SAVED PLANS"));
+      assert.equal(preambles.length, 0,
+        'plans of ' + JSON.stringify(sent) + ' produced a preamble');
+    } finally { mock.restore(); }
+  }
+});
+
+test('a real plans list does add the library preamble, as a context turn ahead of the conversation', async () => {
+  const mock = installMockFetch();
+  try {
+    const plans = [
+      { id: 'p1', name: 'Shopee 9.9', brand: 'Shopee', status: 'booked', budget: 150000, duration: '4 weeks', updated: '1 Sep 2026' },
+      { id: 'p2', name: 'Shopee 11.11', brand: 'Shopee', status: 'draft', budget: 200000, duration: '3 weeks', updated: '10 Sep 2026' },
+    ];
+    const req = { method: 'POST', body: {
+      mode: 'chat', surface: 'library', plans, catalogue: {},
+      messages: [{ role: 'user', content: 'how many shopee plans do i have' }] } };
+    await handler(req, fakeRes());
+    const sent = mock.lastMessages();
+    const idx = sent.findIndex((m) => typeof m.content === 'string' && m.content.startsWith("THE USER'S SAVED PLANS"));
+    assert.ok(idx > -1, 'the library preamble is missing');
+    assert.equal(sent[idx].role, 'user');
+    assert.equal(sent[idx + 1].role, 'assistant');
+    assert.ok(sent[idx].content.includes('Shopee 9.9'));
+    // ahead of the conversation: the last turn is still the user's own question
+    assert.equal(sent[sent.length - 1].content, 'how many shopee plans do i have');
+  } finally { mock.restore(); }
+});
+
+test('a plans list over 200 entries is capped at 200', async () => {
+  const mock = installMockFetch();
+  try {
+    // Short records, well under the 12,000-char cap, so entry count is
+    // the only cap this test can be exercising.
+    const plans = [];
+    for (let i = 0; i < 250; i++) plans.push({ id: 'p' + i });
+    const req = { method: 'POST', body: {
+      mode: 'chat', surface: 'library', plans, catalogue: {},
+      messages: [{ role: 'user', content: 'hello' }] } };
+    await handler(req, fakeRes());
+    const sent = mock.lastMessages();
+    const turn = sent.find((m) => typeof m.content === 'string' && m.content.startsWith("THE USER'S SAVED PLANS"));
+    const ids = turn.content.match(/"id":"p\d+"/g) || [];
+    assert.equal(ids.length, 200);
+  } finally { mock.restore(); }
+});
+
+test('surface defaults to planner when absent, and library is only entered explicitly', async () => {
+  const mock = installMockFetch();
+  try {
+    const req = { method: 'POST', body: {
+      mode: 'chat', catalogue: {}, messages: [{ role: 'user', content: 'hi' }] } };
+    const res = fakeRes();
+    await handler(req, res);
+    assert.equal(res.code, 200);
+    const body = JSON.parse(mock.calls[mock.calls.length - 1].init.body);
+    const system = body.system[0].text;
+    assert.ok(system.includes('WHAT YOU CAN CHANGE'), 'plain chat with no surface must build the planner prompt');
+  } finally { mock.restore(); }
+});
+
+test('surface:"library" builds the library prompt, which names no action and returns none', async () => {
+  const mock = installMockFetch({
+    id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-opus-5',
+    content: [{ type: 'text', text: JSON.stringify({ say: 'You have 2 plans for Shopee.', actions: [] }) }],
+    stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
+  });
+  try {
+    const req = { method: 'POST', body: {
+      mode: 'chat', surface: 'library', catalogue: {},
+      messages: [{ role: 'user', content: 'how many shopee plans do i have' }] } };
+    const res = fakeRes();
+    await handler(req, res);
+    assert.equal(res.code, 200);
+    const body = JSON.parse(mock.calls[mock.calls.length - 1].init.body);
+    const system = body.system[0].text;
+    assert.ok(system.includes('Return no actions, ever'), 'library prompt lost its no-actions rule');
+    assert.equal(system.includes('WHAT YOU CAN CHANGE'), false, 'library prompt still teaches the planner actions');
+    assert.deepEqual(res.body.actions, []);
+  } finally { mock.restore(); }
+});

@@ -24,6 +24,8 @@ const MAX_MSG = 4000;
 const MAX_BRIEF = 8000;
 const MAX_PLAN = 12000;
 const MAX_CATALOGUE = 24000;
+const MAX_PLANS_LIST = 200;
+const MAX_PLANS = 12000;
 
 const clean = (v, n) => String(v == null ? '' : v).slice(0, n);
 
@@ -37,6 +39,7 @@ export default async function handler(req, res) {
 
   const b = req.body || {};
   const mode = b.mode === 'draft' ? 'draft' : 'chat';
+  const surface = b.surface === 'library' ? 'library' : 'planner';
 
   let catalogue;
   try {
@@ -53,6 +56,18 @@ export default async function handler(req, res) {
   const planText = clean(planRaw, MAX_PLAN).trim();
   const plan = (planText === '""' || planText === '{}') ? '' : planText;
 
+  /* Same absent-means-absent care as `plan` above: an empty array
+     stringifies to the truthy '[]', which would otherwise buy every
+     first message on this surface a "here is your library" preamble
+     about a library that was never sent. Each entry is a plain object
+     off the wire, shape untrusted, so this only serialises it; it never
+     reads into it. */
+  const plansArr = Array.isArray(b.plans) ? b.plans.slice(0, MAX_PLANS_LIST) : [];
+  let plansRaw = '';
+  try { plansRaw = plansArr.length ? JSON.stringify(plansArr) : ''; } catch { plansRaw = ''; }
+  const plansText = clean(plansRaw, MAX_PLANS).trim();
+  const plans = (plansText === '' || plansText === '[]') ? '' : plansText;
+
   /* Only the shape the page sends survives; this body is writable by
      anyone, so nothing else is forwarded. */
   const turns = (Array.isArray(b.messages) ? b.messages : [])
@@ -65,6 +80,10 @@ export default async function handler(req, res) {
   if (plan) {
     messages.push({ role: 'user', content: 'PLAN AS IT STANDS:\n' + plan });
     messages.push({ role: 'assistant', content: 'Got it. I have the plan in front of me.' });
+  }
+  if (plans) {
+    messages.push({ role: 'user', content: 'THE USER\'S SAVED PLANS:\n' + plans });
+    messages.push({ role: 'assistant', content: 'Got it. I can see the library.' });
   }
   if (mode === 'draft') {
     const brief = clean(b.brief, MAX_BRIEF);
@@ -124,7 +143,7 @@ export default async function handler(req, res) {
          demotes the op enum to a description and the API then enforces
          nothing. The spec records why the schema exists twice. */
       output_config: { effort: 'low', format: { type: 'json_schema', schema: ENVELOPE_JSON_SCHEMA } },
-      system: [{ type: 'text', text: buildSystem(catalogue), cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: buildSystem(catalogue, surface), cache_control: { type: 'ephemeral' } }],
       messages,
     });
 

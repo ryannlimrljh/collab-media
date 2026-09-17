@@ -94,6 +94,41 @@ test('the examples are marked as register, not as lines to reuse', () => {
   assert.ok(says(s, 'not lines to reuse'), 'the examples now read as scripted lines to parrot');
 });
 
+// --- The library surface: no plan is open, only a list of saved ones ---
+
+test('the planner prompt (surface omitted, and surface:"planner") names all thirteen actions', () => {
+  for (const s of [buildSystem(catalogue), buildSystem(catalogue, 'planner')]) {
+    for (const op of ACTION_OPS) {
+      assert.ok(s.toLowerCase().includes(op), `the planner prompt was never taught the ${op} action`);
+    }
+  }
+});
+
+test('the library prompt names none of the thirteen actions, and says it cannot change anything', () => {
+  const s = buildSystem(catalogue, 'library');
+  const lower = s.toLowerCase();
+  for (const op of ACTION_OPS) {
+    assert.equal(lower.includes(op), false, `the library prompt still names the ${op} action`);
+  }
+  assert.ok(says(s, 'cannot change anything from here'), 'the library prompt must say it cannot act');
+  assert.ok(says(s, 'return no actions, ever'), 'the library prompt must tell the model to return no actions');
+  assert.ok(says(s, 'do not claim to have drafted anything'), 'the library prompt must forbid claiming a draft');
+});
+
+test('the library prompt keeps the rest of the prompt identical to the planner one', () => {
+  const planner = buildSystem(catalogue, 'planner');
+  const library = buildSystem(catalogue, 'library');
+  assert.ok(says(library, 'facts are caged'), 'the facts cage must survive on the library surface');
+  assert.ok(says(library, 'out of scope'), 'the scope fence must survive on the library surface');
+  assert.equal(library.includes('—'), false, 'the library prompt contains an em dash');
+  // Both surfaces open on the exact same catalogue-and-rules preamble;
+  // they only diverge at the actions block onward.
+  assert.equal(
+    planner.slice(0, planner.indexOf('WHAT IF')),
+    library.slice(0, library.indexOf('WHAT IF')),
+  );
+});
+
 /* The prompt teaches the model a vocabulary; the schema decides what the
    API will actually accept. Written by hand these drifted at once, and a
    closed schema turns that drift into fields the model is told to use and

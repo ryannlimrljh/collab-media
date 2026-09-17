@@ -670,7 +670,7 @@
             </div>
           </div>
         </div>
-        <p class="c-chat-foot">The assistant is a placeholder in this prototype. Replies are canned.</p>
+        <p class="c-chat-foot" id="chatFoot">The assistant is a placeholder in this prototype. Replies are canned.</p>
       </div>
     </div>
   </div>
@@ -714,6 +714,7 @@
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script src="../shared/campaigns-data.js"></script>
 <script src="../shared/plan-store.js?v=4"></script>
+<script src="../shared/collab-ai.js?v=1"></script>
 <script>
 (function () {
   'use strict';
@@ -876,10 +877,11 @@
     if (row) window.location.href = row.dataset.href;
   });
 
-  /* Ask box + assistant overlay — the pill folds open into the chat
+  /* Ask box + assistant overlay - the pill folds open into the chat
      modal (the landing's fold, driven by the pill's own rect). Sending
-     a line appends it to the thread; the canned reply offers to draft
-     it in the planner via the one-liner brief carry-in. */
+     a line appends it to the thread and asks Collab AI about the
+     library of saved plans; the canned line only answers if that call
+     fails or the endpoint has no key configured. */
   (function () {
     var box = document.getElementById('askBox');
     var input = document.getElementById('askInput');
@@ -1059,6 +1061,35 @@
       renderRail();
     }
 
+    var foot = document.getElementById('chatFoot');
+    var FOOT_LIVE = 'Collab AI can see your saved plans.';
+    var FOOT_FALLBACK = foot ? foot.textContent : '';
+
+    /* This surface is the library, not a plan: there is no open plan to
+       edit, only every plan the user has saved, so the endpoint is told
+       surface:'library' and answers with facts about that list, never
+       an action. store.list() (window.collabPlans, the same store the
+       rail's campaign rows read from) is mapped down to a compact
+       summary; href is left off since it is a page-local link, not a
+       fact about the plan. */
+    function libraryPlans() {
+      var raw = window.collabPlans ? collabPlans.list() : [];
+      return raw.map(function (p) {
+        return {
+          id: p.id, name: p.name, brand: p.brand, status: p.status,
+          budget: p.budget, duration: p.duration, updated: p.updated
+        };
+      });
+    }
+
+    function appendReply(text) {
+      cur.msgs.push({ role: 'assistant', content: text });
+      cur.at = Date.now();
+      store.save(cur);
+      renderRail();
+      bubble(false, '<p>' + esc(text) + '</p>');
+    }
+
     function sendLine(v) {
       if (!cur) {
         cur = { id: store.newId(), title: store.titleFrom(v), at: Date.now(),
@@ -1070,16 +1101,38 @@
       store.save(cur);
       renderRail();
       bubble(true, '<p>' + esc(v) + '</p>');
-      setTimeout(function () {
-        var reply = 'I can draft that as a plan: audience, mix and a first budget split, ' +
-          'all yours to override.';
-        cur.msgs.push({ role: 'assistant', content: reply });
-        cur.at = Date.now();
-        store.save(cur);
-        renderRail();
-        bubble(false, '<p>' + esc(reply) + ' <a href="planner.html?brief=' +
-          encodeURIComponent(v) + '">Open it in the planner</a>.</p>');
-      }, 600);
+
+      /* The canned line is the fallback now, not the answer: it only
+         runs when the call fails or the endpoint has no key configured,
+         same degrade the planner uses. */
+      function fallback() {
+        if (foot) foot.textContent = FOOT_FALLBACK;
+        appendReply('I can draft that as a plan: audience, mix and a first budget split, ' +
+          'all yours to override.');
+      }
+
+      fetch('/api/plan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'chat',
+          surface: 'library',
+          plans: libraryPlans(),
+          messages: cur.msgs,
+          catalogue: {}
+        })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (j) {
+        if (!j || j.configured === false || typeof j.say !== 'string') {
+          throw new Error('not live');
+        }
+        if (foot) foot.textContent = FOOT_LIVE;
+        appendReply(j.say);
+      }).catch(function () {
+        fallback();
+      });
     }
 
     /* The pill is a launcher: a click anywhere on it — field included —
