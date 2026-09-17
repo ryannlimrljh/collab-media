@@ -415,7 +415,10 @@ git commit -m "Collab AI: the system prompt, catalogue and both standing rules"
 **Files:**
 - Create: `api/plan.mjs`
 
-Use the call shape Task 1 decided. The code below shows shape A (`messages.parse`); if Task 1 chose B, swap the call for `client.beta.messages.create` with `betas: ['server-side-fallback-2026-07-01']`, `fallbacks: 'default'`, and parse `response.content[0].text` through `Envelope.safeParse`.
+Task 1 verified shape B against the live API: one `client.beta.messages.create()` call carries structured output and refusal fallbacks together. Two consequences are already written into the code below, do not undo them:
+
+1. **The beta namespace does not populate `parsed_output`.** The schema-constrained JSON arrives as ordinary text, so the endpoint parses it itself and runs it through `Envelope.safeParse` before answering.
+2. **The text is not necessarily the first content block.** Adaptive thinking is on, so a `thinking` block can precede it. Select the text block by type rather than by position.
 
 - [ ] **Step 1: Write the function**
 
@@ -504,20 +507,40 @@ export default async function handler(req, res) {
   const client = new Anthropic({ apiKey: KEY });
 
   try {
-    const response = await client.messages.parse({
+    const response = await client.beta.messages.create({
       model: 'claude-opus-5',
       max_tokens: MAX_OUT,
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
       output_config: { effort: 'low', format: zodOutputFormat(Envelope) },
       system: [{ type: 'text', text: buildSystem(catalogue), cache_control: { type: 'ephemeral' } }],
       messages,
     });
 
+    /* A policy decline survives the fallback chain. Say so plainly and
+       change nothing; the page treats an empty action list as a no-op. */
     if (response.stop_reason === 'refusal') {
       return res.status(200).json({ say: "I can't help with that one.", actions: [] });
     }
-    const out = response.parsed_output;
-    if (!out) return res.status(502).json({ error: 'the model did not return a usable envelope' });
-    return res.status(200).json(out);
+
+    /* The beta namespace does not fill parsed_output, and adaptive
+       thinking can put a thinking block ahead of the answer, so take the
+       text block by type rather than by position. */
+    const block = (response.content || []).filter((b) => b.type === 'text').pop();
+    if (!block) return res.status(502).json({ error: 'no text block in the response' });
+
+    let parsed;
+    try {
+      parsed = JSON.parse(block.text);
+    } catch {
+      return res.status(502).json({ error: 'the model did not return JSON' });
+    }
+
+    /* The schema constrained it, but this endpoint is open and the
+       browser trusts what comes out of here, so check it anyway. */
+    const check = Envelope.safeParse(parsed);
+    if (!check.success) return res.status(502).json({ error: 'envelope failed its own schema' });
+    return res.status(200).json(check.data);
   } catch (e) {
     return res.status(502).json({ error: 'upstream failed', detail: String(e.message).slice(0, 200) });
   }
