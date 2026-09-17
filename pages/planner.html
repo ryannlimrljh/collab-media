@@ -1960,6 +1960,7 @@
 <script src="../shared/audiences-data.js?v=4"></script>
 <script src="../shared/format-previews.js?v=2"></script>
 <script src="../shared/plan-store.js?v=4"></script>
+<script src="../shared/collab-ai.js?v=1"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script>
 window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for the sample peek */
@@ -2149,6 +2150,52 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       mixSource: mixSource,
       step: step, maxVisited: maxVisited, booked: booked
     };
+  }
+
+  /* What Collab AI is allowed to know. The catalogue is the inventory it
+     may quote from; the snapshot is the plan as it stands. Both are built
+     from the same arrays the page draws from, so they cannot drift. */
+  function aiCatalogue(){
+    return {
+      channels: CHANNELS.slice(),
+      formats: FORMATS.map(function(f){
+        return {id:f.id, name:f.name, ch:f.ch, cpm:f.cpm, video:!!f.video,
+          placeholder: !!f.placeholder};
+      }),
+      personas: PERSONAS.map(function(p){
+        var seg = segmentFor(p.id) || {}, c = seg.consumption || {};
+        return {id:p.id, name:p.name, cat:p.cat, users:p.users,
+          video:c.video || null, social:c.social || null, fit: seg.fit || null};
+      }),
+      sites: SITES.map(function(s){
+        return {id:s.id, name:s.name, ch:s.ch, cpm:s.cpm, inv:s.inv};
+      })
+    };
+  }
+
+  /* The forecast is in here because half of what a planner asks needs it:
+     blended CPM, whether the target is met, what is unallocated. Without
+     it those questions get an invented number or a refusal. */
+  function aiSnapshot(){
+    var fc = forecast(), r = reach();
+    return JSON.stringify({
+      step: step,
+      campaign: {name:$('b-name').value, brand:$('b-brand').value, product:$('b-prod').value,
+        start:$('b-start').value, end:$('b-end').value, days: campaignDays(),
+        budget: budget(), objective: ddVal('b-obj'), kpi:$('b-kpi').value,
+        target: numVal($('b-target')), unit:$('b-unit').value, languages: langOn.slice()},
+      audience: {mode: mode, personas: selected.slice(), refiners: filterState,
+        uniqueReach: audienceReach(), overlapPct: r.pct,
+        intent: $('f-intent').value, exclude: $('f-ex').value},
+      mix: {channels: chanOn.slice(),
+        formats: onFormats().map(function(f){ return {id:f.id, budget: split[f.id] || 0}; }),
+        mustBuySites: SITES.filter(function(s){ return s.pin; }).map(function(s){ return s.id; }),
+        splitIsUserShaped: splitTouched},
+      forecast: {impressions: Math.round(fc.imps), blendedCpm: Math.round(fc.blended),
+        netReach: fc.reach, frequency: fc.freq, allocated: fc.alloc,
+        unallocated: budget() - fc.alloc},
+      booked: booked
+    });
   }
   var planDeleted = false;
   function persistPlan(){

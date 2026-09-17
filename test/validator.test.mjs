@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 global.window = {};
 await import('../shared/collab-ai.js');
-const { validate } = global.window.CollabAI;
+const { validate, draft, chat, live } = global.window.CollabAI;
 
 const cat = {
   channels: ['Video', 'Audio', 'OTT', 'Web', 'Social'],
@@ -205,4 +205,101 @@ test('a malformed catalogue (non-array formats/channels) is treated as empty rat
   assert.doesNotThrow(() => validate([{ op: 'add_formats', ids: ['isv'] }], brokenCat));
   const { actions } = validate([{ op: 'add_formats', ids: ['isv'] }], brokenCat);
   assert.equal(actions.length, 0);
+});
+
+/* ═══ Transport (shared/collab-ai.js: post/draft/chat/live) ═══
+   liveState lives inside the collab-ai.js module closure with no reset
+   hook, and node:test runs top-level tests in this file sequentially, so
+   liveState carries over from whichever test ran before. Rather than
+   depend on that order, every test below that cares about a starting
+   value drives liveState there itself with a real call first. */
+
+function stubFetch(impl) {
+  const original = global.fetch;
+  global.fetch = impl;
+  return () => { global.fetch = original; };
+}
+
+function jsonResponse(status, body) {
+  return Promise.resolve({
+    ok: status >= 200 && status < 300,
+    status: status,
+    json: () => Promise.resolve(body),
+  });
+}
+
+test('a good response resolves to say/actions/why and marks the endpoint live', async () => {
+  const restore = stubFetch(() =>
+    jsonResponse(200, { say: 'hi', actions: [{ op: 'confirm_booking' }], why: 'because' }));
+  try {
+    const result = await draft('brief', cat, '');
+    assert.deepEqual(result, { say: 'hi', actions: [{ op: 'confirm_booking' }], why: 'because' });
+    assert.equal(live(), true);
+  } finally { restore(); }
+});
+
+test('configured:false rejects and marks the endpoint not live', async () => {
+  const restore = stubFetch(() => jsonResponse(200, { configured: false }));
+  try {
+    await assert.rejects(() => draft('brief', cat, ''));
+    assert.equal(live(), false);
+  } finally { restore(); }
+});
+
+test('a non-ok HTTP status rejects', async () => {
+  const restore = stubFetch(() => jsonResponse(502, { say: 'nope' }));
+  try {
+    await assert.rejects(() => draft('brief', cat, ''));
+  } finally { restore(); }
+});
+
+test('a body with no say string rejects as a bad envelope', async () => {
+  const restore = stubFetch(() => jsonResponse(200, { actions: [] }));
+  try {
+    await assert.rejects(() => draft('brief', cat, ''));
+  } finally { restore(); }
+});
+
+test('actions missing from the response comes back as an empty array, not undefined', async () => {
+  const restore = stubFetch(() => jsonResponse(200, { say: 'ok' }));
+  try {
+    const result = await draft('brief', cat, '');
+    assert.deepEqual(result.actions, []);
+  } finally { restore(); }
+});
+
+test('a 502 does not mark a live endpoint as fallen back', async () => {
+  /* Drive liveState to true first: an earlier test in this file already
+     left it false, and asserting live() stayed false after a 502 would
+     prove nothing. */
+  const restoreGood = stubFetch(() => jsonResponse(200, { say: 'hi' }));
+  try { await draft('brief', cat, ''); } finally { restoreGood(); }
+  assert.equal(live(), true);
+
+  const restoreBad = stubFetch(() => jsonResponse(502, { say: 'nope' }));
+  try {
+    await assert.rejects(() => draft('brief', cat, ''));
+    assert.equal(live(), true, 'one bad answer must not be read as a dead endpoint');
+  } finally { restoreBad(); }
+});
+
+test('the request body carries the mode, the catalogue and the plan', async () => {
+  let seenBody = null;
+  const restore = stubFetch((url, opts) => {
+    seenBody = JSON.parse(opts.body);
+    return jsonResponse(200, { say: 'ok' });
+  });
+  try {
+    await draft('the brief', cat, 'plan text');
+    assert.equal(seenBody.mode, 'draft');
+    assert.equal(seenBody.brief, 'the brief');
+    assert.deepEqual(seenBody.catalogue, cat);
+    assert.equal(seenBody.plan, 'plan text');
+
+    await chat([{ role: 'user', content: 'hi' }], cat, 'plan text 2');
+    assert.equal(seenBody.mode, 'chat');
+    assert.deepEqual(seenBody.messages, [{ role: 'user', content: 'hi' }]);
+    assert.deepEqual(seenBody.catalogue, cat);
+    assert.equal(seenBody.plan, 'plan text 2');
+  } finally { restore(); }
 });

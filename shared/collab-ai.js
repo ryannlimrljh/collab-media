@@ -234,6 +234,56 @@
     return { actions: ok, rejected: rejected };
   }
 
-  var api = { validate: validate, OPS: OPS };
+  var ENDPOINT = '/api/plan';
+  var liveState = null;          /* null unknown, true live, false fallback */
+
+  /* A draft takes real seconds, so the ceiling is generous. Without one a
+     hung server leaves the composer spinning with no way back to the
+     offline engine, which is worse than being told it is offline. */
+  var TIMEOUT_MS = 45000;
+
+  function post(body) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, TIMEOUT_MS) : null;
+    function clear() { if (timer) clearTimeout(timer); }
+    return fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: ctl ? ctl.signal : undefined
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      if (j && j.configured === false) { liveState = false; throw new Error('not configured'); }
+      if (!j || typeof j.say !== 'string') throw new Error('bad envelope');
+      liveState = true;
+      return { say: j.say, actions: Array.isArray(j.actions) ? j.actions : [], why: j.why || null };
+    }).catch(function (e) {
+      /* One failure is enough to stop trying for this page load. The
+         offline engine is a complete planner, so the user loses nothing
+         but the model. */
+      if (String(e && e.name) === 'AbortError' || String(e && e.message).indexOf('Failed to fetch') > -1) {
+        liveState = false;
+      }
+      clear();
+      throw e;
+    }).then(function (v) {
+      clear();
+      return v;
+    });
+  }
+
+  function live() { return liveState !== false; }
+
+  function draft(brief, catalogue, plan) {
+    return post({ mode: 'draft', brief: brief, catalogue: catalogue, plan: plan || '' });
+  }
+
+  function chat(messages, catalogue, plan) {
+    return post({ mode: 'chat', messages: messages, catalogue: catalogue, plan: plan || '' });
+  }
+
+  var api = { validate: validate, OPS: OPS, draft: draft, chat: chat, live: live };
   if (typeof window !== 'undefined') window.CollabAI = Object.assign(window.CollabAI || {}, api);
 })();
