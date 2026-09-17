@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSystem } from '../api/_prompt.mjs';
+import { ACTION_OPS } from '../api/_schema.mjs';
 
 /* The prompt is prose, and prose gets rewrapped. Search it with the
    whitespace flattened so a cosmetic line break can never fail a test
@@ -53,4 +54,42 @@ test('does not vary with key order in the catalogue', () => {
   const a = buildSystem({ channels: ['Web'], formats: [], personas: [], sites: [] });
   const b = buildSystem({ sites: [], personas: [], formats: [], channels: ['Web'] });
   assert.equal(a, b);
+});
+
+test('every action op is named in the prompt', () => {
+  const s = buildSystem(catalogue).toLowerCase();
+  for (const op of ACTION_OPS) {
+    assert.ok(s.includes(op), `the model was never taught the ${op} action`);
+  }
+});
+
+test('the four-way routing is stated', () => {
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'return no actions'), 'a plain question must not return actions');
+  assert.ok(says(s, 'never describe a change you did not make'), 'the no-fake-change rule is gone');
+});
+
+test('the what-if rule protects the plan', () => {
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'still a question'), 'the what-if protection is gone');
+  assert.ok(says(s, 'costs them their afternoon'), 'the stakes of a wrong apply are gone');
+});
+
+test('the acting rules are present', () => {
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'the leaderboard'), 'the names-versus-ids rule lost its example');
+  assert.ok(says(s, 'never percentages'), 'the absolute-amounts rule is gone');
+  assert.ok(says(s, 'cannot save a plan'), 'the honest no-save admission is gone');
+});
+
+test('humour is guided and capped', () => {
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'light touch'), 'the tone guidance for declines is gone');
+  assert.ok(says(s, 'never more than one line'), 'the cap on the decline length is gone');
+  assert.ok(says(s, 'vary it'), 'the instruction against repeating the same quip is gone');
+});
+
+test('the examples are marked as register, not as lines to reuse', () => {
+  const s = buildSystem(catalogue);
+  assert.ok(says(s, 'not lines to reuse'), 'the examples now read as scripted lines to parrot');
 });
