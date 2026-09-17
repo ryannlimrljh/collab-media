@@ -86,8 +86,28 @@ export default async function handler(req, res) {
 
   const client = new Anthropic({ apiKey: KEY });
 
+  /* The API intermittently answers a perfectly good request with
+     400 "Invalid request data". Observed twice in about a dozen calls,
+     then not once in eighteen consecutive retries of the same body, so it
+     is not our shape. The SDK retries 408, 409, 429 and 5xx but never a
+     400, reasonably, since a 400 usually means the request really is
+     wrong. This retries that one signature once and nothing else, so a
+     genuinely malformed request still fails fast and loudly. Without it a
+     blip silently drops the user to the offline engine mid conversation. */
+  const TRANSIENT = /Invalid request data/i;
+  async function ask(req) {
+    try {
+      return await client.beta.messages.create(req);
+    } catch (e) {
+      if (e && e.status === 400 && TRANSIENT.test(String(e.message))) {
+        return client.beta.messages.create(req);
+      }
+      throw e;
+    }
+  }
+
   try {
-    const response = await client.beta.messages.create({
+    const response = await ask({
       model: 'claude-opus-5',
       max_tokens: MAX_OUT,
       betas: ['server-side-fallback-2026-07-01'],

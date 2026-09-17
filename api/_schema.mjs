@@ -10,20 +10,28 @@ import { z } from 'zod';
 const id = z.string().min(1).max(40);
 const money = z.number().int().min(0).max(100000000);
 
+/* Every campaign field is nullable, and that is not cosmetic. The API
+   caps a schema at 24 optional properties, so these eleven are declared
+   required-and-nullable to fit. That means a partial change, which is
+   most changes, arrives with nulls in every field it is not touching:
+   "make it six weeks" sends start and end and nulls the other nine.
+   Optional alone rejects null, so every partial edit failed validation
+   and the user was dropped to the offline engine. Null means leave it
+   alone, and the browser drops those keys before writing anything. */
 const SetFields = z.object({
   op: z.literal('set_fields'),
   fields: z.object({
-    name: z.string().max(120).optional(),
-    brand: z.string().max(80).optional(),
-    prod: z.string().max(120).optional(),
-    start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    budget: money.optional(),
-    objective: z.enum(['awareness', 'consideration', 'conversion', 'footfall', 'leadgen']).optional(),
-    kpi: z.string().max(40).optional(),
-    target: money.optional(),
-    unit: z.string().max(20).optional(),
-    langs: z.array(z.string().max(30)).max(4).optional(),
+    name: z.string().max(120).nullable().optional(),
+    brand: z.string().max(80).nullable().optional(),
+    prod: z.string().max(120).nullable().optional(),
+    start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    budget: money.nullable().optional(),
+    objective: z.enum(['awareness', 'consideration', 'conversion', 'footfall', 'leadgen']).nullable().optional(),
+    kpi: z.string().max(40).nullable().optional(),
+    target: money.nullable().optional(),
+    unit: z.string().max(20).nullable().optional(),
+    langs: z.array(z.string().max(30)).max(4).nullable().optional(),
   }),
 });
 

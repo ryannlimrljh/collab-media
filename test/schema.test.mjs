@@ -153,7 +153,13 @@ test('the mode enum in the JSON Schema matches every mode value zod accepts', ()
 test('the objective enum in the JSON Schema matches every objective value zod accepts', () => {
   const setFields = findActionByOp(Action, 'set_fields');
   const objectiveField = setFields.shape.fields.shape.objective;
-  const unwrapped = objectiveField instanceof z.ZodOptional ? objectiveField.unwrap() : objectiveField;
+  /* The field is wrapped twice, optional around nullable, so peel until
+     the enum appears rather than assuming a fixed depth. Adding another
+     wrapper should not break a test about which values are legal. */
+  var unwrapped = objectiveField;
+  while (unwrapped && !unwrapped.options && typeof unwrapped.unwrap === 'function') {
+    unwrapped = unwrapped.unwrap();
+  }
   const zodObjectives = new Set(unwrapped.options);
   const schemaObjectives = new Set(
     ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.fields.properties.objective.anyOf[0].enum,
@@ -223,4 +229,26 @@ test('both schemas agree that a split is a list of id and amount', () => {
   const jsonSplit = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.split;
   assert.equal(jsonSplit.type, 'array');
   assert.deepEqual(Object.keys(jsonSplit.items.properties).sort(), ['amount', 'id']);
+});
+
+/* The API caps a schema at 24 optional properties, so the eleven campaign
+   fields are declared required-and-nullable to fit. A partial change,
+   which is most changes, therefore arrives with nulls in every field it
+   does not touch. Optional alone rejects null, and that broke every
+   partial edit while a full draft kept working, so the happy path hid it.
+   These two pin the shape the API actually produces. */
+test('a partial set_fields, nulls and all, is accepted', () => {
+  const r = Envelope.safeParse({ say: 'x', actions: [{ op: 'set_fields', fields: {
+    name: null, brand: null, prod: null, start: '2026-10-01', end: '2026-11-12',
+    budget: null, objective: null, kpi: null, target: null, unit: null, langs: null } }] });
+  assert.equal(r.success, true, 'a partial edit must validate, it is the commonest action');
+});
+
+test('every campaign field the API marks nullable is nullable in zod', () => {
+  const props = ENVELOPE_JSON_SCHEMA.properties.actions.items.properties.fields.properties;
+  for (const key of Object.keys(props)) {
+    const one = Envelope.safeParse({ say: 'x',
+      actions: [{ op: 'set_fields', fields: { [key]: null } }] });
+    assert.equal(one.success, true, `${key} rejects null, so any edit leaving it out will fail`);
+  }
 });
