@@ -104,13 +104,16 @@ wrinkles follow from using the beta namespace. It does not populate
 adaptive thinking can put a thinking block ahead of the answer, so the text
 block is selected by type rather than by position.
 
-**Three API constraints shape the schema**, all found by testing rather
-than reading. `additionalProperties` must be the literal `false`, so a map
-of arbitrary ids cannot be expressed and a split travels as a list of
-`{id, amount}`. The schema may carry at most 24 optional properties in
-total, so the campaign fields are required-and-nullable rather than
-optional. And an `enum` is genuinely enforced, which is why the schema is
-written twice.
+**Five API constraints shape the schema**, every one found by testing
+rather than reading, because none is documented.
+
+| Constraint | What it forced |
+|---|---|
+| `additionalProperties` must be literally `false` | A map of arbitrary ids cannot be expressed, so a split travels as a list of `{id, amount}` |
+| At most 24 optional properties in the whole schema | Campaign fields are required-and-nullable rather than optional, which brings the count to 18. A test pins the ceiling |
+| `enum` is genuinely enforced | Worth writing the schema twice to get it. Applied to `op`, `mode`, `objective` and the channel names |
+| No `minimum` or `maximum` on an integer | `go_to_step` cannot be bounded at the API. Zod still bounds it 1 to 4 at runtime |
+| `enum` cannot sit beside a nullable `type` array | A nullable enumerated field is expressed as `anyOf` of the enum and null |
 
 **The schema is written twice, on purpose.** Verified the same day: zod 4's
 `zodOutputFormat` demotes every constraint keyword it cannot express into a
