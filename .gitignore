@@ -8,3 +8,6 @@ assets/stills/
 # Source clips: 1112px masters with audio, ~87 MB. The muted, silent
 # 600px versions the page plays on hover live in assets/clips-web.
 assets/clips/
+
+# Node, for the api/ serverless function only. Never committed.
+node_modules/
