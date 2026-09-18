@@ -7,6 +7,8 @@ in a browser and it runs.
 - **Live:** <https://collab-media.vercel.app>
 - **Repo:** `github.com/ryannlimrljh/collab-media` (114 commits)
 - **Design system:** Collabrium DLS, vendored at `collabrium-dls/`
+- **Audiences & Ad formats — UX, interaction and design execution:**
+  [`docs/handover-audiences-and-ad-formats.md`](docs/handover-audiences-and-ad-formats.md)
 
 ---
 
