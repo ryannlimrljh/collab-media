@@ -146,31 +146,58 @@ single Video CPM of 3.26 against the card's median rate. It is a
 placeholder and nothing else in the picker depends on it. Compute it
 from real per-spot delivery when you have it.
 
-## The channel mark, and where real logos go
+## The channel mark
 
-Each group row carries a 26px mark so 81 rows are not 81 identical
-lines of text. It is a monogram today, because there is no channel
-artwork anywhere in this repo and Astro's channel logos are not mine to
-go and fetch.
+Each group row carries a 48x28 mark, so 81 rows are not 81 identical
+lines of text.
 
-**The slot is already there.** Give a channel a `logo` URL and the
-monogram gives way to an `<img>`; nothing else changes. Production's
-Brand Profile library is the obvious source, since it is already where
-the reach figures and tooltips come from. That is a one-field change in
-`shared/tv-ratecard.js` plus whatever the sync script needs.
+**They are Astro's own channel logos**, the ones the public channel
+guide at astro.com.my/content/channels uses, referenced from
+`divign0fdw3sv.cloudfront.net` rather than copied into this repo. 80 of
+the 81 buyable channels have one. The odd one out, BBC Lifestyle, is not
+in the guide's list and falls back to a monogram, which is a fair
+demonstration that the fallback works.
 
-The monogram strips a leading "Astro", since nearly every channel has
-one and the A carries nothing, then uses an acronym whole (AXN, AEC,
-HGTV) or the initials of the first two words (Sun TV becomes ST, BBC
-Earth BE, Arena 2 A2). Five of the 81 collide, all between unrelated
-channels, which is fine for something decorative.
+Three things worth knowing before you touch this:
 
-The tint says which segment the channel is in. It is a hint, not a
+- **The logo id is not the channel number.** It is Astro's own internal
+  id: 104 Astro Ria is logo 193, 801 Astro Arena is logo 235. The map
+  lives in the generator, scraped on 5 Oct 2026.
+- **Two brands run under two channel numbers each** and the guide lists
+  only one of each pair, so Zee Cinema (251) borrows Z Cinema's mark and
+  Astro Tutor TV (601) borrows Tutor TV's. Same brand, same mark.
+- **The tile has to be light.** Many marks carry their own solid
+  background, the pink Astro badge among them, but several are dark
+  artwork on a transparent ground. AXN, BBC News, HISTORY, Astro
+  Vaanavil and Arena Bola all vanish on a dark tile. White, checked
+  against all three backgrounds before choosing.
+
+The artwork is 144x80, which is why the tile is landscape: a square one
+would shrink it to nothing.
+
+**Swapping in the Brand Profile library** is a one-field change. Set
+`logo` on a channel to any URL and that is what renders. These are
+referenced, not vendored, so if Astro moves the CDN the marks break; the
+picker handles that by swapping any image that fails to load for its
+monogram, so the list degrades rather than going blank. If you would
+rather not depend on someone else's CDN, download the 80 files and point
+`logo` at a local path.
+
+### The monogram fallback
+
+It strips a leading "Astro", since nearly every channel has one and the
+A carries nothing, then uses an acronym whole (AXN, AEC, HGTV) or the
+initials of the first two words (Sun TV becomes ST, BBC Earth BE, Arena
+2 A2). Five of the 81 collide, all between unrelated channels, which is
+fine for something decorative.
+
+Its tint says which segment the channel is in. That is a hint, not a
 legend: the Segment facet above is the real signal, and five DLS tones
 have to cover eight segments. The letters are near black on the tint
-rather than the tone's own colour, which at 10px would run as low as
-1.8:1 for amber on cream and look washed out, which is the opposite of
-the point. The mark is `aria-hidden`, because the channel name sits
+rather than the tone's own colour, which at 11px would run as low as
+1.8:1 for amber on cream and look washed out.
+
+Either way the mark is `aria-hidden`, because the channel name sits
 right beside it and a screen reader does not need it twice.
 
 ## How the panel opens

@@ -887,12 +887,17 @@
   .p-card-grp td{background:var(--color-neutral-2);}
   .p-card-grp .ch{font-weight:700;}
   .p-card-grpname{display:flex; align-items:center; gap:var(--spacing-8); min-width:0;}
-  .p-ch-logo{flex:0 0 auto; width:26px; height:26px; border-radius:var(--radius-sm);
+  /* Landscape, because Astro's own channel marks are 144x80 and a
+     square tile would shrink them to nothing. */
+  .p-ch-logo{flex:0 0 auto; width:48px; height:28px; border-radius:var(--radius-sm);
     display:inline-flex; align-items:center; justify-content:center; overflow:hidden;
-    font-size:10px; font-weight:800; letter-spacing:.01em; line-height:1;
+    font-size:11px; font-weight:800; letter-spacing:.01em; line-height:1;
     background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);
     color:var(--color-neutral-8);}
-  img.p-ch-logo{object-fit:contain; background:var(--color-neutral-1);}
+  /* Always light behind the artwork. Some marks carry their own solid
+     background, but others are dark on a transparent ground and would
+     disappear on anything but a pale tile. */
+  img.p-ch-logo{object-fit:contain; background:var(--color-neutral-1); padding:2px;}
   .p-ch-logo.tone-fire{background:var(--color-fire-bg); border-color:var(--color-fire-bg-strong);}
   .p-ch-logo.tone-wood{background:var(--color-wood-bg); border-color:var(--color-wood-bg-strong);}
   .p-ch-logo.tone-earth{background:var(--color-earth-bg); border-color:var(--color-earth-bg-strong);}
@@ -4488,12 +4493,17 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     return (first.charAt(0) + bare(words[1]).charAt(0)).toUpperCase();
   }
 
-  function chMark(line){
-    if (line.logo){
-      return '<img class="p-ch-logo" src="' + esc(line.logo) + '" alt="" aria-hidden="true" loading="lazy" />';
-    }
+  function monoMark(line){
     return '<span class="p-ch-logo tone-' + (SEG_TONE[line.segment] || 'none') + '" aria-hidden="true">' +
       esc(monogram(line.ch)) + '</span>';
+  }
+  function chMark(line){
+    if (!line.logo) return monoMark(line);
+    /* The monogram rides along on the img so a logo that fails to load
+       can be swapped for it without going back to the data. */
+    return '<img class="p-ch-logo is-art" src="' + esc(line.logo) + '" alt="" aria-hidden="true"' +
+      ' loading="lazy" data-tone="' + (SEG_TONE[line.segment] || 'none') + '"' +
+      ' data-mono="' + esc(monogram(line.ch)) + '" />';
   }
 
   function cardMatch(f){
@@ -4732,6 +4742,17 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       renderCard();
       $('cardQ').focus();
     });
+    /* A logo that will not load becomes its monogram. Capture, because
+       an image error does not bubble. */
+    $('cardRows').addEventListener('error', function(e){
+      var img = e.target;
+      if (!img || img.tagName !== 'IMG' || img.className.indexOf('p-ch-logo') < 0) return;
+      var span = document.createElement('span');
+      span.className = 'p-ch-logo tone-' + (img.dataset.tone || 'none');
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = img.dataset.mono || '?';
+      img.parentNode.replaceChild(span, img);
+    }, true);
     $('cardClose').addEventListener('click', closeCard);
     $('cardCancel').addEventListener('click', closeCard);
     $('cardApply').addEventListener('click', applyCard);

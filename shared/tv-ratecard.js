@@ -20,6 +20,11 @@
               production does not carry. Replace it the moment the feed
               grows a real classification.
 
+   Each channel also carries a 'logo', the mark Astro's own channel
+   guide uses, referenced rather than copied. Point it at the Brand
+   Profile library instead when that is wired up; the picker falls back
+   to a monogram for any channel whose logo is blank or fails to load.
+
    Five channels carry no priced line and so cannot be bought: 804, 812,
    813 (their rate card rows name another channel as their pricing
    category), 117 and 603. They are kept here because production still
@@ -38,7 +43,8 @@ window.TV_RATECARD = {
       "name": "Astro Ria",
       "reach": 7860000,
       "segment": "Malay",
-      "lines": 14
+      "lines": 14,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/193_144.png"
     },
     {
       "id": "105",
@@ -46,7 +52,8 @@ window.TV_RATECARD = {
       "name": "Astro Prima",
       "reach": 6810000,
       "segment": "Malay",
-      "lines": 5
+      "lines": 5,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/316_144.png"
     },
     {
       "id": "801",
@@ -54,7 +61,8 @@ window.TV_RATECARD = {
       "name": "Astro Arena",
       "reach": 5310000,
       "segment": "Sports",
-      "lines": 4
+      "lines": 4,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/235_144.png"
     },
     {
       "id": "802",
@@ -62,7 +70,8 @@ window.TV_RATECARD = {
       "name": "Astro Arena 2",
       "reach": 5310000,
       "segment": "Sports",
-      "lines": 3
+      "lines": 3,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/457_144.png"
     },
     {
       "id": "108",
@@ -70,7 +79,8 @@ window.TV_RATECARD = {
       "name": "Astro Citra",
       "reach": 4710000,
       "segment": "Malay",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/301_144.png"
     },
     {
       "id": "803",
@@ -78,7 +88,8 @@ window.TV_RATECARD = {
       "name": "Astro Arena Bola",
       "reach": 4420000,
       "segment": "Sports",
-      "lines": 7
+      "lines": 7,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/486_144.png"
     },
     {
       "id": "804",
@@ -86,7 +97,8 @@ window.TV_RATECARD = {
       "name": "Astro Arena Bola 2",
       "reach": 4420000,
       "segment": "",
-      "lines": 0
+      "lines": 0,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/487_144.png"
     },
     {
       "id": "106",
@@ -94,7 +106,8 @@ window.TV_RATECARD = {
       "name": "Astro Oasis",
       "reach": 4400000,
       "segment": "Malay",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/315_144.png"
     },
     {
       "id": "811",
@@ -102,7 +115,8 @@ window.TV_RATECARD = {
       "name": "Astro Premier League",
       "reach": 3740000,
       "segment": "Sports",
-      "lines": 3
+      "lines": 3,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/536_144.png"
     },
     {
       "id": "812",
@@ -110,7 +124,8 @@ window.TV_RATECARD = {
       "name": "Astro Premier League 2",
       "reach": 3740000,
       "segment": "",
-      "lines": 0
+      "lines": 0,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/537_144.png"
     },
     {
       "id": "813",
@@ -118,7 +133,8 @@ window.TV_RATECARD = {
       "name": "Astro Premier League 3",
       "reach": 3740000,
       "segment": "",
-      "lines": 0
+      "lines": 0,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/538_144.png"
     },
     {
       "id": "815",
@@ -126,7 +142,8 @@ window.TV_RATECARD = {
       "name": "Astro Badminton",
       "reach": 3670000,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/540_144.png"
     },
     {
       "id": "413",
@@ -134,7 +151,8 @@ window.TV_RATECARD = {
       "name": "Astro Showcase",
       "reach": 3200000,
       "segment": "English",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/454_144.png"
     },
     {
       "id": "611",
@@ -142,7 +160,8 @@ window.TV_RATECARD = {
       "name": "Astro Ceria",
       "reach": 3000000,
       "segment": "GenNext",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/386_144.png"
     },
     {
       "id": "701",
@@ -150,7 +169,8 @@ window.TV_RATECARD = {
       "name": "AXN",
       "reach": 2600000,
       "segment": "English",
-      "lines": 3
+      "lines": 3,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/131_144.png"
     },
     {
       "id": "401",
@@ -158,7 +178,8 @@ window.TV_RATECARD = {
       "name": "HITS Movies",
       "reach": 2600000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/391_144.png"
     },
     {
       "id": "810",
@@ -166,7 +187,8 @@ window.TV_RATECARD = {
       "name": "Astro Grandstand",
       "reach": 2560000,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/543_144.png"
     },
     {
       "id": "404",
@@ -174,7 +196,8 @@ window.TV_RATECARD = {
       "name": "Astro BOO",
       "reach": 2530000,
       "segment": "Malay",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/251_144.png"
     },
     {
       "id": "501",
@@ -182,7 +205,8 @@ window.TV_RATECARD = {
       "name": "Astro AWANI",
       "reach": 2400000,
       "segment": "News",
-      "lines": 9
+      "lines": 9,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/436_144.png"
     },
     {
       "id": "203",
@@ -190,7 +214,8 @@ window.TV_RATECARD = {
       "name": "Astro Vellithirai",
       "reach": 2300000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/399_144.png"
     },
     {
       "id": "416",
@@ -198,7 +223,8 @@ window.TV_RATECARD = {
       "name": "tvN Movies",
       "reach": 2200000,
       "segment": "Korean",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/274_144.png"
     },
     {
       "id": "112",
@@ -206,7 +232,8 @@ window.TV_RATECARD = {
       "name": "Astro Rania",
       "reach": 2160000,
       "segment": "Malay",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/401_144.png"
     },
     {
       "id": "202",
@@ -214,7 +241,8 @@ window.TV_RATECARD = {
       "name": "Astro Vinmeen",
       "reach": 2100000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/167_144.png"
     },
     {
       "id": "113",
@@ -222,7 +250,8 @@ window.TV_RATECARD = {
       "name": "Astro Aura",
       "reach": 1630000,
       "segment": "Malay",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/400_144.png"
     },
     {
       "id": "306",
@@ -230,7 +259,8 @@ window.TV_RATECARD = {
       "name": "Astro AEC",
       "reach": 1600000,
       "segment": "Chinese",
-      "lines": 15
+      "lines": 15,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/182_144.png"
     },
     {
       "id": "117",
@@ -238,7 +268,8 @@ window.TV_RATECARD = {
       "name": "Z Cinema",
       "reach": 1600000,
       "segment": "",
-      "lines": 0
+      "lines": 0,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/490_144.png"
     },
     {
       "id": "709",
@@ -246,7 +277,8 @@ window.TV_RATECARD = {
       "name": "Asian Food Network",
       "reach": 1500000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/91_144.png"
     },
     {
       "id": "393",
@@ -254,7 +286,8 @@ window.TV_RATECARD = {
       "name": "Astro Daebak",
       "reach": 1500000,
       "segment": "Korean",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/609_144.png"
     },
     {
       "id": "309",
@@ -262,7 +295,8 @@ window.TV_RATECARD = {
       "name": "Celestial Movies",
       "reach": 1500000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/134_144.png"
     },
     {
       "id": "216",
@@ -270,7 +304,8 @@ window.TV_RATECARD = {
       "name": "KTV",
       "reach": 1500000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/477_144.png"
     },
     {
       "id": "211",
@@ -278,7 +313,8 @@ window.TV_RATECARD = {
       "name": "Sun TV",
       "reach": 1500000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/358_144.png"
     },
     {
       "id": "814",
@@ -286,7 +322,8 @@ window.TV_RATECARD = {
       "name": "Astro Football",
       "reach": 1490000,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/539_144.png"
     },
     {
       "id": "201",
@@ -294,7 +331,8 @@ window.TV_RATECARD = {
       "name": "Astro Vaanavil",
       "reach": 1400000,
       "segment": "Indian",
-      "lines": 3
+      "lines": 3,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/397_144.png"
     },
     {
       "id": "222",
@@ -302,7 +340,8 @@ window.TV_RATECARD = {
       "name": "Colors Tamil HD",
       "reach": 1400000,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/298_144.png"
     },
     {
       "id": "223",
@@ -310,7 +349,8 @@ window.TV_RATECARD = {
       "name": "Zee Tamil HD",
       "reach": 1400000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/297_144.png"
     },
     {
       "id": "703",
@@ -318,7 +358,8 @@ window.TV_RATECARD = {
       "name": "Lifetime",
       "reach": 1300000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/447_144.png"
     },
     {
       "id": "214",
@@ -326,7 +367,8 @@ window.TV_RATECARD = {
       "name": "Adithya",
       "reach": 1200000,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/67_144.png"
     },
     {
       "id": "116",
@@ -334,7 +376,8 @@ window.TV_RATECARD = {
       "name": "Colors Hindi HD",
       "reach": 1200000,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/365_144.png"
     },
     {
       "id": "212",
@@ -342,7 +385,8 @@ window.TV_RATECARD = {
       "name": "Sun Music",
       "reach": 1100000,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/417_144.png"
     },
     {
       "id": "707",
@@ -350,7 +394,8 @@ window.TV_RATECARD = {
       "name": "TLC",
       "reach": 1100000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/338_144.png"
     },
     {
       "id": "395",
@@ -358,7 +403,8 @@ window.TV_RATECARD = {
       "name": "tvN",
       "reach": 1100000,
       "segment": "Korean",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/190_144.png"
     },
     {
       "id": "311",
@@ -366,7 +412,8 @@ window.TV_RATECARD = {
       "name": "Astro AOD",
       "reach": 1000000,
       "segment": "Chinese",
-      "lines": 4
+      "lines": 4,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/172_144.png"
     },
     {
       "id": "217",
@@ -374,7 +421,8 @@ window.TV_RATECARD = {
       "name": "Sun Life",
       "reach": 1000000,
       "segment": "Indian",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/476_144.png"
     },
     {
       "id": "310",
@@ -382,7 +430,8 @@ window.TV_RATECARD = {
       "name": "TVB Jade",
       "reach": 975000,
       "segment": "Chinese",
-      "lines": 6
+      "lines": 6,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/203_144.png"
     },
     {
       "id": "555",
@@ -390,7 +439,8 @@ window.TV_RATECARD = {
       "name": "HISTORY",
       "reach": 968000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/144_144.png"
     },
     {
       "id": "300",
@@ -398,7 +448,8 @@ window.TV_RATECARD = {
       "name": "iQIYI HD",
       "reach": 937000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/355_144.png"
     },
     {
       "id": "706",
@@ -406,7 +457,8 @@ window.TV_RATECARD = {
       "name": "HITS",
       "reach": 916000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/179_144.png"
     },
     {
       "id": "392",
@@ -414,7 +466,8 @@ window.TV_RATECARD = {
       "name": "KBS World",
       "reach": 910000,
       "segment": "Korean",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/161_144.png"
     },
     {
       "id": "308",
@@ -422,7 +475,8 @@ window.TV_RATECARD = {
       "name": "Astro QJ",
       "reach": 905000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/158_144.png"
     },
     {
       "id": "321",
@@ -430,7 +484,8 @@ window.TV_RATECARD = {
       "name": "Celestial Classic Movies",
       "reach": 897000,
       "segment": "Chinese",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/187_144.png"
     },
     {
       "id": "553",
@@ -438,7 +493,8 @@ window.TV_RATECARD = {
       "name": "Discovery Asia",
       "reach": 896000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/136_144.png"
     },
     {
       "id": "305",
@@ -446,7 +502,8 @@ window.TV_RATECARD = {
       "name": "TVB Classic",
       "reach": 884000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/425_144.png"
     },
     {
       "id": "554",
@@ -454,7 +511,8 @@ window.TV_RATECARD = {
       "name": "BBC Earth",
       "reach": 868000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/452_144.png"
     },
     {
       "id": "333",
@@ -462,7 +520,8 @@ window.TV_RATECARD = {
       "name": "Astro Hua Hee Dai",
       "reach": 831000,
       "segment": "Chinese",
-      "lines": 5
+      "lines": 5,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/162_144.png"
     },
     {
       "id": "552",
@@ -470,7 +529,8 @@ window.TV_RATECARD = {
       "name": "Discovery Channel",
       "reach": 826000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/376_144.png"
     },
     {
       "id": "396",
@@ -478,7 +538,8 @@ window.TV_RATECARD = {
       "name": "K-PLUS",
       "reach": 784000,
       "segment": "Korean",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/266_144.png"
     },
     {
       "id": "215",
@@ -486,7 +547,8 @@ window.TV_RATECARD = {
       "name": "Sun News",
       "reach": 765000,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/478_144.png"
     },
     {
       "id": "715",
@@ -494,7 +556,8 @@ window.TV_RATECARD = {
       "name": "HGTV",
       "reach": 687000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/198_144.png"
     },
     {
       "id": "702",
@@ -502,7 +565,8 @@ window.TV_RATECARD = {
       "name": "HITS NOW",
       "reach": 682000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/524_144.png"
     },
     {
       "id": "618",
@@ -510,7 +574,8 @@ window.TV_RATECARD = {
       "name": "Moonbug",
       "reach": 681000,
       "segment": "GenNext",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/465_144.png"
     },
     {
       "id": "319",
@@ -518,7 +583,8 @@ window.TV_RATECARD = {
       "name": "TVB Xing He",
       "reach": 619000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/383_144.png"
     },
     {
       "id": "511",
@@ -526,7 +592,8 @@ window.TV_RATECARD = {
       "name": "CNN",
       "reach": 604000,
       "segment": "News",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/336_144.png"
     },
     {
       "id": "316",
@@ -534,7 +601,8 @@ window.TV_RATECARD = {
       "name": "CTI Asia",
       "reach": 586000,
       "segment": "Chinese",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/424_144.png"
     },
     {
       "id": "817",
@@ -542,7 +610,8 @@ window.TV_RATECARD = {
       "name": "Astro Sports Plus",
       "reach": 575000,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/542_144.png"
     },
     {
       "id": "325",
@@ -550,7 +619,8 @@ window.TV_RATECARD = {
       "name": "Phoenix Chinese Channel",
       "reach": 568000,
       "segment": "Chinese",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/382_144.png"
     },
     {
       "id": "615",
@@ -558,7 +628,8 @@ window.TV_RATECARD = {
       "name": "Cartoon Network",
       "reach": 563000,
       "segment": "GenNext",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/371_144.png"
     },
     {
       "id": "320",
@@ -566,7 +637,8 @@ window.TV_RATECARD = {
       "name": "TVBS Asia",
       "reach": 554000,
       "segment": "Chinese",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/384_144.png"
     },
     {
       "id": "326",
@@ -574,7 +646,8 @@ window.TV_RATECARD = {
       "name": "Phoenix InfoNews Channel",
       "reach": 544000,
       "segment": "Chinese",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/43_144.png"
     },
     {
       "id": "512",
@@ -582,7 +655,8 @@ window.TV_RATECARD = {
       "name": "BBC News",
       "reach": 473000,
       "segment": "News",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/366_144.png"
     },
     {
       "id": "515",
@@ -590,7 +664,8 @@ window.TV_RATECARD = {
       "name": "CNA",
       "reach": 465000,
       "segment": "News",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/295_144.png"
     },
     {
       "id": "714",
@@ -598,7 +673,8 @@ window.TV_RATECARD = {
       "name": "Crime + Investigation",
       "reach": 429000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/369_144.png"
     },
     {
       "id": "513",
@@ -606,7 +682,8 @@ window.TV_RATECARD = {
       "name": "Al Jazeera English",
       "reach": 424000,
       "segment": "News",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/374_144.png"
     },
     {
       "id": "717",
@@ -614,7 +691,8 @@ window.TV_RATECARD = {
       "name": "BBC Lifestyle",
       "reach": 337000,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": ""
     },
     {
       "id": "619",
@@ -622,7 +700,8 @@ window.TV_RATECARD = {
       "name": "Blippi & Friends",
       "reach": 326000,
       "segment": "GenNext",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/566_144.png"
     },
     {
       "id": "831",
@@ -630,7 +709,8 @@ window.TV_RATECARD = {
       "name": "Astro Golf",
       "reach": 321000,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/189_144.png"
     },
     {
       "id": "603",
@@ -638,7 +718,8 @@ window.TV_RATECARD = {
       "name": "Tutor TV",
       "reach": 314000,
       "segment": "",
-      "lines": 0
+      "lines": 0,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/411_144.png"
     },
     {
       "id": "517",
@@ -646,7 +727,8 @@ window.TV_RATECARD = {
       "name": "Bloomberg TV",
       "reach": 298000,
       "segment": "News",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/422_144.png"
     },
     {
       "id": "516",
@@ -654,7 +736,8 @@ window.TV_RATECARD = {
       "name": "CNBC Asia",
       "reach": 136000,
       "segment": "News",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/423_144.png"
     },
     {
       "id": "412",
@@ -662,7 +745,8 @@ window.TV_RATECARD = {
       "name": "Astro FAM Time",
       "reach": 0,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/603_144.png"
     },
     {
       "id": "411",
@@ -670,7 +754,8 @@ window.TV_RATECARD = {
       "name": "Astro Showtime",
       "reach": 0,
       "segment": "English",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/604_144.png"
     },
     {
       "id": "819",
@@ -678,7 +763,8 @@ window.TV_RATECARD = {
       "name": "Astro Tennis",
       "reach": 0,
       "segment": "Sports",
-      "lines": 2
+      "lines": 2,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/616_144.png"
     },
     {
       "id": "601",
@@ -686,7 +772,8 @@ window.TV_RATECARD = {
       "name": "Astro Tutor TV",
       "reach": 0,
       "segment": "GenNext",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/411_144.png"
     },
     {
       "id": "550",
@@ -694,7 +781,8 @@ window.TV_RATECARD = {
       "name": "Love Nature Commercial buy is not available on Love Nature 4K channel",
       "reach": 0,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/483_144.png"
     },
     {
       "id": "414",
@@ -702,7 +790,8 @@ window.TV_RATECARD = {
       "name": "Rock Action",
       "reach": 0,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/601_144.png"
     },
     {
       "id": "415",
@@ -710,7 +799,8 @@ window.TV_RATECARD = {
       "name": "Rock X Stream",
       "reach": 0,
       "segment": "English",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/605_144.png"
     },
     {
       "id": "251",
@@ -718,7 +808,8 @@ window.TV_RATECARD = {
       "name": "Zee Cinema",
       "reach": 0,
       "segment": "Indian",
-      "lines": 1
+      "lines": 1,
+      "logo": "https://divign0fdw3sv.cloudfront.net/Images/ChannelLogo/contenthub/490_144.png"
     }
   ],
   lines: [
