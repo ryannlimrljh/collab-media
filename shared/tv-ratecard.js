@@ -1,2036 +1,2485 @@
 /* The Video (TV) rate card.
    ─────────────────────────────────────────────────────────────────────
-   One row per buyable line. A line is four fields, not a name:
+   Transcribed from RUNS_ON_CHIPS.md, which was read out of the
+   production database on 5 Oct 2026 (Collab: Sales data of 26 Aug
+   2026). 86 channels, 176 buyable lines. The channel census, the
+   channel numbers, the segments and every line's entitlement, timebelt,
+   days, pricing category and 30 second price are production's own.
 
-     ch       the channel it airs on          -> TV_RATECARD.channels
-     spot     what you are buying             'TVC Spot', 'Animated Bug'
-     belt     the timebelt or programme       '6pm - 10pm', 'Liga Super Malaysia'
-     rate     ringgit per 30 second spot
-     daypart  derived from belt, for filtering only
+   A line is what you actually buy:
 
-   'daypart' is the only field the source feed does not carry. It is
-   derived by daypartOf() below so the picker has something coarse to
-   filter on; swap in the real classification when the feed grows one.
+     ch       channel number, which is how production joins a line to a
+              channel. Never by name: Zee Cinema/Z Cinema and Astro
+              Tutor TV/Tutor TV are each two numbers for one brand.
+     ent      entitlement, what is being sold
+     belt     timebelt or programme
+     days     which days it runs
+     cat      pricing category off the TV rate card
+     rate     ringgit for a 30 second spot
+     daypart  DERIVED, see daypartOf() in the generator. The only field
+              production does not carry. Replace it the moment the feed
+              grows a real classification.
 
-   RECONSTRUCTED FOR THE PROTOTYPE. The channel census (name, monthly
-   reach, line count) is read off the production build; the rates on
-   the smaller channels are plausible rather than authoritative. Point
-   this at the real feed before anyone quotes a number from it.
+   Five channels carry no priced line and so cannot be bought: 804, 812,
+   813 (their rate card rows name another channel as their pricing
+   category), 117 and 603. They are kept here because production still
+   shows them, greyed, under Runs on.
 
-   Reach is Kantar Media DTAM monthly, Total Individual universe 15,262K. */
+   Eight channels have no published reach. Verbatim oddities from the
+   source are preserved on purpose, including the Astro Ceria timebelt
+   of "d" and channel 550's name being a sentence. */
 window.TV_RATECARD = {
   universe: 15262000,
+  reachSource: 'Kantar Media DTAM, Total Individual, universe 15,262K',
   channels: [
     {
-      "id": "astro-ria",
+      "id": "104",
+      "no": 104,
       "name": "Astro Ria",
       "reach": 7860000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 14
     },
     {
-      "id": "astro-prima",
+      "id": "105",
+      "no": 105,
       "name": "Astro Prima",
       "reach": 6810000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 5
     },
     {
-      "id": "astro-arena",
+      "id": "801",
+      "no": 801,
       "name": "Astro Arena",
       "reach": 5310000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 4
     },
     {
-      "id": "astro-arena-2",
+      "id": "802",
+      "no": 802,
       "name": "Astro Arena 2",
       "reach": 5310000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 3
     },
     {
-      "id": "astro-citra",
+      "id": "108",
+      "no": 108,
       "name": "Astro Citra",
       "reach": 4710000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 2
     },
     {
-      "id": "astro-arena-bola",
+      "id": "803",
+      "no": 803,
       "name": "Astro Arena Bola",
       "reach": 4420000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 7
     },
     {
-      "id": "astro-arena-bola-2",
+      "id": "804",
+      "no": 804,
       "name": "Astro Arena Bola 2",
       "reach": 4420000,
-      "genre": "Sports",
+      "segment": "",
       "lines": 0
     },
     {
-      "id": "astro-oasis",
+      "id": "106",
+      "no": 106,
       "name": "Astro Oasis",
       "reach": 4400000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 2
     },
     {
-      "id": "astro-premier-league",
+      "id": "811",
+      "no": 811,
       "name": "Astro Premier League",
       "reach": 3740000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 3
     },
     {
-      "id": "astro-premier-league-2",
+      "id": "812",
+      "no": 812,
       "name": "Astro Premier League 2",
       "reach": 3740000,
-      "genre": "Sports",
+      "segment": "",
       "lines": 0
     },
     {
-      "id": "astro-premier-league-3",
+      "id": "813",
+      "no": 813,
       "name": "Astro Premier League 3",
       "reach": 3740000,
-      "genre": "Sports",
+      "segment": "",
       "lines": 0
     },
     {
-      "id": "astro-badminton",
+      "id": "815",
+      "no": 815,
       "name": "Astro Badminton",
       "reach": 3670000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "astro-showcase",
+      "id": "413",
+      "no": 413,
       "name": "Astro Showcase",
       "reach": 3200000,
-      "genre": "Movies",
+      "segment": "English",
       "lines": 2
     },
     {
-      "id": "astro-ceria",
+      "id": "611",
+      "no": 611,
       "name": "Astro Ceria",
       "reach": 3000000,
-      "genre": "Kids",
+      "segment": "GenNext",
       "lines": 2
     },
     {
-      "id": "axn",
+      "id": "701",
+      "no": 701,
       "name": "AXN",
       "reach": 2600000,
-      "genre": "English",
+      "segment": "English",
       "lines": 3
     },
     {
-      "id": "hits-movies",
+      "id": "401",
+      "no": 401,
       "name": "HITS Movies",
       "reach": 2600000,
-      "genre": "Movies",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "astro-grandstand",
+      "id": "810",
+      "no": 810,
       "name": "Astro Grandstand",
       "reach": 2560000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "astro-boo",
+      "id": "404",
+      "no": 404,
       "name": "Astro BOO",
       "reach": 2530000,
-      "genre": "Movies",
+      "segment": "Malay",
       "lines": 1
     },
     {
-      "id": "astro-awani",
+      "id": "501",
+      "no": 501,
       "name": "Astro AWANI",
       "reach": 2400000,
-      "genre": "News",
+      "segment": "News",
       "lines": 9
     },
     {
-      "id": "astro-vellithirai",
+      "id": "203",
+      "no": 203,
       "name": "Astro Vellithirai",
       "reach": 2300000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "tvn-movies",
+      "id": "416",
+      "no": 416,
       "name": "tvN Movies",
       "reach": 2200000,
-      "genre": "Movies",
+      "segment": "Korean",
       "lines": 1
     },
     {
-      "id": "astro-rania",
+      "id": "112",
+      "no": 112,
       "name": "Astro Rania",
       "reach": 2160000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 1
     },
     {
-      "id": "astro-vinmeen",
+      "id": "202",
+      "no": 202,
       "name": "Astro Vinmeen",
       "reach": 2100000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "astro-aura",
+      "id": "113",
+      "no": 113,
       "name": "Astro Aura",
       "reach": 1630000,
-      "genre": "Malay",
+      "segment": "Malay",
       "lines": 1
     },
     {
-      "id": "astro-aec",
+      "id": "306",
+      "no": 306,
       "name": "Astro AEC",
       "reach": 1600000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 15
     },
     {
-      "id": "z-cinema",
+      "id": "117",
+      "no": 117,
       "name": "Z Cinema",
       "reach": 1600000,
-      "genre": "Movies",
+      "segment": "",
       "lines": 0
     },
     {
-      "id": "asian-food-network",
+      "id": "709",
+      "no": 709,
       "name": "Asian Food Network",
       "reach": 1500000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "astro-daebak",
+      "id": "393",
+      "no": 393,
       "name": "Astro Daebak",
       "reach": 1500000,
-      "genre": "English",
+      "segment": "Korean",
       "lines": 2
     },
     {
-      "id": "celestial-movies",
+      "id": "309",
+      "no": 309,
       "name": "Celestial Movies",
       "reach": 1500000,
-      "genre": "Movies",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "ktv",
+      "id": "216",
+      "no": 216,
       "name": "KTV",
       "reach": 1500000,
-      "genre": "Music",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "sun-tv",
+      "id": "211",
+      "no": 211,
       "name": "Sun TV",
       "reach": 1500000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "astro-football",
+      "id": "814",
+      "no": 814,
       "name": "Astro Football",
       "reach": 1490000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "astro-vaanavil",
+      "id": "201",
+      "no": 201,
       "name": "Astro Vaanavil",
       "reach": 1400000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 3
     },
     {
-      "id": "colors-tamil-hd",
+      "id": "222",
+      "no": 222,
       "name": "Colors Tamil HD",
       "reach": 1400000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 1
     },
     {
-      "id": "zee-tamil-hd",
+      "id": "223",
+      "no": 223,
       "name": "Zee Tamil HD",
       "reach": 1400000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "lifetime",
+      "id": "703",
+      "no": 703,
       "name": "Lifetime",
       "reach": 1300000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "adithya",
+      "id": "214",
+      "no": 214,
       "name": "Adithya",
       "reach": 1200000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 1
     },
     {
-      "id": "colors-hindi-hd",
+      "id": "116",
+      "no": 116,
       "name": "Colors Hindi HD",
       "reach": 1200000,
-      "genre": "English",
+      "segment": "Indian",
       "lines": 1
     },
     {
-      "id": "sun-music",
+      "id": "212",
+      "no": 212,
       "name": "Sun Music",
       "reach": 1100000,
-      "genre": "Music",
+      "segment": "Indian",
       "lines": 1
     },
     {
-      "id": "tlc",
+      "id": "707",
+      "no": 707,
       "name": "TLC",
       "reach": 1100000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "tvn",
+      "id": "395",
+      "no": 395,
       "name": "tvN",
       "reach": 1100000,
-      "genre": "English",
+      "segment": "Korean",
       "lines": 2
     },
     {
-      "id": "astro-aod",
+      "id": "311",
+      "no": 311,
       "name": "Astro AOD",
       "reach": 1000000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 4
     },
     {
-      "id": "sun-life",
+      "id": "217",
+      "no": 217,
       "name": "Sun Life",
       "reach": 1000000,
-      "genre": "Tamil",
+      "segment": "Indian",
       "lines": 2
     },
     {
-      "id": "tvb-jade",
+      "id": "310",
+      "no": 310,
       "name": "TVB Jade",
       "reach": 975000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 6
     },
     {
-      "id": "history",
+      "id": "555",
+      "no": 555,
       "name": "HISTORY",
       "reach": 968000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "iqiyi-hd",
+      "id": "300",
+      "no": 300,
       "name": "iQIYI HD",
       "reach": 937000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "hits",
+      "id": "706",
+      "no": 706,
       "name": "HITS",
       "reach": 916000,
-      "genre": "English",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "kbs-world",
+      "id": "392",
+      "no": 392,
       "name": "KBS World",
       "reach": 910000,
-      "genre": "English",
+      "segment": "Korean",
       "lines": 1
     },
     {
-      "id": "astro-qj",
+      "id": "308",
+      "no": 308,
       "name": "Astro QJ",
       "reach": 905000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "celestial-classic-movies",
+      "id": "321",
+      "no": 321,
       "name": "Celestial Classic Movies",
       "reach": 897000,
-      "genre": "Movies",
+      "segment": "Chinese",
       "lines": 1
     },
     {
-      "id": "discovery-asia",
+      "id": "553",
+      "no": 553,
       "name": "Discovery Asia",
       "reach": 896000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "tvb-classic",
+      "id": "305",
+      "no": 305,
       "name": "TVB Classic",
       "reach": 884000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "bbc-earth",
+      "id": "554",
+      "no": 554,
       "name": "BBC Earth",
       "reach": 868000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "astro-hua-hee-dai",
+      "id": "333",
+      "no": 333,
       "name": "Astro Hua Hee Dai",
       "reach": 831000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 5
     },
     {
-      "id": "discovery-channel",
+      "id": "552",
+      "no": 552,
       "name": "Discovery Channel",
       "reach": 826000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "k-plus",
+      "id": "396",
+      "no": 396,
       "name": "K-PLUS",
       "reach": 784000,
-      "genre": "English",
+      "segment": "Korean",
       "lines": 2
     },
     {
-      "id": "sun-news",
+      "id": "215",
+      "no": 215,
       "name": "Sun News",
       "reach": 765000,
-      "genre": "News",
+      "segment": "Indian",
       "lines": 1
     },
     {
-      "id": "hgtv",
+      "id": "715",
+      "no": 715,
       "name": "HGTV",
       "reach": 687000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "hits-now",
+      "id": "702",
+      "no": 702,
       "name": "HITS NOW",
       "reach": 682000,
-      "genre": "Music",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "moonbug",
+      "id": "618",
+      "no": 618,
       "name": "Moonbug",
       "reach": 681000,
-      "genre": "Kids",
+      "segment": "GenNext",
       "lines": 1
     },
     {
-      "id": "tvb-xing-he",
+      "id": "319",
+      "no": 319,
       "name": "TVB Xing He",
       "reach": 619000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "cnn",
+      "id": "511",
+      "no": 511,
       "name": "CNN",
       "reach": 604000,
-      "genre": "News",
+      "segment": "News",
       "lines": 1
     },
     {
-      "id": "cti-asia",
+      "id": "316",
+      "no": 316,
       "name": "CTI Asia",
       "reach": 586000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 1
     },
     {
-      "id": "astro-sports-plus",
+      "id": "817",
+      "no": 817,
       "name": "Astro Sports Plus",
       "reach": 575000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "phoenix-chinese-channel",
+      "id": "325",
+      "no": 325,
       "name": "Phoenix Chinese Channel",
       "reach": 568000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 1
     },
     {
-      "id": "cartoon-network",
+      "id": "615",
+      "no": 615,
       "name": "Cartoon Network",
       "reach": 563000,
-      "genre": "Kids",
+      "segment": "GenNext",
       "lines": 1
     },
     {
-      "id": "tvbs-asia",
+      "id": "320",
+      "no": 320,
       "name": "TVBS Asia",
       "reach": 554000,
-      "genre": "Chinese",
+      "segment": "Chinese",
       "lines": 2
     },
     {
-      "id": "phoenix-infonews-channel",
+      "id": "326",
+      "no": 326,
       "name": "Phoenix InfoNews Channel",
       "reach": 544000,
-      "genre": "News",
+      "segment": "Chinese",
       "lines": 1
     },
     {
-      "id": "bbc-news",
+      "id": "512",
+      "no": 512,
       "name": "BBC News",
       "reach": 473000,
-      "genre": "News",
+      "segment": "News",
       "lines": 1
     },
     {
-      "id": "cna",
+      "id": "515",
+      "no": 515,
       "name": "CNA",
       "reach": 465000,
-      "genre": "News",
+      "segment": "News",
       "lines": 1
     },
     {
-      "id": "crime-investigation",
+      "id": "714",
+      "no": 714,
       "name": "Crime + Investigation",
       "reach": 429000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "al-jazeera-english",
+      "id": "513",
+      "no": 513,
       "name": "Al Jazeera English",
       "reach": 424000,
-      "genre": "News",
+      "segment": "News",
       "lines": 2
     },
     {
-      "id": "bbc-lifestyle",
+      "id": "717",
+      "no": 717,
       "name": "BBC Lifestyle",
       "reach": 337000,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "blippi-friends",
+      "id": "619",
+      "no": 619,
       "name": "Blippi & Friends",
       "reach": 326000,
-      "genre": "Kids",
+      "segment": "GenNext",
       "lines": 1
     },
     {
-      "id": "astro-golf",
+      "id": "831",
+      "no": 831,
       "name": "Astro Golf",
       "reach": 321000,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "tutor-tv",
+      "id": "603",
+      "no": 603,
       "name": "Tutor TV",
       "reach": 314000,
-      "genre": "Kids",
+      "segment": "",
       "lines": 0
     },
     {
-      "id": "bloomberg-tv",
+      "id": "517",
+      "no": 517,
       "name": "Bloomberg TV",
       "reach": 298000,
-      "genre": "News",
+      "segment": "News",
       "lines": 1
     },
     {
-      "id": "cnbc-asia",
+      "id": "516",
+      "no": 516,
       "name": "CNBC Asia",
       "reach": 136000,
-      "genre": "News",
+      "segment": "News",
       "lines": 1
     },
     {
-      "id": "astro-fam-time",
+      "id": "412",
+      "no": 412,
       "name": "Astro FAM Time",
       "reach": 0,
-      "genre": "Malay",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "astro-showtime",
+      "id": "411",
+      "no": 411,
       "name": "Astro Showtime",
       "reach": 0,
-      "genre": "Movies",
+      "segment": "English",
       "lines": 2
     },
     {
-      "id": "astro-tennis",
+      "id": "819",
+      "no": 819,
       "name": "Astro Tennis",
       "reach": 0,
-      "genre": "Sports",
+      "segment": "Sports",
       "lines": 2
     },
     {
-      "id": "astro-tutor-tv",
+      "id": "601",
+      "no": 601,
       "name": "Astro Tutor TV",
       "reach": 0,
-      "genre": "Kids",
+      "segment": "GenNext",
       "lines": 1
     },
     {
-      "id": "love-nature",
-      "name": "Love Nature",
+      "id": "550",
+      "no": 550,
+      "name": "Love Nature Commercial buy is not available on Love Nature 4K channel",
       "reach": 0,
-      "genre": "Lifestyle",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "rock-action",
+      "id": "414",
+      "no": 414,
       "name": "Rock Action",
       "reach": 0,
-      "genre": "Movies",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "rock-x-stream",
+      "id": "415",
+      "no": 415,
       "name": "Rock X Stream",
       "reach": 0,
-      "genre": "Movies",
+      "segment": "English",
       "lines": 1
     },
     {
-      "id": "zee-cinema",
+      "id": "251",
+      "no": 251,
       "name": "Zee Cinema",
       "reach": 0,
-      "genre": "Movies",
+      "segment": "Indian",
       "lines": 1
     }
   ],
   lines: [
     {
-      "id": "astro-ria-1",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
+      "id": "tv-104-1",
+      "ch": "104",
+      "ent": "TVC Spot",
       "belt": "12am - 12pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
       "rate": 4500,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-ria-2",
-      "ch": "astro-ria",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
+      "id": "tv-104-2",
+      "ch": "104",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
       "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-ria-3",
-      "ch": "astro-ria",
-      "spot": "Branded Promo",
+      "id": "tv-104-3",
+      "ch": "104",
+      "ent": "Branded Promo",
       "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-ria-4",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
+      "id": "tv-104-4",
+      "ch": "104",
+      "ent": "TVC Spot",
       "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-ria-5",
-      "ch": "astro-ria",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
+      "id": "tv-104-5",
+      "ch": "104",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-6",
-      "ch": "astro-ria",
-      "spot": "1 minute special report coverage",
+      "id": "tv-104-6",
+      "ch": "104",
+      "ent": "1 minute special report coverage",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-7",
-      "ch": "astro-ria",
-      "spot": "Animated Bug",
+      "id": "tv-104-7",
+      "ch": "104",
+      "ent": "Animated Bug",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-8",
-      "ch": "astro-ria",
-      "spot": "Lower 3rd Bottom Banner",
+      "id": "tv-104-8",
+      "ch": "104",
+      "ent": "Lower 3rd Bottom Banner",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-9",
-      "ch": "astro-ria",
-      "spot": "Opening & Closing",
+      "id": "tv-104-9",
+      "ch": "104",
+      "ent": "Opening & Closing",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-10",
-      "ch": "astro-ria",
-      "spot": "TVC Inside Program",
+      "id": "tv-104-10",
+      "ch": "104",
+      "ent": "TVC Inside Program",
       "belt": "6pm - 10pm (Mon - Thu) 11pm - 12am (Mon - Thu) 6pm - 12am (Fri - Sun)",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-11",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
+      "id": "tv-104-11",
+      "ch": "104",
+      "ent": "TVC Spot",
       "belt": "11pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
-      "daypart": "Prime"
+      "daypart": "Late"
     },
     {
-      "id": "astro-ria-12",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
+      "id": "tv-104-12",
+      "ch": "104",
+      "ent": "TVC Spot",
       "belt": "6pm - 10pm",
+      "days": "Mon - Thu",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-13",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
+      "id": "tv-104-13",
+      "ch": "104",
+      "ent": "TVC Spot",
       "belt": "6pm - 12am",
+      "days": "Fri - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-ria-14",
-      "ch": "astro-ria",
-      "spot": "TVC Spot",
-      "belt": "10pm - 11pm",
+      "id": "tv-104-14",
+      "ch": "104",
+      "ent": "TVC Spot",
+      "belt": "10pm -11pm",
+      "days": "Mon - Thu",
+      "cat": "x15",
       "rate": 15000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-prima-1",
-      "ch": "astro-prima",
-      "spot": "TVC Spot",
+      "id": "tv-105-1",
+      "ch": "105",
+      "ent": "TVC Spot",
       "belt": "12pm - 12pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
       "rate": 4000,
-      "daypart": "Daytime"
+      "daypart": "Run of schedule"
     },
     {
-      "id": "astro-prima-2",
-      "ch": "astro-prima",
-      "spot": "TVC Spot",
+      "id": "tv-105-2",
+      "ch": "105",
+      "ent": "TVC Spot",
       "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x6",
       "rate": 6000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-prima-3",
-      "ch": "astro-prima",
-      "spot": "TVC Spot",
+      "id": "tv-105-3",
+      "ch": "105",
+      "ent": "TVC Spot",
       "belt": "6pm - 12mn",
+      "days": "Sat - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-prima-4",
-      "ch": "astro-prima",
-      "spot": "TVC Spot",
+      "id": "tv-105-4",
+      "ch": "105",
+      "ent": "TVC Spot",
       "belt": "7pm - 12mn",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-prima-5",
-      "ch": "astro-prima",
-      "spot": "TVC Spot",
-      "belt": "6pm - 7pm",
+      "id": "tv-105-5",
+      "ch": "105",
+      "ent": "TVC Spot",
+      "belt": "6pm -7pm",
+      "days": "Mon - Fri",
+      "cat": "x14",
       "rate": 14000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-801-1",
+      "ch": "801",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-801-2",
+      "ch": "801",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-801-3",
+      "ch": "801",
+      "ent": "Any",
+      "belt": "News and Talk Shows (1st Run)",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-801-4",
+      "ch": "801",
+      "ent": "Any",
+      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x10",
+      "rate": 10000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-802-1",
+      "ch": "802",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-802-2",
+      "ch": "802",
+      "ent": "Any",
+      "belt": "News and Talk Shows (1st Run)",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-802-3",
+      "ch": "802",
+      "ent": "Any",
+      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x10",
+      "rate": 10000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-108-1",
+      "ch": "108",
+      "ent": "TVC Spot",
+      "belt": "12am - 9pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-arena-1",
-      "ch": "astro-arena",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-2",
-      "ch": "astro-arena",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-3",
-      "ch": "astro-arena",
-      "spot": "Any",
-      "belt": "News and Talk Shows (1st Run)",
-      "rate": 8000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-4",
-      "ch": "astro-arena",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
-      "rate": 10000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-2-1",
-      "ch": "astro-arena-2",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-2-2",
-      "ch": "astro-arena-2",
-      "spot": "Any",
-      "belt": "News and Talk Shows (1st Run)",
-      "rate": 8000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-arena-2-3",
-      "ch": "astro-arena-2",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
-      "rate": 10000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-citra-1",
-      "ch": "astro-citra",
-      "spot": "TVC Spot",
-      "belt": "12am - 9pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-citra-2",
-      "ch": "astro-citra",
-      "spot": "TVC Spot",
+      "id": "tv-108-2",
+      "ch": "108",
+      "ent": "TVC Spot",
       "belt": "9pm - 1am",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
-      "daypart": "Prime"
+      "daypart": "Late"
     },
     {
-      "id": "astro-arena-bola-1",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-1",
+      "ch": "803",
+      "ent": "Any",
       "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x6",
       "rate": 6000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-2",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-2",
+      "ch": "803",
+      "ent": "Any",
       "belt": "Asean Championship Mitsubishi Cup, AFC Champions League Elite, AFC Champions League TWO, Asian Cup Championship",
+      "days": "Mon - Sun",
+      "cat": "x10",
       "rate": 10000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-3",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-3",
+      "ch": "803",
+      "ent": "Any",
       "belt": "Liga Super Malaysia (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x12",
       "rate": 12000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-4",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-4",
+      "ch": "803",
+      "ent": "Any",
       "belt": "MFL Challenge Cup, Piala FA Malaysia or Piala Malaysia: Knock Out Stage (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x12",
       "rate": 12000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-5",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-5",
+      "ch": "803",
+      "ent": "Any",
       "belt": "MFL Challenge Cup, Piala FA Malaysia or Piala Malaysia: Quarter-Finals (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x15",
       "rate": 15000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-6",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-6",
+      "ch": "803",
+      "ent": "Any",
       "belt": "MFL Challenge Cup, Piala FA Malaysia or Piala Malaysia: Semi-Finals (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x18",
       "rate": 18000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-arena-bola-7",
-      "ch": "astro-arena-bola",
-      "spot": "Any",
+      "id": "tv-803-7",
+      "ch": "803",
+      "ent": "Any",
       "belt": "MFL Challenge Cup, Piala FA Malaysia or Piala Malaysia: Finals (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x20",
       "rate": 20000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-oasis-1",
-      "ch": "astro-oasis",
-      "spot": "TVC Spot",
+      "id": "tv-106-1",
+      "ch": "106",
+      "ent": "TVC Spot",
       "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
       "rate": 3500,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-oasis-2",
-      "ch": "astro-oasis",
-      "spot": "TVC Spot",
+      "id": "tv-106-2",
+      "ch": "106",
+      "ent": "TVC Spot",
       "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-premier-league-1",
-      "ch": "astro-premier-league",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-premier-league-2",
-      "ch": "astro-premier-league",
-      "spot": "Any",
-      "belt": "News and Talk Shows (1st Run)",
-      "rate": 8000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-premier-league-3",
-      "ch": "astro-premier-league",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
-      "rate": 12000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-badminton-1",
-      "ch": "astro-badminton",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-badminton-2",
-      "ch": "astro-badminton",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
-      "rate": 7000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-showcase-1",
-      "ch": "astro-showcase",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-showcase-2",
-      "ch": "astro-showcase",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
+      "id": "tv-811-1",
+      "ch": "811",
+      "ent": "Any",
+      "belt": "Others vs Others (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x10",
       "rate": 10000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-ceria-1",
-      "ch": "astro-ceria",
-      "spot": "Any",
-      "belt": "8am - 6pm",
-      "rate": 8000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-ceria-2",
-      "ch": "astro-ceria",
-      "spot": "Any",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "axn-1",
-      "ch": "axn",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "axn-2",
-      "ch": "axn",
-      "spot": "TVC Spot",
-      "belt": "6pm - 9pm",
-      "rate": 7000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "axn-3",
-      "ch": "axn",
-      "spot": "TVC Spot",
-      "belt": "9pm - 12am",
-      "rate": 10000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "hits-movies-1",
-      "ch": "hits-movies",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 6000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-grandstand-1",
-      "ch": "astro-grandstand",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 8000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-grandstand-2",
-      "ch": "astro-grandstand",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
+      "id": "tv-811-2",
+      "ch": "811",
+      "ent": "Any",
+      "belt": "Big 6 vs Others (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x15",
       "rate": 15000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-boo-1",
-      "ch": "astro-boo",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 6000,
-      "daypart": "Run of schedule"
+      "id": "tv-811-3",
+      "ch": "811",
+      "ent": "Any",
+      "belt": "Big 6 vs Big 6 (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x20",
+      "rate": 20000,
+      "daypart": "Programme buy"
     },
     {
-      "id": "astro-awani-1",
-      "ch": "astro-awani",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
-      "belt": "ROS 12am - 12am",
+      "id": "tv-815-1",
+      "ch": "815",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
-      "daypart": "Run of schedule"
+      "daypart": "Programme buy"
     },
     {
-      "id": "astro-awani-2",
-      "ch": "astro-awani",
-      "spot": "1 minute special report coverage",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
+      "id": "tv-815-2",
+      "ch": "815",
+      "ent": "Any",
+      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
+      "daypart": "Programme buy"
     },
     {
-      "id": "astro-awani-3",
-      "ch": "astro-awani",
-      "spot": "Animated Bug",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-4",
-      "ch": "astro-awani",
-      "spot": "Branded Promo",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-5",
-      "ch": "astro-awani",
-      "spot": "Lower 3rd Bottom Banner",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-6",
-      "ch": "astro-awani",
-      "spot": "Lower Third Banner",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-7",
-      "ch": "astro-awani",
-      "spot": "Opening & Closing",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-8",
-      "ch": "astro-awani",
-      "spot": "TVC Inside Program",
-      "belt": "7.45pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-awani-9",
-      "ch": "astro-awani",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-vellithirai-1",
-      "ch": "astro-vellithirai",
-      "spot": "TVC Spot",
+      "id": "tv-413-1",
+      "ch": "413",
+      "ent": "TVC Spot",
       "belt": "12am - 6pm",
-      "rate": 4500,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-vellithirai-2",
-      "ch": "astro-vellithirai",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
+      "id": "tv-413-2",
+      "ch": "413",
+      "ent": "TVC Spot",
+      "belt": "6pm -12am",
+      "days": "Mon - Sun",
+      "cat": "x10",
+      "rate": 10000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-611-1",
+      "ch": "611",
+      "ent": "Any",
+      "belt": "d",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Not stated"
+    },
+    {
+      "id": "tv-611-2",
+      "ch": "611",
+      "ent": "Any",
+      "belt": "8am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-701-1",
+      "ch": "701",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-701-2",
+      "ch": "701",
+      "ent": "TVC Spot",
+      "belt": "6pm - 9pm",
+      "days": "Mon - Sun",
+      "cat": "x7",
       "rate": 7000,
       "daypart": "Prime"
     },
     {
-      "id": "tvn-movies-1",
-      "ch": "tvn-movies",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-rania-1",
-      "ch": "astro-rania",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-vinmeen-1",
-      "ch": "astro-vinmeen",
-      "spot": "TVC Spot",
-      "belt": "12am - 8pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-vinmeen-2",
-      "ch": "astro-vinmeen",
-      "spot": "TVC Spot",
-      "belt": "8pm - 12am",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aura-1",
-      "ch": "astro-aura",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-aec-1",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "12am - 12pm",
-      "rate": 4000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-aec-2",
-      "ch": "astro-aec",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
-      "belt": "12pm - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-aec-3",
-      "ch": "astro-aec",
-      "spot": "Extension 1 minute market spotlight",
-      "belt": "12pm - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-aec-4",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "12pm - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-aec-5",
-      "ch": "astro-aec",
-      "spot": "1 min AWANI Ringkas + Sponsor Tag On",
-      "belt": "6pm - 12am (excl. 8pm - 8.30pm & 10.30pm - 11pm)",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-6",
-      "ch": "astro-aec",
-      "spot": "Branded Stage with sponsor's logo",
-      "belt": "6pm - 12am (excl. 8pm - 8.30pm & 10.30pm - 11pm)",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-7",
-      "ch": "astro-aec",
-      "spot": "Extension 1 minute market spotlight",
-      "belt": "6pm - 12am (excl. 8pm - 8.30pm & 10.30pm - 11pm)",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-8",
-      "ch": "astro-aec",
-      "spot": "Lower Third Banner",
-      "belt": "6pm - 12am (excl. 8pm - 8.30pm & 10.30pm - 11pm)",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-9",
-      "ch": "astro-aec",
-      "spot": "Opening & Closing",
-      "belt": "8pm - 8.30pm",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-10",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "10.30pm - 12mn",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-11",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "6pm - 8pm",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-12",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "8.30pm - 10.30pm",
-      "rate": 9000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-13",
-      "ch": "astro-aec",
-      "spot": "1 minute market spotlight (PRIME TALK)",
-      "belt": "8pm - 8.30pm",
-      "rate": 13000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-14",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "8pm - 8.30pm",
-      "rate": 13000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aec-15",
-      "ch": "astro-aec",
-      "spot": "TVC Spot",
-      "belt": "10.30pm - 11pm",
-      "rate": 13000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "asian-food-network-1",
-      "ch": "asian-food-network",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 5000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-daebak-1",
-      "ch": "astro-daebak",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 4000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-daebak-2",
-      "ch": "astro-daebak",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "celestial-movies-1",
-      "ch": "celestial-movies",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3500,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "celestial-movies-2",
-      "ch": "celestial-movies",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 5500,
-      "daypart": "Prime"
-    },
-    {
-      "id": "ktv-1",
-      "ch": "ktv",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 2500,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "ktv-2",
-      "ch": "ktv",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 4000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "sun-tv-1",
-      "ch": "sun-tv",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "sun-tv-2",
-      "ch": "sun-tv",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-football-1",
-      "ch": "astro-football",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 6000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-football-2",
-      "ch": "astro-football",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
-      "rate": 10000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-vaanavil-1",
-      "ch": "astro-vaanavil",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-vaanavil-2",
-      "ch": "astro-vaanavil",
-      "spot": "TVC Spot",
-      "belt": "6pm - 9pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-vaanavil-3",
-      "ch": "astro-vaanavil",
-      "spot": "TVC Spot",
+      "id": "tv-701-3",
+      "ch": "701",
+      "ent": "TVC Spot",
       "belt": "9pm - 12am",
-      "rate": 6000,
+      "days": "Mon - Sun",
+      "cat": "x10",
+      "rate": 10000,
       "daypart": "Prime"
     },
     {
-      "id": "colors-tamil-hd-1",
-      "ch": "colors-tamil-hd",
-      "spot": "TVC Spot",
+      "id": "tv-401-1",
+      "ch": "401",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 4000,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "zee-tamil-hd-1",
-      "ch": "zee-tamil-hd",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3000,
-      "daypart": "Daytime"
+      "id": "tv-810-1",
+      "ch": "810",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Programme buy"
     },
     {
-      "id": "zee-tamil-hd-2",
-      "ch": "zee-tamil-hd",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
+      "id": "tv-810-2",
+      "ch": "810",
+      "ent": "Any",
+      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x15",
+      "rate": 15000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-404-1",
+      "ch": "404",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-501-1",
+      "ch": "501",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-501-2",
+      "ch": "501",
+      "ent": "1 minute special report coverage",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
       "daypart": "Prime"
     },
     {
-      "id": "lifetime-1",
-      "ch": "lifetime",
-      "spot": "TVC Spot",
+      "id": "tv-501-3",
+      "ch": "501",
+      "ent": "Animated Bug",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-4",
+      "ch": "501",
+      "ent": "Branded Promo",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-5",
+      "ch": "501",
+      "ent": "Lower 3rd Bottom Banner",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-6",
+      "ch": "501",
+      "ent": "Lower Third Banner",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-7",
+      "ch": "501",
+      "ent": "Opening & Closing",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-8",
+      "ch": "501",
+      "ent": "TVC Inside Program",
+      "belt": "7.45pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-501-9",
+      "ch": "501",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 4000,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "adithya-1",
-      "ch": "adithya",
-      "spot": "TVC Spot",
+      "id": "tv-203-1",
+      "ch": "203",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
+      "rate": 4500,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-203-2",
+      "ch": "203",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-416-1",
+      "ch": "416",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 4000,
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "colors-hindi-hd-1",
-      "ch": "colors-hindi-hd",
-      "spot": "TVC Spot",
+      "id": "tv-112-1",
+      "ch": "112",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 4000,
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "sun-music-1",
-      "ch": "sun-music",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 4000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "tlc-1",
-      "ch": "tlc",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 4000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "tvn-1",
-      "ch": "tvn",
-      "spot": "TVC Spot",
+      "id": "tv-202-1",
+      "ch": "202",
+      "ent": "TVC Spot",
       "belt": "12am - 8pm",
-      "rate": 6000,
-      "daypart": "Prime"
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
     },
     {
-      "id": "tvn-2",
-      "ch": "tvn",
-      "spot": "TVC Spot",
+      "id": "tv-202-2",
+      "ch": "202",
+      "ent": "TVC Spot",
       "belt": "8pm - 12am",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aod-1",
-      "ch": "astro-aod",
-      "spot": "TVC Spot",
-      "belt": "10.30pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x8",
       "rate": 8000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-aod-2",
-      "ch": "astro-aod",
-      "spot": "TVC Spot",
-      "belt": "12am - 8.30pm",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-aod-3",
-      "ch": "astro-aod",
-      "spot": "TVC Spot",
+      "id": "tv-113-1",
+      "ch": "113",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 8000,
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "astro-aod-4",
-      "ch": "astro-aod",
-      "spot": "TVC Spot",
+      "id": "tv-306-1",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "12am - 12pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-306-2",
+      "ch": "306",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
+      "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-306-3",
+      "ch": "306",
+      "ent": "Extension 1 minute market spotlight",
+      "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-306-4",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-306-5",
+      "ch": "306",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
+      "belt": "6pm - 12am (excl. 8pm - 8:30pm & 10:30pm - 11pm)",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-6",
+      "ch": "306",
+      "ent": "Branded Stage with sponsor's logo",
+      "belt": "6pm - 12am (excl. 8pm - 8:30pm & 10:30pm - 11pm)",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-7",
+      "ch": "306",
+      "ent": "Extension 1 minute market spotlight",
+      "belt": "6pm - 12am (excl. 8pm - 8:30pm & 10:30pm - 11pm)",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-8",
+      "ch": "306",
+      "ent": "Lower Third Banner",
+      "belt": "6pm - 12am (excl. 8pm - 8:30pm & 10:30pm - 11pm)",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-9",
+      "ch": "306",
+      "ent": "Opening & Closing",
+      "belt": "8pm - 8.30pm",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-10",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "10.30pm - 12mn",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Late"
+    },
+    {
+      "id": "tv-306-11",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "6pm - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-12",
+      "ch": "306",
+      "ent": "TVC Spot",
       "belt": "8.30pm - 10.30pm",
+      "days": "Mon - Sun",
+      "cat": "x9",
+      "rate": 9000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-13",
+      "ch": "306",
+      "ent": "1 minute market spotlight (PRIME TALK)",
+      "belt": "8pm - 8.30pm",
+      "days": "Mon - Sun",
+      "cat": "x13",
       "rate": 13000,
       "daypart": "Prime"
     },
     {
-      "id": "sun-life-1",
-      "ch": "sun-life",
-      "spot": "TVC Spot",
+      "id": "tv-306-14",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "10.30pm - 11pm",
+      "days": "Mon - Sun",
+      "cat": "x13",
+      "rate": 13000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-306-15",
+      "ch": "306",
+      "ent": "TVC Spot",
+      "belt": "8pm - 8.30pm",
+      "days": "Mon - Sun",
+      "cat": "x13",
+      "rate": 13000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-709-1",
+      "ch": "709",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 3500,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "sun-life-2",
-      "ch": "sun-life",
-      "spot": "TVC Spot",
+      "id": "tv-393-1",
+      "ch": "393",
+      "ent": "TVC Spot",
       "belt": "12am - 8pm",
-      "rate": 4500,
-      "daypart": "Prime"
-    },
-    {
-      "id": "tvb-jade-1",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "12am - 1pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
       "rate": 4000,
       "daypart": "Daytime"
     },
     {
-      "id": "tvb-jade-2",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "1pm - 12am",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "tvb-jade-3",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "1pm - 6.30pm",
-      "rate": 5000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "tvb-jade-4",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "10.30pm - 12am",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "tvb-jade-5",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "6.30pm - 8.30pm",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "tvb-jade-6",
-      "ch": "tvb-jade",
-      "spot": "TVC Spot",
-      "belt": "8.30pm - 10.30pm",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "history-1",
-      "ch": "history",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 4000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "iqiyi-hd-1",
-      "ch": "iqiyi-hd",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3500,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "iqiyi-hd-2",
-      "ch": "iqiyi-hd",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "hits-1",
-      "ch": "hits",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 4000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "kbs-world-1",
-      "ch": "kbs-world",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 4000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-qj-1",
-      "ch": "astro-qj",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3500,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-qj-2",
-      "ch": "astro-qj",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
-      "rate": 6000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "celestial-classic-movies-1",
-      "ch": "celestial-classic-movies",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "discovery-asia-1",
-      "ch": "discovery-asia",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "tvb-classic-1",
-      "ch": "tvb-classic",
-      "spot": "TVC Spot",
-      "belt": "12am - 12pm",
-      "rate": 3000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "tvb-classic-2",
-      "ch": "tvb-classic",
-      "spot": "TVC Spot",
-      "belt": "12pm - 12am",
-      "rate": 5000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "bbc-earth-1",
-      "ch": "bbc-earth",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-hua-hee-dai-1",
-      "ch": "astro-hua-hee-dai",
-      "spot": "TVC Spot",
-      "belt": "12am - 12pm",
-      "rate": 4500,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-hua-hee-dai-2",
-      "ch": "astro-hua-hee-dai",
-      "spot": "Extension 1 minute market spotlight",
-      "belt": "12pm - 6pm",
-      "rate": 6000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-hua-hee-dai-3",
-      "ch": "astro-hua-hee-dai",
-      "spot": "TVC Spot",
-      "belt": "12pm - 6pm",
-      "rate": 6000,
-      "daypart": "Daytime"
-    },
-    {
-      "id": "astro-hua-hee-dai-4",
-      "ch": "astro-hua-hee-dai",
-      "spot": "Extension 1 minute market spotlight",
-      "belt": "6pm - 12am",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "astro-hua-hee-dai-5",
-      "ch": "astro-hua-hee-dai",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12mn",
-      "rate": 8000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "discovery-channel-1",
-      "ch": "discovery-channel",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "k-plus-1",
-      "ch": "k-plus",
-      "spot": "TVC Spot",
-      "belt": "12am - 8pm",
-      "rate": 4000,
-      "daypart": "Prime"
-    },
-    {
-      "id": "k-plus-2",
-      "ch": "k-plus",
-      "spot": "TVC Spot",
+      "id": "tv-393-2",
+      "ch": "393",
+      "ent": "TVC Spot",
       "belt": "8pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x6",
       "rate": 6000,
       "daypart": "Prime"
     },
     {
-      "id": "sun-news-1",
-      "ch": "sun-news",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "hgtv-1",
-      "ch": "hgtv",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "hits-now-1",
-      "ch": "hits-now",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "moonbug-1",
-      "ch": "moonbug",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "tvb-xing-he-1",
-      "ch": "tvb-xing-he",
-      "spot": "TVC Spot",
+      "id": "tv-309-1",
+      "ch": "309",
+      "ent": "TVC Spot",
       "belt": "12am - 6pm",
-      "rate": 3000,
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
       "daypart": "Daytime"
     },
     {
-      "id": "tvb-xing-he-2",
-      "ch": "tvb-xing-he",
-      "spot": "TVC Spot",
+      "id": "tv-309-2",
+      "ch": "309",
+      "ent": "TVC Spot",
       "belt": "6pm - 12am",
-      "rate": 5000,
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
       "daypart": "Prime"
     },
     {
-      "id": "cnn-1",
-      "ch": "cnn",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3500,
-      "daypart": "Run of schedule"
+      "id": "tv-216-1",
+      "ch": "216",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
+      "rate": 4500,
+      "daypart": "Daytime"
     },
     {
-      "id": "cti-asia-1",
-      "ch": "cti-asia",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
+      "id": "tv-216-2",
+      "ch": "216",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
+      "daypart": "Prime"
     },
     {
-      "id": "astro-sports-plus-1",
-      "ch": "astro-sports-plus",
-      "spot": "Any",
+      "id": "tv-211-1",
+      "ch": "211",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-211-2",
+      "ch": "211",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-814-1",
+      "ch": "814",
+      "ent": "Any",
       "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-sports-plus-2",
-      "ch": "astro-sports-plus",
-      "spot": "Any",
+      "id": "tv-814-2",
+      "ch": "814",
+      "ent": "Any",
       "belt": "All (Live or Delayed)",
-      "rate": 6000,
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
       "daypart": "Programme buy"
     },
     {
-      "id": "phoenix-chinese-channel-1",
-      "ch": "phoenix-chinese-channel",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "cartoon-network-1",
-      "ch": "cartoon-network",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "tvbs-asia-1",
-      "ch": "tvbs-asia",
-      "spot": "TVC Spot",
-      "belt": "12am - 6pm",
-      "rate": 3000,
+      "id": "tv-201-1",
+      "ch": "201",
+      "ent": "TVC Spot",
+      "belt": "12am - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
       "daypart": "Daytime"
     },
     {
-      "id": "tvbs-asia-2",
-      "ch": "tvbs-asia",
-      "spot": "TVC Spot",
-      "belt": "6pm - 12am",
+      "id": "tv-201-2",
+      "ch": "201",
+      "ent": "TVC Spot",
+      "belt": "8pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
       "rate": 4500,
       "daypart": "Prime"
     },
     {
-      "id": "phoenix-infonews-channel-1",
-      "ch": "phoenix-infonews-channel",
-      "spot": "TVC Spot",
+      "id": "tv-201-3",
+      "ch": "201",
+      "ent": "1 min AWANI Ringkas + Sponsor Tag On",
+      "belt": "12am - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-222-1",
+      "ch": "222",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 3000,
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "bbc-news-1",
-      "ch": "bbc-news",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
+      "id": "tv-223-1",
+      "ch": "223",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
+      "rate": 4500,
+      "daypart": "Daytime"
     },
     {
-      "id": "cna-1",
-      "ch": "cna",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "crime-investigation-1",
-      "ch": "crime-investigation",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "al-jazeera-english-1",
-      "ch": "al-jazeera-english",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 3000,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "al-jazeera-english-2",
-      "ch": "al-jazeera-english",
-      "spot": "TVC Spot",
+      "id": "tv-223-2",
+      "ch": "223",
+      "ent": "TVC Spot",
       "belt": "6pm - 12am",
-      "rate": 4000,
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
       "daypart": "Prime"
     },
     {
-      "id": "bbc-lifestyle-1",
-      "ch": "bbc-lifestyle",
-      "spot": "TVC Spot",
+      "id": "tv-703-1",
+      "ch": "703",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "blippi-friends-1",
-      "ch": "blippi-friends",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 2500,
-      "daypart": "Run of schedule"
-    },
-    {
-      "id": "astro-golf-1",
-      "ch": "astro-golf",
-      "spot": "Any",
-      "belt": "Others",
-      "rate": 4000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "astro-golf-2",
-      "ch": "astro-golf",
-      "spot": "Any",
-      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
-      "daypart": "Programme buy"
-    },
-    {
-      "id": "bloomberg-tv-1",
-      "ch": "bloomberg-tv",
-      "spot": "TVC Spot",
-      "belt": "ROS 12am - 12am",
-      "rate": 2500,
       "daypart": "Run of schedule"
     },
     {
-      "id": "cnbc-asia-1",
-      "ch": "cnbc-asia",
-      "spot": "TVC Spot",
+      "id": "tv-214-1",
+      "ch": "214",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
       "daypart": "Run of schedule"
     },
     {
-      "id": "astro-fam-time-1",
-      "ch": "astro-fam-time",
-      "spot": "TVC Spot",
+      "id": "tv-116-1",
+      "ch": "116",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "astro-showtime-1",
-      "ch": "astro-showtime",
-      "spot": "TVC Spot",
+      "id": "tv-212-1",
+      "ch": "212",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-707-1",
+      "ch": "707",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-395-1",
+      "ch": "395",
+      "ent": "TVC Spot",
+      "belt": "12am - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-395-2",
+      "ch": "395",
+      "ent": "TVC Spot",
+      "belt": "8pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-311-1",
+      "ch": "311",
+      "ent": "TVC Spot",
+      "belt": "10.30pm - 12am",
+      "days": "Mon - Fri",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Late"
+    },
+    {
+      "id": "tv-311-2",
+      "ch": "311",
+      "ent": "TVC Spot",
+      "belt": "12am - 8.30pm",
+      "days": "Mon - Fri",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-311-3",
+      "ch": "311",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Sat - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-311-4",
+      "ch": "311",
+      "ent": "TVC Spot",
+      "belt": "8.30pm - 10.30pm",
+      "days": "Mon - Fri",
+      "cat": "x13",
+      "rate": 13000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-217-1",
+      "ch": "217",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-217-2",
+      "ch": "217",
+      "ent": "TVC Spot",
+      "belt": "12am - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
+      "rate": 4500,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-310-1",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "12am - 1pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-310-2",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "1pm - 12am",
+      "days": "Sat - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-310-3",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "1pm - 6.30pm",
+      "days": "Mon - Fri",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-310-4",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "10.30pm - 12am",
+      "days": "Mon - Fri",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Late"
+    },
+    {
+      "id": "tv-310-5",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "6.30pm - 8.30pm",
+      "days": "Mon - Fri",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-310-6",
+      "ch": "310",
+      "ent": "TVC Spot",
+      "belt": "8.30pm - 10.30pm",
+      "days": "Mon - Fri",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-555-1",
+      "ch": "555",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-300-1",
+      "ch": "300",
+      "ent": "TVC Spot",
       "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
       "rate": 3500,
       "daypart": "Daytime"
     },
     {
-      "id": "astro-showtime-2",
-      "ch": "astro-showtime",
-      "spot": "TVC Spot",
+      "id": "tv-300-2",
+      "ch": "300",
+      "ent": "TVC Spot",
       "belt": "6pm - 12am",
-      "rate": 5500,
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
       "daypart": "Prime"
     },
     {
-      "id": "astro-tennis-1",
-      "ch": "astro-tennis",
-      "spot": "Any",
+      "id": "tv-706-1",
+      "ch": "706",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-392-1",
+      "ch": "392",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-308-1",
+      "ch": "308",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-308-2",
+      "ch": "308",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-321-1",
+      "ch": "321",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-553-1",
+      "ch": "553",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-305-1",
+      "ch": "305",
+      "ent": "TVC Spot",
+      "belt": "12am - 12pm",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-305-2",
+      "ch": "305",
+      "ent": "TVC Spot",
+      "belt": "12pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-554-1",
+      "ch": "554",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-333-1",
+      "ch": "333",
+      "ent": "TVC Spot",
+      "belt": "12am - 12pm",
+      "days": "Mon - Sun",
+      "cat": "x4.5",
+      "rate": 4500,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-333-2",
+      "ch": "333",
+      "ent": "Extension 1 minute market spotlight",
+      "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-333-3",
+      "ch": "333",
+      "ent": "TVC Spot",
+      "belt": "12pm - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-333-4",
+      "ch": "333",
+      "ent": "Extension 1 minute market spotlight",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-333-5",
+      "ch": "333",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12mn",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-552-1",
+      "ch": "552",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-396-1",
+      "ch": "396",
+      "ent": "TVC Spot",
+      "belt": "12am - 8pm",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-396-2",
+      "ch": "396",
+      "ent": "TVC Spot",
+      "belt": "8pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-215-1",
+      "ch": "215",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-715-1",
+      "ch": "715",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-702-1",
+      "ch": "702",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-618-1",
+      "ch": "618",
+      "ent": "Any",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-319-1",
+      "ch": "319",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-319-2",
+      "ch": "319",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-511-1",
+      "ch": "511",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-316-1",
+      "ch": "316",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x2.5",
+      "rate": 2500,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-817-1",
+      "ch": "817",
+      "ent": "Any",
       "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x5",
       "rate": 5000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-tennis-2",
-      "ch": "astro-tennis",
-      "spot": "Any",
+      "id": "tv-817-2",
+      "ch": "817",
+      "ent": "Any",
       "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x6",
       "rate": 6000,
       "daypart": "Programme buy"
     },
     {
-      "id": "astro-tutor-tv-1",
-      "ch": "astro-tutor-tv",
-      "spot": "TVC Spot",
+      "id": "tv-325-1",
+      "ch": "325",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x2.5",
       "rate": 2500,
       "daypart": "Run of schedule"
     },
     {
-      "id": "love-nature-1",
-      "ch": "love-nature",
-      "spot": "TVC Spot",
+      "id": "tv-615-1",
+      "ch": "615",
+      "ent": "Any",
       "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-320-1",
+      "ch": "320",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x2.5",
+      "rate": 2500,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-320-2",
+      "ch": "320",
+      "ent": "TVC Spot",
+      "belt": "6pm - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-326-1",
+      "ch": "326",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x2.5",
       "rate": 2500,
       "daypart": "Run of schedule"
     },
     {
-      "id": "rock-action-1",
-      "ch": "rock-action",
-      "spot": "TVC Spot",
+      "id": "tv-512-1",
+      "ch": "512",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "rock-x-stream-1",
-      "ch": "rock-x-stream",
-      "spot": "TVC Spot",
+      "id": "tv-515-1",
+      "ch": "515",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     },
     {
-      "id": "zee-cinema-1",
-      "ch": "zee-cinema",
-      "spot": "TVC Spot",
+      "id": "tv-714-1",
+      "ch": "714",
+      "ent": "TVC Spot",
       "belt": "ROS 12am - 12am",
-      "rate": 2500,
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-513-1",
+      "ch": "513",
+      "ent": "Branded Promo",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-513-2",
+      "ch": "513",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-717-1",
+      "ch": "717",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x4",
+      "rate": 4000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-619-1",
+      "ch": "619",
+      "ent": "Any",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3.5",
+      "rate": 3500,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-831-1",
+      "ch": "831",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-831-2",
+      "ch": "831",
+      "ent": "Any",
+      "belt": "Competitive Rounds (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x8",
+      "rate": 8000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-517-1",
+      "ch": "517",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-516-1",
+      "ch": "516",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-412-1",
+      "ch": "412",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-411-1",
+      "ch": "411",
+      "ent": "TVC Spot",
+      "belt": "12am - 6pm",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Daytime"
+    },
+    {
+      "id": "tv-411-2",
+      "ch": "411",
+      "ent": "TVC Spot",
+      "belt": "6pm -12am",
+      "days": "Mon - Sun",
+      "cat": "x10",
+      "rate": 10000,
+      "daypart": "Prime"
+    },
+    {
+      "id": "tv-819-1",
+      "ch": "819",
+      "ent": "Any",
+      "belt": "Others",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-819-2",
+      "ch": "819",
+      "ent": "Any",
+      "belt": "All (Live or Delayed)",
+      "days": "Mon - Sun",
+      "cat": "x6",
+      "rate": 6000,
+      "daypart": "Programme buy"
+    },
+    {
+      "id": "tv-601-1",
+      "ch": "601",
+      "ent": "Any",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x3",
+      "rate": 3000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-550-1",
+      "ch": "550",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-414-1",
+      "ch": "414",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x7",
+      "rate": 7000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-415-1",
+      "ch": "415",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
+      "daypart": "Run of schedule"
+    },
+    {
+      "id": "tv-251-1",
+      "ch": "251",
+      "ent": "TVC Spot",
+      "belt": "ROS 12am - 12am",
+      "days": "Mon - Sun",
+      "cat": "x5",
+      "rate": 5000,
       "daypart": "Run of schedule"
     }
   ]

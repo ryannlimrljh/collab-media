@@ -33,13 +33,13 @@ export function buildSystem(cat, surface = 'planner') {
   const cardLines = card ? card.channels.reduce((a, c) => a + c[3].length, 0) : 0;
   const videoCard = !card ? '' : `
 VIDEO RATE CARD. Video is not one format, it is ${cardLines} buyable lines
-across ${card.channels.length} channels. Each line is an id, a ${card.cols.slice(1).join(', a ')}.
+across ${card.channels.length} channels. Each line reads: id | entitlement | timebelt or programme | days | rate | daypart.
 Add and drop them with add_formats and remove_formats, quoting the id
 exactly as written here. The rate is per 30 second spot, not a CPM, so
 never call it a CPM.
 
 ${card.channels.map((c) => `${c[0]} (${c[1] ? n(c[1]) + ' monthly' : 'no published reach'}, ${c[2]})
-` + c[3].map((l) => `  ${l[0]} | ${l[1]} | ${l[2]} | RM ${n(l[3])} /30s | ${l[4]}`).join('\n')).join('\n')}
+` + c[3].map((l) => `  ${l[0]} | ${l[1]} | ${l[2]} | ${l[3]} | RM ${n(l[4])} /30s | ${l[5]}`).join('\n')).join('\n')}
 `;
 
   /* The planner has an open plan and thirteen ways to change it; the

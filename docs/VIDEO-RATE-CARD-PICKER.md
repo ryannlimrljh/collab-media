@@ -87,43 +87,85 @@ are the group row, the tabular rate column and the panel's height.
 
 ## The data contract
 
-`shared/tv-ratecard.js` is the only thing to replace. One row per
-buyable line:
+`shared/tv-ratecard.js` holds the real card, transcribed on 5 Oct 2026
+from `RUNS_ON_CHIPS.md`, which was read out of the production database.
+86 channels, 176 buyable lines, 81 of them with something to buy. The
+channel census, the channel numbers, the segments and every line's
+entitlement, timebelt, days, pricing category and 30 second price are
+production's own, and the derived figures agree with production exactly:
+81 buyable and 5 grey channels, 8 with no published reach, and a segment
+split of English 20, Chinese 14, Indian 13, Sports 10, Malay 7, News 7,
+not stated 5, GenNext 5, Korean 5.
+
+One row per buyable line:
 
 ```js
-{ id, ch, spot, belt, rate, daypart }
+{ id, ch, ent, belt, days, cat, rate, daypart }
 ```
 
 | field | meaning |
 |---|---|
-| `ch` | channel id, joins to `TV_RATECARD.channels` |
-| `spot` | what is being bought, "TVC Spot", "Animated Bug" |
-| `belt` | timebelt or programme, "6pm - 10pm", "Liga Super Malaysia" |
-| `rate` | ringgit per 30 second spot |
+| `ch` | **channel number**, which is how production joins a line to a channel |
+| `ent` | entitlement, what is being sold |
+| `belt` | timebelt or programme |
+| `days` | which days it runs |
+| `cat` | pricing category off the TV rate card, "x13" |
+| `rate` | ringgit for a 30 second spot |
 | `daypart` | **derived, see below** |
 
-`daypart` is the only field your feed does not already carry. It is
-derived from `belt` by a small set of patterns so the picker has
-something coarse to filter on. If the feed ever grows a real
-classification, use that instead and delete the guesswork.
+Channels carry `{ id, no, name, reach, segment, lines }`.
 
-Channels carry `{ id, name, reach, genre }`. `genre` drives the second
-facet; `reach` drives both the group header and the default ordering.
+**Join on the number, never the name.** Two brands appear twice under
+two numbers, because the rate card and the Brand Profile library
+disagree: Zee Cinema (251, buyable, no reach) and Z Cinema (117, grey,
+1,600,000); Astro Tutor TV (601, buyable, no reach) and Tutor TV (603,
+grey, 314,000). Keyed by name they would collide into one.
 
-### Two things to fix when the real data lands
+`daypart` is the only field the feed does not carry. It is derived in
+the generator by the **midpoint of the timebelt**, which is coarse but
+survives every shape in the card: a point in time ("7.45pm"), a belt
+that runs past midnight ("9pm - 1am"), a full day, and the programme
+buys that name a competition instead of a clock. Prime is a midpoint
+from 6pm to 11pm, Late from 11pm to 6am, Daytime otherwise; anything
+starting "ROS" or spanning a full day is Run of schedule, and anything
+matching a competition is a Programme buy. Replace the whole thing the
+moment the feed grows a real classification.
 
-1. **CPM is directional.** The card prices a 30 second spot, not a
-   thousand impressions. To keep the existing split, forecast and
-   booking machinery working without a special case, each line gets a
-   CPM scaled from the old single Video CPM of 3.26 against the card's
-   median rate. It is a placeholder. Compute it from real per-spot
-   delivery when you have it. Everything else about the picker is
-   independent of this.
-2. **The rates on the smaller channels are reconstructed.** The channel
-   census, being name, monthly reach and line count, is read off the
-   production build and is accurate; so are the rates on the channels
-   large enough to read in the recording. The rest are plausible rather
-   than authoritative. Nobody should quote a number out of this file.
+**Source oddities are preserved on purpose**, because hiding them would
+hide a data problem: Astro Ceria's timebelt of `d`, Astro Prima's
+`12pm - 12pm`, channel 550 whose name is the sentence "Love Nature
+Commercial buy is not available on Love Nature 4K channel", and the
+inconsistent spacing in `10pm -11pm` and `6pm -12am`.
+
+### The one thing still to fix when you port it
+
+**CPM is directional.** The card prices a 30 second spot, not a thousand
+impressions. To keep the existing split, forecast and booking machinery
+working without a special case, each line gets a CPM scaled from the old
+single Video CPM of 3.26 against the card's median rate. It is a
+placeholder and nothing else in the picker depends on it. Compute it
+from real per-spot delivery when you have it.
+
+## The "Runs on" chips are now redundant
+
+Production draws 86 chips under **Runs on** in the Video block, each
+naming a channel, its monthly reach and its line count. They are labels,
+not buttons: clicking one does nothing. They are also the second half of
+the long scroll, and they repeat what is already on screen, because the
+picker's group header carries exactly the same three facts for every
+channel that has something to buy.
+
+The only thing the chips say that the group headers cannot is that five
+channels exist but carry no priced line. That is one sentence, and it
+now sits under the table:
+
+> 5 more channels carry no priced line and cannot be bought: Astro Arena
+> Bola 2, Astro Premier League 2, Astro Premier League 3, Z Cinema,
+> Tutor TV.
+
+So the Video block can drop the chip row entirely and lose nothing. Web
+is a different case and should keep its own chips: those are clickable
+must-buy pins, not labels.
 
 ## What else changed
 
@@ -131,7 +173,7 @@ Expanding Video from one format to 176 pushed the AI catalogue from
 6KB to 30KB, over the endpoint's 24KB cap, which would have returned
 `400 catalogue did not parse` on every assistant call. Video now travels
 as its own card, grouped so a channel is named once rather than once per
-line, which brings it to 15.5KB; the cap moved to 40KB for headroom. See
+line, which brings it to 16.4KB; the cap moved to 40KB for headroom. See
 `aiCatalogue()` in the page and the `VIDEO RATE CARD` block in
 `api/_prompt.mjs`. The model is told the rate is per 30 second spot and
 is not a CPM.
@@ -144,3 +186,6 @@ is not a CPM.
   not been redesigned for that.
 - Sorting by rate drops the channel grouping and shows a flat list, by
   design: grouping and a global price sort fight each other.
+- The card is a transcription with a date on it, not a feed. It goes
+  stale the moment Sales re-syncs. Point it at the real endpoint rather
+  than re-transcribing.
