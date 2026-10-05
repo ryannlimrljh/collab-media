@@ -889,7 +889,7 @@
   .p-card-grpname{display:flex; align-items:center; gap:var(--spacing-8); min-width:0;}
   /* Landscape, because Astro's own channel marks are 144x80 and a
      square tile would shrink them to nothing. */
-  .p-ch-logo{flex:0 0 auto; width:48px; height:28px; border-radius:var(--radius-sm);
+  .p-ch-logo{flex:0 0 auto; width:48px; height:28px; border-radius:4px;
     display:inline-flex; align-items:center; justify-content:center; overflow:hidden;
     font-size:11px; font-weight:800; letter-spacing:.01em; line-height:1;
     background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);
@@ -4112,13 +4112,15 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
       block.appendChild(add);
       }
 
-      /* Runs on: the sites in this channel; an active chip is a must-buy. */
+      /* Runs on: the sites in this channel; an active chip is a must-buy.
+         A channel with no pool gets no row. Saying "no site pool to pick
+         from" under Video and Audio was a label with nothing under it:
+         Video names its channel on every line and in every group header
+         of the picker, and Audio is one airtime line. */
       var sites = SITES.filter(function(s){ return s.ch === c; });
-      var runs = document.createElement('div');
-      runs.className = 'p-chan-sites';
-      if (!sites.length){
-        runs.innerHTML = '<span class="lab">Runs on</span><div class="chips"><span class="sum" style="margin-left:0;">Bought as airtime, no site pool to pick from.</span></div>';
-      } else {
+      if (sites.length){
+        var runs = document.createElement('div');
+        runs.className = 'p-chan-sites';
         var pinned = sites.filter(function(s){ return s.pin; }).length;
         runs.innerHTML = '<span class="lab">Runs on</span><div class="chips">' +
           sites.map(function(sx){
@@ -4130,8 +4132,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
           }).join('') +
           '<span class="sum">' + (pinned ? pinned + ' must-buy · ' + (sites.length - pinned) + ' in the pool' : 'Tick a site to guarantee it; the rest stay in the pool') + '</span>' +
           '</div>';
+        block.appendChild(runs);
       }
-      block.appendChild(runs);
       list.appendChild(block);
     });
     /* new block or row: grow it in now that it has a real height */

@@ -214,6 +214,101 @@ page is not a fold but a shape flying in from nowhere; and
 that shows the backdrop immediately rather than on a timer, or it
 flashes empty for a frame.
 
+## The "Runs on" row is gone from Video and Audio
+
+Production draws 86 chips under **Runs on** in the Video block, each
+naming a channel, its monthly reach and its line count. They are labels,
+not buttons: clicking one does nothing. They are also the second half of
+the long scroll, and they repeat what is already on screen, because the
+picker's group header carries exactly the same three facts, with the
+channel's logo on top.
+
+The only thing the chips said that the group headers cannot is that five
+channels exist but carry no priced line. That is one sentence, and it
+sits under the picker's table:
+
+> 5 more channels carry no priced line and cannot be bought: Astro Arena
+> Bola 2, Astro Premier League 2, Astro Premier League 3, Z Cinema,
+> Tutor TV.
+
+So the row is dropped. The rule is **a channel with no site pool gets no
+row**, which is a fact about the data rather than a list of channel
+names: Video and Audio have no pool, and Audio's row only ever said
+"bought as airtime, no site pool to pick from", which is a label with
+nothing under it. Web, Social and OTT keep theirs, because those chips
+are clickable must-buy pins and not labels.
+
+Production's own Video block can lose its 86 chips on the same grounds.
+That is the second half of the scroll in the recording.
+
+## The channel mark
+
+Each group row carries a 48x28 mark, so 81 rows are not 81 identical
+lines of text.
+
+**They are Astro's own channel logos**, the ones the public channel
+guide at astro.com.my/content/channels uses, referenced from
+`divign0fdw3sv.cloudfront.net` rather than copied into this repo. 80 of
+the 81 buyable channels have one. The odd one out, BBC Lifestyle, is not
+in the guide's list and falls back to a monogram, which is a fair
+demonstration that the fallback works.
+
+Three things worth knowing before you touch this:
+
+- **The logo id is not the channel number.** It is Astro's own internal
+  id: 104 Astro Ria is logo 193, 801 Astro Arena is logo 235. The map
+  lives in the generator, scraped on 5 Oct 2026.
+- **Two brands run under two channel numbers each** and the guide lists
+  only one of each pair, so Zee Cinema (251) borrows Z Cinema's mark and
+  Astro Tutor TV (601) borrows Tutor TV's. Same brand, same mark.
+- **The tile has to be light.** Many marks carry their own solid
+  background, the pink Astro badge among them, but several are dark
+  artwork on a transparent ground. AXN, BBC News, HISTORY, Astro
+  Vaanavil and Arena Bola all vanish on a dark tile. White, checked
+  against all three backgrounds before choosing.
+
+The artwork is 144x80, which is why the tile is landscape: a square one
+would shrink it to nothing.
+
+**Swapping in the Brand Profile library** is a one-field change. Set
+`logo` on a channel to any URL and that is what renders. These are
+referenced, not vendored, so if Astro moves the CDN the marks break; the
+picker handles that by swapping any image that fails to load for its
+monogram, so the list degrades rather than going blank. If you would
+rather not depend on someone else's CDN, download the 80 files and point
+`logo` at a local path.
+
+### The monogram fallback
+
+It strips a leading "Astro", since nearly every channel has one and the
+A carries nothing, then uses an acronym whole (AXN, AEC, HGTV) or the
+initials of the first two words (Sun TV becomes ST, BBC Earth BE, Arena
+2 A2). Five of the 81 collide, all between unrelated channels, which is
+fine for something decorative.
+
+Its tint says which segment the channel is in. That is a hint, not a
+legend: the Segment facet above is the real signal, and five DLS tones
+have to cover eight segments. The letters are near black on the tint
+rather than the tone's own colour, which at 11px would run as low as
+1.8:1 for amber on cream and look washed out.
+
+Either way the mark is `aria-hidden`, because the channel name sits
+right beside it and a screen reader does not need it twice.
+
+## How the panel opens
+
+It folds out of the button that opened it, reusing `p-fold-open` and
+`p-fold-close`, the same keyframes and the same measure-the-trigger
+trick as the why, thread and brief sheets, so the page has one motion
+language instead of two. Only the shell moves; the backdrop just fades.
+
+Two guards worth keeping: the fold is skipped when the trigger is not
+actually on screen, because folding from a point past the bottom of the
+page is not a fold but a shape flying in from nowhere; and
+`instantMotion()` (reduced motion, or a backgrounded tab) takes a path
+that shows the backdrop immediately rather than on a timer, or it
+flashes empty for a frame.
+
 ## The "Runs on" chips are now redundant
 
 Production draws 86 chips under **Runs on** in the Video block, each
