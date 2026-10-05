@@ -892,7 +892,9 @@
          but only if the pointer is still on it. */
       v.addEventListener('canplay', function () { if (v.dataset.want === '1' && v.paused) startClip(v); });
       v.addEventListener('playing', function () { if (v.dataset.want === '1') v.classList.add('is-on'); });
-      v.src = '../assets/clips-web/' + seg.id + '.mp4';
+      /* The clips were re-encoded in place, so the names did not change
+         and a returning visitor would keep the heavier cached copies. */
+      v.src = '../assets/clips-web/' + seg.id + '.mp4?v=2';
       host.appendChild(v);
     }
     v.dataset.want = '1';

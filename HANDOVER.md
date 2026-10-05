@@ -62,10 +62,10 @@ see [Gotchas](#gotchas).
 (149 MB, kept out of git); `clips/` holds the four-second animation
 masters (87 MB, also out of git). `stills-web/` holds the 700px JPEGs the
 page loads (2.3 MB) and `clips-web/` the 600px silent clips it plays on
-hover (4.4 MB), regenerated with
+hover (3.0 MB), regenerated with
 `for f in assets/stills/*.png; do sips -Z 700 -s format jpeg -s formatOptions 88 "$f" --out "assets/stills-web/$(basename "$f" .png).jpg"; done`
 and
-`for f in assets/clips/*.mp4; do ffmpeg -y -i "$f" -an -vf scale=600:-2 -c:v libx264 -profile:v main -pix_fmt yuv420p -crf 28 -preset medium -movflags +faststart "assets/clips-web/$(basename "$f" .mp4).mp4"; done`.
+`for f in assets/clips/*.mp4; do ffmpeg -y -i "$f" -an -vf scale=600:450:flags=lanczos -c:v libx264 -crf 30 -preset veryslow -tune animation -pix_fmt yuv420p -movflags +faststart "assets/clips-web/$(basename "$f" .mp4).mp4"; done`. `-tune animation` is the setting that matters — these are flat colour with hard edges, and it is worth 29% over the same CRF without it. Re-encoding in place does not change the filenames, so bump the `?v=` on the clip `src` in `audiences.html` or returning visitors keep the heavier copies.
 `audiences/` holds the 51 kult.my photographs, which nothing references
 any more and which are kept until someone decides to delete them.
 

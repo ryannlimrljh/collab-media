@@ -640,3 +640,20 @@ never the only carrier: lens tags carry text, arcs carry percentages.
   first and like still settles near like. Across three pours no disc
   landed within a pixel of where it had before, the median disc moving
   some 300px, with the radii identical throughout.
+- 2026-10-05, the clips lose a third. An engineer flagged the weight of the
+  51 hover animations. Re-encoded from the masters with `-tune animation`,
+  which is built for exactly this content — flat colour, hard edges, large
+  uniform areas — the set goes from 4.25 MB to 3.03 MB, 29% off, at
+  SSIM 0.989-0.992 against a lossless reference. Same codec, same container,
+  same 600x450 at 24fps: nothing about compatibility changes and the page
+  needed no code beyond a cache bust.
+  Two alternatives were measured and set aside. AV1 at CRF 52 reaches
+  2.08 MB — half the weight at better measured quality than the H.264 — but
+  it needs an H.264 fallback for older Safari, which means shipping both
+  sets (5.11 MB in the repo) and a `<source>` pair in `playClip`. Dropping
+  to 15fps would take H.264 to roughly 2.2 MB, which is a judgement about
+  motion rather than a measurement. Resolution is not available as a lever:
+  the cards render 250-300 CSS px wide, so 600px is barely 2x.
+  Worth remembering in any weight conversation: no visitor downloads the
+  set. Nothing is fetched until a card is hovered, so five hovers cost
+  about 300 KB. The 29% is mostly a repo saving.
