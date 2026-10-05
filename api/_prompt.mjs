@@ -25,6 +25,23 @@ export function buildSystem(cat, surface = 'planner') {
     .map((s) => `${s.id} | ${s.name} | ${s.ch} | RM ${s.cpm} CPM | ${n(s.inv)} monthly impressions`)
     .join('\n');
 
+  /* Video arrives as a card rather than as formats, because it is one:
+     hundreds of lines, each a channel, a spot type, a timebelt and a
+     rate per 30 second spot. Printing the channel once per group keeps
+     it readable for the model as well as cheap. */
+  const card = cat.videoCard;
+  const cardLines = card ? card.channels.reduce((a, c) => a + c[3].length, 0) : 0;
+  const videoCard = !card ? '' : `
+VIDEO RATE CARD. Video is not one format, it is ${cardLines} buyable lines
+across ${card.channels.length} channels. Each line is an id, a ${card.cols.slice(1).join(', a ')}.
+Add and drop them with add_formats and remove_formats, quoting the id
+exactly as written here. The rate is per 30 second spot, not a CPM, so
+never call it a CPM.
+
+${card.channels.map((c) => `${c[0]} (${c[1] ? n(c[1]) + ' monthly' : 'no published reach'}, ${c[2]})
+` + c[3].map((l) => `  ${l[0]} | ${l[1]} | ${l[2]} | RM ${n(l[3])} /30s | ${l[4]}`).join('\n')).join('\n')}
+`;
+
   /* The planner has an open plan and thirteen ways to change it; the
      library has neither, only every plan the user has saved. Swapping
      this one block is cheaper and safer than forking the whole prompt,
@@ -77,6 +94,7 @@ ${(cat.channels || []).join(', ')}
 FORMATS (id | name | channel | rate | kind)
 ${formats}
 
+${videoCard}
 PERSONAS (id | name | category | size | consumption)
 ${personas}
 

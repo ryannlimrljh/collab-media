@@ -23,7 +23,7 @@ const MAX_TURNS = 16;
 const MAX_MSG = 4000;
 const MAX_BRIEF = 8000;
 const MAX_PLAN = 12000;
-const MAX_CATALOGUE = 24000;
+const MAX_CATALOGUE = 40000;
 const MAX_PLANS_LIST = 200;
 const MAX_PLANS = 12000;
 

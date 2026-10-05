@@ -834,6 +834,64 @@
   .p-site-chip.is-pop i{animation:p-chip-in 240ms var(--ease-settle) both;}
   /* toggle choreography: things leave before the rebuild, arrive after */
   @keyframes p-chip-in{from{opacity:0; transform:scale(.82);} to{opacity:1; transform:none;}}
+  /* ═══ Rate card: the shelf's way in, and the picker ═══════════════
+     The table, its checkbox column, its sort headers and its sticky
+     head are the DLS Table component's own. What is page-local here is
+     the group row, the tabular rate column and the modal's height. */
+  .p-card-add{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
+  .p-card-add .sum{margin-left:0;}
+  .p-fmtrow .label .spot{font-weight:400; color:var(--color-neutral-5);}
+
+  .p-cardmodal{max-width:1040px; width:min(1040px, calc(100vw - 48px));
+    max-height:min(86vh, 880px); display:flex; flex-direction:column;}
+  .p-cardmodal .c-modal-body{display:flex; flex-direction:column;
+    gap:var(--spacing-12); min-height:0; overflow:hidden;}
+  .p-card-controls{display:flex; flex-direction:column; gap:var(--spacing-8); flex:0 0 auto;}
+  .p-card-search{position:relative; display:flex; align-items:center;}
+  .p-card-search > i{position:absolute; left:var(--spacing-12); font-size:var(--icon-sm);
+    color:var(--color-neutral-5); pointer-events:none;}
+  .p-card-search input{width:100%; height:40px; box-sizing:border-box; background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
+    padding:0 120px 0 36px; font-family:inherit; font-size:var(--text-body2-size);
+    color:var(--color-neutral-9);}
+  .p-card-search input:focus{outline:2px solid var(--color-obsidian); outline-offset:-1px;}
+  .p-card-clear{position:absolute; right:var(--spacing-8); height:28px; padding:0 var(--spacing-8);
+    border:0; background:none; cursor:pointer; font-family:inherit;
+    font-size:var(--text-caption-size); color:var(--color-neutral-5); text-decoration:underline;}
+  .p-card-clear:hover{color:var(--color-neutral-9);}
+  .p-card-facetrow{display:flex; align-items:flex-start; gap:var(--spacing-12);}
+  .p-card-facetrow .lab{flex:0 0 58px; padding-top:7px; font-size:var(--text-caption-size);
+    font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--color-neutral-5);}
+  .p-card-facetrow .chips{display:flex; flex-wrap:wrap; gap:var(--spacing-4);}
+
+  .p-card-wrap{flex:1 1 auto; min-height:0; overflow:auto;}
+  .p-cardmodal table{width:100%;}
+  .p-cardmodal thead th{position:sticky; top:0; z-index:2; background:var(--color-neutral-1);}
+  .p-cardmodal th.num, .p-cardmodal td.num{text-align:right;}
+  .p-cardmodal td.num{font-variant-numeric:tabular-nums; white-space:nowrap; font-weight:600;}
+  .p-card-ch{white-space:nowrap;}
+  .p-card-belt .c-badge{margin-left:var(--spacing-4); vertical-align:middle;}
+  /* The channel is printed once for its group, not once per line. */
+  .p-card-grp td{background:var(--color-neutral-2);}
+  .p-card-grp .ch{font-weight:700;}
+  .p-card-grp .meta{margin-left:var(--spacing-8); font-weight:400;
+    font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .p-cardmodal tr.is-on > td:first-child{box-shadow:inset 2px 0 0 var(--color-obsidian);}
+  .p-card-none{text-align:center; color:var(--color-neutral-5); padding:var(--spacing-24) 0;}
+  .p-cardmodal .c-modal-foot{justify-content:space-between; align-items:center; gap:var(--spacing-12);}
+  .p-card-footinfo{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .p-card-footinfo .sel{font-size:var(--text-body2-size); font-weight:600;}
+  .p-card-footinfo .shown{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .p-card-footbtns{display:flex; gap:var(--spacing-8); flex:0 0 auto;}
+  @media (max-width: 860px){
+    .p-cardmodal{width:calc(100vw - 24px); max-height:92vh;}
+    .p-card-belt .c-badge{display:none;}
+    .p-card-facetrow{flex-direction:column; gap:var(--spacing-4);}
+    /* Stacked, the label is a row of its own: a flex-basis meant for a
+       column would otherwise become 58px of empty height. */
+    .p-card-facetrow .lab{flex:0 0 auto; padding-top:0;}
+  }
+
   .c-chip.is-new, .p-site-chip.is-new{animation:p-chip-in 220ms var(--ease-settle) both;}
   .c-chip.is-lifting{opacity:0; transform:scale(.85);
     transition:opacity 160ms var(--ease-standard), transform 160ms var(--ease-standard);}
@@ -1913,6 +1971,51 @@
   </div>
 </div>
 
+<!-- Rate card picker. A channel whose formats are four-field rate card
+     lines is chosen here rather than off a chip shelf. See openCard(). -->
+<div class="p-overlay" id="cardOverlay" hidden>
+  <div class="c-modal p-cardmodal" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
+    <div class="c-modal-head">
+      <h4 id="cardTitle">Rate card</h4>
+      <button class="c-icon-btn" id="cardClose" aria-label="Close" type="button"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="c-modal-body">
+      <div class="p-card-controls">
+        <div class="p-card-search">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          <input id="cardQ" type="text" autocomplete="off" spellcheck="false"
+            placeholder="Search a channel, a spot type or a timebelt. Try: ria prime"
+            aria-label="Search the rate card" />
+          <button class="p-card-clear" id="cardClear" type="button" hidden>Clear filters</button>
+        </div>
+        <div class="p-card-facetrow"><span class="lab">Daypart</span><div class="chips" id="cardDay"></div></div>
+        <div class="p-card-facetrow"><span class="lab">Genre</span><div class="chips" id="cardGen"></div></div>
+      </div>
+      <div class="c-table-standalone-wrap p-card-wrap">
+        <table class="c-table c-table-standalone">
+          <thead>
+            <tr>
+              <th class="c-table-chk-col"><span class="c-checkbox-box" id="cardAll" role="checkbox" aria-checked="false" tabindex="0" aria-label="Select every line shown"></span></th>
+              <th class="c-table-sort-th" data-sort="channel" role="button" tabindex="0" aria-label="Group by channel, biggest reach first">Channel <i class="ph ph-arrows-down-up c-table-sort-icon"></i></th>
+              <th>Spot type</th>
+              <th>Timebelt or programme</th>
+              <th class="c-table-sort-th num" data-sort="rate" role="button" tabindex="0" aria-label="Sort by rate">Rate /30s <i class="ph ph-arrows-down-up c-table-sort-icon"></i></th>
+            </tr>
+          </thead>
+          <tbody id="cardRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="c-modal-foot">
+      <span class="p-card-footinfo"><span class="sel" id="cardSel"></span><span class="shown" id="cardShown"></span></span>
+      <span class="p-card-footbtns">
+        <button class="c-btn c-btn-secondary c-btn-md" id="cardCancel" type="button">Cancel</button>
+        <button class="c-btn c-btn-primary c-btn-md" id="cardApply" type="button">Use these lines</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 <!-- Booking modal -->
 <div class="p-overlay" id="bookOverlay" hidden>
   <div class="c-modal" role="dialog" aria-modal="true" aria-labelledby="bookTitle" style="max-width:480px;">
@@ -1960,6 +2063,7 @@
 <script src="../shared/audiences-data.js?v=4"></script>
 <script src="../shared/format-previews.js?v=2"></script>
 <script src="../shared/plan-store.js?v=4"></script>
+<script src="../shared/tv-ratecard.js?v=1"></script>
 <script src="../shared/collab-ai.js?v=1"></script>
 <script src="../shared/threads.js?v=0.9.43"></script>
 <script>
@@ -2042,10 +2146,41 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     {id:'vib', name:'Video In-banner',      cpm:20,   w:8,  ch:'Web',    video:true,  on:false},
     {id:'sva', name:'Video Social Ad',      cpm:9,    w:30, ch:'Social', video:true,  on:true},
     {id:'wav', name:'Wave Cards',           cpm:30,   w:4,  ch:'Web',    video:false, on:false},
-    {id:'tvc', name:'Video',                cpm:3.26, w:25, ch:'Video',  video:true,  on:false},
     {id:'ott', name:'OTT',                  cpm:26,   w:20, ch:'OTT',    video:true,  on:false, placeholder:true},
     {id:'rad', name:'Audio',                cpm:6.61, w:12, ch:'Audio',  video:false, on:false}
   ];
+
+  /* Video is not a format, it is a rate card. Each line is four fields,
+     a channel, a spot type, a timebelt and a rate per 30s, and there are
+     176 of them. They join FORMATS like anything else so split, forecast
+     and booking need no special case; what differs is only how they are
+     chosen, which is the picker further down. shared/tv-ratecard.js. */
+  (function expandRateCard(){
+    var RC = window.TV_RATECARD;
+    if (!RC) return;
+    var meta = {};
+    RC.channels.forEach(function(c){ meta[c.id] = c; });
+    /* CPM is directional. The card prices a 30s spot, not a thousand
+       impressions, so we scale the old single Video CPM of 3.26 by how
+       the line's rate sits against the card's median. Replace this with
+       real per-spot delivery when the feed carries it. */
+    var sorted = RC.lines.map(function(l){ return l.rate; }).sort(function(a, b){ return a - b; });
+    var mid = sorted[Math.floor(sorted.length / 2)] || 1;
+    RC.lines.forEach(function(l){
+      var c = meta[l.ch] || {name: l.ch, reach: 0, genre: ''};
+      FORMATS.push({
+        id: 'tv-' + l.id,
+        name: c.name + ' \u00b7 ' + l.spot + ' \u00b7 ' + l.belt,
+        cpm: Math.round(3.26 * (l.rate / mid) * 100) / 100,
+        /* Weight steers the AI and sample drafts only. Reach-led, so a
+           draft reaches for Astro Ria before it reaches for CNBC Asia. */
+        w: Math.max(1, Math.round(c.reach / 400000)),
+        ch: 'Video', video: true, on: false,
+        line: {chId: l.ch, ch: c.name, reach: c.reach, genre: c.genre,
+          spot: l.spot, belt: l.belt, rate: l.rate, daypart: l.daypart}
+      });
+    });
+  })();
 
   var SITES = [
     {id:'sooka',   name:'sooka',          ch:'OTT',    cpm:30, inv:13200000, pin:true,  ai:true},
@@ -2156,12 +2291,31 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
      may quote from; the snapshot is the plan as it stands. Both are built
      from the same arrays the page draws from, so they cannot drift. */
   function aiCatalogue(){
+    /* Video is a rate card, not a list of format names. Sent flat it is
+       176 fat objects and 24KB, four fifths of the whole catalogue and
+       over the endpoint's cap, which would 400 every call. Sent as its
+       own card, grouped so a channel is named once rather than once per
+       line, it is a third of that and reads the way the card works. */
+    var card = null;
+    if (FORMATS.some(function(f){ return f.line; })){
+      var byCh = {}, order = [];
+      FORMATS.forEach(function(f){
+        if (!f.line) return;
+        if (!byCh[f.line.chId]){ byCh[f.line.chId] = []; order.push(f.line); }
+        byCh[f.line.chId].push([f.id, f.line.spot, f.line.belt, f.line.rate, f.line.daypart]);
+      });
+      card = {
+        cols: ['id', 'spot type', 'timebelt', 'rate per 30s', 'daypart'],
+        channels: order.map(function(l){ return [l.ch, l.reach, l.genre, byCh[l.chId]]; })
+      };
+    }
     return {
       channels: CHANNELS.slice(),
-      formats: FORMATS.map(function(f){
+      formats: FORMATS.filter(function(f){ return !f.line; }).map(function(f){
         return {id:f.id, name:f.name, ch:f.ch, cpm:f.cpm, video:!!f.video,
           placeholder: !!f.placeholder};
       }),
+      videoCard: card,
       personas: PERSONAS.map(function(p){
         var seg = segmentFor(p.id) || {}, c = seg.consumption || {};
         return {id:p.id, name:p.name, cat:p.cat, users:p.users,
@@ -3860,9 +4014,12 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
           '<label class="c-choice">' +
             '<input type="checkbox" checked aria-label="' + f.name + '" />' +
             '<span class="c-checkbox-box on"><i class="ph ph-check"></i></span>' +
-            '<span class="text"><span class="label">' + f.name +
+            '<span class="text"><span class="label">' +
+              (f.line ? esc(f.line.ch) + ' <span class="spot">' + esc(f.line.spot) + '</span>' : f.name) +
               (f.placeholder ? ' <span class="c-badge c-badge-warning">placeholder rate</span>' : '') + '</span>' +
-            '<span class="desc">' + cpmFmt(f.cpm) + ' CPM</span></span>' +
+            '<span class="desc">' +
+              (f.line ? esc(f.line.belt) + ' \u00b7 ' + rm(f.line.rate) + ' /30s' : cpmFmt(f.cpm) + ' CPM') +
+            '</span></span>' +
           '</label>' +
           '<div class="c-slider-group"><div class="c-slider-rail">' +
             '<div class="c-slider-track"><div class="c-slider-fill" style="width:' + (b ? amt / b * 100 : 0) + '%;"></div></div>' +
@@ -3884,13 +4041,21 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         rows.appendChild(row);
       });
 
-      /* Add: this channel's shelf, capped until opened, ignoring the cap while searching. */
+      /* Add. A channel whose formats are plain names gets the chip
+         shelf it was designed for. A channel whose formats are rate
+         card lines gets a way in instead: four fields crammed into a
+         chip is a sentence, and 176 sentences is a wall nobody can
+         read, search, or compare prices down. */
       var cap = 8, open = !!shelfOpen[c] || !!q;
       var vis = open ? shelf : shelf.slice(0, cap);
       var more = shelf.length - vis.length;
       var add = document.createElement('div');
       add.className = 'p-chan-add';
       var allIn = !FORMATS.some(function(f){ return !f.on && f.ch === c; });
+      if (isCardChannel(c)){
+        add.innerHTML = cardShelf(c, shelf);
+        block.appendChild(add);
+      } else {
       add.innerHTML = '<span class="lab">Add</span><div class="chips">' +
         (allIn ? '<span class="sum" style="margin-left:0;">Every ' + c + ' format is in the mix.</span>' : '') +
         (!allIn && !shelf.length && q ? '<span class="sum" style="margin-left:0;">No ' + c + ' format matches.</span>' : '') +
@@ -3905,6 +4070,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         (open && !q && shelf.length > cap ? '<button class="c-chip-showless" type="button" data-less="' + c + '">Show less</button>' : '') +
         '</div>';
       block.appendChild(add);
+      }
 
       /* Runs on: the sites in this channel; an active chip is a must-buy. */
       var sites = SITES.filter(function(s){ return s.ch === c; });
@@ -4057,6 +4223,8 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
         markSaved();
         return;
       }
+      var card = e.target.closest('[data-card]');
+      if (card){ openCard(card.dataset.card); return; }
       var add = e.target.closest('[data-add]');
       if (!add) return;
       var f = FORMATS.filter(function(x){ return x.id === add.dataset.add; })[0];
@@ -4200,6 +4368,296 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
     askShow('Picked again from the brief: Comedy lover, Active lifestyle seekers and K-drama watchers. That is ' +
       fmt(reach().uniq) + ' unique reach. Swap any of them freely.');
   });
+
+  /* ═══ Rate card picker ═══════════════════════════════════════════
+     Video is not a short list of format names, it is 176 buyable lines,
+     each one a channel, a spot type, a timebelt and a rate per 30s.
+     Rendered as chips that is a wall: nothing aligns, so the rate you
+     are comparing on sits at a different place on every row; the text
+     that repeats is the loudest thing on screen; and there is no way to
+     search it. Four fields get four columns instead, the channel is
+     printed once per group rather than once per line, and a search box
+     and two facets sit above it.
+
+     A channel qualifies on the shape of its data, not on its size:
+     formats carrying f.line are rate card lines. Plain names keep the
+     chip shelf, which is the right control for them. ═══════════════ */
+
+  function isCardChannel(c){ return FORMATS.some(function(f){ return f.ch === c && f.line; }); }
+  function cardLines(c){ return FORMATS.filter(function(f){ return f.ch === c && f.line; }); }
+
+  var cardCh = null, cardSel = {}, cardQ = '', cardDay = [], cardGen = [], cardSort = 'channel';
+
+  /* The shelf for a rate card channel: a way in, the handful most worth
+     starting from, and an honest count of what is behind the button. */
+  function cardShelf(c, shelf){
+    var all = cardLines(c);
+    if (!shelf.length){
+      return '<span class="lab">Add</span><div class="chips"><span class="sum" style="margin-left:0;">' +
+        'Every line on the ' + esc(c) + ' rate card is already in the mix.</span></div>';
+    }
+    var rates = all.map(function(f){ return f.line.rate; });
+    var chans = {};
+    all.forEach(function(f){ chans[f.line.chId] = 1; });
+    /* One suggestion per channel, biggest reach first, so four short
+       chips stand for four channels rather than four near-identical
+       sentences off the same one. */
+    var seen = {};
+    var sugg = shelf.slice().sort(function(a, b){
+      return (b.line.reach - a.line.reach) || (a.line.rate - b.line.rate);
+    }).filter(function(f){
+      if (seen[f.line.chId]) return false;
+      seen[f.line.chId] = 1;
+      return true;
+    }).slice(0, 4);
+    return '<span class="lab">Add</span><div class="chips p-card-add">' +
+      '<button class="c-btn c-btn-secondary c-btn-sm" type="button" data-card="' + esc(c) + '">' +
+        '<i class="ph ph-rows" aria-hidden="true"></i>Browse the rate card</button>' +
+      sugg.map(function(f){
+        return '<button class="c-chip c-chip-filter' + (f.id === newChip ? ' is-new' : '') +
+          '" type="button" data-add="' + f.id + '" title="' + esc(f.name) + ' \u00b7 ' + rm(f.line.rate) + ' per 30s">' +
+          '<i class="ph ph-plus" aria-hidden="true"></i>' + esc(f.line.ch) + ' \u00b7 ' + esc(f.line.daypart) +
+          ' <span class="cpm">' + rm(f.line.rate) + '</span></button>';
+      }).join('') +
+      '<span class="sum">' + shelf.length + ' of ' + all.length + ' lines still out \u00b7 ' +
+        Object.keys(chans).length + ' channels \u00b7 ' + rm(Math.min.apply(null, rates)) +
+        ' to ' + rm(Math.max.apply(null, rates)) + ' per 30s</span>' +
+      '</div>';
+  }
+
+  function cardMatch(f){
+    var l = f.line;
+    if (cardDay.length && cardDay.indexOf(l.daypart) < 0) return false;
+    if (cardGen.length && cardGen.indexOf(l.genre) < 0) return false;
+    if (!cardQ) return true;
+    /* Every term must land somewhere, so "ria prime" narrows instead of
+       widening. This is the whole point of the search box. */
+    var hay = (l.ch + ' ' + l.spot + ' ' + l.belt + ' ' + l.daypart + ' ' + l.genre).toLowerCase();
+    return cardQ.split(/\s+/).every(function(t){ return !t || hay.indexOf(t) > -1; });
+  }
+
+  function cardFacetRow(host, tally, active, kind){
+    host.innerHTML = tally.map(function(v){
+      var on = active.indexOf(v[0]) > -1;
+      return '<button class="c-chip c-chip-filter' + (on ? ' is-active' : '') + '" type="button"' +
+        ' data-facet="' + kind + '" data-val="' + esc(v[0]) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+        esc(v[0]) + ' <span class="count">' + v[1] + '</span></button>';
+    }).join('');
+  }
+
+  function renderCardFacets(){
+    var all = cardLines(cardCh);
+    function tally(get){
+      var m = {}, out = [];
+      all.forEach(function(f){ var k = get(f.line); m[k] = (m[k] || 0) + 1; });
+      Object.keys(m).forEach(function(k){ out.push([k, m[k]]); });
+      return out.sort(function(a, b){ return b[1] - a[1] || a[0].localeCompare(b[0]); });
+    }
+    cardFacetRow($('cardDay'), tally(function(l){ return l.daypart; }), cardDay, 'day');
+    cardFacetRow($('cardGen'), tally(function(l){ return l.genre; }), cardGen, 'gen');
+  }
+
+  function renderCard(){
+    var all = cardLines(cardCh);
+    var byId = {};
+    all.forEach(function(f){ byId[f.id] = f; });
+    var hits = all.filter(cardMatch);
+    var grouped = cardSort === 'channel';
+    hits.sort(function(a, b){
+      var x = a.line, y = b.line;
+      if (cardSort === 'rate') return x.rate - y.rate || y.reach - x.reach;
+      if (cardSort === 'rate-desc') return y.rate - x.rate || y.reach - x.reach;
+      return y.reach - x.reach || x.ch.localeCompare(y.ch) || x.rate - y.rate;
+    });
+
+    var perCh = {};
+    if (grouped) hits.forEach(function(f){ (perCh[f.line.chId] = perCh[f.line.chId] || []).push(f); });
+
+    var html = '', lastCh = null;
+    hits.forEach(function(f){
+      var l = f.line, on = !!cardSel[f.id];
+      if (grouped && l.chId !== lastCh){
+        lastCh = l.chId;
+        var sibs = perCh[l.chId];
+        var allOn = sibs.every(function(g){ return cardSel[g.id]; });
+        html += '<tr class="p-card-grp"><td class="c-table-chk-col">' +
+          '<span class="c-checkbox-box force-visible' + (allOn ? ' on' : '') + '" role="checkbox" aria-checked="' +
+            (allOn ? 'true' : 'false') + '" tabindex="0" data-grp="' + esc(l.chId) +
+            '" aria-label="Select every ' + esc(l.ch) + ' line shown">' +
+            (allOn ? '<i class="ph ph-check"></i>' : '') + '</span></td>' +
+          '<td colspan="4"><span class="ch">' + esc(l.ch) + '</span><span class="meta">' +
+            (l.reach ? fmt(l.reach) + ' monthly' : 'no published reach') + ' \u00b7 ' +
+            sibs.length + (sibs.length === 1 ? ' line' : ' lines') + '</span></td></tr>';
+      }
+      html += '<tr class="is-interactive' + (on ? ' is-on' : '') + '" data-line="' + f.id + '">' +
+        '<td class="c-table-chk-col"><span class="c-checkbox-box force-visible' + (on ? ' on' : '') +
+          '" role="checkbox" aria-checked="' + (on ? 'true' : 'false') + '" tabindex="0" aria-label="' +
+          esc(f.name) + '">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span></td>' +
+        '<td class="p-card-ch">' + (grouped ? '' : esc(l.ch)) + '</td>' +
+        '<td>' + esc(l.spot) + '</td>' +
+        '<td class="p-card-belt">' + esc(l.belt) +
+          ' <span class="c-badge c-badge-neutral">' + esc(l.daypart) + '</span></td>' +
+        '<td class="num">' + rm(l.rate) + '</td></tr>';
+    });
+    $('cardRows').innerHTML = html ||
+      '<tr><td colspan="5" class="p-card-none">Nothing on the ' + esc(cardCh) +
+      ' rate card matches that. Clear a filter, or search for something else.</td></tr>';
+
+    syncCardChrome();
+  }
+
+  function setBox(el, on){
+    if (!el) return;
+    el.className = 'c-checkbox-box force-visible' + (on ? ' on' : '');
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+    el.innerHTML = on ? '<i class="ph ph-check"></i>' : '';
+  }
+
+  /* Ticking a box repaints that row, its group header and the footer.
+     Rebuilding every row to tick one would drop the checkbox the
+     keyboard is sitting on, stranding you halfway down the list. */
+  function syncCardSelection(){
+    var hits = cardLines(cardCh).filter(cardMatch), byCh = {};
+    hits.forEach(function(f){ (byCh[f.line.chId] = byCh[f.line.chId] || []).push(f); });
+    var rows = $('cardRows');
+    Array.prototype.forEach.call(rows.querySelectorAll('tr[data-line]'), function(tr){
+      var on = !!cardSel[tr.dataset.line];
+      tr.className = 'is-interactive' + (on ? ' is-on' : '');
+      setBox(tr.querySelector('.c-checkbox-box'), on);
+    });
+    Array.prototype.forEach.call(rows.querySelectorAll('[data-grp]'), function(box){
+      var sibs = byCh[box.getAttribute('data-grp')] || [];
+      setBox(box, !!sibs.length && sibs.every(function(f){ return cardSel[f.id]; }));
+    });
+    syncCardChrome();
+  }
+
+  function syncCardChrome(){
+    var all = cardLines(cardCh), hits = all.filter(cardMatch);
+    var sel = [], spend = 0;
+    all.forEach(function(f){ if (cardSel[f.id]){ sel.push(f); spend += f.line.rate; } });
+    var allShown = hits.length && hits.every(function(f){ return cardSel[f.id]; });
+    var head = $('cardAll');
+    setBox(head, allShown);
+    head.setAttribute('aria-checked', allShown ? 'true' : (sel.length ? 'mixed' : 'false'));
+
+    $('cardShown').textContent = hits.length === all.length
+      ? all.length + ' lines'
+      : fmt(hits.length) + ' of ' + all.length + ' lines';
+    $('cardSel').textContent = sel.length
+      ? sel.length + (sel.length === 1 ? ' line' : ' lines') + ' selected \u00b7 ' + rm(spend) + ' for one spot in each'
+      : 'Nothing selected yet';
+    var onNow = all.filter(function(f){ return f.on; }).length;
+    $('cardApply').textContent = sel.length
+      ? 'Use these ' + sel.length + (sel.length === 1 ? ' line' : ' lines')
+      : (onNow ? 'Take ' + cardCh + ' out of the mix' : 'Use these lines');
+    $('cardApply').disabled = !sel.length && !onNow;
+    $('cardClear').hidden = !(cardQ || cardDay.length || cardGen.length);
+  }
+
+  function openCard(c){
+    cardCh = c; cardQ = ''; cardDay = []; cardGen = []; cardSort = 'channel'; cardSel = {};
+    cardLines(c).forEach(function(f){ if (f.on) cardSel[f.id] = true; });
+    $('cardTitle').textContent = c + ' rate card';
+    $('cardQ').value = '';
+    $('cardOverlay').hidden = false;
+    renderCardFacets();
+    renderCard();
+    setTimeout(function(){ $('cardQ').focus(); }, 30);
+  }
+  function closeCard(){ if (!$('cardOverlay').hidden) $('cardOverlay').hidden = true; }
+
+  function applyCard(){
+    var all = cardLines(cardCh), changed = 0;
+    all.forEach(function(f){
+      var want = !!cardSel[f.id];
+      if (f.on !== want){ f.on = want; changed++; }
+    });
+    /* The plan must keep at least one format, same rule the channel
+       chips enforce. */
+    if (!onFormats().length){
+      var first = FORMATS.filter(function(f){ return chanAllows(f.ch) && !f.line; })[0] ||
+                  FORMATS.filter(function(f){ return chanAllows(f.ch); })[0];
+      if (first) first.on = true;
+    }
+    var ch = cardCh;
+    closeCard();
+    if (!changed) return;
+    popCount = ch;
+    mixSource = 'user';
+    resetSplit();
+    renderAll();
+    markSaved();
+  }
+
+  (function cardWiring(){
+    var ov = $('cardOverlay');
+    if (!ov) return;
+    $('cardQ').addEventListener('input', function(){
+      cardQ = this.value.trim().toLowerCase();
+      renderCard();
+    });
+    $('cardClear').addEventListener('click', function(){
+      cardQ = ''; cardDay = []; cardGen = [];
+      $('cardQ').value = '';
+      renderCardFacets();
+      renderCard();
+      $('cardQ').focus();
+    });
+    $('cardClose').addEventListener('click', closeCard);
+    $('cardCancel').addEventListener('click', closeCard);
+    $('cardApply').addEventListener('click', applyCard);
+    ov.addEventListener('click', function(e){ if (e.target === ov) closeCard(); });
+
+    function toggleRow(id){
+      if (cardSel[id]) delete cardSel[id]; else cardSel[id] = true;
+      syncCardSelection();
+    }
+    ov.addEventListener('click', function(e){
+      var facet = e.target.closest('[data-facet]');
+      if (facet){
+        var list = facet.dataset.facet === 'day' ? cardDay : cardGen;
+        var i = list.indexOf(facet.dataset.val);
+        if (i > -1) list.splice(i, 1); else list.push(facet.dataset.val);
+        renderCardFacets();
+        renderCard();
+        return;
+      }
+      var sortTh = e.target.closest('[data-sort]');
+      if (sortTh){
+        cardSort = sortTh.dataset.sort === 'rate'
+          ? (cardSort === 'rate' ? 'rate-desc' : 'rate')
+          : 'channel';
+        renderCard();
+        return;
+      }
+      if (e.target.closest('#cardAll')){
+        var hits = cardLines(cardCh).filter(cardMatch);
+        var allOn = hits.length && hits.every(function(f){ return cardSel[f.id]; });
+        hits.forEach(function(f){ if (allOn) delete cardSel[f.id]; else cardSel[f.id] = true; });
+        syncCardSelection();
+        return;
+      }
+      var grp = e.target.closest('[data-grp]');
+      if (grp){
+        var sibs = cardLines(cardCh).filter(cardMatch).filter(function(f){ return f.line.chId === grp.dataset.grp; });
+        var on = sibs.every(function(f){ return cardSel[f.id]; });
+        sibs.forEach(function(f){ if (on) delete cardSel[f.id]; else cardSel[f.id] = true; });
+        syncCardSelection();
+        return;
+      }
+      var row = e.target.closest('[data-line]');
+      if (row) toggleRow(row.dataset.line);
+    });
+    /* Space and Enter on a checkbox cell, same as the DLS gallery. */
+    ov.addEventListener('keydown', function(e){
+      if (e.key !== ' ' && e.key !== 'Enter') return;
+      var box = e.target.closest('.c-checkbox-box, [data-sort]');
+      if (!box) return;
+      e.preventDefault();
+      box.click();
+    });
+  })();
 
   function renderMixRail(){
     var fc = forecast();
@@ -4391,7 +4849,7 @@ window.FORMATS_CATALOGUE = window.FORMATS; /* shared/formats-data.js, kept for t
   $('bookCancel').addEventListener('click', closeBook);
   $('bookOverlay').addEventListener('click', function(e){ if (e.target === $('bookOverlay')) closeBook(); });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); closeThread(); closeBrief(); }
+    if (e.key === 'Escape'){ closeBook(); closeChecker(); closeWhy(); closeThread(); closeBrief(); closeCard(); }
   });
   $('bookGo').addEventListener('click', function(){
     booked = true;
