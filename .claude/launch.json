@@ -8,8 +8,8 @@
         "--env-file=.env.local",
         "scripts/dev-server.mjs"
       ],
-      "port": 8797,
-      "url": "http://localhost:8797",
+      "port": 8798,
+      "url": "http://localhost:8798",
       "autoPort": false
     }
   ]
