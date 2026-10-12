@@ -8,6 +8,14 @@ tokens), not approximated. Where a snippet appears, it is the shipped code.
 The reference build is the source of truth. When this document and the build
 disagree, the build wins; update this file.
 
+**What you also need.** This file specifies motion and interaction. It names
+tokens rather than restating them, so it travels with the Collabrium DLS:
+`collabrium-dls/tokens.css` for every colour, radius, spacing and duration,
+`collabrium-dls/components.css` for the components the specs build on
+(Button, Table, Chip, Modal, Checkbox, Badge), and
+`collabrium-dls/DESIGN-SYSTEM.md` plus `preview.html` for what each one is
+for. With those four, every value below resolves. Without them it is prose.
+
 ---
 
 ## 0. Foundations everything else relies on
@@ -549,7 +557,9 @@ what a pill is: channels are DLS BUTTONS (`c-btn c-btn-md`, 40px,
 press and a `c-badge c-badge-selected` count riding inside; addable
 formats are 32px DLS filter PILLS with a leading plus; sites are 26px
 squared TAGS (`p-site-chip`, Neutral-2, leading pin that fills when
-active). The Add and Runs on labels share a fixed 88px column so the
+active). A channel with no site pool has no Runs on row at all, so
+Video and Audio end after Add; see 9g. The Add and Runs on labels
+share a fixed 88px column so the
 first pill of each row lines up.
 
 ## 9c. Audience pull: what each pill draws from the universe
@@ -781,6 +791,209 @@ unit themselves, `measureTouched` latches and nothing is overwritten
 again, including on hydration of a plan whose saved measure is not the
 default. `#goalEcho` reads the whole thing back as a sentence
 ("Conversion: 8,000 sign-ups, counted as registrations"). No motion.
+
+## 9g. The rate card picker (step 3, Video)
+
+Video is not a format, it is a rate card: 176 buyable lines, each one a
+channel, an entitlement, a timebelt and a rate per 30 second spot. The
+chip shelf of 9b is the right control for a short label and the wrong
+one for a four field record, so Video gets a different control. **The
+switch is on the shape of the data, not a channel name**: a channel
+whose formats carry a `line` object gets the picker, everything else
+keeps the shelf.
+
+### The shelf that replaced the wall
+
+**What the user sees:** where 176 chips used to wrap down the page,
+one button, four suggestions and a count.
+
+The suggestions are one line per channel, biggest reach first, so four
+short chips stand for four channels rather than four near-identical
+sentences off the same one. They are ordinary 9b add chips and animate
+identically (`is-new`, `p-chip-in`). The count is plain text:
+
+> 176 of 176 lines still out · 81 channels · RM 2,500 to RM 20,000 per 30s
+
+### Opening: the panel folds out of its button
+
+Same grammar as section 7, same keyframes, so the page has one motion
+language rather than two. Only the shell moves; the backdrop fades on
+its own clock.
+
+```css
+.p-overlay.is-folding{opacity:0; transition:opacity 280ms var(--ease-standard);}
+.p-overlay.is-folding.is-shown{opacity:1;}
+.p-cardmodal{transform-origin:0 0;}
+.p-cardmodal.is-folding-open{animation:p-fold-open .8s cubic-bezier(.25,.9,.35,1) both;}
+.p-cardmodal.is-folding-closed{animation:p-fold-close .55s cubic-bezier(.3,.6,.35,1) both;}
+```
+
+| Step | Timing |
+|---|---|
+| Rows render, then the shell is measured | synchronous, before any class is added, so `getBoundingClientRect()` reads the real height |
+| `--fold-dx/dy/sx/sy` set from the trigger | `sx`/`sy` clamped to a `0.05` floor |
+| `is-folding-open` added | after a forced reflow (`void shell.offsetWidth`) |
+| Backdrop `is-shown` | 20ms, or immediately under `instantMotion()` |
+| Search box takes focus | 420ms, or 0 under `instantMotion()` |
+| Close: `is-folding-closed`, then `hidden` | 560ms, matching the 0.55s close |
+
+**Two guards, both found by testing, both worth keeping.**
+
+1. **The fold is skipped when the trigger is off screen.** The shelf
+   button sits well down a long step; measured once at `dy: 2673px`.
+   Folding from a point past the bottom of the page is not a fold, it
+   is a shape flying in from nowhere. The open checks the trigger rect
+   intersects the viewport and falls back to a plain fade.
+2. **The instant path shows the backdrop immediately**, not on the 20ms
+   timer. With the transition disabled by the media query, a timer
+   leaves one frame of empty overlay.
+
+A single `cardShut` timer is cleared on every open, so reopening during
+a close cannot leave the panel hidden.
+
+### Selection: repaint the row, never the table
+
+**What the user sees:** ticking a line changes that line, its channel
+header and the footer total. Nothing else moves, and the scroll does
+not jump.
+
+The table is 257 rows (176 lines plus 81 group headers). Rebuilding it
+to tick one box throws away the checkbox the keyboard is sitting on and
+strands the user halfway down the list, so `syncCardSelection()` walks
+the existing DOM instead and `renderCard()` runs only when the filter,
+the search or the sort changes.
+
+| Trigger | What repaints |
+|---|---|
+| Row checkbox | that row's class and box, its group header's box, the footer |
+| Group header checkbox | every matching row on that channel, that header, the footer |
+| Header select-all | every row shown, every group header, the footer |
+| Search, facet, sort | the whole `<tbody>`, then the footer |
+
+No transitions on the tick itself: a checkbox is a state flip, and the
+DLS checkbox glyph already carries it.
+
+### Search and facets
+
+Search is instant, matches channel, entitlement, timebelt, daypart and
+segment, and **every term must land**, so `ria prime` narrows to 10 of
+176 rather than widening to everything containing either word. This is
+the single behaviour that makes 176 lines navigable.
+
+Facets are DLS filter chips carrying their own counts, multi-select
+within a row and AND across rows. Sorting by rate drops the channel
+grouping and goes flat, by design: grouping and a global price sort
+fight each other.
+
+### The row: four columns, and what only shows when it matters
+
+Four fields get four columns. The rate is right aligned with
+`font-variant-numeric: tabular-nums` so prices compare straight down the
+column, with the rate card's own pricing band (`x13`) under it in
+caption grey. The channel is printed once per group header, with its
+mark, reach and line count, instead of once per line.
+
+**Days print only when they are not `Mon - Sun`**, which is 150 of the
+176 lines. Information where it carries information, nothing where it
+does not.
+
+The table, its checkbox column, its sort headers and its sticky head are
+the DLS Table component's own. One deliberate deviation: every checkbox
+carries `force-visible`. The DLS reveals a row's checkbox on hover
+because selection is usually secondary; here it is the entire point of
+the screen.
+
+### The channel mark
+
+A 48x28 landscape tile in each group header, so 81 rows are not 81
+identical lines of text.
+
+```css
+.p-ch-logo{width:48px; height:28px; border-radius:4px;
+  font-size:11px; font-weight:800; line-height:1;
+  background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);
+  color:var(--color-neutral-8);}
+img.p-ch-logo{object-fit:contain; background:var(--color-neutral-1); padding:2px;}
+```
+
+**Landscape because the artwork is 144x80**; a square tile shrinks it to
+nothing. **Light because the artwork demands it**: many Astro marks
+carry their own solid background, but AXN, BBC News, HISTORY, Astro
+Vaanavil and Arena Bola are dark on a transparent ground and vanish on
+anything dark. Checked against white, a DLS tint and near black before
+choosing.
+
+**4px is the one place this product leaves the DLS radius scale.** It
+starts at `--radius-sm: 12px`, which on a 28px tile is almost a pill and
+fights the squared corners of the artwork inside it.
+
+Where a logo is missing, a monogram takes its place on a DLS tone tint:
+
+| Segment | Tone |
+|---|---|
+| Malay, GenNext | `fire` |
+| English, News | `water` |
+| Sports | `earth` |
+| Chinese, Korean | `gold` |
+| Indian | `wood` |
+| none | `neutral-2` |
+
+The tint is a hint, not a legend: five tones cover eight segments, and
+the Segment facet is the real signal. The letters are `--color-neutral-8`
+on the tint rather than the tone's own colour, which at 11px would run
+as low as 1.8:1 for amber on cream and look washed out, which is the
+opposite of the point.
+
+The monogram strips a leading "Astro", since nearly every channel has
+one and the A carries nothing, then uses an acronym whole (AXN, AEC,
+HGTV) or the initials of the first two words (Sun TV becomes ST, Arena 2
+becomes A2). Five of 81 collide, all between unrelated channels.
+
+**A logo that fails to load becomes its monogram.** A capturing `error`
+listener on the tbody swaps the `img` for a span built from
+`data-tone` and `data-mono` riding on it; capture, because image errors
+do not bubble. The marks are referenced from Astro's CDN rather than
+vendored, so this is the difference between a degraded list and a blank
+one. All 81 images are `loading="lazy"`.
+
+### Two things said once instead of 86 times
+
+The five channels that carry no priced line used to be five grey chips
+in a Runs on row of 86. They are one line under the table:
+
+> 5 more channels carry no priced line and cannot be bought: Astro Arena
+> Bola 2, Astro Premier League 2, Astro Premier League 3, Z Cinema,
+> Tutor TV.
+
+And the Runs on row itself is gone from any channel with no site pool,
+which is Video and Audio. Audio's only ever read "bought as airtime, no
+site pool to pick from", a label with nothing under it; Video names its
+channel on every line and in every group header. Web, Social and OTT
+keep theirs, because those chips are clickable must-buy pins and not
+labels.
+
+### The footer, and the panel as an editor
+
+The panel opens with the plan's current lines already ticked, so
+removing a line does not mean hunting for it a second time somewhere
+else. The primary button says what will happen rather than what it is:
+"Use these 6 lines", or "Take Video out of the mix" when the selection
+is emptied, and it is `disabled` when neither applies. Beside it the
+footer carries the live count and the combined rate for one spot in
+each.
+
+Applying closes the panel first and lets the plan update behind the
+fold, so the result arrives as the panel leaves.
+
+### Accessibility
+
+Space and Enter act on any checkbox cell and on the sort headers;
+Escape closes. The channel mark is `aria-hidden` whether it is a logo or
+a monogram, because the channel name sits right beside it. Focus lands
+in the search box after the fold rather than during it, or the page
+scrolls mid animation.
+
+---
 
 ## 10. `jumpToTarget(id)` — the shared "take me there"
 
