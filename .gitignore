@@ -11,3 +11,6 @@ assets/clips/
 
 # Node, for the api/ serverless function only. Never committed.
 node_modules/
+
+# macOS
+.DS_Store
